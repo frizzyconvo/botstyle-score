@@ -1,0 +1,6 @@
+# Cloudflare deploy config for the Botbooru CORS proxy (tools/cors-proxy-worker.js).
+#   npx wrangler deploy -c tools/wrangler-proxy.toml
+name = "bb-card-proxy"
+main = "cors-proxy-worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true

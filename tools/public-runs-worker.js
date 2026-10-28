@@ -3,7 +3,8 @@
 // Cloudflare Workers free plan: 100,000 requests/day; Workers KV free: 100,000 reads and 1,000
 // writes per day, 1 GB stored. Each shared card is one write, each page view one read.
 //
-// Deploy: Cloudflare dashboard -> Storage & Databases -> KV -> create namespace "bb-runs";
+// Deploy: npx wrangler deploy -c tools/wrangler-runs.toml (KV namespace "bb-runs" already exists).
+// Or by hand: Cloudflare dashboard -> Storage & Databases -> KV -> create namespace "bb-runs";
 // Workers & Pages -> Create -> Worker -> paste this file -> Settings -> Bindings -> add KV
 // namespace, variable name RUNS -> Deploy. Put the worker URL in js/site-config.js PUBLIC_RUNS.
 //

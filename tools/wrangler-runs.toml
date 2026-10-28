@@ -1,0 +1,10 @@
+# Cloudflare deploy config for the public list worker (tools/public-runs-worker.js).
+#   npx wrangler deploy -c tools/wrangler-runs.toml
+name = "bb-runs"
+main = "public-runs-worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "RUNS"
+id = "d98c5822f63642b591b08748bfc4d04f"   # KV namespace "bb-runs"

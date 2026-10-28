@@ -1,7 +1,7 @@
 // cors-proxy-worker.js - Optional Cloudflare Worker so a hosted copy of the page (GitHub Pages)
 // can fetch Botbooru cards. Botbooru sends no CORS header; Chub doesn't need this.
 //
-// Deploy: Cloudflare dashboard -> Workers & Pages -> Create -> Worker -> paste this file -> Deploy.
+// Deploy: npx wrangler deploy -c tools/wrangler-proxy.toml, or: Cloudflare dashboard -> Workers & Pages -> Create -> Worker -> paste this file -> Deploy.
 // Set ALLOWED_ORIGIN to your Pages origin, then put the worker URL + "?url=" in js/site-config.js.
 // Only GET, only the card hosts below, only requests from your page's origin.
 
