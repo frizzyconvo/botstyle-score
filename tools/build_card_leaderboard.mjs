@@ -12,16 +12,19 @@ import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { WRITING_STYLE_BANDS as WB, SCORER_VERSION } from '../js/score-card.js';
+// band shares are recomputed from the score with the current cut-offs, so older score files stay usable
 const dir = process.argv[2] || join('eval', 'scores', readdirSync(join('eval', 'scores')).filter(d => /^v\d/.test(d)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).pop());
 const load = n => existsSync(join(dir, n + '.jsonl')) ? readFileSync(join(dir, n + '.jsonl'), 'utf-8').split('\n').filter(Boolean).map(JSON.parse).filter(r => !r.error && r.reliable && !r.nonEnglish) : [];
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1) : null; };
 const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, median: q(v, .5), p25: q(v, .25), p75: q(v, .75),
-  original: +(100 * rows.filter(r => r.band === 'original').length / Math.max(1, v.length)).toFixed(1), common: +(100 * rows.filter(r => r.band === 'common').length / Math.max(1, v.length)).toFixed(1),
+  original: +(100 * v.filter(x => x < WB.original).length / Math.max(1, v.length)).toFixed(1), common: +(100 * v.filter(x => x >= WB.common).length / Math.max(1, v.length)).toFixed(1),
+  pulp: q(rows.map(r => r.pulp).filter(x => x !== null && x !== undefined), .5),
   upstream: q(rows.map(r => r.upstream).filter(x => x !== null && x !== undefined), .5) }; };
 const gen = [...load('generated_v1').map(r => ({ ...r, mode: r.mode || 'fresh', run: 1 })), ...load('generated_v2').map(r => ({ ...r, run: 2 }))];
 const models = {};
 for (const r of gen) (models[r.model] = models[r.model] || []).push(r);
-const out = { scorerName: 'BBBScorer', note: 'Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.', dir, version: (gen[0] || {}).version, built: new Date().toISOString().slice(0, 10), models: [], references: [] };
+const out = { scorerName: 'BBBScorer', note: 'Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.', dir, version: (gen[0] || {}).version, bands: WB, scorer: SCORER_VERSION, built: new Date().toISOString().slice(0, 10), models: [], references: [] };
 for (const [m, rows] of Object.entries(models)) {
   const fresh = rows.filter(r => r.mode === 'fresh');
   if (!fresh.length) continue;

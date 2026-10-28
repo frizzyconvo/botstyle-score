@@ -79,7 +79,13 @@ novelists didn't write "her heart pounding".
 
 ## Writing style bands (`WRITING_STYLE_BANDS` in `js/score-card.js`)
 
-**Original** under 20, **Mixed** 20–40, **Common** 40+. Card-length text scores lower than stories, so the 30/60 split
+**Scorer 0.5.0 (tentative): Original under 35, Mixed 35–50, Common 50+**, shown as *Meatbag adjacent* / *Mixed signals* /
+*Might just be slop*. The cut-offs were widened on purpose to keep false alarms on human cards low while the
+scorer is untested: on the v0.4.0 reference, 118,571 human cards (2023) split 96 / 3 / 1 and 1,005 AI-written
+cards 60 / 31 / 9 (with 20/40: 87 / 10 / 3 and 10 / 63 / 27). Genavros (Botbooru 75990, 34.2) now reads as
+Original. The scores themselves are unchanged from 0.4.0.
+
+History, 0.4.0: **Original** under 20, **Mixed** 20–40, **Common** 40+. Card-length text scores lower than stories, so the 30/60 split
 fits poorly: it put 42% of AI-written cards (SPB) in Original and almost none in Common. Share in each band
 (reliable English cards with prose):
 
@@ -396,7 +402,7 @@ a `compare_scores.mjs` regression report:
    card AUC ~0.85 → ~0.93).
 3. **Calibration p90** (`calibrate.mjs`): rerun after any list change so 100 still means the sloppiest tenth
    of AI fiction.
-4. **Bands** (20 / 40): re-cut on the new reference; 20 / 35 is the current candidate.
+4. **Bands** (35 / 50 since 0.5.0, tentative): narrow again once pulp and card calibration are in.
 5. **Format peers** (`build_peers.py`): add JanitorAI before Jul 2023 to the "same format" comparison.
 6. **Bonus-tag thresholds** (`bonus-tags.js`): set on 15.7k cards; recheck the top-few-percent cut-offs.
 7. **AI-favourite names** (`corroborate_names.py`): recheck "rare in human cards" against JanitorAI.
@@ -491,3 +497,19 @@ node tools/botstyle_leaderboard.mjs --ref "Label=scores.jsonl[:human|ai|before:Y
 node tools/build_vendor.mjs                                               # vendor/ (after npm install)
 node tools/test.mjs                                                       # regression checks
 ```
+
+
+## Experimental read-outs (scorer 0.5.0, not scored)
+
+- **Genre** (`js/genre.js`): keyword density per 1k prose words for fantasy, horror, sci-fi, romance, modern and
+  action, plus +6 for a matching tag. Primary genre needs 8 or more, otherwise "general".
+- **Pulp** (`js/pulp.js`, `data/botstyle_pulp_words.json` from `tools/build_pulp_words.mjs`): the share of the
+  AI-favoured word weight that comes from 112 genre words human genre cards use at least as often as AI cards
+  (and 1.5× as often as other human cards). The adjusted score drops them. Flags at share ≥ 15% and a score
+  above the Original cut: *Reads as pulp, not AI-styled* (adjusted score falls into Original) or *Pulpy and
+  AI-suspect* (still above it). Genavros: pulp 15%, 34.2 → 29.5.
+- **Archetype** (`js/archetypes.js`): format × greeting voice × genre, e.g. "Swashbuckling novelist" (Farina),
+  "Gothic novelist" (Genavros), plus Doorstopper (1,500+ prose words) / Bite-sized (under 200).
+- `score_all.mjs` writes genre, genre2, archetype, pulp, pulpAdjusted and pulpFlag per card, and a
+  `run-log.jsonl` line per dataset (start/end, cards, words, words/s), so the next overnight run gives
+  genre-level and pulp-level breakdowns.

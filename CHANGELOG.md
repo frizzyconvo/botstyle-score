@@ -4,6 +4,27 @@ Two versions: the scorer version (`SCORER_VERSION` in js/score-card.js, carried 
 scores or labels can change; the app version (`package.json`) also moves for page and tool changes. Both follow
 `MAJOR.MINOR.PATCH`.
 
+## 0.6.0 (2026-10-28) - app; BBBScorer 0.5.0
+
+Scorer 0.5.0 (scores identical to 0.4.0; bands and read-outs change)
+- Bands widened and marked tentative: Original < 35, Mixed 35–50, Common 50+, labelled Meatbag adjacent /
+  Mixed signals / Might just be slop. Fewer false alarms on human cards (2023 human: 96 / 3 / 1).
+- Experimental, unscored: genre read, pulp score with genre-adjusted score and pulp / pulp-and-AI flags,
+  archetype tag with length badge.
+
+Page
+- "BBBScorer v…" everywhere; "slop" wording kept only for the top band and the original slop-score stats.
+- Result shows the tentative marker, archetype, pulp read and genre read.
+- Leaderboard link at the top; leaderboard rows show sample size, a clearer * for fewer than 20 cards, band
+  shares recomputed with the current cut-offs, and pulp medians. Reference set "Foreverse".
+- Public list section always visible (not switched on yet) and states it never keeps card text.
+
+Tools
+- Every .mjs takes `--help`. `score_all` adds genre/pulp/archetype fields and timing logs (run-log.jsonl).
+- `generate_ai_cards`: per-card timing and word counts, error log, `--failures`, `--reparse`, `--retry-invalid`,
+  `--max-usd`, `--dry-run`; accepts `DESCRIPTION:` headings.
+- `build_pulp_words.mjs` (new); `dev/` for local-only scripts (gitignored).
+
 ## 0.5.0 (2026-10-28) - app; scorer stays 0.4.0
 
 Page (BB Botstyle Score)
