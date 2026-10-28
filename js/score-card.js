@@ -29,11 +29,11 @@ import { cardRepetition } from './repetition.js';
 // can be ahead of it for page-only changes). Bump it (and CHANGELOG.md) whenever a change can move
 // scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it, so
 // stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
-export const SCORER_VERSION = '0.8.0';
+export const SCORER_VERSION = '0.8.1';
 // Versions whose botstyle *numbers* are identical to this one, so references built with them still apply.
 // 0.7.0 re-anchored the scale to AI-written cards and made repeat damping length-independent, so older
 // references don't apply.
-export const SAME_SCORES_AS = ['0.8.0'];
+export const SAME_SCORES_AS = ['0.8.1'];
 // Card fields scored by default (scoreCard opts.fields overrides): what the page says it scores.
 export const DEFAULT_FIELDS = ['description', 'first_mes'];
 

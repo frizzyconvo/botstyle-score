@@ -149,6 +149,10 @@ check('joint score kept alongside', typeof blended.joint.score === 'number');
 check('repeats inside a text are counted', repeatsWithin('She walks the long road home every night. '.repeat(10)).count > 0);
 check('different texts share nothing', sharedBetween(descTxt, 'Completely unrelated words about trains, stations and timetables. '.repeat(10)).count === 0);
 
+const semi = preprocessCard('Enjoys seaweed noodles and dueling; 176cm tall with brown skin and dark brown hair; Known for her stubborn and hot-headed demeanor; Struggles with PTSD; Adventurous; Ambitious; Confident; Passionate; Restless; Loyal');
+check('semicolon trait list is structured, not prose', semi.stats.proseWords === 0, semi.stats.proseWords);
+const semiProse = preprocessCard('She keeps the lighthouse; it keeps her. The keeper before her drowned; nobody says how. She counts ships at dawn and again at dusk, and writes the numbers in a ledger nobody reads.');
+check('prose with a few semicolons stays prose', semiProse.stats.proseWords > 20);
 const htmlTitle = (readFileSync(new URL('../index.html', import.meta.url), 'utf-8').match(/<title>([^<]*)<\/title>/) || [])[1] || '';
 check('page title names the scorer version (update index.html <title> when bumping)', htmlTitle.includes('BBBScorer v' + SCORER_VERSION), htmlTitle);
 

@@ -68,6 +68,14 @@ const wordCount = s => (s.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).length;
 
 function looksLikeList(s) {
   // "tall, lean, scarred, quiet" - several short comma/semicolon/slash items
+  // "Enjoys noodles; 176cm tall with brown skin; Stubborn; Loyal; …" - a trait list joined with semicolons:
+  // six or more semicolon-separated fragments, mostly short, and no sentences. (Korra, Chub 2023, was read as
+  // prose and scored 85 on its trait words.)
+  const semis = s.split(/;\s*/).map(x => x.trim()).filter(Boolean);
+  if (semis.length >= 6) {
+    const lens = semis.map(wordCount).sort((a, b) => a - b), med = lens[lens.length >> 1];
+    if (med <= 8 && (s.match(/[.!?]["”']?\s+[A-Z]/g) || []).length <= 1) return true;
+  }
   const items = s.split(/[,;/|]|\s\+\s/).map(x => x.trim()).filter(Boolean);
   if (items.length < 3) return false;
   const avg = items.reduce((a, x) => a + wordCount(x), 0) / items.length;

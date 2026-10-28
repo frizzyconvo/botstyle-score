@@ -6,6 +6,13 @@ All notable changes to BB Botstyle Score. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.10.1] - 2026-10-28 · BBBScorer 0.8.1
+
+### Fixed
+- Trait lists joined with semicolons ("Enjoys noodles; 176cm tall; Stubborn; Loyal; …") were read as prose, so trait
+  words counted as AI vocabulary (a 2023 Chub card scored 63 on its trait list alone; now 4.6). They now count as
+  lists, like W++ and PLists. Affects about 1% of human cards and 0.6% of AI cards.
+
 ## [0.10.0] - 2026-10-28 · BBBScorer 0.8.0
 
 Scores unchanged.
