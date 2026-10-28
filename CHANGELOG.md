@@ -45,7 +45,7 @@ Tools
 
 Scoring output (the score itself is unchanged)
 - Each result says where it sits among 3,827 human 2023 cards and 940 AI-written cards
-  (`reference` in `scoreCard()`, `data/botstyle_reference.json`, `tools/build_reference.py`).
+  (`reference` in `scoreCard()`, `data/botstyle_reference.json`, `tools/build_reference.mjs`).
 
 Page
 - Original slop-score metrics moved into a collapsed "Stats for nerds" section; the over-represented

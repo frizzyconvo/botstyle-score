@@ -329,7 +329,7 @@ Every `scoreCard()` result carries `version` (`SCORER_VERSION` in `js/score-card
 188,834 card files into `card-datasets/jaicards-cards-js/jaicards_cards.jsonl`.
 `node tools/compare_scores.mjs eval/scores/v0.4.0 eval/scores/v0.5.0` reports, per dataset, the median before
 and after, mean absolute change, the share of cards whose band changed (and which way), and the biggest movers.
-`python3 tools/build_reference.py --scores eval/scores/v<version>` rebuilds the percentile reference from a
+`node tools/build_reference.mjs --scores eval/scores/v<version>` rebuilds the percentile reference from a
 complete run (it refuses mixed versions); the reference records the version it was built with.
 
 v0.4.0 so far: Korshuk 8.5 median (488 reliable), Chub 2023–26 16.1, SPB 31.5, generated v1 36.0,
@@ -389,7 +389,7 @@ The overnight `score_all` run adds JanitorAI (188,834 cards) and Perchance. Thes
 smaller or less clean human sets and should be revisited, in this order, each as a scorer version bump with
 a `compare_scores.mjs` regression report:
 
-1. **Human reference for the ⓘ percentiles** (`build_reference.py --scores eval/scores/v0.4.0`): add
+1. **Human reference for the ⓘ percentiles** (`build_reference.mjs --scores eval/scores/v0.4.0`): add
    JanitorAI before 2024-03 (currently Korshuk + early Chub only, 2,121 cards).
 2. **Card / genre calibration** (`card_calibrate.mjs`): rebuild the drop list from Korshuk + JanitorAI
    before Jul 2023, check which classic slop words survive, then switch it on (expected: Genavros ~31 → ~23,
@@ -412,7 +412,7 @@ on the page), so each recalibration can also be compared against it.
 
 The score is a weighted hit rate scaled so 100 = the sloppiest 10% of card-length AI fiction; it isn't a
 percentage or a probability. Since 0.3.0 every result also says where it sits among reference cards
-(`reference` in `scoreCard()`, from `data/botstyle_reference.json`, built by `tools/build_reference.py`):
+(`reference` in `scoreCard()`, from `data/botstyle_reference.json`, built by `tools/build_reference.mjs`):
 
 | Score | Higher than … of human 2023 cards (3,827) | … of AI-written cards (940) |
 |---|---|---|
