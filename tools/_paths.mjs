@@ -8,7 +8,7 @@
 //
 // Each path falls back to its older location while that still exists, so tools work before and after
 // organize_eval.mjs has run.
-import { existsSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 export const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -43,3 +43,10 @@ export function runDirs() {
 }
 /** Folder of the run for one scorer version, wherever it is. */
 export const runDir = v => (runDirs().find(r => r.version === v) || { dir: join(PATHS.scores, 'v' + v) }).dir;
+
+// The scorer version the page uses (SCORER_VERSION in js/score-card.js) and its run folder. Tools that build what the page
+// shows (leaderboard, reference) default to this folder, not the newest one: a prepared next version (e.g. an opt-in
+// 0.9.0 rescore in progress) must not replace the live data.
+export const PAGE_SCORER = (readFileSync(join(ROOT, 'js', 'score-card.js'), 'utf-8').match(/SCORER_VERSION = '([0-9.]+)'/) || [])[1];
+// relative to the repo (the folder name ends up in data/ files, which are public: no local paths)
+export const pageRunDir = () => runDir(PAGE_SCORER).slice(ROOT.length + 1).replace(/\\/g, '/');

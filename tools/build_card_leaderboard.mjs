@@ -18,7 +18,9 @@ import { WRITING_STYLE_BANDS as WB, SCORER_VERSION } from '../js/score-card.js';
 import { FAILED, JUST_FOR_FUN } from './_model_groups.mjs';
 import { PATHS } from './_paths.mjs';
 // band shares are recomputed from the score with the current cut-offs, so older score files stay usable
-const dir = process.argv[2] || join('eval', 'scores', readdirSync(join('eval', 'scores')).filter(d => /^v\d/.test(d)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).pop());
+import { pageRunDir } from './_paths.mjs';
+// default: the page's scorer version's run (not the newest folder: a prepared next version may be mid-run)
+const dir = process.argv[2] || pageRunDir();
 const load = n => existsSync(join(dir, n + '.jsonl')) ? readFileSync(join(dir, n + '.jsonl'), 'utf-8').split('\n').filter(Boolean).map(JSON.parse).filter(r => !r.error && r.reliable && !r.nonEnglish) : [];
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1) : null; };
 const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, median: q(v, .5), p25: q(v, .25), p75: q(v, .75),

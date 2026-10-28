@@ -18,7 +18,9 @@ import { join } from 'path';
 import { WRITING_STYLE_BANDS as WB } from '../js/score-card.js';
 const argv = process.argv.slice(2);
 const opt = (k, d) => argv.includes(k) ? argv[argv.indexOf(k) + 1] : d;
-const latest = () => join('eval', 'scores', readdirSync(join('eval', 'scores')).filter(d => /^v\d/.test(d)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).pop());
+import { pageRunDir } from './_paths.mjs';
+// default: the page's scorer version's run (not the newest folder: a prepared next version may be mid-run)
+const latest = () => pageRunDir();
 const SC = argv.find((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--')) || latest();
 const HB = opt('--human-before', '2023-07'), JB = opt('--jai-before', '2024-03');
 const load = n => { const p = join(SC, n + '.jsonl'); return existsSync(p) ? readFileSync(p, 'utf-8').split('\n').filter(Boolean).map(JSON.parse) : []; };

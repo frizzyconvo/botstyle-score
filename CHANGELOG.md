@@ -6,6 +6,12 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.20.1] - 2026-10-28 · BBBScorer 0.8.1
+
+### Fixed
+- The leaderboard was empty: it had been rebuilt from a 0.9.0 scoring run that had only just started (the builder took
+  the newest scoring folder). The leaderboard and reference builders now default to the scorer version the page uses.
+
 ## [0.20.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged. BBBScorer 0.9.0 (prepared, opt-in) gains a card-mined list.
