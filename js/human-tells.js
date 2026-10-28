@@ -84,6 +84,52 @@ export function stripExampleDialogue(t) {
   return out.replace(/^\s*(?:\{\{(?:char|user)\}\}|[*_]{0,2}[A-Z][\w .'()-]{0,24}?[*_]{0,2})\s*:\s*[*_]{0,2}(?=\s*\S)(?=[^\n]*(?:\blol\b|\bi\b|[a-z]\?\?|!!|\bu\b|^\s*[a-z]))[^\n]*$/gm, '');
 }
 
+// ---- word-level helpers for the typo check ----
+// Card-writing terms that aren't in general dictionaries.
+const CARD_TERMS = new Set('plist plists wpp alichat ooc nsfw sfw npc npcs lorebook lorebooks jailbreak jailbreaks chub botbooru janitorai sillytavern tavern ccv persona personas'.split(' '));
+const FOREIGN = new Set(`lo la el los las que de del por para con una uno pero muy mas como esta este eso esa todo toda bien mi tu su yo
+te se le nos algo mucho mucha sabe hace porque cuando donde quien creo eres soy estoy hola gracias amor querido querida mija
+mijo chica chico señor señora dios mio verdad ahora aquí vamos ven tengo tienes quiero puedo nada nunca siempre sí qué cómo
+não da do em um uma mais muito seu sua meu ele ela foi tem nem dela você voce isso também
+les des une est pas avec pour mais très mon ton son oui je suis tu es il elle nous vous chéri chérie
+che non il della per sono come molto bene ciao amore tesoro`.split(/\s+/));
+// Extra dictionary: real English words that wordfreq doesn't list or rates as very rare (data/extra_words.txt, from
+// the word-list package: its words with wordfreq zipf under 2). Optional; loaded by loadExtraWords().
+let EXTRA_WORDS = null;
+export function setExtraWords(words) { EXTRA_WORDS = words instanceof Set ? words : new Set(words); }
+export async function loadExtraWords(base = './data/') {
+  try { const r = await fetch(base + 'extra_words.txt'); if (r.ok && r.text) setExtraWords((await r.text()).split('\n').filter(Boolean)); } catch { /* optional */ }
+}
+// Only derivational endings: a misspelled inflection ("walkd", "realy") should still count as a typo.
+const SUFFIXES = ['ishly', 'ishness', 'ish', 'esque', 'ness', 'less', 'lessly', 'like', 'ism', 'ist', 'wise', 'ward', 'wards', 'hood', 'ship', 'dom'];
+const PREFIXES = ['un', 're', 'non', 'over', 'under', 'out', 'half', 'semi', 'anti', 'pre', 'post', 'mis', 'dis', 'super', 'hyper', 'ultra', 'mega', 'mini', 'micro', 'self', 'counter', 'inter', 'sub', 'co', 'ex', 'mid', 'multi', 'pseudo', 'quasi'];
+// A regular derivation or compound of a known word: tallish, greenish, purpleish, unbothered, catlike, moonlit. Used
+// only to excuse a word that also looks like a typo of a common word.
+function knownByForm(w, z) {
+  const ok = c => c.length >= 3 && z(c) >= 2.5;
+  for (const suf of SUFFIXES) {
+    if (!w.endsWith(suf) || w.length - suf.length < 3) continue;
+    const b = w.slice(0, -suf.length);
+    if (ok(b) || ok(b + 'e') || ok(b.replace(/(.)\1$/, '$1')) || ok(b.replace(/i$/, 'y'))) return true;
+  }
+  for (const pre of PREFIXES) if (w.startsWith(pre) && w.length - pre.length >= 3) { const r = w.slice(pre.length); if (ok(r) || knownByFormShallow(r, z)) return true; }
+  for (let i = 4; i <= w.length - 4; i++) if (z(w.slice(0, i)) >= 3 && z(w.slice(i)) >= 3) return true;   // compounds, both parts 4+ letters
+  return false;
+}
+function knownByFormShallow(w, z) { for (const suf of SUFFIXES) if (w.endsWith(suf) && w.length - suf.length >= 3 && z(w.slice(0, -suf.length)) >= 2.5) return true; return false; }
+// The most common word one edit away (delete, swap, replace, insert), if it's common enough to be the intended word.
+const ABC = 'abcdefghijklmnopqrstuvwxyz';
+function nearestCommon(w, z, min = 3.2) {
+  let best = null, bz = min;
+  const tryW = c => { if (c.length >= 2 && c !== w) { const v = z(c); if (v > bz) { bz = v; best = c; } } };
+  for (let i = 0; i <= w.length; i++) {
+    if (i < w.length) tryW(w.slice(0, i) + w.slice(i + 1));
+    if (i < w.length - 1) tryW(w.slice(0, i) + w[i + 1] + w[i] + w.slice(i + 2));
+    for (const ch of ABC) { if (i < w.length) tryW(w.slice(0, i) + ch + w.slice(i + 1)); tryW(w.slice(0, i) + ch + w.slice(i)); }
+  }
+  return best;
+}
+
 /**
  * @param {string} text  card text (raw; macros intact)
  * @param {object} opts  { lookupZipf?: (word)=>number|null, knownWords?: Set<string> }
@@ -112,19 +158,35 @@ export function checkCard(text, opts = {}) {
   add(humanTells, 'missing_apostrophe', 'Contractions without apostrophes', { count: noApos.length, examples: [...new Set(noApos)].slice(0, 6) });
   add(humanTells, 'common_misspelling', 'Common misspellings', { count: [...seenMiss.values()].reduce((a, b) => a + b, 0), examples: miss.slice(0, 8) });
 
-  // Unknown lowercase words (likely typos). Needs the wordfreq lookup; capitalized
-  // words are skipped (names, places), as is anything also used capitalized in the card.
+  // Likely typos: lowercase words the English frequency list doesn't know (or barely knows) AND that are one edit
+  // away from a common word ("beutiful" -> beautiful). Everything else is left alone: rare real words (gambeson; also
+  // checked against data/extra_words.txt), regular derivations of known words (tallish, purpleish, unbothered),
+  // other languages (in-character Spanish: sentences with 2+ common Spanish/Portuguese/French/Italian words are
+  // skipped), contractions, capitalized words (names, places) and anything also used capitalized in the card.
   if (opts.lookupZipf) {
+    const z = w => opts.lookupZipf(w) || 0;
     const capitalized = new Set((text.match(/\b[A-Z][a-z]+\b/g) || []).map(w => w.toLowerCase()));
-    const unk = new Map();
-    for (const w of text.replace(/\{\{[^}]*\}\}/g, ' ').match(/\b[a-z]{3,}\b/g) || []) {
-      if (capitalized.has(w) || COMMON_MISSPELLINGS.has(w) || NO_APOSTROPHE.has(w) || (opts.knownWords && opts.knownWords.has(w))) continue;
-      const z = opts.lookupZipf(w);
-      if (!z) unk.set(w, (unk.get(w) || 0) + 1);
+    const typos = new Map(), toks = [];
+    for (const sent of text.replace(/\{\{[^}]*\}\}/g, ' ').split(/(?<=[.!?…])\s+|\n+|["“”*]/)) {
+      const ts = sent.match(/[\p{L}\p{M}]+(?:['’][\p{L}\p{M}]+)*/gu) || [];
+      if (ts.filter(t => FOREIGN.has(t.toLowerCase())).length >= 2) continue;
+      toks.push(...ts);
     }
-    if (unk.size) add(humanTells, 'unknown_words', 'Words not in the English frequency list (possible typos)',
-      { count: [...unk.values()].reduce((a, b) => a + b, 0), examples: [...unk.keys()].slice(0, 10) },
-      'Invented words and slang also land here; check by eye.');
+    for (const w of toks) {
+      if (!/^[a-z]{3,}$/.test(w)) continue;   // capitals, contractions, accents, other scripts: not checked
+      if (/(?:mente|cion|iendo|ando)$/.test(w)) continue;   // Spanish / Portuguese word endings
+      if (capitalized.has(w) || COMMON_MISSPELLINGS.has(w) || NO_APOSTROPHE.has(w) || (opts.knownWords && opts.knownWords.has(w))) continue;
+      const zw = z(w);
+      if (zw >= 1.7 || (EXTRA_WORDS && EXTRA_WORDS.has(w)) || CARD_TERMS.has(w)) continue;   // a word in its own right
+      // the intended word: one edit away and much more common. wordfreq lists some typos too ("beutiful" 1.7), so a
+      // known-but-very-rare word counts only when its neighbor is a very common word.
+      const near = nearestCommon(w, z, zw ? 5 : 3.5);
+      if (!near || knownByForm(w, z) || w === near + w.slice(-1) && /[aeo]$/.test(w)) continue;   // dominante, humano: cognates
+      const t = typos.get(w); typos.set(w, { near, count: (t ? t.count : 0) + 1 });
+    }
+    if (typos.size) add(humanTells, 'unknown_words', 'Likely typos (one letter off a common word)',
+      { count: [...typos.values()].reduce((a, x) => a + x.count, 0), examples: [...typos].slice(0, 10).map(([w, x]) => `${w} (${x.near}?)`) },
+      'Only words one letter away from a common word count; rare real words, other languages and invented words are left out.');
   }
 
   add(humanTells, 'txt_speak', 'Txt-speak in narration', collect(narr, TXT_SPEAK_RX));

@@ -78,5 +78,8 @@ MIT (see [LICENSE](LICENSE)), except the wordfreq port: `js/wordfreq.js` is Apac
 `data/large_en.msgpack.gz` is CC BY-SA 4.0 ([wordfreq](https://github.com/rspeer/wordfreq) by Robyn Speer;
 Speer, R. (2022). rspeer/wordfreq: v3.0 (v3.0.2). Zenodo. https://doi.org/10.5281/zenodo.7199437).
 
+`data/extra_words.txt` (rare real words for the typo check) is derived from
+[word-list](https://github.com/sindresorhus/word-list) by Sindre Sorhus (MIT).
+
 Built on [slop-score](https://github.com/sam-paech/slop-score) by Samuel J. Paech (2025). Datasets and other
 credits are listed in [BOTSTYLE.md](BOTSTYLE.md#credits).

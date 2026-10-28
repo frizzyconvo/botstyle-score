@@ -20,6 +20,7 @@ import { BOTSTYLE_WEIGHTS, MIN_PROSE_WORDS } from './botstyle.js';
 import { FORMAT_INFO, formatLabel, requestStyleLabel, GREETING_FORMATS, GREETING_POV } from './card-style.js';
 import { EMDASH_POINTS } from './ai-structures.js';
 import { CARD_PROXY, PUBLIC_RUNS } from './site-config.js';
+import { originalParts, explainDifference, disparity, DISPARITY } from './compare-original.js';
 
 // Botbooru sends no CORS header: local server proxy on localhost, CARD_PROXY on a hosted copy.
 if (/^(?:localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) CARD_SOURCES.proxy = '/proxy?url=';
@@ -252,7 +253,7 @@ function renderResult(r) {
     ${meter('Sentence structures', r.components.structures, `${r.rates.structures.toFixed(1)} weighted hits per 1k prose words: not-x-but-y, "a hint of…", abstract similes, banter tags…`)}
     ${r.emdash && r.emdash.points > 0 ? `<div class="note">Em-dashes: ${r.emdash.count} (${r.emdash.rate.toFixed(1)} per 1k words) → +${r.emdash.points.toFixed(1)}</div>` : ''}
     <div class="note">Scored ${st.proseWords} prose words of ${st.totalWords} (${st.structuredWords} in lists/W++/key-value lines, ${st.boilerplateWords} in boilerplate).
-      ${st.proseWords < MIN_PROSE_WORDS && band.id !== 'na' ? ' <b>Short: low confidence.</b>' : ''}${st.nonEnglish ? ' <b>Doesn\'t look like English; the word lists are English-only.</b>' : ''}</div>`;
+      ${st.proseWords < MIN_PROSE_WORDS && band.id !== 'na' ? ' <b>Short: low confidence.</b>' : st.totalWords < 350 && band.id !== 'na' ? ' <b>Short card:</b> the score rests on few words, so treat it as rough.' : ''}${st.nonEnglish ? ' <b>Doesn\'t look like English; the word lists are English-only.</b>' : ''}</div>`;
   // The description and first message are always separate inputs; say so when one is missing.
   const cc0 = state.card || {}, noDesc = !String(cc0.description || '').trim(), noGreet = !String(cc0.first_mes || '').trim();
   if (noDesc || noGreet) L += `<div class="alert"><b>${noDesc && noGreet ? 'No description or first message.' : noDesc ? 'No description.' : 'No first message.'}</b> ${noDesc ? 'Every card should have a description; ' : ''}${noDesc && !noGreet ? 'this score is the first message alone.' : noGreet && !noDesc ? 'This score is the description alone. If the greeting is pasted into the description box, move it to the first-message box.' : ''}</div>`;
@@ -260,7 +261,7 @@ function renderResult(r) {
     .map(([l, p]) => `${l} <b>${p.score.toFixed(1)}</b>${p.reliable ? '' : ' <span class="faint">(short)</span>'}`);
   if (r.mixed) L += `<div class="alert"><b>Mixed card:</b> the ${r.mixed.higher} reads ${r.mixed.gap.toFixed(0)} points more AI-styled than the ${r.mixed.higher === 'greeting' ? 'description' : 'greeting'} (${partTxt.join(' · ')}). Often a hand-written ${r.mixed.higher === 'greeting' ? 'description with an AI-written greeting' : 'greeting with an AI-written description'}. The card score blends the two by length.</div>`;
   else if (partTxt.length > 1) L += `<div class="note">Each part alone: ${partTxt.join(' · ')}.</div>`;
-  if (r.pulp && band.id !== 'na') {
+  if (r.pulp && band.id !== 'na' && r.pulp.score > 0) {   // nothing to say when no AI-favored word is genre vocabulary
     const P = r.pulp;
     L += `<div class="sec pulp${P.flag ? ' ' + P.flag : ''}"><h3>Pulp read · experimental</h3>${P.flag ? `<div class="pulp-flag">${esc(P.flagLabel)}</div>` : ''}
       <div class="small">${Math.round(P.score)}% of the AI-favored word weight is genre vocabulary that human ${esc((r.genre && r.genre.label) || 'genre')} cards use a lot too. Without it: <b>${P.adjusted.toFixed(1)}</b>${P.delta > 0.05 ? ` (−${P.delta.toFixed(1)})` : ''}.</div>
@@ -271,12 +272,15 @@ function renderResult(r) {
   if (r.artifacts && r.artifacts.hits.length) L += `<div class="alert"><b>Obvious AI tells</b> (+${r.artifacts.points}): the chatbot talking to whoever prompted it.<ul>${r.artifacts.hits.map(x => `<li>${esc(x.label)} ×${x.count}<span class="ex">${x.examples.slice(0, 2).map(esc).join('<br>')}</span></li>`).join('')}</ul></div>`;
   L += saveBox(r);
 
-  const chips = (hits, n = 24) => hits.slice(0, n).map(x => `<span class="tag hot">${esc(x.item)}${x.count > 1 ? ' ×' + x.count : ''}<span class="w">${x.weight.toFixed(1)}</span></span>`).join('');
+  // Phrases show as written in the card ("something she can't"); the list form ("something ca": stopwords left out,
+  // contractions cut) is in the tooltip.
+  const chips = (hits, n = 24) => hits.slice(0, n).map(x => `<span class="tag hot"${x.example ? ` title="list entry: ${esc(x.item)}"` : ''}>${esc(x.example || x.item)}${x.count > 1 ? ' ×' + x.count : ''}<span class="w">${x.weight.toFixed(1)}</span></span>`).join('');
   let R = '';
   if (r.hits.phrases.length || r.hits.words.length || r.hits.structures.length) {
     R += `<div class="sec"><h3>What scored</h3>${r.hits.phrases.length ? `<div class="dim small">Phrases</div>${chips(r.hits.phrases)}` : ''}${r.hits.words.length ? `<div class="dim small" style="margin-top:6px">Words</div>${chips(r.hits.words)}` : ''}`
       + (r.hits.structures.length ? `<div class="dim small" style="margin-top:6px">Sentence structures</div><ul>${r.hits.structures.slice(0, 12).map(x => `<li>${esc(x.label)}${x.count > 1 ? ' ×' + x.count : ''} <span class="faint">(${x.weight.toFixed(1)})</span>${x.examples && x.examples[0] ? `<span class="ex">“${esc(String(x.examples[0]).slice(0, 100))}”</span>` : ''}</li>`).join('')}</ul>` : '') + '</div>';
   }
+  R += compareSection(r);
   const f = r.format.format, g = r.greeting;
   R += `<div class="sec"><h3>Card</h3>Format: <b>${esc(formatLabel(f))}</b>${formatPop(r.format)}`
     + (r.peers ? `<div class="faint small">vs 2023 cards in the same format: ${Object.entries(r.peers).filter(([, p]) => p !== null && p !== undefined).map(([k, p]) => `${k} ${p}th pct${p >= 90 ? ' ⚑' : ''}`).join(', ')}</div>` : '')
@@ -320,6 +324,29 @@ function formatPop(fmt) {
   const list = Object.entries(FORMAT_INFO).map(([k, [label, blurb]]) => `<li${k === f ? ' class="on"' : ''}><b>${esc(label)}</b>${k === f ? ' ← this card' : ''}<br><span class="faint">${esc(blurb)}</span></li>`).join('');
   return `<span class="pop" tabindex="0" aria-label="Possible formats">i<span class="pop-body"><b>Possible description formats</b><ul class="fmt-list">${list}</ul>`
     + (mix.length ? `This card's description: ${mix.join(', ')}${sh.first_person >= 0.045 ? '; written in first person' : ''}.` : '') + ` Format isn't scored; it says how the card is laid out and which cards it's compared with.</span></span>`;
+}
+
+// BBBScorer vs the original slop score on the same text: what each counts, and why they differ on this card.
+function compareSection(r) {
+  if (!state.norm || r.band.id === 'na') return '';
+  const up = originalParts(r.text, state.norm, true); if (!up) return '';
+  const st = r.stats, gap = r.score - up.score, d = disparity(r, up), why = explainDifference(r, up);
+  const pctOf = v => `${Math.round(v * 100)}%`;
+  const flag = d && d.flag ? ` <span class="tag${d.flag === 'very_big' ? ' hot' : ''}">${d.flag === 'very_big' ? 'very big gap' : 'big gap'}</span>` : '';
+  const row = (label, a, b) => `<span class="cmp-l">${label}</span><span>${a}</span><span>${b}</span>`;
+  const origWords = (up.wordHits || []).slice(0, 10).map(x => `${esc(x.item)}${x.count > 1 ? ' ×' + x.count : ''}`).join(', ') || 'none';
+  return `<details class="sec cmp"${Math.abs(gap) >= 20 ? ' open' : ''}><summary><h3>BBBScorer vs the original slop score</h3>
+      <span class="small">BBBScorer <b>${r.score.toFixed(1)}</b> · original <b>${up.score.toFixed(1)}</b> · ${gap >= 0 ? '+' : '−'}${Math.abs(gap).toFixed(1)}${flag}</span></summary>
+    <div class="cmp-grid small"><span></span><b>BBBScorer</b><b>Original</b>
+      ${row('Text', `prose only: ${st.proseWords} of ${st.totalWords} words`, `everything: ${up.tokens} words`)}
+      ${row('Words', `${r.rates.words.toFixed(0)} weighted hits per 1k, AI-vs-human list (60%) → ${pctOf(r.components.words)}`, `${up.words} slop-list words per 1k (60%) → ${pctOf(up.parts.words)}`)}
+      ${row('Phrases', `${r.rates.phrases.toFixed(1)} two/three-word hits per 1k (25%) → ${pctOf(r.components.phrases)}`, `${up.trigrams} slop trigrams per 1k (15%) → ${pctOf(up.parts.trigrams)}`)}
+      ${row('Patterns', `${r.rates.structures.toFixed(1)} per 1k: not-x-but-y + 28 others (15%) → ${pctOf(r.components.structures)}`, `${up.contrast} not-x-but-y per 1k characters (25%) → ${pctOf(up.parts.contrast)}`)}
+      ${row('Extras', `em-dashes +${r.emdashPoints.toFixed(1)}, chatbot leftovers +${r.artifactPoints}`, 'none')}
+      ${row('100 means', 'the most AI-styled tenth of AI-written cards', 'the sloppiest of 22 models\' story averages')}</div>
+    <div class="small dim" style="margin-top:6px">Original slop-list words found: ${origWords}.</div>
+    ${why.length ? `<div class="small" style="margin-top:6px"><b>Why they differ here</b><ul>${why.map(x => `<li>${esc(x.text)}</li>`).join('')}</ul></div>` : ''}
+    <div class="faint small">Gaps of ${DISPARITY.big}+ points are common: the two measure different things on different scales. Botbooru shows its own slop-score figure, which doesn't always match the original formula on the description and first message.</div></details>`;
 }
 
 function saveBox(r) {

@@ -165,5 +165,24 @@ const zAll = [...readCards(zipPath)], zBooks = [...readCards(zipPath + '/books/*
 check('zip source: every card file inside', zAll.length === 3 && sourceKind(zipPath) === 'zip', zAll.length);
 check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zBooks[0].name === 'Zed' && zBooks[0].description.length > 100, zBooks.map(c => c.id).join());
 
+// typo read-out: one edit off a common word counts; rare real words, -ish coinages and in-character Spanish don't
+{
+  const M = await import('../js/metrics.js'); await M.loadWordfreq();
+  const H = await import('./../js/human-tells.js');
+  H.setExtraWords(readFileSync(new URL('../data/extra_words.txt', import.meta.url), 'utf-8').split('\n'));
+  const t = 'She wore a gambeson and a purpleish cloak, tallish and unbothered. The knight was beutiful and hosue-proud. "No lo creo cariño, elige sabiamente, mija." She walkd home.';
+  const tells = H.checkCard(t, { lookupZipf: M.lookupZipf }).humanTells.find(x => x.id === 'unknown_words');
+  const ex = tells ? tells.examples.join(' ') : '';
+  check('typos: one letter off a common word', /beutiful/.test(ex) && /walkd/.test(ex), ex);
+  check('typos: rare real words, -ish, Spanish left out', !/gambeson|purpleish|tallish|unbothered|sabiamente|elige|mija/.test(ex), ex);
+}
+// phrases are shown as written, not in their stopword-free list form
+{
+  const { scoreWeighted } = await import('../js/botstyle.js');
+  const w = scoreWeighted('There was something she can\'t name in the way he looked at her, a living, breathing thing.');
+  const ph = w.phrases.hits.find(x => x.item === 'something ca');
+  check('phrase hits carry the text as written', !!ph && /can't/.test(ph.example || ''), JSON.stringify(ph));
+}
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

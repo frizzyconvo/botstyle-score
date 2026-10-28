@@ -14,7 +14,7 @@ import { loadBotstyle, scoreWeighted, computeBotstyleScore, peerPercentile, tall
 import { preprocessCard } from './card-preprocess.js';
 import { scoreStructures } from './ai-structures.js';
 import { findArtifacts } from './ai-artifacts.js';
-import { checkCard } from './human-tells.js';
+import { checkCard, loadExtraWords } from './human-tells.js';
 import { loadCliches, tallyCliches } from './cliches.js';
 import { descriptionFormat, greetingStyle, cardType } from './card-style.js';
 import { bonusTags, tagInputs } from './bonus-tags.js';
@@ -49,9 +49,8 @@ export const BAND_TAGLINES = { original: 'Meatbag adjacent', mixed: 'Mixed signa
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
 
 export async function loadAll(base = './data/') {
-  await loadBotstyle(base);
-  await loadCliches(base);
-  await loadPulp(base);
+  // extra_words.txt (~0.6 MB compressed) only feeds the typo read-out, so it loads alongside the rest
+  await Promise.all([loadBotstyle(base), loadCliches(base), loadPulp(base), loadExtraWords(base)]);
   try { const r = await fetch(base + 'botstyle_reference.json'); if (r.ok) REFERENCE = await r.json(); } catch { REFERENCE = null; }
 }
 

@@ -33,6 +33,7 @@ import { createRequire } from 'module';
 import { loadAll, scoreCard, SCORER_VERSION } from '../js/score-card.js';
 import { setPosTagger } from '../js/pos-tagger.js';
 import { formatLabel } from '../js/card-style.js';
+import { disparity, DISPARITY } from '../js/compare-original.js';
 import { loadSlopSets, computeSlopIndex } from '../js/metrics.js';
 import { wordsOnlyLower, alphaTokens } from '../js/utils.js';
 import { scoreText as scoreContrast } from '../js/contrast-detector.js';
@@ -56,30 +57,7 @@ function upstreamParts(text) {
 }
 const upstreamScore = text => { const u = upstreamParts(text); return u ? u.score : null; };
 
-// Disparity between BBBScorer and the original formula on the same text (points). Marked in every row and
-// summarized in notes.md, with likely reasons, so a run shows where the two disagree and why.
-const DISPARITY = { big: 30, veryBig: 50 };
-function disparity(r, up) {
-  if (!up) return null;
-  const d = +(r.score - up.score).toFixed(1), a = Math.abs(d);
-  if (a < DISPARITY.big) return { diff: d };
-  const why = [], st = r.stats, share = st.totalWords ? st.proseWords / st.totalWords : 1;
-  if (d > 0) {
-    if (r.components.phrases >= .5 || r.components.structures >= .5) why.push('AI phrases/structures the original lists lack');
-    if (share < .6) why.push(`only ${Math.round(share * 100)}% prose (original counts lists and boilerplate, diluting it)`);
-    if (up.words < 8) why.push(`few original slop-list words (${up.words}/1k)`);
-    if (r.emdashPoints > 0) why.push(`em-dash points +${r.emdashPoints.toFixed(0)}`);
-    if (r.artifactPoints > 0) why.push(`chatbot leftovers +${r.artifactPoints}`);
-  } else {
-    if (up.trigrams >= 1) why.push(`original trigram hits (${up.trigrams}/1k) that BBBScorer drops or weights low`);
-    if (up.words >= 20) why.push(`many original slop-list words (${up.words}/1k); BBBScorer weights by AI/human ratio`);
-    if (share < .6) why.push(`only ${Math.round(share * 100)}% prose scored by BBBScorer`);
-    if (r.pulp && r.pulp.score >= 15) why.push('genre vocabulary');
-  }
-  if (r.mixed) why.push(`mixed card (${r.mixed.higher} +${r.mixed.gap})`);
-  return { diff: d, flag: a >= DISPARITY.veryBig ? 'very_big' : 'big', dir: d > 0 ? 'bbb_higher' : 'orig_higher', why };
-}
-
+// Disparity marks and reasons: js/compare-original.js (shared with the page).
 const argv = process.argv.slice(2);
 const opt = k => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : null);
 let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force');

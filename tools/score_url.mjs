@@ -21,7 +21,7 @@ const root = new URL('../', import.meta.url);
 const netFetch = globalThis.fetch;
 // local data files are read from disk; everything else goes to the network
 globalThis.fetch = async (url, o) => /^\.\//.test(url)
-  ? { ok: true, json: async () => JSON.parse(readFileSync(new URL(url.replace(/^\.\//, ''), root), 'utf-8')) }
+  ? { ok: true, json: async () => JSON.parse(readFileSync(new URL(url.replace(/^\.\//, ''), root), 'utf-8')), text: async () => readFileSync(new URL(url.replace(/^\.\//, ''), root), 'utf-8') }
   : netFetch(url, o);
 await loadAll('./data/'); setPosTagger(require('wink-pos-tagger')());
 

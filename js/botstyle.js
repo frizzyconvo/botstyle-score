@@ -56,6 +56,19 @@ export function ngramTokens(text) {
   return out;
 }
 
+// Same tokens as ngramTokens(), with where each one sits in the text, so a matched phrase can be shown as it was
+// written ("something she can't") rather than as its stopword-free list form ("something ca").
+export function ngramTokenSpans(text) {
+  const low = normalizeQuotes(String(text || '').toLowerCase()), out = [], rx = /[a-z']+/g;
+  let m;
+  while ((m = rx.exec(low))) {
+    const lead = m[0].match(/^'*/)[0].length, core = m[0].replace(/^'+|'+$/g, '');
+    const t = splitClitic(core);
+    if (t && /^[a-z]+$/.test(t) && !STOPWORDS.has(t)) out.push({ t, s: m.index + lead, e: m.index + lead + core.length });
+  }
+  return out;
+}
+
 export async function loadBotstyle(base = './data/') {
   const get = async (f) => { const r = await fetch(base + f); if (!r.ok) throw new Error(f + ' missing'); return r.json(); };
   const toMap = rows => new Map(rows.map(r => [r[0], r[1]]));
@@ -87,7 +100,8 @@ export function repeatWeight(k, nWords) {
 
 export function scoreWeighted(proseText) {
   if (!lists) throw new Error('call loadBotstyle() first');
-  const toks = ngramTokens(proseText);
+  const spans = ngramTokenSpans(proseText), toks = spans.map(x => x.t);
+  const example = new Map(), keep = (g, i, n) => { if (!example.has(g)) example.set(g, String(proseText).slice(spans[i].s, spans[i + n - 1].e).replace(/\s+/g, ' ')); };
   // Rates are per 1000 *running* words (stopwords included), like upstream.
   const nWords = (proseText.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).length;
 
@@ -95,12 +109,12 @@ export function scoreWeighted(proseText) {
   const tri = new Map(), bi = new Map(), wd = new Map();
   for (let i = 0; i + 2 < toks.length; i++) {
     const g = toks[i] + ' ' + toks[i + 1] + ' ' + toks[i + 2];
-    if (lists.trigrams.has(g)) { tri.set(g, (tri.get(g) || 0) + 1); covered[i] = covered[i + 1] = covered[i + 2] = 1; }
+    if (lists.trigrams.has(g)) { tri.set(g, (tri.get(g) || 0) + 1); keep(g, i, 3); covered[i] = covered[i + 1] = covered[i + 2] = 1; }
   }
   for (let i = 0; i + 1 < toks.length; i++) {
     if (covered[i] && covered[i + 1]) continue;
     const g = toks[i] + ' ' + toks[i + 1];
-    if (lists.bigrams.has(g)) bi.set(g, (bi.get(g) || 0) + 1);
+    if (lists.bigrams.has(g)) { bi.set(g, (bi.get(g) || 0) + 1); keep(g, i, 2); }
   }
   for (const t of toks) if (lists.words.has(t)) wd.set(t, (wd.get(t) || 0) + 1);
 
@@ -111,7 +125,7 @@ export function scoreWeighted(proseText) {
     for (const [g, k] of hits) {
       const w = map.get(g);
       s += w * repeatWeight(k, nWords); v += w * w * k;
-      rows.push({ item: g, count: k, weight: w });
+      rows.push({ item: g, count: k, weight: w, ...(example.has(g) ? { example: example.get(g) } : {}) });
     }
     rows.sort((a, b) => b.weight * b.count - a.weight * a.count);
     const per = nWords ? 1000 / nWords : 0;

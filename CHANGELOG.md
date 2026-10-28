@@ -6,6 +6,28 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.14.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- **BBBScorer vs the original slop score** section on every result: what text each counts, their word, phrase and
+  pattern rates, extras and scales side by side, the original's slop-list words found, and the reasons the two
+  differ on that card (shared with the scoring-run notes, `js/compare-original.js`).
+- Extra dictionary for the typo check (`data/extra_words.txt`, rare real words from the word-list package), so words
+  like "gambeson" aren't flagged.
+
+### Changed
+- Typo check: a word now counts as a likely typo only when it's one letter off a common word ("beutiful",
+  "walkd"). Rare real words, regular derivations ("tallish", "purpleish", "unbothered"), contractions, words with
+  accents and sentences in another language (in-character Spanish and the like) are left out. On a sample, 12% of
+  2023 JanitorAI cards get a likely typo and 0.3% of AI-written cards (before: most cards, either way).
+- Phrase hits show as written in the card ("something she can't") instead of their list form ("something ca":
+  stopwords left out, contractions cut); the list form is in the tooltip.
+- **Bite-sized** badge for cards under 350 words in the scored fields (was under 200 prose words), with a note that
+  the score rests on few words.
+- The pulp read is hidden when none of the card's AI-favored word weight is genre vocabulary.
+
 ## [0.13.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.

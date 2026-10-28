@@ -59,6 +59,22 @@ a little more or less text.
 together), shown under the score for comparison. It matches EQ-Bench's slop-score page exactly. More of its
 metrics are under "Stats for nerds".
 
+**BBBScorer vs the original slop score** (a section of every result) lines the two up side by side: what text each
+counts, their word, phrase and pattern rates, extras, and what 100 means on each, then the reasons they differ on
+that card. Big gaps are normal, mostly for two reasons:
+
+- **Different scales.** The original stretches 0–100 between the averages of 22 models' *stories*, so character
+  cards, AI-written ones included, mostly land under 30 on it (AI-written cards: median about 7–18). BBBScorer puts
+  100 at the most AI-styled tenth of AI-written cards.
+- **Different lists.** The original's slop list was built from story outputs ("murmurs", "glances", "tapestry"). A
+  lot of card-writing AI vocabulary isn't on it, so an obviously AI-written card can have zero hits and land on the
+  original's floor of 1.2. BBBScorer weights every word and phrase by how much more AI fiction uses it than human
+  fiction, and adds sentence patterns.
+
+BBBScorer also scores only prose (lists and instructions dilute the original's rate) and scores the description and
+first message separately. Botbooru shows its own slop-score figure; it doesn't always match the original formula on
+the description and first message (on one card it matched the formula run over every greeting instead).
+
 **The ⓘ next to the score** says where it sits among 2023 cards (mostly human) and AI-written cards. That comparison
 says more than the number on its own.
 
@@ -222,7 +238,7 @@ noun, e.g. "Gothic novelist", "Sci-fi dossier-keeper", "The minimalist" (no adje
 Genre adjectives: High-fantasy (fantasy), Gothic (horror / dark), Sci-fi, Romantic (romance), Slice-of-life
 (modern), Swashbuckling (action / adventure).
 
-**Size badges:** **Doorstopper** (1,500+ prose words) and **Bite-sized** (under 200 prose words).
+**Size badges:** **Doorstopper** (1,500+ prose words) and **Bite-sized** (under 350 words in the scored fields, lists included; about half of 2023 JanitorAI cards). A bite-sized card's score rests on few words, so the result also says to treat it as rough.
 
 ## Genre and pulp read
 
@@ -241,7 +257,9 @@ it. When pulp vocabulary is 15%+ of the word weight and the card scores 40+, it 
 ## Other read-outs (not scored)
 
 - **Human tells:** mistakes models almost never make. Lowercase "i" in narration, contractions without
-  apostrophes, common misspellings, words not in the English frequency list (possible typos), txt-speak, word
+  apostrophes, common misspellings, likely typos (a word the English frequency list doesn't know, or barely knows,
+  that is one letter off a common word: "beutiful", "walkd"; rare real words such as "gambeson", regular derivations
+  such as "tallish" or "purpleish", and sentences in another language are left out), txt-speak, word
   mix-ups ("could of", "then" for "than", "your" for "you're", "it's own", "their is", "loose" for "lose"),
   doubled words, space before punctuation, missing space after punctuation, two-dot or 4+-dot ellipses,
   repeated !!! / ???, typewriter dashes ("--"), sentences starting lowercase, unclosed \*actions\* or quotes,

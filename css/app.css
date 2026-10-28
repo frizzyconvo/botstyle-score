@@ -284,3 +284,14 @@ html { scroll-behavior: smooth; }
   .axis-legend { display: block; margin: -4px 0 14px; text-align: center; font-size: 11px; letter-spacing: .5px; color: var(--faint); }
   .axis-legend .l1 { color: var(--good); } .axis-legend .l2 { color: var(--warn); } .axis-legend .l3 { color: var(--bad); }
 }
+
+/* 0.14: BBBScorer vs original comparison */
+details.sec.cmp > summary { cursor: pointer; list-style: none; }
+details.sec.cmp > summary::-webkit-details-marker { display: none; }
+details.sec.cmp > summary h3 { display: inline; margin-right: 6px; }
+details.sec.cmp > summary::after { content: ' ▾'; color: var(--faint); }
+details.sec.cmp[open] > summary::after { content: ' ▴'; }
+.cmp-grid { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); gap: 4px 10px; margin-top: 8px; }
+.cmp-grid > b { color: var(--dim); font-size: 11.5px; letter-spacing: .5px; text-transform: uppercase; }
+.cmp-l { color: var(--faint); white-space: nowrap; }
+@media (max-width: 520px) { .cmp-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .cmp-grid > span:first-child, .cmp-l { grid-column: 1 / -1; margin-top: 4px; } }

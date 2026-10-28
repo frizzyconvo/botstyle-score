@@ -30,7 +30,9 @@ export function archetype({ format, greeting, genre, stats }) {
   else kind = 'storyteller';
   const adj = GENRE_ADJ[(genre && genre.primary) || 'general'];
   const label = (adj ? adj + ' ' : 'The ') + NOUN[kind];
-  const pw = stats ? stats.proseWords : 0;
-  const size = pw >= 1500 ? { id: 'doorstopper', label: 'Doorstopper', note: '1,500+ prose words' } : pw > 0 && pw < 200 ? { id: 'bite_sized', label: 'Bite-sized', note: 'under 200 prose words' } : null;
+  // Size badge: Doorstopper = 1,500+ words of prose; Bite-sized = under 350 words in the scored fields, lists and all
+  // (about half of 2023 JanitorAI cards, a sixth of Chub cards). A bite-sized score rests on few words.
+  const pw = stats ? stats.proseWords : 0, tw = stats ? stats.totalWords : 0;
+  const size = pw >= 1500 ? { id: 'doorstopper', label: 'Doorstopper', note: '1,500+ prose words' } : tw > 0 && tw < 350 ? { id: 'bite_sized', label: 'Bite-sized', note: `${tw} words in the scored fields (under 350): the score rests on few words, so treat it as rough` } : null;
   return { id: kind, label: label.charAt(0).toUpperCase() + label.slice(1), blurb: BLURB[kind] + (genre && genre.primary !== 'general' ? ` Genre read: ${genre.label.toLowerCase()}${genre.secondaryLabel ? ' with ' + genre.secondaryLabel.toLowerCase() : ''}.` : ''), size };
 }
