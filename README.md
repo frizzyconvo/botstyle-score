@@ -1,3 +1,16 @@
+# botstyle-score
+
+**This is a fork of slop-score adapted to character cards** (version in `package.json`, history in
+[CHANGELOG.md](CHANGELOG.md)). See [BOTSTYLE.md](BOTSTYLE.md) for what changed, the evaluation results and how to
+rebuild the lists; the original README follows.
+
+**Run it locally:** install Node 18+, then double-click `start-local.cmd` (Windows) or run `npm start`, and open
+http://localhost:8787/. Paste a Chub or Botbooru link and press *Fetch card*, or paste/drop a card. Opening
+`slop-score.html` directly from disk doesn't work (browsers block its scripts there). Command line:
+`node tools/score_url.mjs <link | card.json | card.png>`. Tests: `npm test`.
+
+---
+
 # Slop-Score: Writing Metrics Analyzer
 
 An in-browser text analysis tool that detects AI-generated "slop" patterns, repetitive language, and "Not X, but Y" constructions in writing.

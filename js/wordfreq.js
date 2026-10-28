@@ -115,9 +115,16 @@ export async function loadWordfreqEnFromFile(pathToMsgpackGz) {
 
 // Browser loader
 export async function loadWordfreqEnFromUrl(url) {
-  // Use CDN version of msgpack for browser
-  const msgpack = await import('https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3.0.0-beta2/+esm');
-  const msgpackDecode = msgpack.decode;
+  // Local copy first (node tools/build_vendor.mjs -> vendor/msgpack.min.js, sets window.MessagePack),
+  // CDN as a fallback.
+  let msgpackDecode = null;
+  try {
+    if (typeof window !== 'undefined' && !window.MessagePack) {
+      await new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = './vendor/msgpack.min.js'; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); });
+    }
+    if (typeof window !== 'undefined' && window.MessagePack) msgpackDecode = window.MessagePack.decode;
+  } catch { /* handled below */ }
+  if (!msgpackDecode) throw new Error('vendor/msgpack.min.js is missing: run node tools/build_vendor.mjs');
 
   const response = await fetch(url);
   const gz = await response.arrayBuffer();

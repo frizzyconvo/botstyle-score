@@ -1,0 +1,2789 @@
+{
+ "_about": "Clich\u00e9s humans and models both use: tallied, not scored. Built by tools/build_cliches.py.",
+ "phrases": [
+  [
+   "help feel sense",
+   3,
+   396.23,
+   "upstream slop-score"
+  ],
+  [
+   "felt sense peace",
+   3,
+   247.64,
+   "upstream slop-score"
+  ],
+  [
+   "felt shiver run",
+   3,
+   210.64,
+   "upstream slop-score"
+  ],
+  [
+   "rain continued fall",
+   3,
+   197.35,
+   "upstream slop-score"
+  ],
+  [
+   "deep breath steeling",
+   3,
+   162.73,
+   "upstream slop-score"
+  ],
+  [
+   "shiver run",
+   2,
+   147.07,
+   "upstream slop-score"
+  ],
+  [
+   "small smile playing",
+   3,
+   116.99,
+   "upstream slop-score"
+  ],
+  [
+   "said voice laced",
+   3,
+   109.34,
+   "upstream slop-score"
+  ],
+  [
+   "could help feel",
+   3,
+   103.22,
+   "upstream slop-score"
+  ],
+  [
+   "felt strange sensation",
+   3,
+   71.08,
+   "upstream slop-score"
+  ],
+  [
+   "mind raced trying",
+   3,
+   58.03,
+   "upstream slop-score"
+  ],
+  [
+   "looked eyes filled",
+   3,
+   53.59,
+   "upstream slop-score"
+  ],
+  [
+   "hung low sky",
+   3,
+   53.18,
+   "upstream slop-score"
+  ],
+  [
+   "sent shivers spine",
+   3,
+   49.89,
+   "upstream slop-score"
+  ],
+  [
+   "far reaching implications",
+   3,
+   49.29,
+   "upstream slop-score"
+  ],
+  [
+   "breath catching throat",
+   3,
+   49.28,
+   "upstream slop-score"
+  ],
+  [
+   "voice dripping",
+   2,
+   48.25,
+   "upstream slop-score"
+  ],
+  [
+   "trembling slightly",
+   2,
+   46.36,
+   "upstream slop-score"
+  ],
+  [
+   "delicate balancing act",
+   3,
+   44.36,
+   "upstream slop-score"
+  ],
+  [
+   "voice echoing",
+   2,
+   40.64,
+   "upstream slop-score"
+  ],
+  [
+   "felt shiver",
+   2,
+   40.6,
+   "upstream slop-score"
+  ],
+  [
+   "grin spreading across",
+   3,
+   38.42,
+   "upstream slop-score"
+  ],
+  [
+   "said voice dripping",
+   3,
+   37.46,
+   "upstream slop-score"
+  ],
+  [
+   "long shadows",
+   2,
+   36.94,
+   "upstream slop-score"
+  ],
+  [
+   "maybe maybe could",
+   3,
+   33.51,
+   "upstream slop-score"
+  ],
+  [
+   "felt chill run",
+   3,
+   32.18,
+   "upstream slop-score"
+  ],
+  [
+   "whatever lay ahead",
+   3,
+   32.16,
+   "upstream slop-score"
+  ],
+  [
+   "shiver ran spine",
+   3,
+   31.56,
+   "upstream slop-score"
+  ],
+  [
+   "one must first",
+   3,
+   30.17,
+   "upstream slop-score"
+  ],
+  [
+   "asked voice",
+   2,
+   29.69,
+   "upstream slop-score"
+  ],
+  [
+   "replied voice",
+   2,
+   29.02,
+   "upstream slop-score"
+  ],
+  [
+   "eyes gleaming",
+   2,
+   27.77,
+   "upstream slop-score"
+  ],
+  [
+   "eyes wide wonder",
+   3,
+   26.12,
+   "upstream slop-score"
+  ],
+  [
+   "eyes locked onto",
+   3,
+   24.76,
+   "upstream slop-score"
+  ],
+  [
+   "deep breath trying",
+   3,
+   24.44,
+   "upstream slop-score"
+  ],
+  [
+   "long term consequences",
+   3,
+   24.34,
+   "upstream slop-score"
+  ],
+  [
+   "heart pounding",
+   2,
+   22.23,
+   "upstream slop-score"
+  ],
+  [
+   "knew one thing",
+   3,
+   21.17,
+   "upstream slop-score"
+  ],
+  [
+   "voice tinged",
+   2,
+   21.16,
+   "upstream slop-score"
+  ],
+  [
+   "asked voice low",
+   3,
+   20.64,
+   "upstream slop-score"
+  ],
+  [
+   "eyes darting around",
+   3,
+   20.27,
+   "upstream slop-score"
+  ],
+  [
+   "voice firm",
+   2,
+   18.74,
+   "upstream slop-score"
+  ],
+  [
+   "gaze fixed",
+   2,
+   17.76,
+   "upstream slop-score"
+  ],
+  [
+   "spread like wildfire",
+   3,
+   17.63,
+   "upstream slop-score"
+  ],
+  [
+   "voice low",
+   2,
+   17.21,
+   "upstream slop-score"
+  ],
+  [
+   "room fell silent",
+   3,
+   16.55,
+   "upstream slop-score"
+  ],
+  [
+   "said voice",
+   2,
+   16.09,
+   "upstream slop-score"
+  ],
+  [
+   "deep within",
+   2,
+   15.25,
+   "upstream slop-score"
+  ],
+  [
+   "breath caught",
+   2,
+   15.04,
+   "upstream slop-score"
+  ],
+  [
+   "forward eyes",
+   2,
+   14.59,
+   "upstream slop-score"
+  ],
+  [
+   "voice like",
+   2,
+   14.16,
+   "upstream slop-score"
+  ],
+  [
+   "brow furrowed",
+   2,
+   13.96,
+   "upstream slop-score"
+  ],
+  [
+   "voice echoed",
+   2,
+   13.77,
+   "upstream slop-score"
+  ],
+  [
+   "spoke voice",
+   2,
+   13.56,
+   "upstream slop-score"
+  ],
+  [
+   "caught throat",
+   2,
+   13.35,
+   "upstream slop-score"
+  ],
+  [
+   "voice soft",
+   2,
+   12.94,
+   "upstream slop-score"
+  ],
+  [
+   "heart pounded",
+   2,
+   12.84,
+   "upstream slop-score"
+  ],
+  [
+   "called voice",
+   2,
+   12.82,
+   "upstream slop-score"
+  ],
+  [
+   "eyes darting",
+   2,
+   11.84,
+   "upstream slop-score"
+  ],
+  [
+   "eyes filled",
+   2,
+   11.3,
+   "upstream slop-score"
+  ],
+  [
+   "voice filled",
+   2,
+   11.19,
+   "upstream slop-score"
+  ],
+  [
+   "eyes widening",
+   2,
+   11.15,
+   "upstream slop-score"
+  ],
+  [
+   "leaned forward eyes",
+   3,
+   10.55,
+   "upstream slop-score"
+  ],
+  [
+   "eyes narrowing",
+   2,
+   10.06,
+   "upstream slop-score"
+  ],
+  [
+   "heart raced",
+   2,
+   9.92,
+   "upstream slop-score"
+  ],
+  [
+   "eyes widened surprise",
+   3,
+   9.49,
+   "upstream slop-score"
+  ],
+  [
+   "one thing certain",
+   3,
+   9.45,
+   "upstream slop-score"
+  ],
+  [
+   "could feel power",
+   3,
+   9.38,
+   "upstream slop-score"
+  ],
+  [
+   "heart racing",
+   2,
+   8.88,
+   "upstream slop-score"
+  ],
+  [
+   "eyes wide",
+   2,
+   8.82,
+   "upstream slop-score"
+  ],
+  [
+   "nodded eyes",
+   2,
+   8.48,
+   "upstream slop-score"
+  ],
+  [
+   "eyes fixed",
+   2,
+   7.84,
+   "upstream slop-score"
+  ],
+  [
+   "piercing blue eyes",
+   3,
+   7.58,
+   "upstream slop-score"
+  ],
+  [
+   "spread across face",
+   3,
+   7.54,
+   "upstream slop-score"
+  ],
+  [
+   "eyes locked",
+   2,
+   7.21,
+   "upstream slop-score"
+  ],
+  [
+   "step forward",
+   2,
+   6.06,
+   "upstream slop-score"
+  ],
+  [
+   "looked eyes",
+   2,
+   6.01,
+   "upstream slop-score"
+  ],
+  [
+   "heart skipped beat",
+   3,
+   5.36,
+   "upstream slop-score"
+  ],
+  [
+   "swallowed hard",
+   2,
+   5.24,
+   "upstream slop-score"
+  ],
+  [
+   "said trying sound",
+   3,
+   5.18,
+   "upstream slop-score"
+  ],
+  [
+   "one last time",
+   3,
+   5.15,
+   "upstream slop-score"
+  ],
+  [
+   "turned walked away",
+   3,
+   4.96,
+   "upstream slop-score"
+  ],
+  [
+   "took step forward",
+   3,
+   4.6,
+   "upstream slop-score"
+  ],
+  [
+   "caught eye",
+   2,
+   4.37,
+   "upstream slop-score"
+  ],
+  [
+   "knew would never",
+   3,
+   4.17,
+   "upstream slop-score"
+  ],
+  [
+   "long could remember",
+   3,
+   4.01,
+   "upstream slop-score"
+  ],
+  [
+   "eyes widened",
+   2,
+   3.79,
+   "upstream slop-score"
+  ],
+  [
+   "took deep",
+   2,
+   3.73,
+   "upstream slop-score"
+  ],
+  [
+   "would find way",
+   3,
+   3.64,
+   "upstream slop-score"
+  ],
+  [
+   "took step closer",
+   3,
+   3.64,
+   "upstream slop-score"
+  ],
+  [
+   "taking deep breath",
+   3,
+   3.62,
+   "upstream slop-score"
+  ],
+  [
+   "could find way",
+   3,
+   3.61,
+   "upstream slop-score"
+  ],
+  [
+   "looked around room",
+   3,
+   3.57,
+   "upstream slop-score"
+  ],
+  [
+   "eyes narrowed",
+   2,
+   3.46,
+   "upstream slop-score"
+  ],
+  [
+   "raised hand",
+   2,
+   3.44,
+   "upstream slop-score"
+  ],
+  [
+   "closed eyes",
+   2,
+   3.25,
+   "upstream slop-score"
+  ],
+  [
+   "deep breath",
+   2,
+   3.19,
+   "upstream slop-score"
+  ],
+  [
+   "said eyes",
+   2,
+   3.19,
+   "upstream slop-score"
+  ],
+  [
+   "took step",
+   2,
+   2.95,
+   "upstream slop-score"
+  ],
+  [
+   "took deep breath",
+   3,
+   2.67,
+   "upstream slop-score"
+  ],
+  [
+   "opened eyes",
+   2,
+   2.64,
+   "upstream slop-score"
+  ],
+  [
+   "leaned back chair",
+   3,
+   2.4,
+   "upstream slop-score"
+  ],
+  [
+   "would never forget",
+   3,
+   2.35,
+   "upstream slop-score"
+  ],
+  [
+   "seen anything like",
+   3,
+   2.26,
+   "upstream slop-score"
+  ],
+  [
+   "took step back",
+   3,
+   2.1,
+   "upstream slop-score"
+  ],
+  [
+   "door swung open",
+   3,
+   1.9,
+   "upstream slop-score"
+  ],
+  [
+   "never seen anything",
+   3,
+   1.78,
+   "upstream slop-score"
+  ],
+  [
+   "made way back",
+   3,
+   1.54,
+   "upstream slop-score"
+  ],
+  [
+   "cleared throat",
+   2,
+   1.45,
+   "upstream slop-score"
+  ],
+  [
+   "shook head",
+   2,
+   0.61,
+   "upstream slop-score"
+  ]
+ ],
+ "words": [
+  [
+   "schizophrenia",
+   797.49
+  ],
+  [
+   "alaric",
+   647.29
+  ],
+  [
+   "xylos",
+   480.82
+  ],
+  [
+   "necromancer",
+   479.06
+  ],
+  [
+   "theron",
+   461.06
+  ],
+  [
+   "chronos",
+   434.33
+  ],
+  [
+   "eldoria",
+   364.57
+  ],
+  [
+   "dampness",
+   346.42
+  ],
+  [
+   "eldritch",
+   317.7
+  ],
+  [
+   "veridia",
+   305.79
+  ],
+  [
+   "aethelgard",
+   301.76
+  ],
+  [
+   "drumbeat",
+   297.7
+  ],
+  [
+   "devourer",
+   266.44
+  ],
+  [
+   "cultists",
+   261.09
+  ],
+  [
+   "sigil",
+   256.54
+  ],
+  [
+   "oakhaven",
+   240.65
+  ],
+  [
+   "sigils",
+   223.64
+  ],
+  [
+   "algorithmic",
+   215.39
+  ],
+  [
+   "trepidation",
+   209.47
+  ],
+  [
+   "optimize",
+   209.3
+  ],
+  [
+   "advancements",
+   196.59
+  ],
+  [
+   "volkov",
+   195.4
+  ],
+  [
+   "valerius",
+   185.53
+  ],
+  [
+   "blending",
+   166.47
+  ],
+  [
+   "ignis",
+   161.49
+  ],
+  [
+   "adaptable",
+   159.81
+  ],
+  [
+   "labyrinthine",
+   159.42
+  ],
+  [
+   "explores",
+   158.73
+  ],
+  [
+   "anya",
+   158.19
+  ],
+  [
+   "quietude",
+   156.11
+  ],
+  [
+   "incantation",
+   153.65
+  ],
+  [
+   "adaptability",
+   152.34
+  ],
+  [
+   "burdens",
+   149.61
+  ],
+  [
+   "chillingly",
+   149.12
+  ],
+  [
+   "chillingly",
+   149.12
+  ],
+  [
+   "unburdened",
+   149.01
+  ],
+  [
+   "unburdened",
+   149.01
+  ],
+  [
+   "mages",
+   147.95
+  ],
+  [
+   "dissecting",
+   147.28
+  ],
+  [
+   "pixelated",
+   146.54
+  ],
+  [
+   "ensures",
+   145.84
+  ],
+  [
+   "tomes",
+   143.78
+  ],
+  [
+   "multifaceted",
+   143.78
+  ],
+  [
+   "arcane",
+   143.34
+  ],
+  [
+   "glyphs",
+   141.99
+  ],
+  [
+   "intricacies",
+   141.24
+  ],
+  [
+   "unparalleled",
+   138.35
+  ],
+  [
+   "biometric",
+   137.45
+  ],
+  [
+   "initiatives",
+   134.54
+  ],
+  [
+   "townsfolk",
+   133.77
+  ],
+  [
+   "veridian",
+   133.77
+  ],
+  [
+   "thrives",
+   133.32
+  ],
+  [
+   "behaviors",
+   132.64
+  ],
+  [
+   "borin",
+   131.73
+  ],
+  [
+   "reshaping",
+   126.88
+  ],
+  [
+   "reinforcing",
+   126.49
+  ],
+  [
+   "interplay",
+   126.09
+  ],
+  [
+   "hierarchies",
+   124.5
+  ],
+  [
+   "aethelred",
+   124.37
+  ],
+  [
+   "delved",
+   124.05
+  ],
+  [
+   "interconnectedness",
+   122.97
+  ],
+  [
+   "hargrove",
+   121.94
+  ],
+  [
+   "biases",
+   121.58
+  ],
+  [
+   "grimoire",
+   120.81
+  ],
+  [
+   "lira",
+   118.93
+  ],
+  [
+   "measurable",
+   117.55
+  ],
+  [
+   "personalized",
+   117.17
+  ],
+  [
+   "transcends",
+   117.15
+  ],
+  [
+   "exhilaration",
+   116.84
+  ],
+  [
+   "marveled",
+   116.15
+  ],
+  [
+   "highlighting",
+   115.74
+  ],
+  [
+   "smirked",
+   114.97
+  ],
+  [
+   "hivemind",
+   114.13
+  ],
+  [
+   "emanated",
+   113.87
+  ],
+  [
+   "prioritized",
+   111.2
+  ],
+  [
+   "incantations",
+   110.85
+  ],
+  [
+   "grapple",
+   110.15
+  ],
+  [
+   "sustainability",
+   110.07
+  ],
+  [
+   "fostering",
+   109.71
+  ],
+  [
+   "refine",
+   108.82
+  ],
+  [
+   "encompassing",
+   108.73
+  ],
+  [
+   "conversely",
+   108.7
+  ],
+  [
+   "undercurrent",
+   108.69
+  ],
+  [
+   "stewardship",
+   108.56
+  ],
+  [
+   "purred",
+   107.98
+  ],
+  [
+   "transformative",
+   106.91
+  ],
+  [
+   "disconnection",
+   105.58
+  ],
+  [
+   "manifests",
+   105.0
+  ],
+  [
+   "unfurling",
+   104.18
+  ],
+  [
+   "foundational",
+   103.09
+  ],
+  [
+   "petrova",
+   102.72
+  ],
+  [
+   "geopolitical",
+   102.2
+  ],
+  [
+   "pandemic",
+   102.05
+  ],
+  [
+   "simplistic",
+   100.88
+  ],
+  [
+   "minimizing",
+   100.69
+  ],
+  [
+   "whirred",
+   100.01
+  ],
+  [
+   "cornerstone",
+   99.89
+  ],
+  [
+   "guttered",
+   99.46
+  ],
+  [
+   "luminescent",
+   99.39
+  ],
+  [
+   "materializing",
+   99.26
+  ],
+  [
+   "aligning",
+   98.85
+  ],
+  [
+   "endures",
+   97.78
+  ],
+  [
+   "paradoxically",
+   97.56
+  ],
+  [
+   "cityscape",
+   97.02
+  ],
+  [
+   "windowpane",
+   95.07
+  ],
+  [
+   "lifeblood",
+   94.67
+  ],
+  [
+   "optimizing",
+   94.09
+  ],
+  [
+   "recalibration",
+   94.05
+  ],
+  [
+   "mingling",
+   93.1
+  ],
+  [
+   "paradoxical",
+   92.25
+  ],
+  [
+   "unshakeable",
+   91.37
+  ],
+  [
+   "eroding",
+   91.34
+  ],
+  [
+   "verdant",
+   90.82
+  ],
+  [
+   "transforms",
+   90.68
+  ],
+  [
+   "rostova",
+   90.45
+  ],
+  [
+   "empathetic",
+   90.29
+  ],
+  [
+   "frameworks",
+   89.81
+  ],
+  [
+   "penhaligon",
+   89.09
+  ],
+  [
+   "coalescing",
+   88.51
+  ],
+  [
+   "archmage",
+   87.92
+  ],
+  [
+   "mitigate",
+   87.01
+  ],
+  [
+   "fostered",
+   86.85
+  ],
+  [
+   "tendril",
+   85.76
+  ],
+  [
+   "impermanence",
+   84.71
+  ],
+  [
+   "locket",
+   83.53
+  ],
+  [
+   "resonates",
+   83.23
+  ],
+  [
+   "monolithic",
+   82.57
+  ],
+  [
+   "erode",
+   82.33
+  ],
+  [
+   "prioritizing",
+   82.32
+  ],
+  [
+   "confluence",
+   81.52
+  ],
+  [
+   "misunderstandings",
+   81.48
+  ],
+  [
+   "delve",
+   81.23
+  ],
+  [
+   "igniting",
+   81.03
+  ],
+  [
+   "leveraging",
+   80.87
+  ],
+  [
+   "delving",
+   80.61
+  ],
+  [
+   "quantifiable",
+   80.49
+  ],
+  [
+   "utilizing",
+   79.71
+  ],
+  [
+   "emphasizes",
+   79.58
+  ],
+  [
+   "revolutionized",
+   79.49
+  ],
+  [
+   "chronal",
+   79.12
+  ],
+  [
+   "prioritizes",
+   77.88
+  ],
+  [
+   "equitable",
+   77.8
+  ],
+  [
+   "grimoires",
+   77.45
+  ],
+  [
+   "underbrush",
+   76.98
+  ],
+  [
+   "aldric",
+   76.33
+  ],
+  [
+   "festered",
+   75.52
+  ],
+  [
+   "marveling",
+   73.71
+  ],
+  [
+   "clockmaker",
+   73.46
+  ],
+  [
+   "seraphina",
+   73.24
+  ],
+  [
+   "interdimensional",
+   73.0
+  ],
+  [
+   "performative",
+   72.94
+  ],
+  [
+   "dilemmas",
+   72.68
+  ],
+  [
+   "marginalized",
+   70.73
+  ],
+  [
+   "amplifies",
+   70.1
+  ],
+  [
+   "inadequacy",
+   68.97
+  ],
+  [
+   "interjected",
+   68.93
+  ],
+  [
+   "ethically",
+   67.75
+  ],
+  [
+   "woodsmoke",
+   67.17
+  ],
+  [
+   "masterclass",
+   66.92
+  ],
+  [
+   "furthermore",
+   66.49
+  ],
+  [
+   "innovate",
+   66.28
+  ],
+  [
+   "wheezed",
+   66.23
+  ],
+  [
+   "solidifying",
+   65.86
+  ],
+  [
+   "underscores",
+   65.49
+  ],
+  [
+   "disrupts",
+   65.38
+  ],
+  [
+   "sustains",
+   65.22
+  ],
+  [
+   "aethelburg",
+   64.72
+  ],
+  [
+   "chitinous",
+   64.35
+  ],
+  [
+   "solidify",
+   63.89
+  ],
+  [
+   "warred",
+   63.1
+  ],
+  [
+   "cloying",
+   62.6
+  ],
+  [
+   "brushstroke",
+   62.25
+  ],
+  [
+   "pored",
+   61.88
+  ],
+  [
+   "cultivating",
+   60.83
+  ],
+  [
+   "datapad",
+   60.66
+  ],
+  [
+   "obsolescence",
+   59.77
+  ],
+  [
+   "croaked",
+   59.61
+  ],
+  [
+   "sneered",
+   56.58
+  ],
+  [
+   "crucially",
+   55.98
+  ],
+  [
+   "unspooled",
+   55.69
+  ],
+  [
+   "viewport",
+   54.48
+  ],
+  [
+   "lamplight",
+   54.25
+  ],
+  [
+   "indispensable",
+   54.12
+  ],
+  [
+   "ichor",
+   53.95
+  ],
+  [
+   "veyra",
+   53.41
+  ],
+  [
+   "insights",
+   50.68
+  ],
+  [
+   "hulking",
+   49.23
+  ],
+  [
+   "logistical",
+   47.04
+  ],
+  [
+   "lysander",
+   46.58
+  ],
+  [
+   "enhance",
+   44.3
+  ],
+  [
+   "chirped",
+   42.84
+  ],
+  [
+   "doorframe",
+   42.11
+  ],
+  [
+   "yellowed",
+   39.71
+  ],
+  [
+   "streetlamps",
+   38.65
+  ],
+  [
+   "cohesion",
+   35.35
+  ],
+  [
+   "torchlight",
+   34.97
+  ],
+  [
+   "coiling",
+   34.65
+  ],
+  [
+   "pivoted",
+   34.27
+  ],
+  [
+   "calloused",
+   33.26
+  ],
+  [
+   "contexts",
+   31.68
+  ],
+  [
+   "agonizingly",
+   28.75
+  ],
+  [
+   "emanate",
+   26.78
+  ],
+  [
+   "clinking",
+   23.8
+  ],
+  [
+   "writhe",
+   23.4
+  ],
+  [
+   "deceptively",
+   23.22
+  ],
+  [
+   "enveloped",
+   23.07
+  ],
+  [
+   "emphasizing",
+   22.23
+  ],
+  [
+   "firelight",
+   20.89
+  ],
+  [
+   "glimmering",
+   20.43
+  ],
+  [
+   "ominously",
+   20.21
+  ],
+  [
+   "peephole",
+   19.2
+  ],
+  [
+   "pinpricks",
+   19.08
+  ],
+  [
+   "paramount",
+   16.58
+  ],
+  [
+   "viewscreen",
+   16.57
+  ],
+  [
+   "doppelg",
+   16.06
+  ],
+  [
+   "cobblestone",
+   15.96
+  ],
+  [
+   "lurked",
+   14.94
+  ],
+  [
+   "prickling",
+   14.78
+  ],
+  [
+   "alleyway",
+   14.68
+  ],
+  [
+   "blurted",
+   14.68
+  ],
+  [
+   "lingered",
+   14.62
+  ],
+  [
+   "jolt",
+   14.23
+  ],
+  [
+   "shrouded",
+   14.2
+  ],
+  [
+   "savoring",
+   14.06
+  ],
+  [
+   "hovered",
+   13.9
+  ],
+  [
+   "tinged",
+   13.84
+  ],
+  [
+   "arced",
+   13.79
+  ],
+  [
+   "eerie",
+   13.78
+  ],
+  [
+   "pivotal",
+   13.65
+  ],
+  [
+   "sickly",
+   13.62
+  ],
+  [
+   "unreadable",
+   13.56
+  ],
+  [
+   "deafening",
+   13.53
+  ],
+  [
+   "bewilderment",
+   13.43
+  ],
+  [
+   "clattering",
+   13.33
+  ],
+  [
+   "reeked",
+   13.32
+  ],
+  [
+   "sprawling",
+   13.28
+  ],
+  [
+   "tattered",
+   13.02
+  ],
+  [
+   "strategic",
+   12.94
+  ],
+  [
+   "lanced",
+   12.91
+  ],
+  [
+   "raged",
+   12.9
+  ],
+  [
+   "grumbled",
+   12.7
+  ],
+  [
+   "faltered",
+   12.65
+  ],
+  [
+   "cloaked",
+   12.49
+  ],
+  [
+   "flickering",
+   12.36
+  ],
+  [
+   "conspiratorial",
+   12.33
+  ],
+  [
+   "writhed",
+   12.27
+  ],
+  [
+   "bewildered",
+   12.21
+  ],
+  [
+   "shivers",
+   12.19
+  ],
+  [
+   "scribbled",
+   12.05
+  ],
+  [
+   "whispering",
+   12.05
+  ],
+  [
+   "grizzled",
+   12.02
+  ],
+  [
+   "creaking",
+   11.95
+  ],
+  [
+   "flinched",
+   11.89
+  ],
+  [
+   "inextricably",
+   11.84
+  ],
+  [
+   "precariously",
+   11.75
+  ],
+  [
+   "thunderous",
+   11.75
+  ],
+  [
+   "evelyn",
+   11.72
+  ],
+  [
+   "diminish",
+   11.72
+  ],
+  [
+   "crackled",
+   11.59
+  ],
+  [
+   "strategically",
+   11.53
+  ],
+  [
+   "soundlessly",
+   11.47
+  ],
+  [
+   "yelped",
+   11.35
+  ],
+  [
+   "rippling",
+   11.28
+  ],
+  [
+   "slithered",
+   11.2
+  ],
+  [
+   "unblinking",
+   10.71
+  ],
+  [
+   "expanse",
+   10.68
+  ],
+  [
+   "searing",
+   10.64
+  ],
+  [
+   "flickered",
+   10.4
+  ],
+  [
+   "clawing",
+   10.17
+  ],
+  [
+   "retrieved",
+   9.67
+  ],
+  [
+   "raspy",
+   9.66
+  ],
+  [
+   "amelia",
+   9.56
+  ],
+  [
+   "blared",
+   9.44
+  ],
+  [
+   "eerily",
+   9.28
+  ],
+  [
+   "wavering",
+   9.03
+  ],
+  [
+   "glimmered",
+   8.99
+  ],
+  [
+   "shrieked",
+   8.97
+  ],
+  [
+   "nightshade",
+   8.96
+  ],
+  [
+   "glimmer",
+   8.9
+  ],
+  [
+   "glinting",
+   8.81
+  ],
+  [
+   "crackle",
+   8.76
+  ],
+  [
+   "whisper",
+   8.75
+  ],
+  [
+   "faintly",
+   8.73
+  ],
+  [
+   "jagged",
+   8.65
+  ],
+  [
+   "clang",
+   8.63
+  ],
+  [
+   "moreover",
+   8.63
+  ],
+  [
+   "gruff",
+   8.62
+  ],
+  [
+   "whirring",
+   8.53
+  ],
+  [
+   "mumbled",
+   8.46
+  ],
+  [
+   "prickled",
+   8.45
+  ],
+  [
+   "itched",
+   8.44
+  ],
+  [
+   "snarled",
+   8.39
+  ],
+  [
+   "pang",
+   8.19
+  ],
+  [
+   "bellowed",
+   8.18
+  ],
+  [
+   "ticked",
+   8.05
+  ],
+  [
+   "cradling",
+   7.99
+  ],
+  [
+   "blinding",
+   7.95
+  ],
+  [
+   "jolted",
+   7.93
+  ],
+  [
+   "ethan",
+   7.92
+  ],
+  [
+   "disheveled",
+   7.91
+  ],
+  [
+   "gravelly",
+   7.9
+  ],
+  [
+   "coursed",
+   7.76
+  ],
+  [
+   "glow",
+   7.73
+  ],
+  [
+   "hushed",
+   7.72
+  ],
+  [
+   "rooted",
+   7.64
+  ],
+  [
+   "froze",
+   7.63
+  ],
+  [
+   "howled",
+   7.54
+  ],
+  [
+   "gleaming",
+   7.53
+  ],
+  [
+   "crackling",
+   7.44
+  ],
+  [
+   "coursing",
+   7.37
+  ],
+  [
+   "surged",
+   7.2
+  ],
+  [
+   "surged",
+   7.2
+  ],
+  [
+   "reeling",
+   7.15
+  ],
+  [
+   "groaned",
+   7.11
+  ],
+  [
+   "rustling",
+   7.11
+  ],
+  [
+   "trembled",
+   7.05
+  ],
+  [
+   "wavered",
+   7.0
+  ],
+  [
+   "clinked",
+   6.98
+  ],
+  [
+   "rustled",
+   6.97
+  ],
+  [
+   "disbelief",
+   6.95
+  ],
+  [
+   "crucial",
+   6.88
+  ],
+  [
+   "reliant",
+   6.88
+  ],
+  [
+   "growl",
+   6.83
+  ],
+  [
+   "acrid",
+   6.8
+  ],
+  [
+   "mused",
+   6.78
+  ],
+  [
+   "cascaded",
+   6.64
+  ],
+  [
+   "glowed",
+   6.61
+  ],
+  [
+   "hissed",
+   6.55
+  ],
+  [
+   "echoed",
+   6.45
+  ],
+  [
+   "hinges",
+   6.42
+  ],
+  [
+   "paled",
+   6.4
+  ],
+  [
+   "throbbed",
+   6.36
+  ],
+  [
+   "instinctively",
+   6.35
+  ],
+  [
+   "reverberated",
+   6.35
+  ],
+  [
+   "glint",
+   6.25
+  ],
+  [
+   "chuckled",
+   6.12
+  ],
+  [
+   "boomed",
+   6.1
+  ],
+  [
+   "murmur",
+   6.0
+  ],
+  [
+   "shadows",
+   5.86
+  ],
+  [
+   "clanged",
+   5.81
+  ],
+  [
+   "lunged",
+   5.76
+  ],
+  [
+   "clattered",
+   5.73
+  ],
+  [
+   "faint",
+   5.62
+  ],
+  [
+   "rumbling",
+   5.58
+  ],
+  [
+   "silhouetted",
+   5.57
+  ],
+  [
+   "transfixed",
+   5.55
+  ],
+  [
+   "shiver",
+   5.54
+  ],
+  [
+   "clawed",
+   5.48
+  ],
+  [
+   "crinkled",
+   5.48
+  ],
+  [
+   "gnarled",
+   5.48
+  ],
+  [
+   "inky",
+   5.45
+  ],
+  [
+   "piqued",
+   5.3
+  ],
+  [
+   "skittered",
+   5.3
+  ],
+  [
+   "softened",
+   5.24
+  ],
+  [
+   "trembling",
+   5.15
+  ],
+  [
+   "clutching",
+   5.11
+  ],
+  [
+   "beeped",
+   5.09
+  ],
+  [
+   "gazes",
+   5.05
+  ],
+  [
+   "stumbled",
+   4.93
+  ],
+  [
+   "reeled",
+   4.87
+  ],
+  [
+   "loomed",
+   4.84
+  ],
+  [
+   "audible",
+   4.65
+  ],
+  [
+   "blinked",
+   4.65
+  ],
+  [
+   "creaked",
+   4.51
+  ],
+  [
+   "thud",
+   4.48
+  ],
+  [
+   "snaked",
+   4.4
+  ],
+  [
+   "twinkling",
+   4.39
+  ],
+  [
+   "shuddered",
+   4.32
+  ],
+  [
+   "thudding",
+   4.25
+  ],
+  [
+   "screeched",
+   4.24
+  ],
+  [
+   "slicked",
+   4.23
+  ],
+  [
+   "barked",
+   4.15
+  ],
+  [
+   "glistening",
+   4.11
+  ],
+  [
+   "unmoving",
+   4.11
+  ],
+  [
+   "dimly",
+   4.0
+  ],
+  [
+   "sprinted",
+   3.94
+  ],
+  [
+   "crumpled",
+   3.93
+  ],
+  [
+   "faded",
+   3.93
+  ],
+  [
+   "steadying",
+   3.85
+  ],
+  [
+   "clutched",
+   3.76
+  ],
+  [
+   "tilted",
+   3.74
+  ],
+  [
+   "rumbled",
+   3.73
+  ],
+  [
+   "billowing",
+   3.62
+  ],
+  [
+   "huddled",
+   3.58
+  ],
+  [
+   "amid",
+   3.56
+  ],
+  [
+   "gesturing",
+   3.54
+  ],
+  [
+   "pounding",
+   3.38
+  ],
+  [
+   "steepled",
+   3.36
+  ],
+  [
+   "furrowed",
+   3.33
+  ],
+  [
+   "yawned",
+   3.33
+  ],
+  [
+   "darting",
+   3.31
+  ],
+  [
+   "squinting",
+   3.3
+  ],
+  [
+   "ashen",
+   3.29
+  ],
+  [
+   "gasped",
+   3.28
+  ],
+  [
+   "rasping",
+   3.28
+  ],
+  [
+   "glances",
+   3.22
+  ],
+  [
+   "swirled",
+   3.17
+  ],
+  [
+   "gestured",
+   3.14
+  ],
+  [
+   "whispered",
+   3.12
+  ],
+  [
+   "glinted",
+   3.09
+  ],
+  [
+   "fluttered",
+   3.03
+  ],
+  [
+   "conclusion",
+   3.02
+  ],
+  [
+   "cradled",
+   3.01
+  ],
+  [
+   "gleamed",
+   2.95
+  ],
+  [
+   "hoarse",
+   2.95
+  ],
+  [
+   "quickened",
+   2.83
+  ],
+  [
+   "narrowing",
+   2.82
+  ],
+  [
+   "shivered",
+   2.81
+  ],
+  [
+   "squinted",
+   2.81
+  ],
+  [
+   "impassive",
+   2.77
+  ],
+  [
+   "growled",
+   2.74
+  ],
+  [
+   "hesitated",
+   2.73
+  ],
+  [
+   "twitched",
+   2.61
+  ],
+  [
+   "knelt",
+   2.6
+  ],
+  [
+   "sparkled",
+   2.59
+  ],
+  [
+   "hesitantly",
+   2.55
+  ],
+  [
+   "roared",
+   2.46
+  ],
+  [
+   "glided",
+   2.42
+  ],
+  [
+   "streaked",
+   2.41
+  ],
+  [
+   "trudged",
+   2.37
+  ],
+  [
+   "hunched",
+   2.34
+  ],
+  [
+   "murmured",
+   2.31
+  ],
+  [
+   "contorted",
+   2.28
+  ],
+  [
+   "tugged",
+   2.25
+  ],
+  [
+   "sprawled",
+   2.15
+  ],
+  [
+   "winced",
+   2.14
+  ],
+  [
+   "widened",
+   2.1
+  ],
+  [
+   "raced",
+   2.09
+  ],
+  [
+   "muttered",
+   2.05
+  ],
+  [
+   "slumped",
+   2.04
+  ],
+  [
+   "scurried",
+   2.03
+  ],
+  [
+   "gaze",
+   1.97
+  ],
+  [
+   "tightened",
+   1.93
+  ],
+  [
+   "snorted",
+   1.9
+  ],
+  [
+   "quivered",
+   1.86
+  ],
+  [
+   "cautiously",
+   1.83
+  ],
+  [
+   "muffled",
+   1.8
+  ],
+  [
+   "lurched",
+   1.77
+  ],
+  [
+   "blankly",
+   1.72
+  ],
+  [
+   "crept",
+   1.71
+  ],
+  [
+   "grunted",
+   1.69
+  ],
+  [
+   "crouched",
+   1.6
+  ],
+  [
+   "ached",
+   1.59
+  ],
+  [
+   "gripped",
+   1.55
+  ],
+  [
+   "brow",
+   1.53
+  ]
+ ],
+ "patterns": [
+  {
+   "id": "banter_lines",
+   "label": "Stock banter lines (\"took you long enough\", \"I don't bite\u2026 much\")",
+   "regex": "\\b(?:well, well(?:, well)?|look who(?:'s| is| finally)|took you long enough|didn't (?:anyone|your mother|they) ever tell you|you're (?:cute|adorable) when you|like what you see|don't get any ideas|i don't bite|you wound me|how (?:very )?(?:bold|brave|daring) of you|playing hard to get|is that so\\?|careful now|easy there)"
+  },
+  {
+   "id": "playful_smirk",
+   "label": "\"a playful/knowing smirk\"",
+   "regex": "\\b(?:a|with a|her|his) (?:playful|teasing|mischievous|wry|lopsided|crooked|amused|devilish|sly) (?:smirk|grin|smile|glint|twinkle|lilt)"
+  },
+  {
+   "id": "for_a_moment",
+   "label": "\"for a moment / a heartbeat\"",
+   "regex": "\\bfor (?:a|one) (?:moment|heartbeat|breath|beat|second|long moment)\\b"
+  },
+  {
+   "id": "something_akin",
+   "label": "\"something akin to / something like\"",
+   "regex": "\\bsomething (?:akin to|between|close to|almost like)\\b"
+  },
+  {
+   "id": "head_tilt",
+   "label": "Head tilt",
+   "regex": "\\b(?:tilts|tilted|tilting|cocks|cocked|cocking) (?:her|his|their) head\\b"
+  },
+  {
+   "id": "couldnt_help",
+   "label": "\"couldn't help but\"",
+   "regex": "\\b(?:couldn't|could not|can't|cannot) help but\\b"
+  },
+  {
+   "id": "first_time_in",
+   "label": "\"for the first time in years\"",
+   "regex": "\\bfor the first time in (?:a long time|years|forever|what felt like|ages|decades|centuries)\\b"
+  },
+  {
+   "id": "despite_herself",
+   "label": "\"despite herself\"",
+   "regex": "\\bdespite (?:herself|himself|themselves|myself)\\b"
+  },
+  {
+   "id": "litotes",
+   "label": "\"not unkind / not unpleasant\"",
+   "regex": "\\bnot (?:unkind|unpleasant|unwelcome|entirely unpleasant|entirely unwelcome)\\b"
+  },
+  {
+   "id": "a_beat",
+   "label": "Beat sentence (\"A beat.\" \"Silence.\")",
+   "regex": "(?:^|[.!?]\\s+)(?:A beat|Silence|Nothing)\\."
+  },
+  {
+   "id": "time_stopped",
+   "label": "\"time seemed to stop\"",
+   "regex": "\\b(?:time|the world|everything|the room) (?:seemed to |itself )?(?:slowed|stopped|stood still|narrowed|fell away|tilted|held its breath|shrank)\\b"
+  },
+  {
+   "id": "something_shifted",
+   "label": "\"something shifted\"",
+   "regex": "\\bsomething (?:shifted|changed|cracked|broke|stirred|snapped|clicked)\\b"
+  },
+  {
+   "id": "ss:a wave of",
+   "label": "\"a wave of\"",
+   "regex": "\\ba\\s+wave\\s+of\\b"
+  },
+  {
+   "id": "ss:moth to a flame",
+   "label": "\"moth to a flame\"",
+   "regex": "\\bmoth\\s+to\\s+a\\s+flame\\b"
+  },
+  {
+   "id": "ss:like an electric shock",
+   "label": "\"like an electric shock\"",
+   "regex": "\\blike\\s+an\\s+electric\\s+shock\\b"
+  },
+  {
+   "id": "ss:siren call",
+   "label": "\"siren call\"",
+   "regex": "\\bsiren\\s+call\\b"
+  },
+  {
+   "id": "ss:soothing balm",
+   "label": "\"soothing balm\"",
+   "regex": "\\bsoothing\\s+balm\\b"
+  },
+  {
+   "id": "ss:hung heavy in the air",
+   "label": "\"hung heavy in the air\"",
+   "regex": "\\bhung\\s+heavy\\s+in\\s+the\\s+air\\b"
+  },
+  {
+   "id": "ss:threatens to consume",
+   "label": "\"threatens to consume\"",
+   "regex": "\\bthreatens\\s+to\\s+consume\\b"
+  },
+  {
+   "id": "ss:orchestra of",
+   "label": "\"orchestra of\"",
+   "regex": "\\borchestra\\s+of\\b"
+  },
+  {
+   "id": "ss:pupils blown wide",
+   "label": "\"pupils blown wide\"",
+   "regex": "\\bpupils\\s+blown\\s+wide\\b"
+  },
+  {
+   "id": "ss:ministrations",
+   "label": "\"ministrations\"",
+   "regex": "\\bministrations\\b"
+  },
+  {
+   "id": "ss:orbs",
+   "label": "\"orbs\"",
+   "regex": "\\borbs\\b"
+  },
+  {
+   "id": "ss:delicate fingers",
+   "label": "\"delicate fingers\"",
+   "regex": "\\bdelicate\\s+fingers\\b"
+  },
+  {
+   "id": "ss:lithe form",
+   "label": "\"lithe form\"",
+   "regex": "\\blithe\\s+form\\b"
+  },
+  {
+   "id": "ss:ethereal beauty",
+   "label": "\"ethereal beauty\"",
+   "regex": "\\bethereal\\s+beauty\\b"
+  },
+  {
+   "id": "ss:alabaster skin",
+   "label": "\"alabaster skin\"",
+   "regex": "\\balabaster\\s+skin\\b"
+  },
+  {
+   "id": "ss:tresses",
+   "label": "\"tresses\"",
+   "regex": "\\btresses\\b"
+  },
+  {
+   "id": "ss:gossamer",
+   "label": "\"gossamer\"",
+   "regex": "\\bgossamer\\b"
+  },
+  {
+   "id": "ss:rivulets of",
+   "label": "\"rivulets of\"",
+   "regex": "\\brivulets\\s+of\\b"
+  },
+  {
+   "id": "ss:porcelain skin",
+   "label": "\"porcelain skin\"",
+   "regex": "\\bporcelain\\s+skin\\b"
+  },
+  {
+   "id": "ss:cascading down her",
+   "label": "\"cascading down her\"",
+   "regex": "\\bcascading\\s+down\\s+her\\b"
+  },
+  {
+   "id": "ss:cascading down his",
+   "label": "\"cascading down his\"",
+   "regex": "\\bcascading\\s+down\\s+his\\b"
+  },
+  {
+   "id": "ss:found herself",
+   "label": "\"found herself\"",
+   "regex": "\\bfound\\s+herself\\b"
+  },
+  {
+   "id": "ss:found himself",
+   "label": "\"found himself\"",
+   "regex": "\\bfound\\s+himself\\b"
+  },
+  {
+   "id": "ss:in a way that was almost",
+   "label": "\"in a way that was almost\"",
+   "regex": "\\bin\\s+a\\s+way\\s+that\\s+was\\s+almost\\b"
+  },
+  {
+   "id": "ss:felt a sense of",
+   "label": "\"felt a sense of\"",
+   "regex": "\\bfelt\\s+a\\s+sense\\s+of\\b"
+  },
+  {
+   "id": "ss:half-lidded eyes",
+   "label": "\"half-lidded eyes\"",
+   "regex": "\\bhalf\\-lidded\\s+eyes\\b"
+  },
+  {
+   "id": "ss:stars burst behind her eyes",
+   "label": "\"stars burst behind her eyes\"",
+   "regex": "\\bstars\\s+burst\\s+behind\\s+her\\s+eyes\\b"
+  },
+  {
+   "id": "ss:evident in her eyes",
+   "label": "\"evident in her eyes\"",
+   "regex": "\\bevident\\s+in\\s+her\\s+eyes\\b"
+  },
+  {
+   "id": "ss:evident in his eyes",
+   "label": "\"evident in his eyes\"",
+   "regex": "\\bevident\\s+in\\s+his\\s+eyes\\b"
+  },
+  {
+   "id": "ss:a smile that didn't reach",
+   "label": "\"a smile that didn't reach\"",
+   "regex": "\\ba\\s+smile\\s+that\\s+didn't\\s+reach\\b"
+  },
+  {
+   "id": "ss:crinkle at the corners",
+   "label": "\"crinkle at the corners\"",
+   "regex": "\\bcrinkle\\s+at\\s+the\\s+corners\\b"
+  },
+  {
+   "id": "ss:chuckles darkly",
+   "label": "\"chuckles darkly\"",
+   "regex": "\\bchuckles\\s+darkly\\b"
+  },
+  {
+   "id": "ss:purred seductively",
+   "label": "\"purred seductively\"",
+   "regex": "\\bpurred\\s+seductively\\b"
+  },
+  {
+   "id": "ss:softly but firmly",
+   "label": "\"softly but firmly\"",
+   "regex": "\\bsoftly\\s+but\\s+firmly\\b"
+  },
+  {
+   "id": "ss:knuckles turning white",
+   "label": "\"knuckles turning white\"",
+   "regex": "\\bknuckles\\s+turning\\s+white\\b"
+  },
+  {
+   "id": "ss:adam's apple bobbing",
+   "label": "\"adam's apple bobbing\"",
+   "regex": "\\badam's\\s+apple\\s+bobbing\\b"
+  },
+  {
+   "id": "ss:fidgeting with the hem",
+   "label": "\"fidgeting with the hem\"",
+   "regex": "\\bfidgeting\\s+with\\s+the\\s+hem\\b"
+  },
+  {
+   "id": "ss:picking at the hem",
+   "label": "\"picking at the hem\"",
+   "regex": "\\bpicking\\s+at\\s+the\\s+hem\\b"
+  },
+  {
+   "id": "ss:tucked a strand of hair behind",
+   "label": "\"tucked a strand of hair behind\"",
+   "regex": "\\btucked\\s+a\\s+strand\\s+of\\s+hair\\s+behind\\b"
+  },
+  {
+   "id": "ss:bit her lower lip",
+   "label": "\"bit her lower lip\"",
+   "regex": "\\bbit\\s+her\\s+lower\\s+lip\\b"
+  },
+  {
+   "id": "ss:heart aching with",
+   "label": "\"heart aching with\"",
+   "regex": "\\bheart\\s+aching\\s+with\\b"
+  },
+  {
+   "id": "ss:a mix of emotions",
+   "label": "\"a mix of emotions\"",
+   "regex": "\\ba\\s+mix\\s+of\\s+emotions\\b"
+  },
+  {
+   "id": "ss:renewed sense of purpose",
+   "label": "\"renewed sense of purpose\"",
+   "regex": "\\brenewed\\s+sense\\s+of\\s+purpose\\b"
+  },
+  {
+   "id": "ss:torn between",
+   "label": "\"torn between\"",
+   "regex": "\\btorn\\s+between\\b"
+  },
+  {
+   "id": "ss:overwhelmed by the sheer",
+   "label": "\"overwhelmed by the sheer\"",
+   "regex": "\\boverwhelmed\\s+by\\s+the\\s+sheer\\b"
+  },
+  {
+   "id": "ss:racing with anticipation",
+   "label": "\"racing with anticipation\"",
+   "regex": "\\bracing\\s+with\\s+anticipation\\b"
+  },
+  {
+   "id": "ss:her heart swelled",
+   "label": "\"her heart swelled\"",
+   "regex": "\\bher\\s+heart\\s+swelled\\b"
+  },
+  {
+   "id": "ss:his heart swelled",
+   "label": "\"his heart swelled\"",
+   "regex": "\\bhis\\s+heart\\s+swelled\\b"
+  },
+  {
+   "id": "ss:was only just beginning",
+   "label": "\"was only just beginning\"",
+   "regex": "\\bwas\\s+only\\s+just\\s+beginning\\b"
+  },
+  {
+   "id": "ss:was taken aback",
+   "label": "\"was taken aback\"",
+   "regex": "\\bwas\\s+taken\\s+aback\\b"
+  },
+  {
+   "id": "ss:unbeknownst to",
+   "label": "\"unbeknownst to\"",
+   "regex": "\\bunbeknownst\\s+to\\b"
+  },
+  {
+   "id": "ss:steeling herself",
+   "label": "\"steeling herself\"",
+   "regex": "\\bsteeling\\s+herself\\b"
+  },
+  {
+   "id": "ss:with reckless abandon",
+   "label": "\"with reckless abandon\"",
+   "regex": "\\bwith\\s+reckless\\s+abandon\\b"
+  },
+  {
+   "id": "ss:bore silent witness",
+   "label": "\"bore silent witness\"",
+   "regex": "\\bbore\\s+silent\\s+witness\\b"
+  },
+  {
+   "id": "ss:without waiting for a response",
+   "label": "\"without waiting for a response\"",
+   "regex": "\\bwithout\\s+waiting\\s+for\\s+a\\s+response\\b"
+  },
+  {
+   "id": "ss:mask of composure",
+   "label": "\"mask of composure\"",
+   "regex": "\\bmask\\s+of\\s+composure\\b"
+  }
+ ]
+}

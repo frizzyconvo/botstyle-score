@@ -3,12 +3,9 @@
 let winkPOS = null;
 
 export async function initPosTagger() {
-  // Try multiple CDN sources in order
+  // Local bundle only (node tools/build_vendor.mjs); no CDN fallbacks
   const cdnUrls = [
-    { url: 'https://esm.sh/wink-pos-tagger@2.2.2', type: 'esm' },
-    { url: 'https://cdn.skypack.dev/wink-pos-tagger@2.2.2', type: 'esm' },
-    { url: 'https://unpkg.com/wink-pos-tagger@2.2.2/dist/wink-pos-tagger.min.js', type: 'umd' },
-    { url: 'https://cdn.jsdelivr.net/npm/wink-pos-tagger@2.2.2/dist/wink-pos-tagger.min.js', type: 'umd' },
+    { url: './vendor/wink-pos-tagger.bundle.js', type: 'umd' },
   ];
 
   let lastError = null;
@@ -81,6 +78,12 @@ function loadScript(url) {
     script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
     document.head.appendChild(script);
   });
+}
+
+// Node/offline use: inject an already-constructed wink-pos-tagger instance
+// (e.g. `setPosTagger(require('wink-pos-tagger')())`) instead of loading from a CDN.
+export function setPosTagger(instance) {
+  winkPOS = instance;
 }
 
 export function hasPosTagger() {

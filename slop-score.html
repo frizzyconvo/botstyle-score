@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Slop Score | EQ-Bench</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>Botstyle Score</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <style>
   :root { --bg:#0f1115; --fg:#e6e6e6; --muted:#9aa4ad; --card:#171a21; --accent:#6aa0ff; }
   * { box-sizing: border-box; }
-  body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+  body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.5; }
+  *, *::before, *::after { box-sizing: border-box; }
 
   /* Container */
   .container { max-width: 1400px; margin: 0 auto; padding: 24px; background: var(--bg); }
@@ -22,60 +22,13 @@
   .header-text h1, .header-text p { margin: 0; }
 
   /* Dark mode toggle */
-  .form-check { position: fixed; top: 10px; right: 10px; z-index: 1000; }
+  .form-check { position: fixed; top: 10px; right: 10px; z-index: 1000; background: var(--bg); padding: 2px 8px; border-radius: 6px; }
   #toggleLabel { margin-right: 8px; }
 
   /* Navigation styles */
-  .nav-separator { color: var(--muted); margin: 0 4px; }
-  .nav-dropdown { position: relative; display: inline-block; }
-  .nav-dropdown-toggle {
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    color: #007bff;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  .nav-dropdown-toggle:hover { text-decoration: underline; }
-  .nav-dropdown-toggle::after { content: ' ▾'; font-size: 0.8em; }
 
-  body.dark-mode .nav-dropdown-toggle { color: #4dabf7; }
 
-  .nav-dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 8px;
-    padding: 8px 0;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
-    min-width: 200px;
-    z-index: 1000;
-  }
-  .nav-dropdown-menu.show { display: block; }
-  .nav-dropdown-item {
-    display: block;
-    padding: 8px 16px;
-    color: inherit;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .nav-dropdown-item:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: inherit;
-    text-decoration: none;
-  }
 
-  body.dark-mode .nav-dropdown-menu {
-    background: #1a1a1a;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  }
-  body.dark-mode .nav-dropdown-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
 
   /* Slop-specific content font (not applied to header/nav) */
   .slop-content {
@@ -118,6 +71,7 @@
   .section { margin-top: 16px; }
   .pill { display: inline-block; background: #10141c; border: 1px solid #2a2f3a; border-radius: 999px; padding: 4px 8px; margin: 4px 6px 0 0; font-size: 12px; }
   .pill b { color: #e6e6e6; }
+  .reference-row { opacity: 0.6; font-style: italic; }
   .contrast-match { background: #1a1f2a; border: 1px solid #3a4f5a; border-radius: 6px; padding: 12px 16px 12px 40px; margin: 6px 0; font-size: 13px; position: relative; line-height: 1.6; }
   .contrast-match::before { content: '\201C'; position: absolute; left: 8px; top: 4px; font-size: 48px; color: #3a4f5a; opacity: 0.4; font-family: Georgia, serif; line-height: 1; }
   details { margin-top: 10px; }
@@ -189,7 +143,6 @@
     .modal-content { max-width: 90vw; }
 
     /* Fix navigation dropdown min-width */
-    .nav-dropdown-menu { min-width: 150px; max-width: 90vw; }
 
     /* Fix leaderboard spacing and wrapping */
     .leaderboard-row { gap: 4px; align-items: flex-start; }
@@ -376,14 +329,7 @@
     color: #fff;
   }
 
-  body:not(.dark-mode) .nav-dropdown-menu {
-    background: #ffffff;
-    border: 1px solid #ccc;
-  }
 
-  body:not(.dark-mode) .nav-dropdown-item:hover {
-    background: #e8e8e8;
-  }
 
   body:not(.dark-mode) .leaderboard-bar {
     background: linear-gradient(90deg, #6fd147 0%, #8fe66a 100%);
@@ -498,48 +444,20 @@
 </style>
 </head>
 <body>
+<div id="fileNotice" style="display:none;background:#5a3b00;color:#fff;padding:10px 14px;font:14px/1.4 system-ui,sans-serif;">This page can't run from a file path (browsers block its scripts and data there). Run <b>start-local.cmd</b> (Windows) or <code>npm start</code> in the botstyle-score folder, then open <b>http://localhost:8787/</b>.</div>
+<script>if (location.protocol === 'file:') document.getElementById('fileNotice').style.display = 'block';</script>
   <div class="container">
     <div class="form-check form-switch">
       <input class="form-check-input" type="checkbox" id="darkModeToggle">
       <label class="form-check-label" for="darkModeToggle" id="toggleLabel">Light</label>
     </div>
     <div class="header">
-      <a href="./"><img src="./images/eqbench_logo_sml.png" alt="EQ-bench Logo" class="logo"/></a>
       <div class="header-text">
-        <h1>Slop Score</h1>
+        <h1>Botstyle Score</h1>
       </div>
     </div>
-    <p>Emotional Intelligence Benchmarks for LLMs</p>
-    <p><a href="https://github.com/EQ-bench" target="_blank">Github</a> | <a href="https://arxiv.org/abs/2312.06281" target="_blank">Paper</a> | <span id="email"></span> | <a href="https://twitter.com/sam_paech" target="_blank">Twitter</a> | <a href="about.html">About</a></p>
-
-    <p>
-      <a href='index.html'>💙EQ-Bench3</a>
-      <span class="nav-separator">|</span>
-      <a href='spiral-bench.html'>🌀Spiral-Bench v1.2</a>
-      <span class="nav-separator">|</span>
-      <a href='creative_writing_longform.html'>✍️Longform Writing</a>
-      <span class="nav-separator">|</span>
-      <a href='creative_writing.html'>🎨Creative Writing v3</a>
-      <span class="nav-separator">|</span>
-      <b>☢️Slop Score</b>
-      <span class="nav-separator">|</span>
-      <a href='judgemark-v2.html'>⚖️Judgemark v2.1</a>
-      <span class="nav-separator">|</span>
-      <a href='buzzbench.html'>🎤BuzzBench</a>
-      <span class="nav-separator">|</span>
-      <a href='diplobench.html'>🌍DiploBench</a>
-      <span class="nav-separator">|</span>
-      <span class="nav-dropdown">
-        <button class="nav-dropdown-toggle" id="legacyDropdownToggle">
-          📚Legacy Leaderboards
-        </button>
-        <span class="nav-dropdown-menu" id="legacyDropdownMenu">
-          <a href="spiral-bench_v1.0.html" class="nav-dropdown-item">🌀Spiral-Bench v1.0</a>
-          <a href="creative_writing_v2.html" class="nav-dropdown-item">🎨Creative Writing v2</a>
-          <a href="eqbench-v2.html" class="nav-dropdown-item">💗EQ-Bench v2</a>
-        </span>
-      </span>
-    </p>
+    <p>How much a character card's writing leans on the stock phrasing of AI models.
+      A fork of <a href="https://github.com/sam-paech/slop-score" target="_blank" rel="noopener">slop-score</a> by Sam Paech, adapted for character cards.</p>
 
   <div class="slop-content">
   <div class="section" style="display: flex; justify-content: space-between; align-items: center;">
@@ -559,8 +477,17 @@
   <div id="errors" class="section mono" style="white-space:pre-wrap;color:#ffb4b4;"></div>
   <div class="row">
     <div>
-      <textarea id="input" placeholder="Add text to analyse, or drag & drop text files" style="display:none;"></textarea>
-      <div id="fileList"></div>      
+      <div id="inputWrap" style="display:none;">
+        <div id="urlRow" style="display:flex;gap:8px;margin-bottom:8px;">
+          <input id="cardUrl" type="url" placeholder="Chub or Botbooru character link (optional)" style="flex:1;padding:10px 12px;background:var(--card);color:var(--fg);border:1px solid #2a2f3a;border-radius:8px;font:inherit;">
+          <button id="fetchCardBtn" class="secondary" type="button">Fetch card</button>
+        </div>
+        <textarea id="input" placeholder="Character description (personality, scenario…). Or paste a card's JSON, or drop a card .png / .json / .txt file."></textarea>
+        <textarea id="greetingInput" placeholder="First message / greeting (optional)" style="margin-top:8px;min-height:120px;"></textarea>
+      </div>
+      <div id="fileList"></div>
+      <label id="altWrap" class="muted" style="display:none;margin:6px 0 10px;font-size:13px;"><input type="checkbox" id="altToggle"> include alternate greetings (from an imported card)</label>
+      <div id="altList" class="muted" style="display:none;margin:0 0 12px;font-size:13px;"></div>
       <div id="leaderboard" class="visible"></div>
     </div>
     <div class="panel">
@@ -602,19 +529,19 @@
           <li>The analysis is optimised for creative writing and essays. It may work for other domains, but will likely under-report slop.</li>
         </ul>
 
-        <h3>Slop Score Calculation</h3>
-        <p>The Slop Score is a weighted composite metric designed to detect AI-generated text patterns:</p>
+        <h3>Botstyle Score (this fork)</h3>
+        <p>Built for character cards (description + greeting). Only the prose is scored: W++/PList blocks, key-value lists and copy-pasted instructions are tallied and set aside, and the score comes with a confidence range that widens when there isn't much prose.</p>
         <ul style="line-height: 1.8;">
-          <li><strong>60%</strong> - Slop Words: Frequency of individual words that appear unnaturally often in LLM outputs</li>
-          <li><strong>25%</strong> - Not-x-but-y Patterns: Frequency of contrast patterns like "not just X, but Y" which are overused by AI</li>
-          <li><strong>15%</strong> - Slop Trigrams: Frequency of 3-word phrases that appear unnaturally often in LLM outputs</li>
+          <li><strong>60%</strong> - Slop words: words models use far more than human fiction writers, each weighted by how lopsided that is</li>
+          <li><strong>25%</strong> - Slop phrases: two- and three-word phrases, weighted the same way</li>
+          <li><strong>15%</strong> - Sentence structures: not-x-but-y plus AI sentence habits ("a hint of…", "the air was thick…", "like a promise", "…," she purred)</li>
+          <li><strong>+ up to 6</strong> for heavy em-dash use (over 6 per 1,000 words), <strong>+25 each</strong> for obvious AI tells (a chatbot's "Certainly! Here is…" or "I hope this helps!")</li>
         </ul>
-        
+        <p>100 on a component means "as sloppy as the sloppiest 10% of card-length AI fiction". Each card is also compared with 2023 cards of the same style (free prose, headers + prose, W++/lists, in-voice…). Shared clichés, human tells, craft notes and AI-favourite names (Elara, Kael, Thorne…) are shown but not scored.</p>
+        <p><strong>Writing style:</strong> Original (under 20), Mixed (20–40), Common (40 and up). About 87% of human cards from early 2023 come out Original; AI-written cards mostly land in Mixed or Common. <strong>Description format</strong> (free prose, formatted prose, compact W++/PList/JSON, lists, in-voice, hybrids) describes the layout and isn't scored. Bonus tags (Copyedit-proof, Clichemonger, A card for ants, …) flag cards in roughly the top few percent of real cards for that trait. Details: BOTSTYLE.md in the repository.</p>
 
-        <h3>Slop Lists</h3>
-        <p>The slop word and trigram lists are produced using the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. This tool identifies words and n-grams that are statistically over-represented in LLM outputs compared to human writing.</p>
-        <p>The lists were computed by analyzing outputs from 10 different language models on a selection of essay and creative writing prompts, then comparing them against human-authored text.</p>
-        <p>View the lists: <a href="https://github.com/sam-paech/slop-score/blob/main/data/slop_list.json" target="_blank" style="color: var(--accent);">Slop Words</a> | <a href="https://github.com/sam-paech/slop-score/blob/main/data/slop_list_trigrams.json" target="_blank" style="color: var(--accent);">Slop Trigrams</a></p>
+        <h3>Upstream Slop Score (for comparison)</h3>
+        <p>The leaderboard ranks models by their median botstyle score on card-length samples, with grey reference rows for human writing. The "Upstream slop-score metrics" section uses the original formula: 60% slop words, 25% not-x-but-y, 15% slop trigrams, normalised across the leaderboard models.</p>
 
         <h3>Over-represented Words & Trigrams</h3>
         <p>These sections show words and phrases that occur more frequently in the analyzed text than in typical human writing, based on:</p>
@@ -627,7 +554,7 @@
         <p>The tool also provides various writing style metrics including lexical diversity (MATTR-500), vocabulary level (Flesch-Kincaid), sentence and paragraph length, and dialogue frequency to give a comprehensive view of the text's characteristics.</p>
 
         <h3>Leaderboard</h3>
-        <p>The leaderboard shows how different language models score on the Slop metric, based on their outputs from a standardized set of prompts. Lower scores indicate more human-like writing patterns.</p>
+        <p>Models are scored on their creative-writing outputs from a standard set of prompts, cut to card length. Lower scores mean less stock AI phrasing. These outputs were also used to build the word lists, so model scores are in-sample.</p>
       </div>
     </div>
   </div>
@@ -654,12 +581,35 @@ import {
 } from './js/metrics.js';
 import { initPosTagger } from './js/pos-tagger.js';
 import { scoreText as scoreContrast } from './js/contrast-detector.js';
+// botstyle-score additions
+import { lookupZipf } from './js/metrics.js';
+import { loadBotstyle, scoreWeighted, computeBotstyleScore, BOTSTYLE_WEIGHTS, MIN_PROSE_WORDS, peerPercentile } from './js/botstyle.js';
+import { preprocessCard } from './js/card-preprocess.js';
+import { checkCard } from './js/human-tells.js';
+import { findArtifacts } from './js/ai-artifacts.js';
+import { scoreCard } from './js/score-card.js';
+import { parseCardText, parseCardPng } from './js/card-import.js';
+import { fetchCard, CARD_SOURCES } from './js/card-fetch.js';
+// Served by tools/serve.mjs (npm start): route card requests through its local proxy so
+// Botbooru links work too (Botbooru sends no CORS header).
+if (/^(?:localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) CARD_SOURCES.proxy = '/proxy?url=';
+import { DESCRIPTION_FORMATS } from './js/card-style.js';
+import { scoreStructures, EMDASH_POINTS } from './js/ai-structures.js';
+import { loadCliches, tallyCliches } from './js/cliches.js';
+import { definitionStyle, styleFamily } from './js/card-style.js';
 
 const ui = {
   btn: document.getElementById('analyzeBtn'),
   status: document.getElementById('status'),
   errors: document.getElementById('errors'),
   input: document.getElementById('input'),
+  inputWrap: document.getElementById('inputWrap'),
+  altWrap: document.getElementById('altWrap'),
+  greeting: document.getElementById('greetingInput'),
+  altToggle: document.getElementById('altToggle'),
+  altList: document.getElementById('altList'),
+  cardUrl: document.getElementById('cardUrl'),
+  fetchCardBtn: document.getElementById('fetchCardBtn'),
   fileList: document.getElementById('fileList'),
   leaderboard: document.getElementById('leaderboard'),
   viewLeaderboardBtn: document.getElementById('viewLeaderboardBtn'),
@@ -677,6 +627,7 @@ const ui = {
 
 let ready = false;
 let leaderboardData = null;
+let botstyleBoard = null;   // data/botstyle_leaderboard.json (optional)
 let normalizationRanges = null;
 let userResult = null;
 let selectedModel = null;
@@ -838,11 +789,11 @@ function renderFileList() {
   if (uploadedFiles.length === 0) {
     ui.fileList.style.display = 'none';
     ui.fileList.classList.remove('visible');
-    ui.input.style.display = 'block';
+    ui.inputWrap.style.display = 'block';
     return;
   }
 
-  ui.input.style.display = 'none';
+  ui.inputWrap.style.display = 'none';
   ui.fileList.style.display = 'block';
   ui.fileList.classList.add('visible');
 
@@ -875,11 +826,11 @@ function renderFileList() {
 function handleFiles(files) {
   // Filter for text files only
   const textFiles = Array.from(files).filter(file =>
-    file.type === 'text/plain' || file.name.endsWith('.txt')
+    file.type === 'text/plain' || /\.(txt|json|png)$/i.test(file.name)
   );
 
   if (textFiles.length === 0) {
-    ui.errors.textContent = '⚠ Please drop only .txt files';
+    ui.errors.textContent = '⚠ Please drop .txt, .json or character-card .png files';
     setTimeout(() => ui.errors.textContent = '', 3000);
     return;
   }
@@ -896,18 +847,63 @@ function handleFiles(files) {
 }
 
 async function readFilesContent() {
-  const contents = await Promise.all(
-    uploadedFiles.map(file => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsText(file);
-      });
-    })
-  );
+  // Returns plain text for .txt files; card JSON / PNG files become a card object.
+  const read = (file, how) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = reject;
+    how === 'buffer' ? reader.readAsArrayBuffer(file) : reader.readAsText(file);
+  });
+  const texts = [];
+  for (const file of uploadedFiles) {
+    if (/\.png$/i.test(file.name)) {
+      const parsed = parseCardPng(await read(file, 'buffer'));
+      if (!parsed) throw new Error(`${file.name} has no embedded character card`);
+      importedCard = parsed.card;
+    } else {
+      const t = await read(file, 'text');
+      const parsed = parseCardText(t);
+      if (parsed.kind === 'json') importedCard = parsed.card; else texts.push(t);
+    }
+  }
+  return texts.join('\n\n');
+}
+let importedCard = null;
+let fetchedCard = null;      // card loaded from a Chub/Botbooru link
 
-  return contents.join('\n\n');
+function renderAltList(card) {
+  const alts = (card && card.alternate_greetings) || [];
+  if (!alts.length) { ui.altList.style.display = 'none'; ui.altList.innerHTML = ''; ui.altWrap.style.display = 'block'; return; }
+  ui.altWrap.style.display = 'none';
+  const words = t => (t.match(/[A-Za-z]+/g) || []).length;
+  ui.altList.innerHTML = `<div style="margin-bottom:4px;"><label><input type="checkbox" id="altAll"> include all ${alts.length} alternate greetings</label></div>` +
+    alts.map((g, i) => `<label style="display:block;margin:2px 0 2px 18px;"><input type="checkbox" class="alt-pick" data-i="${i}"> #${i + 2} (${words(g)} words): ${escHtml(g.replace(/\s+/g, ' ').slice(0, 90))}${g.length > 90 ? '…' : ''}</label>`).join('');
+  ui.altList.style.display = 'block';
+  const all = document.getElementById('altAll');
+  all.addEventListener('change', () => ui.altList.querySelectorAll('.alt-pick').forEach(c => { c.checked = all.checked; }));
+}
+function selectedAltGreetings() {
+  if (!fetchedCard) return [];
+  return [...ui.altList.querySelectorAll('.alt-pick')].filter(c => c.checked).map(c => fetchedCard.alternate_greetings[+c.dataset.i]);
+}
+async function loadCardFromUrl() {
+  const url = ui.cardUrl.value.trim();
+  if (!url) return;
+  ui.errors.textContent = '';
+  ui.fetchCardBtn.disabled = true; const label = ui.fetchCardBtn.textContent; ui.fetchCardBtn.textContent = 'Fetching…';
+  try {
+    const { card } = await fetchCard(url);
+    fetchedCard = card;
+    uploadedFiles = []; renderFileList();
+    ui.input.value = [card.description, card.personality, card.scenario].filter(Boolean).join('\n\n');
+    ui.greeting.value = card.first_mes || '';
+    renderAltList(card);
+    ui.status.textContent = `Loaded ${card.name || 'card'}: ${card.alternate_greetings.length} alternate greeting${card.alternate_greetings.length === 1 ? '' : 's'}`;
+  } catch (e) {
+    ui.errors.textContent = '⚠ ' + e.message;
+  } finally {
+    ui.fetchCardBtn.disabled = false; ui.fetchCardBtn.textContent = label;
+  }
 }
 
 // Additional text analytics functions
@@ -1041,6 +1037,7 @@ async function loadLeaderboard() {
   const response = await fetch('data/leaderboard_results.json');
   const data = await response.json();
   leaderboardData = data.results;
+  try { const rb = await fetch('data/botstyle_leaderboard.json'); if (rb.ok) botstyleBoard = await rb.json(); } catch { botstyleBoard = null; }
 
   // Compute normalization ranges with 10% buffer
   const slopWordVals = leaderboardData.map(r => r.metrics.slop_list_matches_per_1k_words || 0);
@@ -1102,11 +1099,23 @@ function renderLeaderboard(includeUserResult = false) {
     fullData: entry
   }));
 
+  // Botstyle mode: rank models by their median botstyle score on card-length samples,
+  // with reference rows for human writing (data/botstyle_leaderboard.json).
+  if (botstyleBoard) {
+    for (const e of entries) {
+      const b = botstyleBoard.models[e.model] || botstyleBoard.models[e.fullData.test_model];
+      e.upstreamScore = e.slopScore; e.slopScore = b ? b.median : null;
+    }
+    for (let i = entries.length - 1; i >= 0; i--) if (entries[i].slopScore === null) entries.splice(i, 1);
+    for (const r of botstyleBoard.references || []) entries.push({ model: r.label, slopScore: r.median, fullData: {}, isReference: true });
+  }
+
   // Add user result if available
   if (includeUserResult && userResult) {
     entries.push({
       model: 'Your Text',
-      slopScore: userResult.slopScore,
+      slopScore: botstyleBoard ? userResult.botstyleScore : userResult.slopScore,
+      upstreamScore: userResult.slopScore,
       fullData: userResult.fullData,
       isUser: true
     });
@@ -1121,13 +1130,14 @@ function renderLeaderboard(includeUserResult = false) {
   // Render
   let html = `
     <div class="leaderboard-header">
+      ${botstyleBoard ? '<div class="muted" style="font-size:12px;margin-bottom:6px;">Botstyle score: median over each model\'s card-length samples. Grey rows are human references.</div>' : ''}
       <span class="slop-indicator left">Less slop</span>
       <span class="slop-indicator right">More slop</span>
     </div>
   `;
   entries.forEach((entry, idx) => {
     const barWidth = (entry.slopScore / maxScore) * 100;
-    const rowClass = entry.isUser ? 'leaderboard-row user-result' : 'leaderboard-row';
+    const rowClass = entry.isUser ? 'leaderboard-row user-result' : entry.isReference ? 'leaderboard-row reference-row' : 'leaderboard-row';
     const barClass = entry.isUser ? 'leaderboard-bar user-bar' : 'leaderboard-bar';
 
     html += `
@@ -1138,7 +1148,7 @@ function renderLeaderboard(includeUserResult = false) {
           <div class="${barClass}" style="width: ${barWidth}%"></div>
         </div>
         <div class="leaderboard-score">${entry.slopScore.toFixed(1)}</div>
-        <button class="leaderboard-report-btn" data-model="${entry.model}">Report</button>
+        <button class="leaderboard-report-btn" data-model="${entry.model}"${entry.isReference ? ' style="visibility:hidden"' : ''}>Report</button>
       </div>
     `;
   });
@@ -1164,6 +1174,10 @@ function renderLeaderboard(includeUserResult = false) {
       // Update right panel with model stats
       const entry = entries.find(e => e.model === rowModel);
       selectedModel = entry;
+      if (entry && entry.isReference) {
+        ui.panelContent.innerHTML = `<h3 style="margin:0 0 12px;">${escHtml(entry.model)}</h3><div class="muted">Human reference: median botstyle score ${entry.slopScore.toFixed(1)} on this evaluation set. Reference rows have no per-sample report.</div>`;
+        return;
+      }
       updateRightPanel(entry);
     });
   });
@@ -1187,10 +1201,88 @@ function renderLeaderboard(includeUserResult = false) {
   }
 }
 
+function escHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+const LAYOUT_NAMES = { prose: 'plain prose', label_prose: 'section headers + prose paragraphs', wpp: 'W++', plist: 'PList', alichat: 'Ali:Chat / example dialogue', markdown_list: 'Markdown lists', instructions: 'instruction / narrator block', json: 'JSON', xml: 'XML tags', yaml: 'YAML' };
+
+function renderBotstyleSection(b) {
+  if (!b) return '';
+  const s = b.score, st = b.stats, W = BOTSTYLE_WEIGHTS;
+  const pctw = x => Math.round(x * 100);
+  const bar = (label, v, tip) => `
+      <div class="modal-metric metric-with-tooltip">
+        <div class="modal-metric-bg slop" style="width: ${Math.min(100, v * 100)}%"></div>
+        <div class="modal-metric-label">${label}</div>
+        <div class="modal-metric-value">${(v * 100).toFixed(0)}</div>
+        <span class="tooltip-text">${tip}</span>
+      </div>`;
+  let h = `<div class="botstyle-section" style="margin-bottom:20px;">
+    <div class="modal-metric metric-with-tooltip">
+      <div class="modal-metric-bg slop" style="width: ${Math.min(100, s.score)}%"></div>
+      <div class="modal-metric-label">Botstyle Score${b.band ? ` — <b>${escHtml(b.band.label)}</b> writing style` : (s.reliable ? '' : ' (low confidence)')}</div>
+      <div class="modal-metric-value">${s.score.toFixed(1)} <span class="muted" style="font-size:0.8em;">(${s.low.toFixed(0)}–${s.high.toFixed(0)})</span></div>
+      <span class="tooltip-text">${pctw(W.words)}% weighted slop words + ${pctw(W.phrases)}% weighted slop phrases + ${pctw(W.structures)}% AI sentence structures (incl. not-x-but-y), on prose only. 100 on a component = as sloppy as the sloppiest 10% of card-sized AI fiction chunks. Range is a ±1 standard-error band from the hit counts. Heavy em-dash use (over ${EMDASH_POINTS.free} per 1k words, up to +${EMDASH_POINTS.max}) and obvious AI tells (chatbot preambles/sign-offs) add points on top.</span>
+    </div>
+    ${bar('Slop words', s.components.words, `${b.rates.words.toFixed(0)} weighted hits per 1k prose words`)}
+    ${bar('Slop phrases', s.components.phrases, `${b.rates.phrases.toFixed(1)} weighted bigram/trigram hits per 1k prose words`)}
+    ${bar('Sentence structures', s.components.structures, `${b.rates.structures.toFixed(1)} weighted hits per 1k prose words: not-x-but-y, "a hint of…", abstract similes, banter tags…`)}
+    ${b.emdash && b.emdash.points > 0 ? `<div class="muted" style="margin:4px 0;">Em-dashes: ${b.emdash.count} (${b.emdash.rate.toFixed(1)} per 1k words) → +${b.emdash.points.toFixed(1)} points</div>` : ''}
+    <div class="muted" style="margin:8px 0 12px;">Scored ${st.proseWords} prose words of ${st.totalWords}
+      (${st.structuredWords} in lists/W++/key-value lines, ${st.boilerplateWords} in boilerplate${Object.keys(st.boilerplateHits).length ? ': ' + Object.entries(st.boilerplateHits).map(([k, v]) => `${k.replace(/_/g, ' ')} ×${v}`).join(', ') : ''}).
+      ${st.proseWords < MIN_PROSE_WORDS ? '<b>Too little prose for a reliable score.</b>' : ''}
+      ${st.nonEnglish ? '<br><b>This card doesn\'t look like English.</b> The slop lists are English-only, so the score isn\'t meaningful here.' : ''}
+      </div>`;
+  if (b.tags && b.tags.length) {
+    h += `<div style="margin:0 0 10px;">${b.tags.map(t => `<span title="${escHtml(t.note)}" style="display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:10px;border:1px solid var(--accent, #6aa);font-size:12px;">${escHtml(t.label)}</span><span class="muted" style="font-size:11px;margin-right:8px;">${escHtml(t.detail || '')}</span>`).join('')}</div>`;
+  }
+  if (b.family) {
+    const f = b.family.format || b.family.family;
+    const pp = ['words', 'phrases', 'structures'].map(k => [k, b.peers ? b.peers[k] : peerPercentile(f, k, b.rates[k])]).filter(x => x[1] !== null && x[1] !== undefined);
+    const g = b.greeting;
+    h += `<div style="margin:0 0 10px;"><b>Description format:</b> ${escHtml(b.family.label || DESCRIPTION_FORMATS[f] || f)}${f === 'boilerplate' ? ' <span class="muted">— mostly instructions, so the score only means something if an obvious AI tell shows up.</span>' : ''}` +
+      (pp.length ? `<br><span class="muted">Compared with 2023 cards in the same format: ${pp.map(([k, p]) => `${k} at the ${p}th percentile${p >= 90 ? ' ⚑' : ''}`).join(', ')}.</span>` : '') +
+      (g && g.primary !== 'none' ? `<br><b>Greeting:</b> <span class="muted">${escHtml(g.pov.replace('_', ' '))}, ${escHtml(g.rp)} format, ${escHtml(g.tense)} tense${g.endsWithQuestion ? ', ends on a question' : ''}</span>` : '') +
+      (b.type && b.type !== 'single_character' ? `<br><b>Card type:</b> <span class="muted">${escHtml(b.type.replace('_', ' / '))}</span>` : '') + `</div>`;
+  }
+  const hitList = (title, hits) => hits.length ? `<div style="margin:6px 0;"><b>${title}:</b> ${hits.slice(0, 20).map(x => `${escHtml(x.item)}${x.count > 1 ? ' ×' + x.count : ''} <span class="muted">(${x.weight.toFixed(1)})</span>`).join(', ')}</div>` : '';
+  if (b.artifacts && b.artifacts.hits.length) {
+    h += `<div style="margin:10px 0;padding:8px 10px;border-left:3px solid #e8590c;"><b>Obvious AI tells</b> <span class="muted">(scored: +${b.artifacts.points} points) The chatbot talking to whoever prompted it.</span><ul style="margin:4px 0 0 18px;padding:0;">` +
+      b.artifacts.hits.map(x => `<li>${escHtml(x.label)} — ${x.count}<div class="muted mono" style="font-size:0.85em;">${x.examples.slice(0, 2).map(escHtml).join('<br>')}</div>${x.note ? `<div class="muted" style="font-size:0.85em;">${escHtml(x.note)}</div>` : ''}</li>`).join('') + '</ul></div>';
+  }
+  h += hitList('Top slop phrases', b.phraseHits) + hitList('Top slop words', b.wordHits);
+  if (b.structHits && b.structHits.length) h += `<div style="margin:6px 0;"><b>Sentence structures:</b> ${b.structHits.slice(0, 12).map(x => `${escHtml(x.label)}${x.count > 1 ? ' ×' + x.count : ''} <span class="muted">(${x.weight.toFixed(1)}${x.provisional ? ', provisional' : ''})</span>${x.examples && x.examples[0] ? ` <span class="muted mono" style="font-size:0.85em;">“${escHtml(String(x.examples[0]).slice(0, 80))}”</span>` : ''}`).join('; ')}</div>`;
+  if (b.artifacts && b.artifacts.notes && b.artifacts.notes.length) h += `<div style="margin:6px 0;"><b>Worth a look</b> <span class="muted">(not scored: drafts and exports produce these too)</span>: ${b.artifacts.notes.map(x => `${escHtml(x.label)} — <span class="muted mono" style="font-size:0.85em;">${escHtml((x.examples || [])[0] || '')}</span>`).join('; ')}</div>`;
+  const group = (title, items, blurb) => {
+    if (!items.length) return `<div style="margin-top:12px;"><b>${title}</b> <span class="muted">none found</span></div>`;
+    return `<div style="margin-top:12px;"><b>${title}</b> <span class="muted">(not scored) ${blurb}</span><ul style="margin:4px 0 0 18px;padding:0;">` +
+      items.map(x => `<li>${escHtml(x.label)} — ${x.count}${x.examples && x.examples.length ? `<div class="muted mono" style="font-size:0.85em;">${x.examples.slice(0, 3).map(escHtml).join('<br>')}</div>` : ''}${x.note ? `<div class="muted" style="font-size:0.85em;">${escHtml(x.note)}</div>` : ''}</li>`).join('') + '</ul></div>';
+  };
+  if (b.cliches && (b.cliches.phraseHits.length || b.cliches.wordHits.length)) {
+    const c = b.cliches;
+    h += `<div style="margin-top:12px;"><b>Shared clichés</b> <span class="muted">(not scored: humans and models both use these) ${c.phrasesPer1k.toFixed(1)} phrase hits per 1k words</span>` +
+      (c.phraseHits.length ? `<div style="margin:4px 0;">${c.phraseHits.slice(0, 20).map(x => `${escHtml(x.item)}${x.count > 1 ? ' ×' + x.count : ''}`).join(', ')}</div>` : '') +
+      (c.wordHits.length ? `<div class="muted" style="margin:4px 0;">Common fiction words: ${c.wordHits.slice(0, 20).map(x => `${escHtml(x.item)}${x.count > 1 ? ' ×' + x.count : ''}`).join(', ')}</div>` : '') + `</div>`;
+  }
+  if (b.names && b.names.length) {
+    h += `<div style="margin-top:12px;"><b>AI-favourite names</b> <span class="muted">(not scored: canon and original characters can have these names too)</span>: ${b.names.map(x => `${escHtml(x.item)}${x.count > 1 ? ' ×' + x.count : ''}`).join(', ')}</div>`;
+  }
+  h += group('Human tells', b.checks.humanTells, 'Mistakes models almost never make. Their presence suggests a human wrote or edited this.');
+  h += group('Craft notes', b.checks.craftNotes, 'Card-writing issues anyone can introduce.');
+  if (b.texture && b.texture.paraCv !== null) {
+    const lk = b.experimental && b.experimental.aiStyleLikelihood;
+    h += `<div style="margin-top:12px;"><b>Texture</b> <span class="muted">(experimental, not scored)</span><div class="muted" style="font-size:13px;line-height:1.5;">`
+      + `Paragraph evenness: length CV ${b.texture.paraCv.toFixed(2)} over ${b.texture.paragraphs} paragraphs (2023 human cards ~0.67, AI-written cards ~0.32; lower = more even, which AI text tends to be, but so do some careful writers).`
+      + (lk !== null && lk !== undefined ? `<br>AI-style likelihood (botstyle score + evenness): ${Math.round(lk * 100)}%` : '')
+      + `</div></div>`;
+  }
+  return h + '</div><h4 style="margin:16px 0 8px;">Upstream slop-score metrics</h4>';
+}
+
 function updateRightPanel(entry) {
   const data = entry.fullData;
 
   let html = `<h3 style="margin: 0 0 16px;">${entry.model}</h3>`;
+  html += renderBotstyleSection(data.botstyle);
 
   if (data.metrics) {
     // Compute normalized values for bars
@@ -1200,9 +1292,9 @@ function updateRightPanel(entry) {
 
     html += `
       <div class="modal-metric metric-with-tooltip">
-        <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
+        <div class="modal-metric-bg slop" style="width: ${entry.upstreamScore ?? entry.slopScore}%"></div>
         <div class="modal-metric-label">Slop Score</div>
-        <div class="modal-metric-value">${entry.slopScore.toFixed(2)}</div>
+        <div class="modal-metric-value">${(entry.upstreamScore ?? entry.slopScore).toFixed(2)}</div>
         <span class="tooltip-text">Combined metric: 60% slop words + 25% not-x-but-y patterns + 15% slop trigrams, normalized across all models</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
@@ -1389,7 +1481,7 @@ function updateRightPanel(entry) {
         data.slop_word_hits,
         'Slop Word Hits',
         hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
-        'Matches to a precompiled slop list produced with the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. The list identifies words that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts. <a href="https://github.com/sam-paech/slop-score/blob/main/data/slop_list.json" target="_blank" style="color: var(--accent);">View slop list</a>'
+        'Matches to a precompiled slop list produced with the slop-forensics toolkit. The list identifies words that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts.'
       );
     }
 
@@ -1399,7 +1491,7 @@ function updateRightPanel(entry) {
         data.slop_trigram_hits,
         'Slop Trigram Hits',
         hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
-        'Matches to a precompiled slop trigram list produced with the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. The list identifies 3-word phrases that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts. <a href="https://github.com/sam-paech/slop-score/blob/main/data/slop_list_trigrams.json" target="_blank" style="color: var(--accent);">View trigram list</a>'
+        'Matches to a precompiled slop trigram list produced with the slop-forensics toolkit. The list identifies 3-word phrases that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts.'
       );
     }
 
@@ -1461,6 +1553,7 @@ function showDetailModal(entry) {
   const data = entry.fullData;
 
   let html = `<h3>${entry.model}</h3>`;
+  html += renderBotstyleSection(data.botstyle);
 
   if (data.metrics) {
     // Compute normalized values for bars
@@ -1470,9 +1563,9 @@ function showDetailModal(entry) {
 
     html += `
       <div class="modal-metric metric-with-tooltip">
-        <div class="modal-metric-bg slop" style="width: ${entry.slopScore}%"></div>
+        <div class="modal-metric-bg slop" style="width: ${entry.upstreamScore ?? entry.slopScore}%"></div>
         <div class="modal-metric-label">Slop Score</div>
-        <div class="modal-metric-value">${entry.slopScore.toFixed(2)}</div>
+        <div class="modal-metric-value">${(entry.upstreamScore ?? entry.slopScore).toFixed(2)}</div>
         <span class="tooltip-text">Combined metric: 60% slop words + 25% not-x-but-y patterns + 15% slop trigrams, normalized across all models</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
@@ -1651,7 +1744,7 @@ function showDetailModal(entry) {
         data.slop_word_hits,
         'Slop Word Hits',
         hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
-        'Matches to a precompiled slop list produced with the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. The list identifies words that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts. <a href="https://github.com/sam-paech/slop-score/blob/main/data/slop_list.json" target="_blank" style="color: var(--accent);">View slop list</a>'
+        'Matches to a precompiled slop list produced with the slop-forensics toolkit. The list identifies words that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts.'
       );
     }
 
@@ -1661,7 +1754,7 @@ function showDetailModal(entry) {
         data.slop_trigram_hits,
         'Slop Trigram Hits',
         hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
-        'Matches to a precompiled slop trigram list produced with the <a href="https://github.com/sam-paech/slop-forensics" target="_blank" style="color: var(--accent);">slop-forensics toolkit</a>. The list identifies 3-word phrases that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts. <a href="https://github.com/sam-paech/slop-score/blob/main/data/slop_list_trigrams.json" target="_blank" style="color: var(--accent);">View trigram list</a>'
+        'Matches to a precompiled slop trigram list produced with the slop-forensics toolkit. The list identifies 3-word phrases that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts.'
       );
     }
 
@@ -1729,8 +1822,10 @@ function hideLeaderboard() {
   if (uploadedFiles.length > 0) {
     renderFileList();
   } else {
-    ui.input.style.display = 'block';
+    ui.inputWrap.style.display = 'block';
   }
+  if (fetchedCard && fetchedCard.alternate_greetings.length) { ui.altWrap.style.display = 'none'; ui.altList.style.display = 'block'; }
+  else ui.altWrap.style.display = 'block';
 
   ui.viewLeaderboardBtn.style.display = 'inline-block';
   ui.analyzeTextBtn.style.display = 'none';
@@ -1739,7 +1834,9 @@ function hideLeaderboard() {
 }
 
 function showLeaderboard() {
-  ui.input.style.display = 'none';
+  ui.inputWrap.style.display = 'none';
+  ui.altWrap.style.display = 'none';
+  ui.altList.style.display = 'none';
   ui.fileList.style.display = 'none';
   ui.fileList.classList.remove('visible');
   ui.leaderboard.style.display = 'block';
@@ -1775,7 +1872,7 @@ async function loadAnalysisResources() {
     await loadWordfreq();
 
     ui.status.textContent = "loading analysis resources…";
-    await Promise.all([loadHumanProfile(), loadSlopSets()]);
+    await Promise.all([loadHumanProfile(), loadSlopSets(), loadBotstyle('./data/').then(() => loadCliches('./data/'))]);
 
     analysisResourcesLoaded = true;
     ui.status.textContent = "ready";
@@ -1838,6 +1935,22 @@ ui.btn.addEventListener('click', async () => {
     } else {
       raw = ui.input.value || "";
     }
+    // Build the card: imported JSON/PNG, pasted JSON, or the two text boxes.
+    let cardIn = importedCard;
+    if (!cardIn) {
+      const parsed = parseCardText(raw);
+      cardIn = parsed.kind === 'json' ? parsed.card : { description: raw, first_mes: ui.greeting.value || '' };
+    }
+    importedCard = null;
+    let includeAlt = !!(ui.altToggle && ui.altToggle.checked);
+    if (fetchedCard && !uploadedFiles.length) {
+      // A card fetched from a link: the boxes hold its text (maybe edited); alternates come from the checkboxes.
+      const picked = selectedAltGreetings();
+      cardIn = { ...cardIn, alternate_greetings: picked, tags: fetchedCard.tags || [] };
+      includeAlt = picked.length > 0;
+    }
+    raw = [cardIn.description, cardIn.personality, cardIn.scenario, cardIn.first_mes]
+      .concat(includeAlt ? (cardIn.alternate_greetings || []) : []).filter(Boolean).join('\n\n');
 
     if (!raw || raw.trim().length === 0) {
       ui.errors.textContent = uploadedFiles.length > 0
@@ -1912,9 +2025,14 @@ ui.btn.addEventListener('click', async () => {
       contrastResult.rate_per_1k
     );
 
-    // Store user result
+    // botstyle: the shared pipeline (js/score-card.js), same as tools/score_cards.mjs
+    const R = scoreCard(cardIn, { lookupZipf, includeAltGreetings: includeAlt });
+
+    // Store user result. The leaderboard keeps the upstream score so it stays
+    // comparable with the model rows; the botstyle score is shown in its own panel.
     userResult = {
       slopScore: userSlopScore,
+      botstyleScore: R.score,
       fullData: {
         total_chars: chars,
         metrics: {
@@ -1933,6 +2051,11 @@ ui.btn.addEventListener('click', async () => {
           avg_paragraph_length: avgParagraphLength,
           dialogue_frequency: dialogueFrequency
         },
+        botstyle: { score: { score: R.score, low: R.low, high: R.high, reliable: R.reliable, components: R.components }, stats: R.stats,
+                   wordHits: R.hits.words.slice(0, 40), phraseHits: R.hits.phrases.slice(0, 40), rates: R.rates, structHits: R.hits.structures,
+                   emdash: R.emdash, checks: R.checks, artifacts: R.artifacts, family: R.format, cliches: R.cliches,
+                   band: R.band, tags: R.tags, names: R.names, greeting: R.greeting, type: R.type, peers: R.peers,
+                   texture: R.texture, experimental: R.experimental },
         slop_word_hits: slopResult.wordHits,
         slop_trigram_hits: slopResult.trigramHits,
         contrast_matches: contrastResult.matches.slice(0, 100).map(m => ({
@@ -1974,8 +2097,8 @@ ui.btn.addEventListener('click', async () => {
     trigrams: topTCounts.slice(0, 100).map(([phrase, ratio, count]) => ({ phrase, ratio, count }))
   };
 
-  // Show verdict animation
-  showVerdict(userSlopScore);
+  // Show verdict animation (botstyle score; falls back to upstream if no prose)
+  showVerdict(userResult.botstyleScore);
 
   // Re-enable button
   ui.btn.disabled = false;
@@ -1983,7 +2106,10 @@ ui.btn.addEventListener('click', async () => {
 
   // Clear uploaded files and input text after successful analysis
   uploadedFiles = [];
-  ui.input.value = '';
+  if (!fetchedCard) {          // keep a fetched card so the greeting checkboxes can be changed and re-run
+    ui.input.value = '';
+    ui.greeting.value = '';
+  }
 
   // Show leaderboard immediately (don't wait for animation)
   showLeaderboard();
@@ -2100,26 +2226,24 @@ ui.fileList.addEventListener('drop', (e) => {
   }
 });
 
+ui.fetchCardBtn.addEventListener('click', loadCardFromUrl);
+ui.cardUrl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadCardFromUrl(); } });
+ui.cardUrl.addEventListener('input', () => { if (!ui.cardUrl.value.trim() && fetchedCard) { fetchedCard = null; renderAltList(null); } });
+
 init();
 </script>
 
-<script src="js/eqbench-utils.js"></script>
 <script>
-// Initialize EQBench utilities
-document.addEventListener('DOMContentLoaded', function() {
-  displayEncodedEmail();
-  applySystemTheme();
-  setupDarkModeToggle();
-
-  // Wire up "Learn more" link to "How it works" modal
-  const learnMoreLink = document.getElementById('learnMoreLink');
-  const howItWorksBtn = document.getElementById('howItWorksBtn');
-  if (learnMoreLink && howItWorksBtn) {
-    learnMoreLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      howItWorksBtn.click();
-    });
-  }
+// Light/dark toggle (follows the system setting until the viewer picks one)
+document.addEventListener('DOMContentLoaded', function () {
+  const toggle = document.getElementById('darkModeToggle'), label = document.getElementById('toggleLabel');
+  let saved = null; try { saved = localStorage.getItem('darkModeEnabled'); } catch {}
+  const dark = saved === null ? window.matchMedia('(prefers-color-scheme: dark)').matches : saved === 'true';
+  const apply = d => { document.body.classList.toggle('dark-mode', d); toggle.checked = d; label.textContent = d ? 'Dark' : 'Light'; };
+  apply(dark);
+  toggle.addEventListener('change', function () { apply(this.checked); try { localStorage.setItem('darkModeEnabled', this.checked); } catch {} });
+  const learnMoreLink = document.getElementById('learnMoreLink'), howItWorksBtn = document.getElementById('howItWorksBtn');
+  if (learnMoreLink && howItWorksBtn) learnMoreLink.addEventListener('click', e => { e.preventDefault(); howItWorksBtn.click(); });
 });
 </script>
 
