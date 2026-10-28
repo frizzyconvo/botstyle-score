@@ -25,7 +25,9 @@ const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, 
   original: +(100 * v.filter(x => x < WB.original).length / Math.max(1, v.length)).toFixed(1), common: +(100 * v.filter(x => x >= WB.common).length / Math.max(1, v.length)).toFixed(1),
   pulp: q(rows.map(r => r.pulp).filter(x => x !== null && x !== undefined), .5),
   upstream: q(rows.map(r => r.upstream).filter(x => x !== null && x !== undefined), .5) }; };
-const gen = [...load('generated_v1').map(r => ({ ...r, mode: r.mode || 'fresh', run: 1 })), ...load('generated_v2').map(r => ({ ...r, run: 2 }))];
+// Cards made at a non-default temperature / min_p (ids with |t… or |mp…) are sampler tests, not leaderboard cards.
+const defaultSampling = r => !/\|(?:t|mp)\d[\d.]*(?:\||$)/.test(String(r.id || ''));
+const gen = [...load('generated_v1').map(r => ({ ...r, mode: r.mode || 'fresh', run: 1 })), ...load('generated_v2').filter(defaultSampling).map(r => ({ ...r, run: 2 }))];
 const models = {};
 // Share of each model's generated cards that failed the format checks (valid and invalid records from the generator).
 const attempts = {};

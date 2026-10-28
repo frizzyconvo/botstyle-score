@@ -23,8 +23,10 @@ const argv = process.argv.slice(2), opt = k => (argv.includes(k) ? argv[argv.ind
 const RUN = argv.find((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--')) || runDir(SCORER_VERSION);
 const MODES = (opt('--modes') || 'fresh').split(',');
 const L = f => existsSync(join(RUN, f)) ? readFileSync(join(RUN, f), 'utf-8').split('\n').filter(Boolean).map(JSON.parse) : [];
+// Cards made at a non-default temperature / min_p (ids with |t… or |mp…) are sampler tests, not leaderboard cards.
+const defaultSampling = r => !/\|(?:t|mp)\d[\d.]*(?:\||$)/.test(String(r.id || ''));
 const rows = [...L('generated_v1.jsonl').map(r => ({ ...r, mode: r.mode || 'fresh' })), ...L('generated_v2.jsonl')]
-  .filter(r => !r.error && r.reliable && !r.nonEnglish && r.upstream !== null && MODES.includes(r.mode || 'fresh'));
+  .filter(r => !r.error && r.reliable && !r.nonEnglish && r.upstream !== null && MODES.includes(r.mode || 'fresh') && defaultSampling(r));
 // cost per card from the generator's records
 const cost = {}; for (const f of [PATHS.aiCardsV1, PATHS.aiCardsV2]) if (existsSync(f)) for (const l of readFileSync(f, 'utf-8').split('\n')) { if (!l) continue; try { const c = JSON.parse(l); if (c.cost != null) (cost[c.model] = cost[c.model] || []).push(c.cost); } catch { /* */ } }
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.min(s.length - 1, Math.floor(p * s.length))] : NaN; };

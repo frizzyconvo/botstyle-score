@@ -2,10 +2,21 @@
 // pounding", "for a moment", "a playful smirk"). Tallied so creators can see them, but
 // NOT scored: they don't tell human and AI writing apart. List: data/botstyle_cliches.json
 // (tools/build_cliches.py), built from entries dropped from the scored lists.
+//
+// RP slop (also unscored): TheDrummer's UnslopNemo target list (data/unslopnemo_targets.json), the phrases
+// UnslopNemo was trained away from in RP chat replies. Checked against cards with tools/phrase_check.mjs:
+// most are chat-reply habits that human card writers share, so they're shown, not scored. Phrases already
+// scored elsewhere or already in the shared clichés are left out here so nothing is listed twice.
 
 import { ngramTokens } from './botstyle.js';
 
-let C = null;
+let C = null, RP = null;
+// UnslopNemo phrases counted elsewhere: scored ("testament" is a scored word; "barely above a whisper" and "mix of /
+// mixture of" are scored sentence structures) or already tallied as shared clichés.
+const RP_SKIP = new Set(['testament', 'barely above a whisper', 'mix of', 'mixture of', 'without waiting for a response',
+  'knuckles turning white', 'torn between', "i don't bite", 'rivulets of', 'conspiratorial', 'glint', 'voice dripping',
+  "couldn't help but", "can't help but", 'voice low']);
+const escRx = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export async function loadCliches(base = './data/') {
   try {
@@ -18,6 +29,14 @@ export async function loadCliches(base = './data/') {
       patterns: j.patterns.map(p => ({ id: p.id, label: p.label, rx: new RegExp(p.regex, 'gi') })),
     };
   } catch { C = null; }
+  try {
+    const r = await fetch(base + 'unslopnemo_targets.json');
+    if (r.ok) {
+      const j = await r.json();
+      // a phrase matches at a word start; single words also match longer forms ("glisten" -> "glistening")
+      RP = (j.phrases || []).filter(p => !RP_SKIP.has(p)).map(p => ({ item: p, rx: new RegExp((/^\w/.test(p) ? '\\b' : '') + escRx(p).replace(/ /g, '\\s+') + (/\s/.test(p) ? '\\b' : '\\w*'), 'gi') }));
+    }
+  } catch { RP = null; }
   return C;
 }
 
@@ -49,6 +68,10 @@ export function tallyCliches(prose) {
     .sort((a, b) => b.count - a.count);
   const total = phraseHits.reduce((a, x) => a + x.count, 0);
   const wordHits = sorted(wd);
-  return { phraseHits, wordHits, phrasesPer1k: nWords ? total * 1000 / nWords : 0,
+  // RP slop: listed separately and kept out of the per-1k rates (the Clichemonger tag reads those)
+  const rpHits = [];
+  if (RP) for (const p of RP) { p.rx.lastIndex = 0; const m = text.match(p.rx); if (m) rpHits.push({ item: p.item, count: m.length, example: m[0] }); }
+  rpHits.sort((a, b) => b.count - a.count);
+  return { phraseHits, wordHits, rpHits, phrasesPer1k: nWords ? total * 1000 / nWords : 0,
            wordsPer1k: nWords ? wordHits.reduce((a, x) => a + x.count, 0) * 1000 / nWords : 0 };
 }

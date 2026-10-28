@@ -102,7 +102,6 @@ Weight per hit in brackets; "provisional" patterns are card-specific and backed 
 | "the silence / words hung heavy" | 1.75 | the question hung in the air |
 | "voice a low rumble / velvet caress" | 1.68 | her voice a velvet caress |
 | Named emotion ("felt a surge / pang of …") | 1.62 | felt a pang of guilt |
-| RP-reply tells ("conspiratorial", "voice low", "punctuating"), provisional | 1.5 | she leaned in, conspiratorial, voice low |
 | "as if the world / time itself …" | 1.41 | as if the world had paused |
 | "with practiced / languid ease" | 1.13 | with practiced ease |
 | Card not-x-but-y ("she is not just a thief, she is a survivor") | 0.9 | Vex isn't just a rogue. She's a legend. |
@@ -114,6 +113,10 @@ Weight per hit in brackets; "provisional" patterns are card-specific and backed 
 | "equal parts X and Y", provisional | 0.75 | equal parts charm and menace |
 | Banter dialogue tag (…," she teased / purred / smirked) | 0.72 | "Miss me?" she purred |
 | "it was as if" | 0.7 | it was as if the world had stopped |
+
+Switched off (in the code, not scored): RP-reply tells ("conspiratorial", "voice low", "punctuating", "mischief") from
+the UnslopNemo list, which added nothing on cards. The full list of lists and how each was built is in
+[docs/LISTS.md](docs/LISTS.md).
 
 ### Chatbot leftovers
 
@@ -138,16 +141,16 @@ Tentative, still being calibrated.
 
 | Score | Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
 |---|---|---|---|---|
-| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 39% |
-| 40–60 | **Mixed** | *Mixed signals* | 4% | 34% |
-| 60 and up | **Common** | *Might just be slop* | 2% | 28% |
+| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 41% |
+| 40–60 | **Mixed** | *Mixed signals* | 4% | 29% |
+| 60 and up | **Common** | *Might just be slop* | 2% | 30% |
 | (too short or not English) | **Low confidence** / no band | | | |
 
 The band names say how common the card's phrasing is in AI writing. The taglines are just for fun and shown next
 to them.
 
 The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,129
-(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 1,520, median 47.
+(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 2,483, median 46.
 
 **The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
 AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
@@ -268,6 +271,9 @@ it. When pulp vocabulary is 15%+ of the word weight and the card scores 40+, it 
   {{user}}'s actions or words, narrating what "you" do or feel, a gendered pronoun right after {{user}},
   jailbreak or permission lines in the card, runs of sentences all starting with the same name.
 - **Shared clichés:** phrases humans and models both use. Counted, not scored.
+- **RP slop:** TheDrummer's UnslopNemo list of RP chat clichés ("hips swaying", "a shiver down", "...for now"),
+  shown under the shared clichés. Not scored: tested against cards, human card writers use most of them as much as
+  models do. Entries already scored or already among the shared clichés aren't listed twice.
 - **AI-favorite names:** names models are fond of (Elara, Kael, Thorne…). Characters can have these names too.
 - **Repeated wording:** inside the description, inside the first message, and shared between them. Human cards
   repeat themselves more often than AI-written ones, so it's a writing note, not an AI sign. Alternate greetings
@@ -342,6 +348,11 @@ the same link sit in a fold under the newest one.
   third-person narration the lists were built from.
 - **"Don't sound like AI" instructions work.** Cards written by a model under strict anti-slop rules score like
   human cards. The score measures house style, not authorship.
+- **Short and compact cards read low.** W++, PLists and lists are set aside, so a compact card is scored mostly on
+  its greeting, and short prose gives few chances for a hit. AI-written cards with under 150 prose words have a
+  median of about 14 (9 in 10 land in Original-ish); with 150–250 words, about 23. The band cut-offs are the same
+  at every length, so human cards that short almost never reach Common either (0.1%, against 3–4% of very long
+  human cards). Treat a low score on a bite-sized card as "not enough to go on".
 - **Repetition isn't an AI sign on cards** (see [Other read-outs](#other-read-outs-not-scored)).
 - **English only.** The word lists are English; other languages get no band.
 
@@ -351,10 +362,10 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 from 2023 (mostly human) vs 1,520 AI-written | 0.70 | 0.89 |
+| Character cards: 108,129 from 2023 (mostly human) vs 2,483 AI-written | 0.75 | 0.87 |
 
-On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 27% of AI-written cards and the original
-slop score 11%.
+On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 30% of AI-written cards and the original
+slop score 20%.
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
@@ -379,7 +390,7 @@ Checked against the upstream code (`slop-score.html`, `data/leaderboard_results.
 | **Per format / per part** | One formula for everything | One set of lists, weights and calibration for every format and for both the description and the greeting. Format only picks the peer group shown in the read-out ("vs 2023 cards in the same format") |
 
 **Results on the shared test sets** (AUC, original → BBBScorer): SlopReview 0.930 → 0.977 (humans flagged above 25:
-9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.70 → 0.89.
+9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.75 → 0.87.
 
 ## Data and references
 
@@ -405,7 +416,8 @@ Checked against the upstream code (`slop-score.html`, `data/leaderboard_results.
 
 **Outside references**
 - pixelnull's SloppySeconds list: a source for several sentence patterns.
-- TheDrummer's UnslopNemo list of 65 target phrases, checked against cards (no gain, so not used).
+- TheDrummer's UnslopNemo list of 65 target phrases, checked against cards (no gain as a score), shown as the
+  unscored RP slop read-out.
 - Foreverse's character-card-skills: their scoring rubric, card categories, and a blind test where AI judges mostly
   got human vs AI backwards. That test is part of why BBBScorer calls itself not an AI detector.
 - The ARB paper (arXiv 2607.29539): its finding that detectors fail on human text an AI has reworded led to the
@@ -446,5 +458,5 @@ the pulp word-list builder and the phrase checker.
   antislop-DPO (sam-paech).
 - Card sets: Korshuk roleplay-characters, AUTOMATIC/jaicards (JanitorAI), raincandy-u/chub-ai-cards, Perchance
   character database, SPB-2602 (marcodsn), Foreverse character-card-skills.
-- Pattern ideas from pixelnull's SloppySeconds; TheDrummer's UnslopNemo target list was checked against cards.
+- Pattern ideas from pixelnull's SloppySeconds; TheDrummer's UnslopNemo target list (the RP slop read-out).
 - [wordfreq](https://github.com/rspeer/wordfreq) by Robyn Speer (word frequencies).

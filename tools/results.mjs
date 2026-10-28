@@ -57,8 +57,10 @@ for (const f of (existsSync(RUN) ? readdirSync(RUN) : []).filter(f => f.endsWith
 }
 
 // 3. AI models
+// Cards made at a non-default temperature / min_p (ids with |t… or |mp…) are sampler tests, not leaderboard cards.
+const defaultSampling = r => !/\|(?:t|mp)\d[\d.]*(?:\||$)/.test(String(r.id || ''));
 const gen = [...(rowsBy.generated_v1 || parse(join(RUN, 'generated_v1.jsonl')).filter(ok)).map(r => ({ ...r, mode: r.mode || 'fresh' })), ...(rowsBy.generated_v2 || scoredV2.filter(ok))]
-  .filter(r => r.upstream != null && MODES.includes(r.mode || 'fresh'));
+  .filter(r => r.upstream != null && MODES.includes(r.mode || 'fresh') && defaultSampling(r));
 if (gen.length > 2) {
   const X = gen.map(r => r.upstream), Y = gen.map(r => r.score), mx = X.reduce((a, b) => a + b, 0) / X.length, my = Y.reduce((a, b) => a + b, 0) / Y.length;
   const sxy = X.reduce((s, x, i) => s + (x - mx) * (Y[i] - my), 0), sxx = X.reduce((s, x) => s + (x - mx) ** 2, 0), syy = Y.reduce((s, y) => s + (y - my) ** 2, 0);

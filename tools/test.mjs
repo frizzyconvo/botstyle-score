@@ -184,5 +184,15 @@ check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zB
   check('phrase hits carry the text as written', !!ph && /can't/.test(ph.example || ''), JSON.stringify(ph));
 }
 
+// RP slop (UnslopNemo list): tallied separately, not double-listed, not in the cliché rate the Clichemonger tag reads
+{
+  const t = 'She saunters over, hips swaying, the night is still young. A testament to chaos, her voice barely above a whisper.';
+  const c = tallyCliches(t), items = (c.rpHits || []).map(x => x.item);
+  check('RP slop tallied', items.includes('saunters') && items.includes('hips swaying') && items.includes('night is still young'), items.join(','));
+  check('RP slop skips entries scored elsewhere', !items.includes('testament') && !items.includes('barely above a whisper'), items.join(','));
+  const c2 = tallyCliches(t.replace('saunters over, hips swaying, ', ''));
+  check('RP slop stays out of the cliché rate', Math.abs(c.phrasesPer1k * (t.split(' ').length) - c2.phrasesPer1k * (t.split(' ').length - 4)) < 1e-6 || c.phraseHits.length === c2.phraseHits.length);
+}
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

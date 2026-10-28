@@ -6,6 +6,8 @@
 //   node tools/score_all.mjs --only korshuk,perchance
 //   node tools/score_all.mjs --limit 200     # quick trial: first 200 cards per dataset (-> _trial/)
 //   node tools/score_all.mjs --force         # rescore datasets already done for this version
+//   node tools/score_all.mjs --only generated_v2 --new   # score only cards not in this version's file yet (appends;
+//                                            # what generate_ai_cards.mjs runs after a generation round)
 //   node tools/score_all.mjs --add "C:\cards\pack.zip\books\*.png" --name jammy_books [--label ai|human|mixed|unknown]
 //                                            # score cards at any path (folder, Perchance folder, .zip, card file) as an
 //                                            # extra dataset; only scores are written (eval/scores/v<ver>/<name>.jsonl),
@@ -60,7 +62,7 @@ const upstreamScore = text => { const u = upstreamParts(text); return u ? u.scor
 // Disparity marks and reasons: js/compare-original.js (shared with the page).
 const argv = process.argv.slice(2);
 const opt = k => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : null);
-let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force');
+let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force'), NEW_ONLY = argv.includes('--new') && !argv.includes('--force');
 // --limit trial runs go to a _trial subfolder so they never count as a finished dataset
 const OUT = join(ROOT, 'eval', 'scores', 'v' + SCORER_VERSION, ...(LIMIT ? ['_trial'] : []));
 mkdirSync(OUT, { recursive: true });
@@ -237,17 +239,21 @@ for (const ds of DATASETS) {
   if (ONLY && !ONLY.includes(ds.name)) continue;
   dsIndex++;
   const outFile = join(OUT, ds.name + '.jsonl');
-  if (existsSync(outFile) && !FORCE) { console.log(`${ds.name}: already scored for v${SCORER_VERSION} (use --force to redo)`); continue; }
+  // --new: keep this version's existing rows and score only cards whose id isn't among them yet.
+  const kept = NEW_ONLY && existsSync(outFile) ? readJsonl(outFile) : null;
+  const keptIds = kept ? new Set(kept.map(x => x.id)) : null;
+  if (existsSync(outFile) && !FORCE && !kept) { console.log(`${ds.name}: already scored for v${SCORER_VERSION} (use --new to add new cards, --force to redo)`); continue; }
   if (ds.name === 'jaicards') { const c = await jaicardsCache(); if (!c) { console.log('jaicards: not found, skipped'); continue; } ds.rows = () => jsonlStream(c); }
   if (ds.need && !existsSync(ds.need)) { console.log(`${ds.name}: ${ds.need} not found, skipped`); continue; }
   if (ds.extra && !sourceKind(ds.source)) { console.log(`${ds.name}: ${ds.source} not found, skipped`); continue; }
   const t0 = Date.now(), startedAt = new Date().toISOString(); const rows = []; let n = 0, totalWords = 0;   // rows are small (no card text)
   const total = ds.name === 'jaicards' ? countLines(join(CARDS, 'jaicards-cards-js', 'jaicards_cards.jsonl')) : ds.need ? countLines(ds.need) : null;
-  say(`[${dsIndex}/${todo.length}] ${ds.name}: scoring${total ? ` ${total.toLocaleString()} cards` : ''}…`);
-  let lastSay = Date.now();
+  say(`[${dsIndex}/${todo.length}] ${ds.name}: scoring${kept ? ` new cards only (${kept.length.toLocaleString()} already scored)` : total ? ` ${total.toLocaleString()} cards` : ''}…`);
+  let lastSay = Date.now(); const stillThere = new Set();   // --new: ids still valid in the source
   for (const raw of ds.rows()) {
     if (raw.valid === false || (ds.skip && ds.skip.has(raw.id))) continue;
     if (LIMIT && n >= LIMIT) break;
+    if (keptIds) { stillThere.add(raw.id); if (keptIds.has(raw.id)) continue; }
     const c = card(raw); n++;
     let r;
     try { r = scoreCard(c); } catch (e) { rows.push({ id: c.id, dataset: ds.name, version: SCORER_VERSION, error: e.message }); continue; }
@@ -260,13 +266,21 @@ for (const ds of DATASETS) {
       comp: Object.fromEntries(Object.entries(r.components).map(([k, v]) => [k, +v.toFixed(3)])), emdashPoints: +r.emdashPoints.toFixed(2), artifactPoints: r.artifactPoints,
       paraCv: r.texture.paraCv === null ? null : +r.texture.paraCv.toFixed(3), aiStyleLikelihood: r.experimental.aiStyleLikelihood === null ? null : +r.experimental.aiStyleLikelihood.toFixed(3),
       tags: r.tags.map(t => t.id), genre: r.genre.primary, genre2: r.genre.secondary, archetype: r.archetype.id,
-      pulp: r.pulp ? r.pulp.score : null, pulpAdjusted: r.pulp ? r.pulp.adjusted : null, pulpFlag: r.pulp ? r.pulp.flag : null });
+      pulp: r.pulp ? r.pulp.score : null, pulpAdjusted: r.pulp ? r.pulp.adjusted : null, pulpFlag: r.pulp ? r.pulp.flag : null,
+      rpSlop: r.cliches && r.cliches.rpHits ? r.cliches.rpHits.reduce((a, x) => a + x.count, 0) : null, temperature: raw.temperature ?? undefined });
     totalWords += r.stats.totalWords || 0;
     if (Date.now() - lastSay > 15000) {
       lastSay = Date.now(); touchLock();
       const secs = (Date.now() - t0) / 1000, rate = n / Math.max(1, secs);
       say(`[${dsIndex}/${todo.length}] ${ds.name}: ${n.toLocaleString()}${total ? ` / ${total.toLocaleString()} (${(100 * n / total).toFixed(1)}%)` : ''} cards, ${Math.round(rate * 60).toLocaleString()} cards/min${total ? `, about ${fmtDur((total - n) / rate)} left` : ''}`);
     }
+  }
+  const scoredNow = rows.length;
+  if (kept) {
+    const gone = kept.filter(x => !stillThere.has(x.id)).length;   // cards since marked invalid or removed from the source
+    if (!scoredNow && !gone) { say(`[${dsIndex}/${todo.length}] ${ds.name}: no new cards (${kept.length.toLocaleString()} already scored)`); continue; }
+    rows.unshift(...kept.filter(x => stillThere.has(x.id)));
+    if (gone) say(`  dropped ${gone} row(s) whose cards are no longer valid in the source`);
   }
   writeFileSync(outFile, rows.map(x => JSON.stringify(x)).join('\n') + '\n');
   const ok = rows.filter(x => !x.error && x.reliable && !x.nonEnglish);
@@ -278,8 +292,8 @@ for (const ds of DATASETS) {
   writeNotes(ds.name, rows);
   // performance log: one line per dataset run (eval/scores/v<version>/run-log.jsonl)
   const secs = (Date.now() - t0) / 1000;
-  appendFileSync(join(OUT, 'run-log.jsonl'), JSON.stringify({ dataset: ds.name, version: SCORER_VERSION, startedAt, endedAt: new Date().toISOString(), cards: rows.length, words: totalWords,
-    seconds: +secs.toFixed(1), msPerCard: +(1000 * secs / Math.max(1, rows.length)).toFixed(2), wordsPerSecond: Math.round(totalWords / Math.max(0.001, secs)), node: process.version, platform: process.platform }) + '\n');
-  say(`[${dsIndex}/${todo.length}] ${ds.name} done: ${rows.length} cards, ${totalWords.toLocaleString()} words, ${Math.round(totalWords / Math.max(0.001, secs))} words/s, median ${summary.datasets[ds.name].median?.toFixed(1)} (reliable ${ok.length}) in ${((Date.now() - t0) / 1000).toFixed(0)}s -> ${outFile}`);
+  appendFileSync(join(OUT, 'run-log.jsonl'), JSON.stringify({ dataset: ds.name, version: SCORER_VERSION, startedAt, endedAt: new Date().toISOString(), cards: scoredNow, ...(kept ? { mode: 'new', total: rows.length } : {}), words: totalWords,
+    seconds: +secs.toFixed(1), msPerCard: +(1000 * secs / Math.max(1, scoredNow)).toFixed(2), wordsPerSecond: Math.round(totalWords / Math.max(0.001, secs)), node: process.version, platform: process.platform }) + '\n');
+  say(`[${dsIndex}/${todo.length}] ${ds.name} done: ${kept ? `${scoredNow} new + ${kept.length} already scored = ` : ''}${rows.length} cards, ${totalWords.toLocaleString()} words, ${Math.round(totalWords / Math.max(0.001, secs))} words/s, median ${summary.datasets[ds.name].median?.toFixed(1)} (reliable ${ok.length}) in ${((Date.now() - t0) / 1000).toFixed(0)}s -> ${outFile}`);
 }
 say(`done. Results in ${OUT}; read notes.md there first.`);

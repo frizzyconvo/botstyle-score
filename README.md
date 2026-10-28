@@ -18,6 +18,7 @@ cards instead of stretching each measure between 22 models and a human baseline.
 
 - **How it works, and what every band, tag, format and label means:** [BOTSTYLE.md](BOTSTYLE.md)
 - **What changed in each version:** [CHANGELOG.md](CHANGELOG.md)
+- **Every word and pattern list, how it's built and how it has changed:** [docs/LISTS.md](docs/LISTS.md)
 
 ## Use it
 
@@ -56,7 +57,7 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 | `data/` | Word and phrase lists, calibration, the leaderboard and the reference distributions the page grades against. |
 | `tools/` | Building lists, scoring datasets, building the leaderboard and reference, generating AI test cards, tests, the local server and the Cloudflare Workers (card proxy, public list). Every tool takes `--help`. |
 | `tests/` | Test fixtures for `npm test`. |
-| `docs/` | Background notes (e.g. Foreverse's card-writing rubric) and the to-do list (`docs/TODO.md`). |
+| `docs/` | The list manifest (`docs/LISTS.md`), background notes (e.g. Foreverse's card-writing rubric) and the to-do list (`docs/TODO.md`). |
 | `upstream/` | Leftovers from slop-score kept for reference: its model outputs, benchmark and leaderboard scripts. |
 | `vendor/` | Bundled browser libraries (msgpack, part-of-speech tagger). |
 | `eval/`, `dev/` | Local only, not in git: datasets, scoring runs and dev scripts. |
@@ -67,6 +68,8 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 - **Score every dataset** with the current scorer (versioned, resumable, about 45 minutes):
   `npm run score-all`. Results go to `eval/scores/v<version>/`; read `notes.md` there first. Then rebuild what
   the page uses with `npm run leaderboard` and `npm run reference`.
+- **Score only new cards** in a dataset (what the card generator runs after each round): `npm run score-all -- --only
+  generated_v2 --new`. Cards already scored by this scorer version keep their rows.
 - **Score cards at any path** (a folder of card PNG/JSON files, a Perchance characters folder, a .zip, optionally
   with a folder or pattern inside it, or one card file): `npm run score-path -- "<path>" --name <short name>`
   (`--label ai|human|mixed|unknown`). Only scores are written, to `eval/scores/v<version>/<name>.jsonl` with a section

@@ -290,7 +290,12 @@ function renderResult(r) {
     + (r.type && r.type !== 'single_character' ? `<div class="small">Type: ${esc(r.type.replace('_', ' / '))}</div>` : '') + '</div>';
   const group = (title, items, blurb) => !items.length ? '' : `<div class="sec"><h3>${title}</h3><span class="faint small">Not scored. ${blurb}</span><ul>${items.map(x => `<li>${esc(x.label)} ×${x.count}${x.examples && x.examples.length ? `<span class="ex">${x.examples.slice(0, 2).map(esc).join('<br>')}</span>` : ''}</li>`).join('')}</ul></div>`;
   if (r.artifacts && r.artifacts.notes && r.artifacts.notes.length) R += group('Worth a look', r.artifacts.notes, 'Drafts and exports produce these too.');
-  if (r.cliches && r.cliches.phraseHits.length) R += `<div class="sec"><h3>Shared clichés</h3><span class="faint small">Not scored: humans and models both use these.</span><div>${r.cliches.phraseHits.slice(0, 20).map(x => `<span class="tag">${esc(x.item)}${x.count > 1 ? ' ×' + x.count : ''}</span>`).join('')}</div></div>`;
+  if (r.cliches && (r.cliches.phraseHits.length || (r.cliches.rpHits || []).length)) {
+    const chips = a => a.slice(0, 20).map(x => `<span class="tag">${esc(x.item)}${x.count > 1 ? ' ×' + x.count : ''}</span>`).join('');
+    const rp = r.cliches.rpHits || [];
+    R += `<div class="sec"><h3>Shared clichés</h3><span class="faint small">Not scored: humans and models both use these.</span>${r.cliches.phraseHits.length ? `<div>${chips(r.cliches.phraseHits)}</div>` : ''}`
+      + (rp.length ? `<div class="small" style="margin-top:6px"><b>RP slop</b> <span class="faint">(UnslopNemo's list of RP chat clichés, not scored)</span></div><div>${chips(rp)}</div>` : '') + `</div>`;
+  }
   if (r.names.length) R += `<div class="sec"><h3>AI-favorite names</h3><span class="faint small">Not scored: characters can have these names too.</span><div>${r.names.map(x => `<span class="tag">${esc(x.item)}</span>`).join('')}</div></div>`;
   R += group('Human tells', r.checks.humanTells || [], 'Mistakes models almost never make.');
   R += group('Craft notes', r.checks.craftNotes || [], 'Card-writing issues anyone can introduce.');

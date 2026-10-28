@@ -31,8 +31,11 @@
 //   --waste-limit N   skip the rest of a model for this run after N wasted cards in a row (failed request, reasoning
 //                 used the whole budget, or invalid card); default 3.
 //   --max-usd-model X skip the rest of a model once it has cost X in this run.
+//   --temperature T  sampling temperature (default 0.8). Cards made at any other temperature get "|t<T>" in their id
+//                 (e.g. "|t1.2"), so they sit beside the default cards instead of counting as the same card.
+//   --min-p P     OpenRouter min_p (a common RP sampler setting); cards get "|mp<P>" in their id.
 //   --no-score    don't score the new cards when the run finishes (by default it runs
-//                 score_all.mjs --only generated_v2 --force, unless another scoring run is active).
+//                 score_all.mjs --only generated_v2 --new: only cards not scored yet, unless another scoring run is active).
 // Each card records at (timestamp), elapsed_ms and out_words; failed requests go to <out>_errors.jsonl.
 //
 // Reads BASE_URL and API_KEY from .env (OpenRouter works). Seeds: JSONL with name / tagline /
@@ -82,7 +85,8 @@ const DRY = !!args['dry-run'];
 if (!models.length && !DRY && !args.reparse && !args.failures) { console.error('need --models "a,b" (or --dry-run)'); process.exit(1); }
 const SEEDS = args.seeds || PATHS.seeds;
 const PER = Number(args['per-style'] || 1), OUT = args.out || PATHS.aiCardsV2, CONC = Number(args.concurrency || 3);
-const MAX_TOKENS = Number(args['max-tokens'] || 6000), TEMP = Number(args.temperature ?? 0.8), MAX_USD = args['max-usd'] ? Number(args['max-usd']) : Infinity;
+const DEFAULT_TEMP = 0.8;
+const MAX_TOKENS = Number(args['max-tokens'] || 6000), TEMP = Number(args.temperature ?? DEFAULT_TEMP), MIN_P = args['min-p'] !== undefined ? Number(args['min-p']) : null, MAX_USD = args['max-usd'] ? Number(args['max-usd']) : Infinity;
 let url = process.env.BASE_URL || 'https://openrouter.ai/api';
 if (!/chat\/completions$/.test(url)) url = url.replace(/\/$/, '') + (/\/v1$/.test(url) ? '' : '/v1') + '/chat/completions';
 const KEY = process.env.API_KEY || process.env.OPENAI_API_KEY;
@@ -168,7 +172,7 @@ function cardText(r) {
 
 // ---------------------------------------------------------------- API
 async function ask(model, prompt, over = {}) {
-  const body = { model, temperature: TEMP, max_tokens: over.maxTokens || MAX_TOKENS, usage: { include: true }, messages: [{ role: 'user', content: prompt }] };
+  const body = { model, temperature: TEMP, ...(MIN_P !== null ? { min_p: MIN_P } : {}), max_tokens: over.maxTokens || MAX_TOKENS, usage: { include: true }, messages: [{ role: 'user', content: prompt }] };
   const effort = over.reasoning || args.reasoning;
   if (effort) body.reasoning = { effort: String(effort) };
   let lastErr;
@@ -285,12 +289,17 @@ const done = new Set(existsSync(OUT) ? readFileSync(OUT, 'utf-8').split('\n').fi
 // Rounds: round 1 ids have no suffix; later rounds end in |r2, |r3… --more adds the next round for each model
 // (one past the highest it already has); --round N fills round N. Same prompts and seeds, new samples.
 const roundOf = id => { const m = /\|r(\d+)$/.exec(id); return m ? +m[1] : 1; };
-const lastRound = model => Math.max(0, ...[...done].filter(id => id.startsWith(model + '|')).map(roundOf));
+const sampTag = id => (/\|(t[\d.]+(?:\|mp[\d.]+)?|mp[\d.]+)(?:\|r\d+)?$/.exec(id) || [, ''])[1];
+const mySamp = (TEMP !== DEFAULT_TEMP ? `t${TEMP}` : '') + (MIN_P !== null ? (TEMP !== DEFAULT_TEMP ? '|' : '') + `mp${MIN_P}` : '');
+// rounds are counted per sampler setting, so a temperature test starts at round 1
+const lastRound = model => Math.max(0, ...[...done].filter(id => id.startsWith(model + '|') && sampTag(id) === mySamp).map(roundOf));
 const jobs = [];
 for (const model of (models.length ? models : ['(dry-run)'])) {
   const round = args.round ? Number(args.round) : args.more ? Math.max(1, lastRound(model) + 1) : 1;
   for (const p of plan) {
-    const id = [model, p.mode, p.variant, p.format, p.k].join('|') + (round > 1 ? `|r${round}` : '');
+    // sampler settings other than the default become part of the id (same prompt and seed, different sampling)
+    const samp = (TEMP !== DEFAULT_TEMP ? `|t${TEMP}` : '') + (MIN_P !== null ? `|mp${MIN_P}` : '');
+    const id = [model, p.mode, p.variant, p.format, p.k].join('|') + samp + (round > 1 ? `|r${round}` : '');
     if (!done.has(id)) jobs.push({ id, model, round, ...p });
   }
 }
@@ -343,7 +352,7 @@ async function worker() {
       cost = cost || null;
       if (cost) { spent += cost; spentBy[j.model] = (spentBy[j.model] || 0) + cost; }
       appendFileSync(OUT, JSON.stringify({
-        id: j.id, round: j.round || 1, createdAt: 'generated', model: j.model, mode: j.mode, variant: j.variant, style_requested: j.format, k: j.k,
+        id: j.id, round: j.round || 1, createdAt: 'generated', model: j.model, temperature: TEMP, ...(MIN_P !== null ? { min_p: MIN_P } : {}), mode: j.mode, variant: j.variant, style_requested: j.format, k: j.k,
         seed_id: j.seed.id, seed_name: j.seed.name || j.seed.card_name, prompt: j.prompt,
         description: parts.description, first_mes: parts.first_mes, preamble: parts.preamble, postscript: parts.postscript,
         raw: res.text, finish_reason: res.finish, usage: res.usage, cost, provider: res.provider, gen_id: res.gen_id,
@@ -370,13 +379,14 @@ console.log(`finished: ${n} written to ${OUT} (${bad} flagged invalid); reported
 if (Object.keys(spentBy).length) console.log('  cost by model: ' + Object.entries(spentBy).map(([m, c]) => `${m} $${c.toFixed(3)}`).join(', '));
 if (Object.keys(skipped).length) console.log('  skipped this round: ' + Object.entries(skipped).map(([m, w]) => `${m} (${w})`).join('; '));
 
-// Score the new cards straight away (BBBScorer + original formula), unless --no-score or nothing was written.
+// Score the new cards straight away (BBBScorer + original formula), unless --no-score or nothing was written. Only cards
+// not yet in this scorer version's file are scored (--new); the rest of the dataset keeps its scores.
 // score_all refuses to start while another scoring run is active (exit code 3), so they never collide.
 const DATASET_FOR = { 'ai_cards_v2.jsonl': 'generated_v2', 'ai_cards.jsonl': 'generated_v1' };
 const dsName = DATASET_FOR[OUT.replace(/\\/g, '/').split('/').pop()];
 if (n > 0 && !args['no-score'] && dsName) {
   console.log(`\nscoring ${dsName} with the current scorer…`);
   const { spawnSync } = await import('child_process');
-  const r = spawnSync(process.execPath, ['tools/score_all.mjs', '--only', dsName, '--force'], { stdio: 'inherit' });
-  if (r.status === 3) console.log(`Not scored now: another scoring run is active. Run later: node tools/score_all.mjs --only ${dsName} --force`);
+  const r = spawnSync(process.execPath, ['tools/score_all.mjs', '--only', dsName, '--new'], { stdio: 'inherit' });
+  if (r.status === 3) console.log(`Not scored now: another scoring run is active. Run later: node tools/score_all.mjs --only ${dsName} --new`);
 } else if (n > 0 && !dsName) console.log(`(not scored automatically: ${OUT} isn't one of the scored datasets)`);

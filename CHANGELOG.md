@@ -6,6 +6,32 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.18.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- **RP slop** read-out under Shared clichés: TheDrummer's UnslopNemo list of RP chat clichés ("hips swaying",
+  "...for now", "a shiver down"), shown but not scored. Entries already scored or already among the shared clichés
+  aren't listed twice, and RP slop doesn't count toward the Clichemonger tag.
+- `docs/LISTS.md`: every word and pattern list, whether it's scored, how it's built, and a history of changes.
+- "How it works" explains why short and compact cards read low, and lists the unscored read-outs.
+- Card generator: `--min-p`, and cards made at a non-default temperature or min_p get it in their id (`|t1.2`) and
+  record; they're left out of the leaderboard and the model report.
+- Scoring: `--new` scores only the cards a scoring run doesn't have yet and keeps the rest.
+
+### Changed
+- Tag names on the page match the docs: **Of course that's your name** (was The usual suspects; the tag id is
+  still `usual_suspects`), and a new line for Copyedit-proof.
+- The card generator scores only its new cards after a round (`--new`) instead of rescoring the whole set.
+- 963 more AI-written cards behind the leaderboard and the page's reference (2,483 in all), including Gemini 2.5
+  Flash Lite, Llama 3.1 8B and Llama 3.2 1B / 3B, and more rounds for most models. Headline numbers: AI-written
+  cards median 46, bands 41 / 29 / 30%, AUC 0.87, 30% flagged at a 2% false-positive rate (original slop score:
+  AUC 0.75, 20%).
+
+### Fixed
+- BOTSTYLE.md listed the switched-off "RP-reply tells" pattern among the scored sentence structures.
+
 ## [0.17.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.
