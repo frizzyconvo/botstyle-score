@@ -376,7 +376,7 @@ AI-written cards (see [Bands](#bands)), which makes these numbers a little pessi
 
 ### How BBBScorer differs from slop-score
 
-Checked against the upstream code (`slop-score.html`, `data/leaderboard_results.json`).
+Checked against the upstream code (upstream's `slop-score.html` page and `data/leaderboard_results.json`).
 
 | | Original slop score | BBBScorer |
 |---|---|---|

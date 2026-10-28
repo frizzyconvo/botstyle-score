@@ -1,9 +1,12 @@
 {
   "name": "botstyle-score",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "private": true,
   "description": "BB Botstyle Scorer: a character-card pseudo-fork of slop-score that reads how much a card leans on stock AI phrasing",
   "license": "MIT",
+  "homepage": "https://frizzyconvo.github.io/botstyle-score/",
+  "repository": { "type": "git", "url": "https://github.com/frizzyconvo/botstyle-score.git" },
+  "engines": { "node": ">=18" },
   "type": "module",
   "dependencies": {
     "@msgpack/msgpack": "^3.1.2",
@@ -17,6 +20,7 @@
     "leaderboard": "node tools/build_card_leaderboard.mjs",
     "reference": "node tools/build_reference.mjs",
     "score-path": "node tools/score_all.mjs --add",
-    "results": "node tools/results.mjs"
+    "results": "node tools/results.mjs",
+    "shortcuts": "node tools/doc_shortcuts.mjs"
   }
 }

@@ -6,6 +6,33 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.22.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged. Housekeeping: docs, licenses and unused files.
+
+### Added
+- `docs/README.md`: an index of every doc and what it's for, linked from the readme.
+- `tools/doc_shortcuts.mjs` (`npm run shortcuts`): Windows shortcuts in `docs/` to every doc, local-only ones included,
+  grouped as "Public", "Dev" and "Eval" and each with a tooltip saying what it is. `--check` lists any doc without a
+  named entry; `--list` works on any OS. It runs on its own at any time, including during a scoring run, and
+  `tools/organize_eval.mjs` uses it.
+- `NOTICE.md`: licenses of the bundled third-party parts (wordfreq, word-list, msgpack, wink-pos-tagger).
+- `.gitattributes`: text files are stored with LF line endings, batch files check out with CRLF, data files are binary.
+- `package.json`: Node version (18+), homepage and repository fields.
+
+### Changed
+- `LICENSE` is now the plain MIT text with both copyright holders, so GitHub recognizes it; the wordfreq and other
+  third-party license notes moved to `NOTICE.md`.
+- `data/prompts.json` moved to `upstream/prompts.json`: only upstream's benchmark script uses it.
+- The readme's layout table and license section point to the new docs index and notices.
+
+### Removed
+- `data/human_writing_profile.json` (75 MB): nothing loads it. The list builder reads the human profile from the
+  slop-forensics and auto-antislop folders it came from.
+- `tools/botstyle_leaderboard.mjs` and `data/botstyle_leaderboard.json`: the story-model leaderboard from 0.2.0,
+  replaced by the card leaderboard.
+- `js/debug.js`: an unused upstream logging helper.
+
 ## [0.21.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.

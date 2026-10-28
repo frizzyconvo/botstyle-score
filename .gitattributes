@@ -1,0 +1,10 @@
+# Normalize text files to LF in the repository; Windows batch files keep CRLF on checkout.
+* text=auto
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary data
+*.png binary
+*.gz binary
+*.zip binary
+*.msgpack binary

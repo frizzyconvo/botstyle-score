@@ -19,6 +19,7 @@ cards instead of stretching each measure between 22 models and a human baseline.
 - **How it works, and what every band, tag, format and label means:** [BOTSTYLE.md](BOTSTYLE.md)
 - **What changed in each version:** [CHANGELOG.md](CHANGELOG.md)
 - **Every word and pattern list, how it's built and how it has changed:** [docs/LISTS.md](docs/LISTS.md)
+- **Every other doc, and what each one is for:** [docs/README.md](docs/README.md)
 
 ## Use it
 
@@ -56,15 +57,16 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 | `js/` | The scorer and the page script. `score-card.js` is the entry point; `card-style.js` holds format names; `app.js` is the page. |
 | `data/` | Word and phrase lists, calibration, the leaderboard and the reference distributions the page grades against. |
 | `tools/` | Building lists, scoring datasets, building the leaderboard and reference, generating AI test cards, tests, the local server and the Cloudflare Workers (card proxy, public list). Every tool takes `--help`. |
-| `tests/` | Test fixtures for `npm test`. |
-| `docs/` | The list manifest (`docs/LISTS.md`), background notes (e.g. Foreverse's card-writing rubric) and the to-do list (`docs/TODO.md`). |
-| `upstream/` | Leftovers from slop-score kept for reference: its model outputs, benchmark and leaderboard scripts. |
+| `tests/` | Test fixtures for `npm test` (the tests themselves are `tools/test.mjs`). |
+| `docs/` | The docs index (`docs/README.md`), the list manifest (`docs/LISTS.md`), the to-do list (`docs/TODO.md`) and background notes (Foreverse's card-writing rubric). |
+| `upstream/` | Leftovers from slop-score kept for reference: its model outputs, prompts, benchmark and leaderboard scripts. |
 | `vendor/` | Bundled browser libraries (msgpack, part-of-speech tagger). |
 | `eval/`, `dev/` | Local only, not in git: datasets, scoring runs and dev scripts. |
 
 ## Development
 
 - **Tests:** `npm test`.
+- **Doc shortcuts** (Windows): `npm run shortcuts` puts a shortcut to every doc, local-only ones included, in `docs/`.
 - **Score every dataset** with the current scorer (versioned, resumable, about 45 minutes):
   `npm run score-all`. Results go to `eval/scores/v<version>/`; read `notes.md` there first. Then rebuild what
   the page uses with `npm run leaderboard` and `npm run reference`.
@@ -91,12 +93,9 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 
 ## License and credits
 
-MIT (see [LICENSE](LICENSE)), except the wordfreq port: `js/wordfreq.js` is Apache 2.0 and
-`data/large_en.msgpack.gz` is CC BY-SA 4.0 ([wordfreq](https://github.com/rspeer/wordfreq) by Robyn Speer;
-Speer, R. (2022). rspeer/wordfreq: v3.0 (v3.0.2). Zenodo. https://doi.org/10.5281/zenodo.7199437).
-
-`data/extra_words.txt` (rare real words for the typo check) is derived from
-[word-list](https://github.com/sindresorhus/word-list) by Sindre Sorhus (MIT).
+MIT (see [LICENSE](LICENSE)), except the bundled third-party parts listed in [NOTICE.md](NOTICE.md): the wordfreq
+port (`js/wordfreq.js`, Apache 2.0) and its data (`data/large_en.msgpack.gz`, CC BY-SA 4.0) by Robyn Speer, the
+word-list-derived `data/extra_words.txt` (MIT) and the vendor libraries.
 
 Built on [slop-score](https://github.com/sam-paech/slop-score) by Samuel J. Paech (2025). Datasets and other
 credits are listed in [BOTSTYLE.md](BOTSTYLE.md#credits).

@@ -295,7 +295,7 @@ async function main() {
       model: { type: 'string' },
       'base-url': { type: 'string' },
       'api-key': { type: 'string' },
-      prompts: { type: 'string', default: 'data/prompts.json' },
+      prompts: { type: 'string', default: 'upstream/prompts.json' },
       results: { type: 'string' },
       workers: { type: 'string', default: '8' },
       timeout: { type: 'string', default: '480' },

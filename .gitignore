@@ -10,5 +10,12 @@ _to_delete/
 eval/
 # local dev scripts and notes (overnight runs, model lists)
 dev/
-# Windows shortcut to the latest scoring-run notes (points into eval/, which is local)
+# Windows shortcuts to every doc, made by tools/doc_shortcuts.mjs (they point at local files)
 docs/*.lnk
+# OS and editor clutter
+Thumbs.db
+desktop.ini
+.DS_Store
+*.log
+# token files (kept next to the repo, never in it)
+.git-credentials*
