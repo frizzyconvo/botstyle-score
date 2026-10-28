@@ -1,6 +1,6 @@
 # botstyle-score
 
-Version **0.3.0** (see [CHANGELOG.md](CHANGELOG.md)). Run it locally: double-click `start-local.cmd` (Windows) or
+Version **0.4.0** (see [CHANGELOG.md](CHANGELOG.md)). Run it locally: double-click `start-local.cmd` (Windows) or
 `npm start`, open http://localhost:8787/, paste a Chub or Botbooru link and press Fetch card. Needs Node 18+.
 
 A fork of [sam-paech/slop-score](https://github.com/sam-paech/slop-score) adapted to score **character cards**
@@ -319,6 +319,60 @@ overuses relative to the Reddit stories the lists were weighted against: a genre
 mostly one "nearly imperceptible frown". With all fields the page gives 75990 34.2 (its personality field
 alone scores 60).
 
+## Versioned scoring and regression tests
+
+Every `scoreCard()` result carries `version` (`SCORER_VERSION` in `js/score-card.js`, kept equal to
+`package.json` by a test). Bump it for any change that can move scores or labels. `tools/score_all.mjs`
+(or `score-all.cmd`) scores every card dataset and writes `eval/scores/v<version>/<dataset>.jsonl` plus
+`summary.json`; it resumes where it stopped and can run overnight. The first run flattens JanitorAI's
+188,834 card files into `card-datasets/jaicards-cards-js/jaicards_cards.jsonl`.
+`node tools/compare_scores.mjs eval/scores/v0.4.0 eval/scores/v0.5.0` reports, per dataset, the median before
+and after, mean absolute change, the share of cards whose band changed (and which way), and the biggest movers.
+`python3 tools/build_reference.py --scores eval/scores/v<version>` rebuilds the percentile reference from a
+complete run (it refuses mixed versions); the reference records the version it was built with.
+
+v0.4.0 so far: Korshuk 8.5 median (488 reliable), Chub 2023–26 16.1, SPB 31.5, generated v1 36.0,
+generated v2 31.3, character-card-skills 11.0. JanitorAI and Perchance come from the overnight run, after which
+the human reference grows from 2,121 cards to tens of thousands and the bands get re-cut.
+
+## Bands: where 20 and 40 sit
+
+| Original / Common cut | Human 2023 (O/M/C %) | AI cards | Chub 2025 |
+|---|---|---|---|
+| 20 / 40 (current) | 78 / 18 / 4 | 8 / 65 / 26 | 42 / 42 / 16 |
+| 20 / 35 | 78 / 16 / 6 | 8 / 52 / 40 | 42 / 34 / 25 |
+| 25 / 40 | 86 / 10 / 4 | 23 / 50 / 26 | 54 / 30 / 16 |
+| 25 / 45 | 86 / 11 / 3 | 23 / 62 / 15 | 54 / 36 / 10 |
+| 30 / 45 | 91 / 6 / 3 | 41 / 44 / 15 | 64 / 25 / 10 |
+
+(3,827 human 2023 cards incl. JanitorAI June 2023, 941 AI cards, v0.3 scores.) Mixed currently spans the 80th to
+98th percentile of human cards and holds two thirds of AI cards. 20/35 catches 40% of AI cards as Common for 2
+more points of human cards; raising the Original cut lets many AI cards through. To be re-cut on the full
+JanitorAI reference, and after the card-calibrated word list below.
+
+## Genre ("pulp") calibration (`tools/card_calibrate.mjs`, not active yet)
+
+Genavros scores high on dark-fantasy words. Checking every scored word against human cards (prose only)
+shows a few hundred of them are at least as common in human 2023 cards, especially fantasy / horror / action
+cards, as in AI cards: abilities, aura, hero, realm, amidst, legendary, unyielding, ruins, monstrous… They were
+weighted by AI fiction vs Reddit stories, where they are rare, but on cards they are genre vocabulary.
+Dropping words whose human-card share (overall or pulp) is at least the AI-card share, chosen on half the
+cards and tested on the other half:
+
+| | Card AUC (human+pulp vs AI) | Pulp cards vs AI | Medians human / pulp / AI | Genavros (desc + greeting) | SlopReview | Gutenberg |
+|---|---|---|---|---|---|---|
+| current list | 0.851 | 0.791 | 13.4 / 16.8 / 31.1 | 31.2 | 0.977 | 0.997 |
+| card-calibrated (~280–370 words dropped) | **0.931** | **0.912** | 8.3 / 10.3 / 29.3 | **22.9** | 0.977 | 0.994 |
+
+So a general card calibration does what a "pulp offset" would, without a genre switch. It isn't on yet because
+the human side matters: with Chub 2023 as evidence it also drops classic slop (intricate, vibrant, unwavering),
+which suggests some "human 2023" Chub cards were already AI-assisted; Korshuk alone (Feb–Apr 2023, little
+prose) drops only 29 words. After the overnight run, rebuild it from the cleanest sets and turn it on as 0.5.0:
+`node tools/card_calibrate.mjs --human ../card-datasets/korshuk-roleplay-characters/korshuk_cards.jsonl
+../card-datasets/jaicards-cards-js/jaicards_cards.jsonl --ai eval/ai_cards.jsonl eval/ai_cards_v2.jsonl
+../card-datasets/spb-2602-ai-personas/data.jsonl --before 2023-07`, then `node tools/calibrate.mjs`, run
+`score_all`, compare with v0.4.0. `botstyle.js` applies `data/botstyle_card_drop.json` when it exists.
+
 ## Grading: what the 0–100 means
 
 The score is a weighted hit rate scaled so 100 = the sloppiest 10% of card-length AI fiction; it isn't a
@@ -333,8 +387,7 @@ percentage or a probability. Since 0.3.0 every result also says where it sits am
 | 60 | 99% | 97% |
 
 So 20 and 40 sit at roughly the 80th and 98th percentile of human cards and the 10th and 75th of AI cards.
-The 0–100 number stays for continuity (leaderboard, bands, platform), and the percentile line is the
-plain-language reading. A calibrated probability from the score alone would depend on how common AI cards
+The 0–100 number stays for continuity (leaderboard, bands, platform); the percentiles are in the score's ⓘ popover. A calibrated probability from the score alone would depend on how common AI cards
 are among whatever is being scored, so percentiles against both groups are the more honest framing.
 
 ## Categories vs character-card-skills

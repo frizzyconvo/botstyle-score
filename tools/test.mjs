@@ -114,5 +114,11 @@ const r10 = scoreCard({ description: 'Her eyes sparkled with mischief, a testame
 const r11 = scoreCard({ description: 'Mara runs the bakery on Elm Street and argues with everyone about rye. She owes her sister forty dollars. '.repeat(20) });
 check('reference percentiles present and ordered', r10.reference && r11.reference && r10.reference.human_2023.percentile > r11.reference.human_2023.percentile, JSON.stringify([r10.reference, r11.reference]));
 
+const { SCORER_VERSION } = await import('../js/score-card.js');
+const pkgV = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8')).version;
+check('SCORER_VERSION matches package.json', SCORER_VERSION === pkgV, `${SCORER_VERSION} vs ${pkgV}`);
+check('results carry the scorer version', r10.version === SCORER_VERSION);
+check('reference built with this scorer version', r10.reference.version === SCORER_VERSION, r10.reference.version);
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

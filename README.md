@@ -7,7 +7,8 @@ rebuild the lists; the original README follows.
 **Run it locally:** install Node 18+, then double-click `start-local.cmd` (Windows) or run `npm start`, and open
 http://localhost:8787/. Paste a Chub or Botbooru link and press *Fetch card*, or paste/drop a card. Opening
 `slop-score.html` directly from disk doesn't work (browsers block its scripts there). Command line:
-`node tools/score_url.mjs <link | card.json | card.png>`. Tests: `npm test`.
+`node tools/score_url.mjs <link | card.json | card.png>`. Tests: `npm test`. Score every dataset (overnight,
+versioned, for regression checks): `score-all.cmd` or `npm run score-all`.
 
 ---
 

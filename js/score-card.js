@@ -25,6 +25,11 @@ import { textureFeatures, aiStyleLikelihood } from './texture.js';
 // at 20/40, ~87% of 2023 human cards are Original and 2-4% Common, while AI-written cards
 // (SPB) are 4% Original / 19% Common and AI stories 7% / 60%. The older 30/60 split put
 // 42% of AI cards in Original and almost nothing in Common. Change here if needed.
+// Version of the scoring pipeline. Bump it (and package.json, CHANGELOG.md) whenever a change can
+// move scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it,
+// so stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
+export const SCORER_VERSION = '0.4.0';
+
 export const WRITING_STYLE_BANDS = { original: 20, common: 40 };
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
@@ -50,6 +55,7 @@ export function referencePercentiles(score) {
   if (!REFERENCE || !REFERENCE.groups) return null;
   const out = {};
   for (const [k, g] of Object.entries(REFERENCE.groups)) out[k] = { label: g.label, n: g.n, percentile: percentileIn(g.q, score) };
+  out.version = REFERENCE.version || null;   // scorer version the reference was built with
   return out;
 }
 
@@ -103,6 +109,7 @@ export function scoreCard(card, opts = {}) {
   const texture = textureFeatures(pre.prose);
   const likelihood = aiStyleLikelihood(score.score, texture, pre.stats.proseWords);
   const result = {
+    version: SCORER_VERSION,
     score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable,
     components: score.components, emdashPoints: score.emdashPoints, artifactPoints: score.artifactPoints,
     band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0),

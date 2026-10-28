@@ -31,6 +31,20 @@
 // clarifying questions, truncation, missing greeting, "original character inspired by"
 // substitutions). Score only valid lines.
 
+// ---------------------------------------------------------------- models (OpenRouter ids)
+// Run 1 (eval/ai_cards.jsonl, old prompts, 20 per style, Oct 2026):
+//   anthropic/claude-sonnet-4.5, openai/gpt-5-mini
+// Run 2 (eval/ai_cards_v2.jsonl, v2 prompts, 1 per cell, Oct 2026):
+//   openai/gpt-5-mini, anthropic/claude-sonnet-4.5, deepseek/deepseek-v3.2-exp,
+//   moonshotai/kimi-k2-0905, z-ai/glm-4.5, meta-llama/llama-4-maverick
+// Run 3 (planned, same file): community roleplay fine-tunes, the scorer's biggest blind spot
+// on SlopReview (Gemmasutra, Impish Bloodmoon, Rocinante, Azure Starlight; the first two
+// aren't on OpenRouter, so their nearest available relatives are used):
+//   thedrummer/rocinante-12b, thedrummer/unslopnemo-12b (trained to avoid slop),
+//   thedrummer/cydonia-24b-v4.1, thedrummer/skyfall-36b-v2, sao10k/l3.3-euryale-70b,
+//   gryphe/mythomax-l2-13b (the 2023 classic), mistralai/mistral-nemo (base of most 12B RP tunes)
+// Ids that OpenRouter doesn't serve fail with an HTTP error per card and the run continues.
+
 import { readFileSync, appendFileSync, existsSync, writeFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { config } from 'dotenv';
@@ -240,10 +254,12 @@ if (DRY) {
 }
 
 let n = 0, bad = 0, spent = 0;
+const modelErrors = {};   // consecutive request errors per model; 3 in a row skips that model
 async function worker() {
   while (jobs.length) {
     if (spent >= MAX_USD) { console.log(`  stopping: reported cost $${spent.toFixed(3)} reached --max-usd`); jobs.length = 0; break; }
     const j = jobs.shift();
+    if ((modelErrors[j.model] || 0) >= 3) continue;
     try {
       let res = await ask(j.model, j.prompt);
       let parts = split(res.text);
@@ -266,9 +282,12 @@ async function worker() {
         raw: res.text, finish_reason: res.finish, usage: res.usage, cost, provider: res.provider, gen_id: res.gen_id,
         valid: v.valid, flags: v.flags, source: 'AI',
       }) + '\n');
-      n++; if (!v.valid) bad++;
+      n++; if (!v.valid) bad++; modelErrors[j.model] = 0;
       console.log(`  ${v.valid ? 'ok ' : 'BAD'} ${j.id}${v.flags.length ? ' [' + v.flags.join(',') + ']' : ''}${cost ? ` $${cost.toFixed(4)}` : ''}`);
-    } catch (e) { console.error(`  ERR ${j.id}: ${e.message}`); }
+    } catch (e) {
+      console.error(`  ERR ${j.id}: ${e.message}`);
+      if ((modelErrors[j.model] = (modelErrors[j.model] || 0) + 1) === 3) console.error(`  skipping the rest of ${j.model}: 3 failed requests in a row (wrong id or unavailable?)`);
+    }
   }
 }
 await Promise.all(Array.from({ length: CONC }, worker));

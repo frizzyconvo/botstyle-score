@@ -4,6 +4,24 @@ Versions follow `MAJOR.MINOR.PATCH`. A change to how scores are computed (lists,
 bands) bumps MINOR and is noted here, so scores from different versions aren't compared by accident.
 `package.json` holds the current version.
 
+## 0.4.0 (2026-10-28)
+
+Scoring output (scores unchanged; the version is now part of every result)
+- `SCORER_VERSION` in `js/score-card.js`; every result carries `version`; the reference records the version it
+  was built with and is rebuilt from `tools/score_all.mjs` output (Korshuk + Chub before Jul 2023 for now).
+- `botstyle.js` applies an optional card-calibration drop list (`data/botstyle_card_drop.json`); none ships yet.
+
+Page
+- New look (css/app.css): dark/light themes, score card with band chip, percentiles in an ⓘ popover,
+  cleaner leaderboard and report sections, mobile layout. The Slop / Not slop splash is gone; the unused
+  upstream style.css was removed.
+
+Tools
+- `tools/score_all.mjs` (+ `score-all.cmd`): versioned scoring of every card dataset, resumable, overnight-safe;
+  `tools/compare_scores.mjs` for regression checks between versions.
+- `tools/card_calibrate.mjs`: genre/card calibration experiment (see BOTSTYLE.md).
+- `generate_ai_cards.mjs`: models of each run listed in the header; skips a model after 3 failed requests.
+
 ## 0.3.0 (2026-10-28)
 
 Scoring output (the score itself is unchanged)
