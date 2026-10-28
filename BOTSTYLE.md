@@ -59,7 +59,7 @@ a little more or less text.
 together), shown under the score for comparison. It matches EQ-Bench's slop-score page exactly. More of its
 metrics are under "Stats for nerds".
 
-**The ⓘ next to the score** says where it sits among human cards from 2023 and AI-written cards. That comparison
+**The ⓘ next to the score** says where it sits among 2023 cards (mostly human) and AI-written cards. That comparison
 says more than the number on its own.
 
 ### Sentence structures
@@ -120,7 +120,7 @@ card-field residue (`"first_mes": "…"`), unfilled placeholders ("[Insert name]
 
 Tentative, still being calibrated.
 
-| Score | Band | Fun tagline | Human cards, 2023 | AI-written cards |
+| Score | Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
 |---|---|---|---|---|
 | under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 35% |
 | 40–60 | **Mixed** | *Mixed signals* | 4% | 37% |
@@ -130,12 +130,17 @@ Tentative, still being calibrated.
 The band names say how common the card's phrasing is in AI writing. The taglines are just for fun and shown next
 to them.
 
-The cut-offs keep false alarms on human cards low, so a low score doesn't clear anyone. Human cards: 108,129
-cards from 2023 (Korshuk, JanitorAI, Chub), median 12. AI-written cards: 1,290, median 49.
+The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,129
+(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 1,290, median 49.
+
+**The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
+AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
+up ChatGPT-, Claude- and Bing-written cards from 2023 among them. Some of its 2% in Common are real AI cards, so
+the false-positive rate on human writing is somewhat lower than these numbers suggest.
 
 **Mixed card** (flag, not a band): the description and the first message both have 150+ words of prose and land
 25+ points apart, for example a hand-written description with an AI-written greeting. The card score stays a
-blend; taking the higher part raised false alarms on human cards, because short greetings are noisy.
+blend; taking the higher part raised false positives on human cards, because short greetings are noisy.
 
 ## Formats
 
@@ -322,14 +327,15 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 human (2023) vs 1,290 AI-written | 0.69 | 0.90 |
+| Character cards: 108,129 from 2023 (mostly human) vs 1,290 AI-written | 0.69 | 0.90 |
 
-On the cards, at a 2% false-alarm rate on human cards, BBBScorer flags 28% of AI-written cards and the original
+On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 28% of AI-written cards and the original
 slop score 8.5%.
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
-and Chub, 2023) against AI personas (SPB-2602) and cards generated for this project.
+and Chub, 2023) against AI personas (SPB-2602) and cards generated for this project. The 2023 side includes some
+AI-written cards (see [Bands](#bands)), which makes these numbers a little pessimistic.
 
 ### How BBBScorer differs from slop-score
 
@@ -361,6 +367,7 @@ and Chub, 2023) against AI personas (SPB-2602) and cards generated for this proj
 | **Percentile ("pct")** | Share of the comparison cards scoring lower. |
 | **Request style** | How a leaderboard card was asked for (lazy prompt or one of the formats). |
 | **Reference set** | Real cards scored with the same version, for comparison. |
+| **False positive** | A human-written card scored as AI-styled (here: landing in Common). The false-positive rate is the share of human cards that do. |
 | **AUC** | Chance that a random AI-written card scores higher than a random human card (0.5 = coin flip, 1 = always). |
 | **Disparity** | In scoring-run notes: BBBScorer and the original slop score 30+ ("big") or 50+ ("very big") points apart on one card. |
 

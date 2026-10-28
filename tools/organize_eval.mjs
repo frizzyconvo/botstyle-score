@@ -71,7 +71,8 @@ if (leftovers.length) console.log(`  not sorted (left in eval/): ${leftovers.joi
 // Windows only (PowerShell); *.lnk is gitignored. Run-specific ones follow the current scorer version.
 export const DOC_SHORTCUTS = cur => [
   ['Readme', 'README.md'], ['Documentation (BOTSTYLE)', 'BOTSTYLE.md'], ['Changelog', 'CHANGELOG.md'],
-  ['Dev chat log', 'dev/CHATLOG.md'], ['Dev notes', 'dev/NOTES.md'], ['Dev scripts readme', 'dev/README.md'],
+  ['Dev chat log', 'dev/CHATLOG.md'], ['Dev notes', 'dev/NOTES.md'], ['Dev scripts readme', 'dev/README.md'], ['Rescore ideas', 'dev/RESCORE_IDEAS.md'],
+  ['Latest AI-model report', `eval/scores/v${cur}/ai-models.md`],
   ['Latest scorer notes', `eval/scores/v${cur}/notes.md`], ['Latest scorer comparison', `eval/scores/v${cur}`, 'compare'],
   ['Latest scorer manifest (SCORER)', `eval/scores/v${cur}/SCORER.md`], ['Eval folder guide', 'eval/README.md'],
   ['Upstream leftovers readme', 'upstream/README.md'],
@@ -80,6 +81,7 @@ if (!DRY && current && process.platform === 'win32') {
   const ps = [];
   for (const [name, target, kind] of DOC_SHORTCUTS(current)) {
     let t = join(ROOT, ...target.split('/'));
+    if (!kind && !existsSync(t)) continue;
     if (kind === 'compare') { const f = existsSync(t) ? readdirSync(t).filter(x => /^compare-v.*\.txt$/.test(x)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).pop() : null; if (!f) continue; t = join(t, f); }
     const lnk = join(ROOT, 'docs', name + '.lnk').replace(/'/g, "''");
     ps.push(`$s = $w.CreateShortcut('${lnk}'); $s.TargetPath = '${t.replace(/'/g, "''")}'; $s.Save()`);

@@ -6,6 +6,12 @@
 //   node tools/score_all.mjs --only korshuk,perchance
 //   node tools/score_all.mjs --limit 200     # quick trial: first 200 cards per dataset (-> _trial/)
 //   node tools/score_all.mjs --force         # rescore datasets already done for this version
+//   node tools/score_all.mjs --add "C:\cards\pack.zip\books\*.png" --name jammy_books [--label ai|human|mixed|unknown]
+//                                            # score cards at any path (folder, Perchance folder, .zip, card file) as an
+//                                            # extra dataset; only scores are written (eval/scores/v<ver>/<name>.jsonl),
+//                                            # never card text. The path is remembered in eval/extra-datasets.json, so
+//                                            # later full runs (new scorer versions) score it again. See tools/_card_sources.mjs.
+//   node tools/score_all.mjs --extras        # list the extra datasets;  --remove-extra <name> forgets one
 //
 // Output: eval/scores/v<SCORER_VERSION>/<dataset>.jsonl (one row per card, each with `version`), SCORER.md
 // (which scorer: weights, lists, anchors, bands; tools/scorer_manifest.mjs) and
@@ -19,6 +25,7 @@
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
 import { PATHS } from './_paths.mjs';
+import { readCards, sourceKind } from './_card_sources.mjs';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, renameSync, openSync, readSync, closeSync, writeSync, appendFileSync, unlinkSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -75,7 +82,7 @@ function disparity(r, up) {
 
 const argv = process.argv.slice(2);
 const opt = k => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : null);
-const ONLY = opt('--only') ? opt('--only').split(',') : null, LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force');
+let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force');
 // --limit trial runs go to a _trial subfolder so they never count as a finished dataset
 const OUT = join(ROOT, 'eval', 'scores', 'v' + SCORER_VERSION, ...(LIMIT ? ['_trial'] : []));
 mkdirSync(OUT, { recursive: true });
@@ -176,6 +183,33 @@ const DATASETS = [
   { name: 'jaicards', label: 'human', rows: null },   // filled in below (needs the cache)
 ];
 
+// ---- extra datasets: any path the user points at (--add), remembered in eval/extra-datasets.json ----
+const EXTRAS_FILE = join(ROOT, 'eval', 'extra-datasets.json');
+const extras = existsSync(EXTRAS_FILE) ? JSON.parse(readFileSync(EXTRAS_FILE, 'utf-8')) : [];
+const saveExtras = () => writeFileSync(EXTRAS_FILE, JSON.stringify(extras, null, 1));
+if (argv.includes('--extras')) {
+  console.log(extras.length ? extras.map(x => `${x.name} (${x.label}): ${x.path}  [added ${x.added.slice(0, 10)}]`).join('\n') : 'No extra datasets. Add one with --add <path> --name <name>.');
+  dropLock(); process.exit(0);
+}
+if (opt('--remove-extra')) {
+  const i = extras.findIndex(x => x.name === opt('--remove-extra'));
+  console.log(i < 0 ? `No extra dataset called ${opt('--remove-extra')}.` : `Forgot ${extras.splice(i, 1)[0].name} (its scores stay in eval/scores).`); if (i >= 0) saveExtras();
+  dropLock(); process.exit(0);
+}
+if (opt('--add')) {
+  const path = resolve(opt('--add').replace(/^"|"$/g, '')), kind = sourceKind(path);
+  if (!kind) { console.log(`Can't read cards at ${path}: give a folder, a Perchance characters folder, a .zip (optionally with a folder or *.png after it) or a .png/.json/.jsonl file.`); dropLock(); process.exit(2); }
+  const auto = path.replace(/[\\/]\*.*$/, '').split(/[\\/]/).filter(Boolean).slice(-1)[0].replace(/\.zip$/i, '');
+  const name = String(opt('--name') || auto).toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'extra';
+  if (DATASETS.some(d => d.name === name)) { console.log(`"${name}" is a built-in dataset name; pick another --name.`); dropLock(); process.exit(2); }
+  const label = ['ai', 'human', 'mixed', 'unknown'].includes(opt('--label')) ? opt('--label') : 'unknown';
+  const prev = extras.find(x => x.name === name);
+  if (prev && prev.path !== path) { console.log(`"${name}" already points at ${prev.path}. Use another --name, or --remove-extra ${name} first.`); dropLock(); process.exit(2); }
+  if (!prev) { extras.push({ name, path, label, kind, added: new Date().toISOString() }); saveExtras(); console.log(`Added extra dataset "${name}" (${kind}, label ${label}): ${path}`); }
+  ONLY = [name];
+}
+for (const x of extras) DATASETS.push({ name: x.name, label: x.label, extra: true, source: x.path, rows: () => readCards(x.path) });
+
 // notes.md: per dataset, how BBBScorer and the original compare (spread, agreement, disparities, examples).
 const NOTES = join(OUT, 'notes.md');
 function writeNotes(name, rows) {
@@ -228,6 +262,7 @@ for (const ds of DATASETS) {
   if (existsSync(outFile) && !FORCE) { console.log(`${ds.name}: already scored for v${SCORER_VERSION} (use --force to redo)`); continue; }
   if (ds.name === 'jaicards') { const c = await jaicardsCache(); if (!c) { console.log('jaicards: not found, skipped'); continue; } ds.rows = () => jsonlStream(c); }
   if (ds.need && !existsSync(ds.need)) { console.log(`${ds.name}: ${ds.need} not found, skipped`); continue; }
+  if (ds.extra && !sourceKind(ds.source)) { console.log(`${ds.name}: ${ds.source} not found, skipped`); continue; }
   const t0 = Date.now(), startedAt = new Date().toISOString(); const rows = []; let n = 0, totalWords = 0;   // rows are small (no card text)
   const total = ds.name === 'jaicards' ? countLines(join(CARDS, 'jaicards-cards-js', 'jaicards_cards.jsonl')) : ds.need ? countLines(ds.need) : null;
   say(`[${dsIndex}/${todo.length}] ${ds.name}: scoring${total ? ` ${total.toLocaleString()} cards` : ''}…`);

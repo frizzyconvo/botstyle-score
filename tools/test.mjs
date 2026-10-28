@@ -158,5 +158,12 @@ const htmlTitle = (html.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
 check('page title names the scorer version (update index.html <title> when bumping)', htmlTitle === 'BB Botstyle Scorer v' + SCORER_VERSION, htmlTitle);
 check('heading shows the scorer version (index.html .title-ver)', html.includes(`<span class="title-ver">v${SCORER_VERSION}</span>`));
 
+// card sources for score_all --add: zip (with an inner pattern), card PNGs inside it
+const { readCards, sourceKind } = await import('./_card_sources.mjs');
+const zipPath = (await import('url')).fileURLToPath(new URL('../tests/fixtures/cards.zip', import.meta.url));
+const zAll = [...readCards(zipPath)], zBooks = [...readCards(zipPath + '/books/*.png')];
+check('zip source: every card file inside', zAll.length === 3 && sourceKind(zipPath) === 'zip', zAll.length);
+check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zBooks[0].name === 'Zed' && zBooks[0].description.length > 100, zBooks.map(c => c.id).join());
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

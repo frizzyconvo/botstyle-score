@@ -168,6 +168,11 @@ export const REQUEST_STYLES = {
   compact:         ['Compact', 'W++ or PList.'],
   first_person:    ['In voice: first person', 'Description written as the character speaking.'],
   interview:       ['In voice: interview', 'Ali:Chat-style Q&A exchanges.'],
+  // run 1 (first generation run, older prompts)
+  structured_plist: ['Compact: PList (run 1)', 'PList, first-run prompt.'],
+  structured_wpp:   ['Compact: W++ (run 1)', 'W++, first-run prompt.'],
+  structured_list:  ['Lists (run 1)', 'Bullet lists, first-run prompt.'],
+  in_voice:         ['In voice (run 1)', 'First person or interview, first-run prompt.'],
 };
 export const requestStyleLabel = id => (REQUEST_STYLES[id] || [id])[0];
 

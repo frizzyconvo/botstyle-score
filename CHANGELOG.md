@@ -6,6 +6,24 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.13.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- Score cards at any path as an extra dataset: `npm run score-path -- "<path>" --name <name>` (`score_all.mjs --add`).
+  Reads folders of card PNG / JSON / JSONL files, Perchance character folders, .zip files (optionally a folder or
+  pattern inside, e.g. `pack.zip\books\*.png`) and single card files (`tools/_card_sources.mjs`). Writes scores only,
+  never card text, and remembers the path so later full runs score it again.
+- `tools/model_report.mjs`: per-model report for the generated AI cards: BBBScorer and original medians, regression
+  of one on the other with each model's residual, within-model agreement, cost per card, and the upstream story
+  scores for comparison. Written to the run folder as `ai-models.md`.
+
+### Changed
+- "False positive" instead of "false alarm" throughout.
+- The 2023 reference is described as mostly human, not human: it includes some AI-written cards from 2023.
+- Leaderboard request styles from the first generation run have readable names.
+
 ## [0.12.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores and cut-offs unchanged.
@@ -81,7 +99,7 @@ Scores unchanged.
 
 ### Changed
 - **Description and first message scored separately**, then blended by length (each counts up to 400 prose words).
-  At a 2% false-alarm rate on human cards this catches 29% of AI cards instead of 15% (AUC 0.91, was 0.90).
+  At a 2% false-positive rate on human cards this catches 29% of AI cards instead of 15% (AUC 0.91, was 0.90).
 - **Bands re-cut:** under 40 / 40–60 / 60+ (human 2023 cards 93 / 5 / 2%, AI cards 30 / 40 / 30%).
 - Overnight scoring prints progress (dataset, cards done, %, time left) every 15 seconds and keeps a progress log;
   a lock file stops two scoring runs at once.

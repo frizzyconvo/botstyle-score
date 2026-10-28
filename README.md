@@ -60,6 +60,12 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 - **Score every dataset** with the current scorer (versioned, resumable, about 45 minutes):
   `npm run score-all`. Results go to `eval/scores/v<version>/`; read `notes.md` there first. Then rebuild what
   the page uses with `npm run leaderboard` and `npm run reference`.
+- **Score cards at any path** (a folder of card PNG/JSON files, a Perchance characters folder, a .zip, optionally
+  with a folder or pattern inside it, or one card file): `npm run score-path -- "<path>" --name <short name>`
+  (`--label ai|human|mixed|unknown`). Only scores are written, to `eval/scores/v<version>/<name>.jsonl` with a section
+  in that run's `notes.md`; the path is remembered so later full runs score it again (`--extras` lists them).
+- **Per-model report** for the generated AI cards (BBBScorer vs the original score, regression, residuals, cost):
+  `node tools/model_report.mjs`.
 - **Compare with the previous run:** `node tools/compare_scores.mjs --previous`.
 - **Tidy `eval/`:** `node tools/organize_eval.mjs` (the current run stays in `eval/scores/`, older ones move to
   `eval/old/`).

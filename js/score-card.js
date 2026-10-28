@@ -144,7 +144,7 @@ export function scoreCard(card, opts = {}) {
   // Card score (scorer 0.8.0+): the description and the greeting(s) are scored separately and blended,
   // each weighted by its prose words up to PART_WEIGHT_CAP, plus card-level chatbot-leftover points. A part
   // needs PART_MIN_WORDS of prose to count; with none, the joint score is used. Scoring the parts apart caught
-  // nearly twice as many AI cards at a 2% false-alarm rate on human cards (eval_cards.mjs). opts.joint = true
+  // nearly twice as many AI cards at a 2% false-positive rate on human cards (eval_cards.mjs). opts.joint = true
   // keeps the old one-text score.
   const joint = { score: score.score, low: score.low, high: score.high };
   if (!opts.joint) {

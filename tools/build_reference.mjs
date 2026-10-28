@@ -52,7 +52,7 @@ const summary = { bands: [WB.original, WB.common],
 const out = { note: 'Botstyle score quantiles (index = percentile). Built by tools/build_reference.mjs.', version: [...versions][0], built: new Date().toISOString().slice(0, 10),
   summary,
   groups: {
-    human_2023: { label: 'human-written cards (2023)', n: human.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])), q: quantiles(human.map(r => r.score)) },
+    human_2023: { label: '2023 cards (mostly human)', n: human.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])), q: quantiles(human.map(r => r.score)) },
     ai_cards: { label: 'AI-written cards', n: ai.length, q: quantiles(ai.map(r => r.score)) },
   } };
 writeFileSync('data/botstyle_reference.json', JSON.stringify(out, null, 1));
