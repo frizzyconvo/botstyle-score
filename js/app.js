@@ -214,7 +214,7 @@ function renderResult(r) {
   let L = `<div class="score-hero"><div><div class="score-num">${r.score.toFixed(1)}</div><div class="score-sub">range ${r.low.toFixed(0)}–${r.high.toFixed(0)}</div></div>
     <div class="score-meta"><span class="band ${band.id}">${esc(band.label || 'Low confidence')}</span>${band.id !== 'na' ? '<span class="tent" title="Band names and cut-offs are tentative while the scorer is calibrated">tentative</span>' : ''}${pop}
       <div class="score-cap">${esc(state.card.name || 'This card')} · ${esc(used.join(', ') || 'nothing selected')}</div>
-      ${r.archetype ? `<div class="arch" title="${esc(r.archetype.blurb || '')}"><span class="arch-tag">${esc(r.archetype.label)}</span>${r.archetype.size ? `<span class="arch-size">${esc(r.archetype.size)}</span>` : ''}<span class="faint small"> archetype · experimental</span></div>` : ''}</div></div>
+      ${r.archetype ? `<div class="arch" title="${esc(r.archetype.blurb || '')}"><span class="arch-tag">${esc(r.archetype.label)}</span>${r.archetype.size ? `<span class="arch-size" title="${esc(r.archetype.size.note)}">${esc(r.archetype.size.label)}</span>` : ''}<span class="faint small"> archetype · experimental</span></div>` : ''}</div></div>
     ${meter('AI-favoured words', r.components.words, `${r.rates.words.toFixed(0)} weighted hits per 1k prose words`)}
     ${meter('AI-favoured phrases', r.components.phrases, `${r.rates.phrases.toFixed(1)} weighted bigram/trigram hits per 1k prose words`)}
     ${meter('Sentence structures', r.components.structures, `${r.rates.structures.toFixed(1)} weighted hits per 1k prose words: not-x-but-y, "a hint of…", abstract similes, banter tags…`)}
@@ -314,9 +314,9 @@ function renderBoard() {
     h += (h ? '' : '<div class="group-label">Yours</div>') + row('you', 'Your saved cards', s.length, q(.25), median(s), q(.75), median(s).toFixed(1), ''); }
   const modeTxt = m => Object.entries(m.byMode || {}).map(([k, v]) => `${{ fresh: 'plain requests', antislop: '"don\'t sound like AI" requests', rewrite: 'rewrites of human cards' }[k] || k}: median ${v.median} (n=${v.n})`).join(' · ');
   h += `<div class="group-label">AI models · cards written for this test</div>` + B.models.map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common} · pulp median ${m.pulp ?? '–'}% · original slop-score median ${m.upstream ?? '–'}`)).join('');
+    `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}`)).join('');
   h += `<div class="group-label">Reference card sets</div>` + B.references.map(r => row('ref', r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1),
-    `${r.n.toLocaleString()} cards · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75} · pulp median ${r.pulp ?? '–'}% · original slop-score median ${r.upstream ?? '–'}`)).join('');
+    `${r.n.toLocaleString()} cards · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`)).join('');
   $('boardRows').innerHTML = h;
   $('boardNote').innerHTML = `BBBScorer v${esc(B.scorer || B.version)}${B.scorer && B.version && B.scorer !== B.version ? ` (scores from the v${esc(B.version)} run; same numbers)` : ''}. Bars: middle half of each set's cards; line: median; n = cards in the set. <span class="star">*</span> fewer than 20 cards, so a rough guess. Click a row for details.`;
   $('boardRows').querySelectorAll('.brow').forEach(el => el.addEventListener('click', () => { const d = el.querySelector('.bdetail'); if (d) d.hidden = !d.hidden; }));
