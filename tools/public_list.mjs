@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // public_list.mjs - List, delete from, download, archive or clear the public list (Cloudflare KV namespace "bb-runs").
-// Runs wrangler on your computer, so you need to be logged in to Cloudflare (dev\deploy-workers.cmd
-// does the login). The namespace id is read from tools/wrangler-runs.toml.
+// Runs Wrangler 4 on your computer: either CLOUDFLARE_API_TOKEN in the environment (dev\public-list.cmd
+// loads it from .env) or a remembered `wrangler login`. The namespace id is read from tools/wrangler-runs.toml.
 //
 //   node tools/public_list.mjs status            # how many entries, oldest and newest date
 //   node tools/public_list.mjs list [--find text] # every entry, numbered, with its id, date, origin and link
@@ -15,7 +15,7 @@
 //   add --dry-run to print the wrangler commands instead of running them
 //
 // Every change first saves a copy of the whole list to public-list-archive/ next to the repo (outside git),
-// so a mistaken delete can be undone by putting that file back (wrangler kv:key put runs --path=<file>). The page only ever reads the
+// so a mistaken delete can be undone by putting that file back (npx wrangler kv key put runs --path=<file> --namespace-id=<id> --remote). The page only ever reads the
 // "runs" key, so archived entries disappear from the page but stay recoverable.
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
@@ -37,16 +37,18 @@ if (!NS) { console.error('No KV namespace id found in tools/wrangler-runs.toml')
 
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 function wrangler(...a) {
-  const full = ['--yes', 'wrangler@3', ...a, `--namespace-id=${NS}`];
+  const full = ['--yes', 'wrangler@4', ...a, `--namespace-id=${NS}`, '--remote'];   // Wrangler 4: KV commands are local unless --remote
   if (DRY) { console.log('[dry-run] npx ' + full.join(' ')); return ''; }
   return execFileSync(npx, full, { cwd: ROOT, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'inherit'], shell: process.platform === 'win32' });
 }
-const getRuns = () => { const t = wrangler('kv:key', 'get', 'runs'); if (DRY) return []; try { return JSON.parse(t.trim() || '[]'); } catch { return []; } };
+// Wrangler may print a banner before the value; parse from the first [ or {.
+const parseOut = t => { const i = String(t || '').search(/[\[{]/); if (i < 0) return null; return JSON.parse(t.slice(i)); };
+const getRuns = () => { const t = wrangler('kv', 'key', 'get', 'runs'); if (DRY) return []; try { return parseOut(t) || []; } catch { console.error('Could not read the list:', String(t).slice(0, 200)); process.exit(1); } };
 function putJson(key, value) {
   // write through a temp file: Windows command lines are too short for a big list
   const dir = mkdtempSync(join(tmpdir(), 'bbruns-')), f = join(dir, 'value.json');
   writeFileSync(f, JSON.stringify(value));
-  wrangler('kv:key', 'put', key, `--path=${f}`);
+  wrangler('kv', 'key', 'put', key, `--path=${f}`);
 }
 const stamp = () => new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 function saveLocal(runs, tag) {
@@ -97,5 +99,5 @@ if (cmd === 'status') {
   saveLocal(runs, 'before-delete');
   putJson('runs', runs.filter((_, i) => !hit[i])); console.log(`Deleted ${gone.length}. ${runs.length - gone.length} left.`);
 } else if (cmd === 'archives') {
-  const t = wrangler('kv:key', 'list', '--prefix=archive:'); if (!DRY) for (const k of JSON.parse(t || '[]')) console.log(k.name);
+  const t = wrangler('kv', 'key', 'list', '--prefix=archive:'); if (!DRY) for (const k of parseOut(t) || []) console.log(k.name);
 } else { console.error(`Unknown command "${cmd}". See --help.`); process.exit(2); }

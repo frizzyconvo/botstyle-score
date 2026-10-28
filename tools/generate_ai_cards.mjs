@@ -11,9 +11,9 @@
 // can hold the character fixed.
 //
 // Usage:
-//   node tools/generate_ai_cards.mjs --models "m1,m2" [--seeds eval/seeds_jai_2023h1.jsonl]
+//   node tools/generate_ai_cards.mjs --models "m1,m2" [--seeds eval/inputs/seeds_jai_2023h1.jsonl]
 //        [--modes fresh,antislop,rewrite] [--formats free_prose,default] [--per-style 1]
-//        [--out eval/ai_cards_v2.jsonl] [--concurrency 3] [--max-tokens 6000]
+//        [--out eval/generated/ai_cards_v2.jsonl] [--concurrency 3] [--max-tokens 6000]
 //        [--reasoning low] [--temperature 0.8] [--max-usd 2] [--dry-run] [--retry-invalid] [--no-retry]
 //
 //   --per-style   cards per (model, mode, format). Keep it at 1 until the prompts are settled.
@@ -54,6 +54,7 @@
 
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
+import { PATHS } from './_paths.mjs';
 import { readFileSync, appendFileSync, existsSync, writeFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { config } from 'dotenv';
@@ -66,8 +67,8 @@ const list = v => String(v || '').split(',').map(s => s.trim()).filter(Boolean);
 const models = list(args.models);
 const DRY = !!args['dry-run'];
 if (!models.length && !DRY && !args.reparse && !args.failures) { console.error('need --models "a,b" (or --dry-run)'); process.exit(1); }
-const SEEDS = args.seeds || 'eval/seeds_jai_2023h1.jsonl';
-const PER = Number(args['per-style'] || 1), OUT = args.out || 'eval/ai_cards_v2.jsonl', CONC = Number(args.concurrency || 3);
+const SEEDS = args.seeds || PATHS.seeds;
+const PER = Number(args['per-style'] || 1), OUT = args.out || PATHS.aiCardsV2, CONC = Number(args.concurrency || 3);
 const MAX_TOKENS = Number(args['max-tokens'] || 6000), TEMP = Number(args.temperature ?? 0.8), MAX_USD = args['max-usd'] ? Number(args['max-usd']) : Infinity;
 let url = process.env.BASE_URL || 'https://openrouter.ai/api';
 if (!/chat\/completions$/.test(url)) url = url.replace(/\/$/, '') + (/\/v1$/.test(url) ? '' : '/v1') + '/chat/completions';

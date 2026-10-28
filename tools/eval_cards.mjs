@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // eval_cards.mjs - Compare ways of scoring a card on human vs AI-written cards.
 //
-//   node tools/eval_cards.mjs --build-sample [--every 32]   # 1. fixed sample -> eval/eval_sample.jsonl
-//   node tools/eval_cards.mjs --shard 1/4                   # 2. score shard 1 of 4 -> eval/eval_parts/1.jsonl
-//   node tools/eval_cards.mjs --report                      # 3. compare variants -> eval/eval_cards.json
+//   node tools/eval_cards.mjs --build-sample [--every 32]   # 1. fixed sample -> eval/experiments/eval_sample.jsonl
+//   node tools/eval_cards.mjs --shard 1/4                   # 2. score shard 1 of 4 -> eval/experiments/eval_parts/1.jsonl
+//   node tools/eval_cards.mjs --report                      # 3. compare variants -> eval/experiments/eval_cards.json
 //
 // Each card is scored with the current scorer: the joint score (description + first message) and the
 // two parts on their own. The report compares the joint score with 'mixed -> higher part' rules at
@@ -15,6 +15,7 @@
 // Card folder: ../card-datasets or BOTSTYLE_CARDS. Shards keep each run short (about 2 minutes).
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
+import { PATHS, EVAL } from './_paths.mjs';
 import { readFileSync, writeFileSync, existsSync, openSync, readSync, closeSync, mkdirSync, readdirSync, appendFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -24,7 +25,7 @@ const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 process.chdir(ROOT);
 const CARDS = process.env.BOTSTYLE_CARDS ? resolve(process.env.BOTSTYLE_CARDS) : resolve(ROOT, '..', 'card-datasets');
 const args = process.argv.slice(2), opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-const SAMPLE = join(ROOT, 'eval', 'eval_sample.jsonl'), PARTS = join(ROOT, 'eval', 'eval_parts');
+const SAMPLE = args.includes('--build-sample') ? join(EVAL, 'experiments', 'eval_sample.jsonl') : PATHS.sample, PARTS = PATHS.parts;
 const t0 = Date.now(), stamp = () => `[${((Date.now() - t0) / 1000).toFixed(0)}s]`;
 function* jsonl(p) { if (!existsSync(p)) { console.log(`  missing ${p}`); return; } const fd = openSync(p, 'r'), buf = Buffer.alloc(4 << 20); let rest = '', n;
   try { while ((n = readSync(fd, buf, 0, buf.length, null)) > 0) { const ls = (rest + buf.toString('utf-8', 0, n)).split('\n'); rest = ls.pop(); for (const l of ls) if (l.trim()) yield JSON.parse(l); } if (rest.trim()) yield JSON.parse(rest); } finally { closeSync(fd); } }
@@ -36,10 +37,10 @@ if (args.includes('--build-sample')) {
   for (const r of jsonl(join(CARDS, 'raincandy-chub-ai-cards', 'raincandy_cards.jsonl'))) { const c = created(r); if (c && c < '2023-07') card('human', 'chub_2023', r); }
   let i = 0; for (const r of jsonl(join(CARDS, 'jaicards-cards-js', 'jaicards_cards.jsonl'))) if (created(r) < '2024-03' && i++ % EVERY === 0) card('human', 'janitorai', r);
   for (const r of jsonl(join(CARDS, 'spb-2602-ai-personas', 'data.jsonl'))) card('ai', 'spb', r);
-  let bad = new Set(); try { bad = new Set(JSON.parse(readFileSync(join(ROOT, 'eval', 'ai_cards_invalid_ids.json'), 'utf-8'))); } catch { /* none */ }
-  for (const r of jsonl(join(ROOT, 'eval', 'ai_cards.jsonl'))) if (!bad.has(r.id)) card('ai', 'generated', r);
-  for (const r of jsonl(join(ROOT, 'eval', 'ai_cards_v2.jsonl'))) if (r.valid !== false && (r.description || r.first_mes)) card('ai', 'generated', r);
-  writeFileSync(SAMPLE, rows.map(r => JSON.stringify(r)).join('\n') + '\n');
+  let bad = new Set(); try { bad = new Set(JSON.parse(readFileSync(PATHS.aiCardsV1Invalid, 'utf-8'))); } catch { /* none */ }
+  for (const r of jsonl(PATHS.aiCardsV1)) if (!bad.has(r.id)) card('ai', 'generated', r);
+  for (const r of jsonl(PATHS.aiCardsV2)) if (r.valid !== false && (r.description || r.first_mes)) card('ai', 'generated', r);
+  mkdirSync(join(SAMPLE, '..'), { recursive: true }); writeFileSync(SAMPLE, rows.map(r => JSON.stringify(r)).join('\n') + '\n');
   console.log(`${stamp()} ${rows.filter(r => r.set === 'human').length} human, ${rows.filter(r => r.set === 'ai').length} AI cards -> ${SAMPLE}`);
   process.exit(0);
 }
@@ -97,7 +98,7 @@ if (args.includes('--report')) {
     res.push(x);
     console.log(`${name.padEnd(30)} AUC ${x.auc} (SPB ${x.auc_spb}, gen ${x.auc_generated})  human med ${x.human_med} 35+ ${x.human_35}% 50+ ${x.human_50}%  AI med ${x.ai_med} [${x.ai_p25}–${x.ai_p75}] 35+ ${x.ai_35}% 50+ ${x.ai_50}%`);
   }
-  writeFileSync(join(ROOT, 'eval', 'eval_cards.json'), JSON.stringify({ built: new Date().toISOString(), n_human: H.length, n_ai: A.length, variants: res }, null, 1));
+  mkdirSync(join(PATHS.evalCardsReport, '..'), { recursive: true }); writeFileSync(PATHS.evalCardsReport, JSON.stringify({ built: new Date().toISOString(), n_human: H.length, n_ai: A.length, variants: res }, null, 1));
   process.exit(0);
 }
 console.log('Nothing to do. See --help.');

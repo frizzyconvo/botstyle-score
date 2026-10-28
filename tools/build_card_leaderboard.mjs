@@ -33,7 +33,14 @@ for (const [m, rows] of Object.entries(models)) {
   if (!fresh.length) continue;
   const byMode = {};
   for (const mode of ['fresh', 'antislop', 'rewrite']) { const x = rows.filter(r => r.mode === mode); if (x.length) byMode[mode] = stats(x); }
-  (PENDING[m] ? out.pending : out.models).push({ model: m, ...stats(fresh), byMode, ...(PENDING[m] ? { why: PENDING[m] } : {}) });
+  // Per requested style (plain requests): the lazy "make me a bot" prompt (style "default") and the lowest and
+  // highest style medians, so the leaderboard can show both the show-off number and the spread.
+  const styleOf = r => r.style || String(r.id || '').split('|')[3] || 'unknown';
+  const byStyle = {}; for (const r of fresh) (byStyle[styleOf(r)] = byStyle[styleOf(r)] || []).push(r);
+  const styleMed = Object.entries(byStyle).map(([k, v]) => ({ style: k, n: v.length, median: q(v.map(x => x.score), .5) })).sort((a, b) => a.median - b.median);
+  const lazy = byStyle.default ? { n: byStyle.default.length, median: q(byStyle.default.map(x => x.score), .5), upstream: q(byStyle.default.map(x => x.upstream).filter(x => x != null), .5) } : null;
+  const styles = { lazy, min: styleMed.find(x => x.style !== 'default') || null, max: [...styleMed].reverse().find(x => x.style !== 'default') || null, all: styleMed };
+  (PENDING[m] ? out.pending : out.models).push({ model: m, ...stats(fresh), byMode, styles, ...(PENDING[m] ? { why: PENDING[m] } : {}) });
 }
 out.models.sort((a, b) => b.median - a.median); out.pending.sort((a, b) => b.median - a.median);
 const refs = [

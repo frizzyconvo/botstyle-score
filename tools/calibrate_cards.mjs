@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // calibrate_cards.mjs - Anchor the 0-100 scale to AI-written character cards.
 //
-//   node tools/calibrate_cards.mjs [eval/eval_sample.jsonl]
+//   node tools/calibrate_cards.mjs [eval/experiments/eval_sample.jsonl]
 //
 // Scores the AI rows of the sample (description + first message, the default fields) and writes the
 // percentiles of each component's raw rate to data/botstyle_calibration.json under "cards". botstyle.js
@@ -10,6 +10,7 @@
 // Build the sample first: node tools/eval_cards.mjs --build-sample
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
+import { PATHS } from './_paths.mjs';
 import { readFileSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -20,7 +21,7 @@ globalThis.fetch = async u => ({ ok: true, json: async () => JSON.parse(readFile
 const { loadAll, scoreCard } = await import('../js/score-card.js');
 const { setPosTagger } = await import('../js/pos-tagger.js');
 await loadAll('./data/'); setPosTagger(createRequire(import.meta.url)('wink-pos-tagger')());
-const src = process.argv.slice(2).find(a => !a.startsWith('--')) || join(ROOT, 'eval', 'eval_sample.jsonl');
+const src = process.argv.slice(2).find(a => !a.startsWith('--')) || PATHS.sample;
 const R = { words: [], phrases: [], structures: [] }; const by = {};
 for (const l of readFileSync(src, 'utf-8').split('\n')) {
   if (!l.trim()) continue; const c = JSON.parse(l); if (c.set !== 'ai') continue;

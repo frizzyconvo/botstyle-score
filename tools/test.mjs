@@ -149,5 +149,8 @@ check('joint score kept alongside', typeof blended.joint.score === 'number');
 check('repeats inside a text are counted', repeatsWithin('She walks the long road home every night. '.repeat(10)).count > 0);
 check('different texts share nothing', sharedBetween(descTxt, 'Completely unrelated words about trains, stations and timetables. '.repeat(10)).count === 0);
 
+const htmlTitle = (readFileSync(new URL('../index.html', import.meta.url), 'utf-8').match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+check('page title names the scorer version (update index.html <title> when bumping)', htmlTitle.includes('BBBScorer v' + SCORER_VERSION), htmlTitle);
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

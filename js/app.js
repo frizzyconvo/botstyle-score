@@ -1,7 +1,11 @@
 // app.js - BB Botstyle Score page. Scores cards in the browser with js/score-card.js; nothing is
 // sent anywhere except card fetches (Chub/Botbooru) and, if switched on and chosen per card, the
 // public list (js/site-config.js PUBLIC_RUNS).
-import { scoreCard, loadAll, SCORER_VERSION, WRITING_STYLE_BANDS as WB, BAND_LABELS } from './score-card.js';
+import { scoreCard, loadAll, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, BAND_LABELS } from './score-card.js';
+// The scorer version is part of the page title, so a tab, bookmark or screenshot says which scorer made a score.
+document.title = `BB Botstyle Score · BBBScorer v${SCORER_VERSION}`;
+// Band zones on the leaderboard axis follow the scorer's cut-offs (css/app.css reads these).
+document.documentElement.style.setProperty('--band1', WB.original + '%'); document.documentElement.style.setProperty('--band2', WB.common + '%');
 import { parseCardText, parseCardPng } from './card-import.js';
 import { fetchCard, CARD_SOURCES } from './card-fetch.js';
 import { initPosTagger } from './pos-tagger.js';
@@ -27,7 +31,8 @@ const DEFAULT_ON = { description: true, personality: false, scenario: false, fir
 const defaultFields = () => ({ ...DEFAULT_ON });
 const STORE = 'bb-botstyle-runs';
 
-const state = { ready: false, card: null, meta: null, fields: { ...DEFAULT_ON }, alts: new Set(), result: null, board: null, norm: null };
+let savedSort = null; try { savedSort = localStorage.getItem('bb-board-sort'); } catch { /* ignore */ }
+const state = { boardSort: savedSort || 'median', ready: false, card: null, meta: null, fields: { ...DEFAULT_ON }, alts: new Set(), result: null, board: null, norm: null };
 
 // ---------------------------------------------------------------- storage (per browser, optional)
 const store = {
@@ -218,7 +223,7 @@ function renderResult(r) {
   const W = BOTSTYLE_WEIGHTS, st = r.stats, band = r.band, ref = r.reference;
   const meter = (label, v, tip) => `<div class="meter"><div class="fill" style="width:${Math.min(100, v * 100)}%"></div><span>${label}</span><b>${(v * 100).toFixed(0)}</b><div class="tip">${tip}</div></div>`;
   const pop = `<span class="pop" tabindex="0" aria-label="What this number means">i<span class="pop-body">`
-    + (ref && ref.human_2023 && band.id !== 'na' ? `Higher than <b>${Math.round(ref.human_2023.percentile)}%</b> of ${esc(ref.human_2023.label)} (${ref.human_2023.n.toLocaleString()}) and <b>${Math.round(ref.ai_cards.percentile)}%</b> of ${esc(ref.ai_cards.label)} (${ref.ai_cards.n.toLocaleString()}).<br><br>` : '')
+    + (ref && ref.human_2023 && band.id !== 'na' ? `Higher than <b>${Math.round(ref.human_2023.percentile)}%</b> of ${esc(ref.human_2023.label)} (${ref.human_2023.n.toLocaleString()}) and <b>${Math.round(ref.ai_cards.percentile)}%</b> of ${esc(ref.ai_cards.label)} (${ref.ai_cards.n.toLocaleString()}).${ref.version && !SAME_SCORES_AS.includes(ref.version) ? ` <i>These comparison cards were scored with BBBScorer v${esc(ref.version)}, not v${esc(SCORER_VERSION)}, so the percentages are approximate until they're rescored.</i>` : ''}<br><br>` : '')
     + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favoured words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Tentative bands</b> (still calibrating): ${BAND_LABELS.original} under ${WB.original} · ${BAND_LABELS.mixed} ${WB.original}–${WB.common} · ${BAND_LABELS.common} ${WB.common}+</span></span>`;
   const used = fieldList(state.fields, state.alts);
   const orig = nerdStats(r.text);
@@ -328,26 +333,37 @@ function renderMine() {
 }
 
 // ---------------------------------------------------------------- leaderboard
+const STYLE_LABEL = { default: 'lazy "make me a bot"', compact: 'W++ / PList', lists: 'lists', formatted_prose: 'sections', free_prose: 'plain prose', first_person: 'first person', interview: 'interview' };
+// Sort order for each leaderboard group: BBBScorer median (default), lazy prompt, original slop score, or card count.
+const BOARD_SORTS = { median: ['BBBScorer', x => x.median], lazy: ['Lazy prompt', x => x.styles && x.styles.lazy ? x.styles.lazy.median : -1], upstream: ['Original', x => x.upstream ?? -1], n: ['Cards', x => x.n] };
 function renderBoard() {
   const B = state.board; if (!B) return;
-  const row = (cls, label, n, p25, med, p75, val, detail) => `<div class="brow ${cls}"><div class="bl" title="${esc(label)}">${esc(label)}<span class="n${n && n < 20 ? ' low' : ''}"${n && n < 20 ? ' title="Fewer than 20 cards: treat as a rough guess"' : ''}>${n ? (n < 20 ? '<span class="star">*</span>' : '') + 'n=' + n.toLocaleString() : ''}</span></div>
+  const sortKey = state.boardSort || 'median', sorter = (BOARD_SORTS[sortKey] || BOARD_SORTS.median)[1];
+  const sorted = list => [...(list || [])].sort((a, b) => sorter(b) - sorter(a));
+  const orig = v => v == null ? '' : `<span class="orig" title="Original slop-score (Sam Paech's formula) median">orig ${(+v).toFixed(1)}</span>`;
+  const row = (cls, label, n, p25, med, p75, val, detail, up = null, extra = '') => `<div class="brow ${cls}"><div class="bl" title="${esc(label)}">${esc(label)}<span class="n${n && n < 20 ? ' low' : ''}"${n && n < 20 ? ' title="Fewer than 20 cards: treat as a rough guess"' : ''}>${n ? (n < 20 ? '<span class="star">*</span>' : '') + 'n=' + n.toLocaleString() : ''}</span>${extra}</div>
     <div class="track"><div class="iqr" style="left:${Math.min(100, p25)}%;width:${Math.max(1, Math.min(100, p75) - Math.min(100, p25))}%"></div><div class="med" style="left:${Math.min(100, med)}%"></div></div>
-    <div class="bv">${val}</div>${detail ? `<div class="bdetail" hidden>${detail}</div>` : ''}</div>`;
-  let h = '';
+    <div class="bv">${val}${orig(up)}</div>${detail ? `<div class="bdetail" hidden>${detail}</div>` : ''}</div>`;
+  let h = `<div class="board-sort small faint">Sort by: ${Object.entries(BOARD_SORTS).map(([k, [l]]) => `<button type="button" class="ghost sort-btn${k === sortKey ? ' on' : ''}" data-sort="${k}">${l}</button>`).join(' ')}</div>`;
   const mine = store.all();
   if (state.result && state.result.band.id !== 'na') { const r = state.result; h += `<div class="group-label">Yours</div>` + row('you', state.card.name || 'This card', 0, r.low, r.score, r.high, r.score.toFixed(1), ''); }
   if (mine.length >= 2) { const s = mine.map(x => x.score).sort((a, b) => a - b); const q = p => s[Math.min(s.length - 1, Math.floor(p * s.length))];
-    h += (h ? '' : '<div class="group-label">Yours</div>') + row('you', 'Your saved cards', s.length, q(.25), median(s), q(.75), median(s).toFixed(1), ''); }
+    h += (mine.length && !(state.result && state.result.band.id !== 'na') ? '<div class="group-label">Yours</div>' : '') + row('you', 'Your saved cards', s.length, q(.25), median(s), q(.75), median(s).toFixed(1), ''); }
   const modeTxt = m => Object.entries(m.byMode || {}).map(([k, v]) => `${{ fresh: 'plain requests', antislop: '"don\'t sound like AI" requests', rewrite: 'rewrites of human cards' }[k] || k}: median ${v.median} (n=${v.n})`).join(' · ');
-  h += `<div class="group-label">AI models · cards written for this test</div>` + B.models.map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}`)).join('');
-  h += `<div class="group-label">Reference card sets</div>` + B.references.map(r => row('ref', r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1),
-    `${r.n.toLocaleString()} cards · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`)).join('');
-  if ((B.pending || []).length) h += `<div class="group-label">Pending, not ranked · tuned for RP chat, not card writing</div>` + B.pending.map(m => row('pending', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)} · ${esc(m.why || '')} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}`)).join('');
+  const styleTxt = m => { const S = m.styles; if (!S) return ''; const lab = x => STYLE_LABEL[x.style] || x.style;
+    return `${S.lazy ? `Lazy "make me a bot" prompt: ${S.lazy.median.toFixed(1)} (n=${S.lazy.n}). ` : ''}${S.min && S.max ? `Other styles from ${S.min.median.toFixed(1)} (${esc(lab(S.min))}) to ${S.max.median.toFixed(1)} (${esc(lab(S.max))}). ` : ''}By style: ${S.all.map(x => `${esc(lab(x))} ${x.median.toFixed(1)}`).join(', ')}.`; };
+  const styleInline = m => m.styles && m.styles.lazy ? `<span class="n" title="Lazy 'make me a bot' prompt median; range = lowest and highest other style medians">lazy ${m.styles.lazy.median.toFixed(0)}${m.styles.min && m.styles.max ? ` · ${m.styles.min.median.toFixed(0)}–${m.styles.max.median.toFixed(0)}` : ''}</span>` : '';
+  h += `<div class="group-label">AI models · cards written for this test</div>` + sorted(B.models).map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
+    `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m))).join('');
+  h += `<div class="group-label">Reference card sets</div>` + sorted(B.references).map(r => row('ref', r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1),
+    `${r.n.toLocaleString()} cards · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`, r.upstream)).join('');
+  if ((B.pending || []).length) h += `<div class="group-label">Pending, not ranked · tuned for RP chat, not card writing</div>` + sorted(B.pending).map(m => row('pending', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
+    `${esc(m.model)} · ${esc(m.why || '')} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}<br>${styleTxt(m)}`, m.upstream, styleInline(m))).join('');
   $('boardRows').innerHTML = h;
-  $('boardNote').innerHTML = `BBBScorer v${esc(B.scorer || B.version)}${B.scorer && B.version && B.scorer !== B.version ? ` (scores from the v${esc(B.version)} run; same numbers)` : ''}. Bars: middle half of each set's cards; line: median; n = cards in the set. <span class="star">*</span> fewer than 20 cards, so a rough guess. Click a row for details.`;
+  const stale = B.version && !SAME_SCORES_AS.includes(B.version);
+  $('boardNote').innerHTML = `${stale ? `<b>Built from the BBBScorer v${esc(B.version)} run</b>; this page scores with v${esc(SCORER_VERSION)}, so the leaderboard numbers will change once it's rebuilt from a v${esc(SCORER_VERSION)} run.` : `BBBScorer v${esc(SCORER_VERSION)}.`} Bars: middle half of each set's cards; line: median; n = cards in the set. <span class="star">*</span> fewer than 20 cards, so a rough guess. Click a row for details.`;
   $('boardRows').querySelectorAll('.brow').forEach(el => el.addEventListener('click', () => { const d = el.querySelector('.bdetail'); if (d) d.hidden = !d.hidden; }));
+  $('boardRows').querySelectorAll('.sort-btn').forEach(el => el.addEventListener('click', ev => { ev.stopPropagation(); state.boardSort = el.dataset.sort; try { localStorage.setItem('bb-board-sort', state.boardSort); } catch { /* ignore */ } renderBoard(); }));
 }
 
 // ---------------------------------------------------------------- public list (optional)

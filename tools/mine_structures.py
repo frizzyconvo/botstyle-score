@@ -13,7 +13,7 @@ def first(t, n=700):
 sets = {}
 sr = [json.loads(l) for l in open(P('slopreview-slopdataset', 'slop_dataset_ensemble_predictions.jsonl'))]
 sets['SlopReview'] = ([first(r['text']) for r in sr if r['source'] != 'AI'], [first(r['text']) for r in sr if r['source'] == 'AI'])
-gu = [json.loads(l) for l in open(P('botstyle-score', 'eval', 'gutenberg_eval_600w.jsonl'))]
+gu = [json.loads(l) for l in open(next(x for x in [P('botstyle-score', 'eval', 'inputs', 'gutenberg_eval_600w.jsonl'), P('botstyle-score', 'eval', 'gutenberg_eval_600w.jsonl')] if os.path.exists(x)))]
 sets['Gutenberg'] = ([r['text'] for r in gu if r['source'] == 'Human'], [r['text'] for r in gu if r['source'] == 'AI'])
 hc = []
 for l in open(P('card-datasets', 'jaicards-cards-js', 'jaicards_cards.jsonl')):

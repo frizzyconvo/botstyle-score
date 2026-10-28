@@ -6,6 +6,26 @@ All notable changes to BB Botstyle Score. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.10.0] - 2026-10-28 · BBBScorer 0.8.0
+
+Scores unchanged.
+
+### Added
+- Page title includes the scorer version ("BB Botstyle Score · BBBScorer v…"); a test checks it on every bump.
+- Leaderboard: original slop-score median on every row; sort by BBBScorer, the lazy "make me a bot" prompt,
+  original score or card count (remembered in the browser); each model shows its lazy-prompt score and the
+  lowest-to-highest range across the other request styles.
+- `SCORER.md` / `scorer.json` in every scoring-run folder: weights, anchor, bands, extra points, card-score method,
+  patterns, list sizes and checksums, and the changelog entry (`tools/scorer_manifest.mjs`, also for past versions).
+- `tools/organize_eval.mjs`: sorts eval/ into generated/, inputs/, experiments/, scores/ and legacy/ and writes a
+  README listing every run and whether it's current, superseded, complete or partial. Run by the overnight script.
+
+### Changed
+- Leaderboard band zones follow the scorer's cut-offs (they were fixed at the old 35 / 50).
+- Leaderboard and ⓘ percentiles say when they were built with an older scorer version.
+- Wrangler 4 for deploying and the public-list tool; no sign-in prompt when already signed in, or none at all
+  with `CLOUDFLARE_API_TOKEN` in `.env`.
+
 ## [0.9.0] - 2026-10-28 · BBBScorer 0.8.0
 
 ### Changed

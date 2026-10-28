@@ -7,7 +7,8 @@
 //   node tools/score_all.mjs --limit 200     # quick trial: first 200 cards per dataset (-> _trial/)
 //   node tools/score_all.mjs --force         # rescore datasets already done for this version
 //
-// Output: eval/scores/v<SCORER_VERSION>/<dataset>.jsonl (one row per card, each with `version`) and
+// Output: eval/scores/v<SCORER_VERSION>/<dataset>.jsonl (one row per card, each with `version`), SCORER.md
+// (which scorer: weights, lists, anchors, bands; tools/scorer_manifest.mjs) and
 // summary.json (n, median, bands, by year). Rows also carry `upstream` (the original slop-score formula),
 // genre, archetype and the experimental pulp score. run-log.jsonl records start/end time, cards, words,
 // ms per card and words per second for each dataset (performance tracking). Compare two versions with tools/compare_scores.mjs.
@@ -17,6 +18,7 @@
 // output folder (or --log <file>). A lock file stops two scoring runs at once (--ignore-lock overrides).
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
+import { PATHS } from './_paths.mjs';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, renameSync, openSync, readSync, closeSync, writeSync, appendFileSync, unlinkSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -167,9 +169,9 @@ const DATASETS = [
   { name: 'spb_ai', label: 'ai', rows: function* () { let i = 0; for (const r of jsonlStream(join(CARDS, 'spb-2602-ai-personas', 'data.jsonl'))) yield { id: 'spb/' + i++, description: r.persona_text }; }, need: join(CARDS, 'spb-2602-ai-personas', 'data.jsonl') },
   { name: 'example_cards', label: 'example', rows: () => cardFiles(join(CARDS, 'example-cards'), f => /\.json$/i.test(f)) },
   { name: 'foreverse_ai', label: 'ai', rows: () => cardFiles(resolve(ROOT, '..', 'character-card-skills', 'cards', 'en'), f => /\.v2\.json$/i.test(f)) },
-  { name: 'generated_v1', label: 'ai', rows: () => jsonlStream(join(ROOT, 'eval', 'ai_cards.jsonl')), need: join(ROOT, 'eval', 'ai_cards.jsonl'),
-    skip: (() => { try { return new Set(JSON.parse(readFileSync(join(ROOT, 'eval', 'ai_cards_invalid_ids.json'), 'utf-8'))); } catch { return new Set(); } })() },
-  { name: 'generated_v2', label: 'ai', rows: () => jsonlStream(join(ROOT, 'eval', 'ai_cards_v2.jsonl')), need: join(ROOT, 'eval', 'ai_cards_v2.jsonl') },
+  { name: 'generated_v1', label: 'ai', rows: () => jsonlStream(PATHS.aiCardsV1), need: PATHS.aiCardsV1,
+    skip: (() => { try { return new Set(JSON.parse(readFileSync(PATHS.aiCardsV1Invalid, 'utf-8'))); } catch { return new Set(); } })() },
+  { name: 'generated_v2', label: 'ai', rows: () => jsonlStream(PATHS.aiCardsV2), need: PATHS.aiCardsV2 },
   { name: 'jaicards', label: 'human', rows: null },   // filled in below (needs the cache)
 ];
 
@@ -213,6 +215,8 @@ function writeNotes(name, rows) {
 const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
 const summary = existsSync(join(OUT, 'summary.json')) ? JSON.parse(readFileSync(join(OUT, 'summary.json'), 'utf-8')) : { version: SCORER_VERSION, datasets: {} };
 
+// Record exactly which scorer this run used (weights, lists, anchors, bands) next to its results.
+if (!LIMIT) { try { const { spawnSync } = await import('child_process'); spawnSync(process.execPath, [join(ROOT, 'tools', 'scorer_manifest.mjs')], { cwd: ROOT, stdio: 'ignore' }); } catch { /* manifest is optional */ } }
 const todo = DATASETS.filter(ds => !ONLY || ONLY.includes(ds.name));
 say(`BBBScorer ${SCORER_VERSION}: ${todo.length} dataset(s) -> ${OUT}`);
 let dsIndex = 0;
@@ -234,7 +238,7 @@ for (const ds of DATASETS) {
     let r;
     try { r = scoreCard(c); } catch (e) { rows.push({ id: c.id, dataset: ds.name, version: SCORER_VERSION, error: e.message }); continue; }
     const up = upstreamParts(r.text), disp = disparity(r, up);
-    rows.push({ id: c.id, name: String(c.name || '').slice(0, 60), dataset: ds.name, label: typeof ds.label === 'function' ? ds.label(c) : ds.label, createdAt: c.createdAt, model: raw.model, mode: raw.mode, round: raw.round,
+    rows.push({ id: c.id, name: String(c.name || '').slice(0, 60), dataset: ds.name, label: typeof ds.label === 'function' ? ds.label(c) : ds.label, createdAt: c.createdAt, model: raw.model, mode: raw.mode, style: raw.style_requested, round: raw.round,
       version: r.version, score: +r.score.toFixed(2), upstream: up ? up.score : null, upstreamParts: up, disparity: disp,
       desc: r.parts.description ? r.parts.description.score : null, greet: r.parts.greeting ? r.parts.greeting.score : null, joint: +r.joint.score.toFixed(2), mixed: r.mixed,
       repeats: { desc: r.repetition.description.per1k, greet: r.repetition.greeting.per1k, between: r.repetition.between.per1k }, low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,

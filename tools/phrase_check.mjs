@@ -4,13 +4,14 @@
 // the scorer. Counts prefix matches at a word start ("glint" also counts "glinting") in
 // description + first message, per million words and as the share of cards containing it.
 //
-//   node tools/phrase_check.mjs [data/unslopnemo_targets.json] [--every 5] [--out eval/phrase_check.json]
+//   node tools/phrase_check.mjs [data/unslopnemo_targets.json] [--every 5] [--out eval/experiments/phrase_check.json]
 //
 // Sets: human 2023 (Korshuk, Chub before Jul 2023, JanitorAI before Mar 2024 sampled --every N),
 // Chub 2025 (mixed), AI-written (SPB personas + our generated cards). Card folder: ../card-datasets
 // or BOTSTYLE_CARDS.
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
+import { PATHS } from './_paths.mjs';
 import { readFileSync, writeFileSync, existsSync, openSync, readSync, closeSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -18,7 +19,7 @@ const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const CARDS = process.env.BOTSTYLE_CARDS ? resolve(process.env.BOTSTYLE_CARDS) : resolve(ROOT, '..', 'card-datasets');
 const args = process.argv.slice(2), opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
 const listFile = args.find(a => !a.startsWith('--') && a !== opt('--every') && a !== opt('--out')) || join(ROOT, 'data', 'unslopnemo_targets.json');
-const EVERY = +opt('--every', 5), OUT = opt('--out', join(ROOT, 'eval', 'phrase_check.json'));
+const EVERY = +opt('--every', 5), OUT = opt('--out', PATHS.phraseCheck);
 const t0 = Date.now(), stamp = () => new Date().toISOString().slice(11, 19);
 const L = JSON.parse(readFileSync(listFile, 'utf-8')); const phrases = [...new Set((L.phrases || L).map(p => String(p).toLowerCase().trim()).filter(Boolean))];
 const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -40,9 +41,9 @@ for (const r of jsonl(join(CARDS, 'raincandy-chub-ai-cards', 'raincandy_cards.js
 let i = 0; for (const r of jsonl(join(CARDS, 'jaicards-cards-js', 'jaicards_cards.jsonl'))) { if (created(r) < '2024-03' && i++ % EVERY === 0) add('human_2023', r); }
 console.log(`[${stamp()}] human done (${sets.human_2023 ? sets.human_2023.cards : 0} cards)`);
 for (const r of jsonl(join(CARDS, 'spb-2602-ai-personas', 'data.jsonl'))) add('ai', r);
-let bad = new Set(); try { bad = new Set(JSON.parse(readFileSync(join(ROOT, 'eval', 'ai_cards_invalid_ids.json'), 'utf-8'))); } catch { /* none */ }
-for (const r of jsonl(join(ROOT, 'eval', 'ai_cards.jsonl'))) if (!bad.has(r.id)) add('ai', r);
-for (const r of jsonl(join(ROOT, 'eval', 'ai_cards_v2.jsonl'))) if (!r.invalid) add('ai', r);
+let bad = new Set(); try { bad = new Set(JSON.parse(readFileSync(PATHS.aiCardsV1Invalid, 'utf-8'))); } catch { /* none */ }
+for (const r of jsonl(PATHS.aiCardsV1)) if (!bad.has(r.id)) add('ai', r);
+for (const r of jsonl(PATHS.aiCardsV2)) if (!r.invalid) add('ai', r);
 const per = (s, j) => s ? +(s.hits[j] / s.words * 1e6).toFixed(1) : null, share = (s, j) => s ? +(100 * s.cardsWith[j] / s.cards).toFixed(2) : null;
 const H = sets.human_2023, A = sets.ai, C = sets.chub_2025;
 const rows = phrases.map((p, j) => ({ phrase: p, human_per_m: per(H, j), ai_per_m: per(A, j), chub2025_per_m: per(C, j), human_cards_pct: share(H, j), ai_cards_pct: share(A, j),
