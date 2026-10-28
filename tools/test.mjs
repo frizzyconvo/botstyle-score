@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // test.mjs - Regression checks. Run: node tools/test.mjs   (exit code 1 on failure)
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync } from 'fs';
 import zlib from 'zlib';
 const root = new URL('../', import.meta.url);
@@ -114,12 +116,19 @@ const r10 = scoreCard({ description: 'Her eyes sparkled with mischief, a testame
 const r11 = scoreCard({ description: 'Mara runs the bakery on Elm Street and argues with everyone about rye. She owes her sister forty dollars. '.repeat(20) });
 check('reference percentiles present and ordered', r10.reference && r11.reference && r10.reference.human_2023.percentile > r11.reference.human_2023.percentile, JSON.stringify([r10.reference, r11.reference]));
 
-const { SCORER_VERSION } = await import('../js/score-card.js');
+const { SCORER_VERSION, SAME_SCORES_AS } = await import('../js/score-card.js');
 const pkgV = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8')).version;
 const sv = v => v.split('.').map(Number), le = (a, b) => { a = sv(a); b = sv(b); for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] < b[i]; return true; };
 check('SCORER_VERSION not ahead of package.json (app version moves for UI changes too)', le(SCORER_VERSION, pkgV), `${SCORER_VERSION} vs ${pkgV}`);
 check('results carry the scorer version', r10.version === SCORER_VERSION);
-check('reference built with this scorer version', r10.reference.version === SCORER_VERSION, r10.reference.version);
+check('reference built with a version that scores the same', SAME_SCORES_AS.includes(r10.reference.version), r10.reference.version);
+
+// 11. genre, pulp, archetype read-outs
+const fan = scoreCard({ description: 'The hero of the realm, a towering knight with a crimson cloak and an aura of primal fury, guards the kingdom from the dragon. '.repeat(12) + 'Her magic runes glow when the demon lords ride out of the abyss.' });
+check('genre: fantasy detected', fan.genre.primary === 'fantasy', JSON.stringify(fan.genre.scores));
+check('pulp score computed with genre words', fan.pulp && fan.pulp.score > 0 && fan.pulp.adjusted <= fan.score, JSON.stringify(fan.pulp));
+check('archetype label present', !!(fan.archetype && fan.archetype.label), JSON.stringify(fan.archetype));
+check('band labels are the tentative ones', ['Meatbag adjacent', 'Mixed signals', 'Might just be slop'].some(l => fan.band.label.startsWith(l)) && fan.band.tentative, fan.band.label);
 
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

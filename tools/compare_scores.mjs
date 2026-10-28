@@ -3,6 +3,8 @@
 //   node tools/compare_scores.mjs eval/scores/v0.4.0 eval/scores/v0.5.0 [--top 10]
 // Per dataset: cards matched by id, median before/after, mean absolute change, share whose band changed,
 // and the biggest movers. Nothing changes on disk.
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 const [A, B] = process.argv.slice(2).filter(a => !a.startsWith('--'));

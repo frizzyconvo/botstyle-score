@@ -23,6 +23,9 @@
 //                 risk of running out of tokens down); omitted by default. A card whose reasoning
 //                 eats the whole budget is retried once at effort=low (--no-retry to skip).
 //   --retry-invalid  move cards flagged invalid to <out>_invalid.jsonl and generate them again.
+//   --reparse     re-split / re-validate the existing cards with the current parser (no API calls).
+//   --failures    list models with failed requests (<out>_errors.jsonl) or no valid cards, then exit.
+// Each card records at (timestamp), elapsed_ms and out_words; failed requests go to <out>_errors.jsonl.
 //
 // Reads BASE_URL and API_KEY from .env (OpenRouter works). Seeds: JSONL with name / tagline /
 // tags / description / first_mes (tools/build_seeds.py makes a clean SFW, pre-Jul-2023 set).
@@ -45,6 +48,8 @@
 //   gryphe/mythomax-l2-13b (the 2023 classic), mistralai/mistral-nemo (base of most 12B RP tunes)
 // Ids that OpenRouter doesn't serve fail with an HTTP error per card and the run continues.
 
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, appendFileSync, existsSync, writeFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { config } from 'dotenv';
@@ -56,14 +61,14 @@ for (let i = 0; i < argv.length; i++) if (argv[i].startsWith('--')) args[argv[i]
 const list = v => String(v || '').split(',').map(s => s.trim()).filter(Boolean);
 const models = list(args.models);
 const DRY = !!args['dry-run'];
-if (!models.length && !DRY) { console.error('need --models "a,b" (or --dry-run)'); process.exit(1); }
+if (!models.length && !DRY && !args.reparse && !args.failures) { console.error('need --models "a,b" (or --dry-run)'); process.exit(1); }
 const SEEDS = args.seeds || 'eval/seeds_jai_2023h1.jsonl';
 const PER = Number(args['per-style'] || 1), OUT = args.out || 'eval/ai_cards_v2.jsonl', CONC = Number(args.concurrency || 3);
 const MAX_TOKENS = Number(args['max-tokens'] || 6000), TEMP = Number(args.temperature ?? 0.8), MAX_USD = args['max-usd'] ? Number(args['max-usd']) : Infinity;
 let url = process.env.BASE_URL || 'https://openrouter.ai/api';
 if (!/chat\/completions$/.test(url)) url = url.replace(/\/$/, '') + (/\/v1$/.test(url) ? '' : '/v1') + '/chat/completions';
 const KEY = process.env.API_KEY || process.env.OPENAI_API_KEY;
-if (!KEY && !DRY) { console.error('API_KEY missing (.env)'); process.exit(1); }
+if (!KEY && !DRY && !args.reparse && !args.failures) { console.error('API_KEY missing (.env)'); process.exit(1); }
 
 // ---------------------------------------------------------------- formats
 // How people actually ask. {C} is the character's name (see fill()). Phrasings rotate with k.
@@ -165,10 +170,11 @@ async function ask(model, prompt, over = {}) {
 // ---------------------------------------------------------------- parse + validate
 function split(raw) {
   const t = String(raw || '');
-  const m = t.match(/^#{1,3}\s*\**DESCRIPTION\**\s*:?\s*$/im);
+  // '### DESCRIPTION', 'DESCRIPTION:', '**Description**' ... (MythoMax drops the ###)
+  const m = t.match(/^[ \t]*(?:#{1,3}[ \t]*)?\**[ \t]*DESCRIPTION[ \t]*\**[ \t]*:?[ \t]*\**[ \t]*$/im);
   const preamble = m ? t.slice(0, m.index).trim() : '';
   const body = m ? t.slice(m.index + m[0].length) : t;
-  const g = body.match(/^#{1,3}\s*\**FIRST MESSAGE\**\s*:?\s*$/im);
+  const g = body.match(/^[ \t]*(?:#{1,3}[ \t]*)?\**[ \t]*FIRST MESSAGE[ \t]*\**[ \t]*:?[ \t]*\**[ \t]*$/im);
   const description = (g ? body.slice(0, g.index) : body).trim();
   let first_mes = g ? body.slice(g.index + g[0].length).trim() : '';
   // trailing notes after the greeting ("---\nNotes: …", "### Tips") are the model talking to the
@@ -201,6 +207,16 @@ function validate(raw, parts, finish) {
 }
 
 // ---------------------------------------------------------------- jobs
+if (args.failures) {
+  const cards = existsSync(OUT) ? readFileSync(OUT, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l)) : [];
+  const errs = existsSync(OUT.replace(/\.jsonl$/, '') + '_errors.jsonl') ? readFileSync(OUT.replace(/\.jsonl$/, '') + '_errors.jsonl', 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l)) : [];
+  const by = {};
+  for (const c of cards) { const b = by[c.model] = by[c.model] || { cards: 0, valid: 0, errors: 0, flags: {} }; b.cards++; if (c.valid) b.valid++; for (const f of c.flags || []) b.flags[f] = (b.flags[f] || 0) + 1; }
+  for (const e of errs) { const b = by[e.model] = by[e.model] || { cards: 0, valid: 0, errors: 0, flags: {} }; b.errors++; b.lastError = e.error; }
+  for (const m of models) if (!by[m]) by[m] = { cards: 0, valid: 0, errors: 0, flags: {}, note: 'nothing recorded (run predates the error log?)' };
+  for (const [m, b] of Object.entries(by).sort()) console.log(`${b.valid ? 'ok  ' : 'FAIL'} ${m}: ${b.cards} cards, ${b.valid} valid, ${b.errors} failed requests${Object.keys(b.flags).length ? ' ' + JSON.stringify(b.flags) : ''}${b.lastError ? ' | ' + b.lastError.slice(0, 120) : ''}${b.note ? ' | ' + b.note : ''}`);
+  process.exit(0);
+}
 const seeds = readFileSync(SEEDS, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l)).filter(r => r.name || r.card_name);
 if (!seeds.length) { console.error('no seeds in ' + SEEDS); process.exit(1); }
 const pick = key => seeds[parseInt(createHash('sha1').update(key).digest('hex').slice(0, 8), 16) % seeds.length];
@@ -222,6 +238,21 @@ for (let k = 0; k < PER; k++) {
     const seed = pick(`rewrite|${k}`);        // the three rewrite kinds share the human original
     plan.push({ mode: 'rewrite', variant: v, format: 'as_original', k, seed, prompt: req + '\n\n' + cardText(seed) + FORMAT_SUFFIX });
   }
+}
+// --reparse: re-split and re-validate the cards already in OUT with the current parser (no API calls),
+// e.g. after the parser learns a new heading style. Rewrites OUT in place (backup: OUT.bak).
+if (args.reparse) {
+  const lines = readFileSync(OUT, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l));
+  writeFileSync(OUT + '.bak', lines.map(l => JSON.stringify(l)).join('\n') + '\n');
+  let fixed = 0;
+  for (const r of lines) {
+    const parts = split(r.raw); const v = validate(r.raw, parts, r.finish_reason);
+    if (v.valid !== r.valid) fixed++;
+    Object.assign(r, { description: parts.description, first_mes: parts.first_mes, preamble: parts.preamble, postscript: parts.postscript, valid: v.valid, flags: v.flags.concat((r.flags || []).filter(f => f === 'retried_low_reasoning')) });
+  }
+  writeFileSync(OUT, lines.map(l => JSON.stringify(l)).join('\n') + '\n');
+  console.log(`reparsed ${lines.length} cards in ${OUT}; ${fixed} changed validity (backup ${OUT}.bak)`);
+  process.exit(0);
 }
 if (args['retry-invalid'] && existsSync(OUT) && !DRY) {
   const lines = readFileSync(OUT, 'utf-8').split('\n').filter(Boolean);
@@ -261,6 +292,7 @@ async function worker() {
     const j = jobs.shift();
     if ((modelErrors[j.model] || 0) >= 3) continue;
     try {
+      const t0 = Date.now();
       let res = await ask(j.model, j.prompt);
       let parts = split(res.text);
       let v = validate(res.text, parts, res.finish);
@@ -280,12 +312,15 @@ async function worker() {
         seed_id: j.seed.id, seed_name: j.seed.name || j.seed.card_name, prompt: j.prompt,
         description: parts.description, first_mes: parts.first_mes, preamble: parts.preamble, postscript: parts.postscript,
         raw: res.text, finish_reason: res.finish, usage: res.usage, cost, provider: res.provider, gen_id: res.gen_id,
+        at: new Date().toISOString(), elapsed_ms: Date.now() - t0, out_words: (res.text.match(/[A-Za-z']+/g) || []).length,
         valid: v.valid, flags: v.flags, source: 'AI',
       }) + '\n');
       n++; if (!v.valid) bad++; modelErrors[j.model] = 0;
       console.log(`  ${v.valid ? 'ok ' : 'BAD'} ${j.id}${v.flags.length ? ' [' + v.flags.join(',') + ']' : ''}${cost ? ` $${cost.toFixed(4)}` : ''}`);
     } catch (e) {
       console.error(`  ERR ${j.id}: ${e.message}`);
+      // failed requests are logged so failed models can be listed later (node tools/generate_ai_cards.mjs --failures)
+      appendFileSync(OUT.replace(/\.jsonl$/, '') + '_errors.jsonl', JSON.stringify({ at: new Date().toISOString(), id: j.id, model: j.model, error: String(e.message).slice(0, 300) }) + '\n');
       if ((modelErrors[j.model] = (modelErrors[j.model] || 0) + 1) === 3) console.error(`  skipping the rest of ${j.model}: 3 failed requests in a row (wrong id or unavailable?)`);
     }
   }

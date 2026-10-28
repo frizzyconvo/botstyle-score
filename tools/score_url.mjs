@@ -8,6 +8,8 @@
 //                 (#1 is the first message, alternates are #2, #3, … as on the page)
 //   --json        print the full result object instead of a summary
 // Botbooru needs CARD_SOURCES.botbooru.api set in js/card-fetch.js.
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, existsSync } from 'fs';
 import { createRequire } from 'module';
 import { loadAll, scoreCard } from '../js/score-card.js';

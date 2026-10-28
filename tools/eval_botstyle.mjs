@@ -5,6 +5,8 @@
 //
 // Usage: node tools/eval_botstyle.mjs <ensemble_predictions.jsonl> [--upstream upstream_scores.jsonl] [--out file.jsonl]
 
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync } from 'fs';
 import { createRequire } from 'module';
 import { loadBotstyle, scoreWeighted, computeBotstyleScore, BOTSTYLE_WEIGHTS, normRate } from '../js/botstyle.js';

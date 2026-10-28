@@ -7,6 +7,8 @@
 //
 // Usage: node tools/calibrate.mjs [--chunk 700]
 
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, readdirSync } from 'fs';
 import { createRequire } from 'module';
 import { loadBotstyle, scoreWeighted } from '../js/botstyle.js';

@@ -5,6 +5,8 @@
 //     node tools/build_vendor.mjs
 // Output: vendor/msgpack.min.js, vendor/wink-pos-tagger.bundle.js
 
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync, copyFileSync } from 'fs';
 import { dirname, join, resolve, relative } from 'path';
 import { fileURLToPath } from 'url';

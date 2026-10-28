@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 
+import { helpIfAsked } from './tools/_help.mjs';
+helpIfAsked(import.meta.url);
 import { config } from 'dotenv';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { dirname } from 'path';

@@ -14,6 +14,8 @@
 // OAI/GPT4/GPT3.5Turbo/Claude (made for those models, so more likely written with them). AI rows
 // with valid=false are skipped; SPB rows (persona_text) work too. Writes data/botstyle_card_drop.json,
 // which botstyle.js applies at load. Rerun node tools/calibrate.mjs afterwards.
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync } from 'fs';
 import { preprocessCard } from '../js/card-preprocess.js';
 

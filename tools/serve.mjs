@@ -7,6 +7,8 @@
 // proxy: GET /proxy?url=<card API url>. The proxy only forwards to the card sites listed in
 // ALLOWED, only GET, and only listens on localhost. The page switches to it automatically
 // when opened from localhost. No dependencies beyond Node 18+.
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { createServer } from 'http';
 import { readFile, stat } from 'fs/promises';
 import { extname, join, normalize, resolve } from 'path';

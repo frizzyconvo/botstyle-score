@@ -3,6 +3,8 @@
 // botstyle (js/score-card.js, the same pipeline as the page) and, for comparison,
 // upstream slop-score. Writes one JSON line per card.
 // Usage: node tools/score_cards.mjs <cards.jsonl> <out.jsonl> [--alt]   (--alt: include alternate greetings)
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync } from 'fs';
 import { createRequire } from 'module';
 import { loadAll, scoreCard } from '../js/score-card.js';

@@ -12,7 +12,8 @@ card handling and the leaderboard are rebuilt for character cards). Version in `
 **Run it locally:** install Node 18+, then double-click `start-local.cmd` (Windows) or run `npm start`, and open
 http://localhost:8787/. Paste a Chub or Botbooru link, upload card PNG/JSON files, or type text. Command line:
 `node tools/score_url.mjs <link | card.json | card.png>`. Tests: `npm test`. Score every dataset (overnight,
-versioned, for regression checks): `score-all.cmd` or `npm run score-all`; then `npm run leaderboard`.
+versioned, for regression checks): `npm run score-all`, then `npm run leaderboard` and `npm run reference`.
+Every tool takes `--help`. Local-only helper scripts go in `dev/` (not committed).
 
 The original slop-score README follows for reference.
 

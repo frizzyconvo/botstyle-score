@@ -10,6 +10,8 @@
 // Usage: node tools/botstyle_leaderboard.mjs [--ref "Label=path/to/scores.jsonl[:filter]" ...]
 //        filter: human | ai | before:YYYY-MM   (applied to score-file rows)
 
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, readdirSync } from 'fs';
 import { createRequire } from 'module';
 import { loadAll, scoreCard } from '../js/score-card.js';

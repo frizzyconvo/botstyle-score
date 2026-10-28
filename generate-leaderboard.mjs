@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // generate-leaderboard.mjs - Generate leaderboard from results/*.json
 
+import { helpIfAsked } from './tools/_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import {

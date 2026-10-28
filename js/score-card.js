@@ -20,24 +20,33 @@ import { descriptionFormat, greetingStyle, cardType } from './card-style.js';
 import { bonusTags, tagInputs } from './bonus-tags.js';
 import { scoreText as scoreContrast } from './contrast-detector.js';
 import { textureFeatures, aiStyleLikelihood } from './texture.js';
+import { detectGenre } from './genre.js';
+import { loadPulp, pulpScore } from './pulp.js';
+import { archetype } from './archetypes.js';
 
-// The platform's "writing style" labels. Cut-offs from the card and story sets (BOTSTYLE.md):
-// at 20/40, ~87% of 2023 human cards are Original and 2-4% Common, while AI-written cards
-// (SPB) are 4% Original / 19% Common and AI stories 7% / 60%. The older 30/60 split put
-// 42% of AI cards in Original and almost nothing in Common. Change here if needed.
-// Version of the scoring pipeline (package.json holds the app version, which can be ahead of it for
-// page-only changes). Bump it (and CHANGELOG.md) whenever a change can
-// move scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it,
-// so stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
-export const SCORER_VERSION = '0.4.0';
+// Version of the scoring pipeline, shown as "BBBScorer v…" (package.json holds the app version, which
+// can be ahead of it for page-only changes). Bump it (and CHANGELOG.md) whenever a change can move
+// scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it, so
+// stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
+export const SCORER_VERSION = '0.5.0';
+// Versions whose botstyle *numbers* are identical to this one (0.5.0 changed band cut-offs and
+// labels and added genre/pulp/archetype read-outs, not the score), so references built with them
+// still apply.
+export const SAME_SCORES_AS = ['0.4.0', '0.5.0'];
 
-export const WRITING_STYLE_BANDS = { original: 20, common: 40 };
+// Writing-style bands, tentative while the tool is being tested. Set to keep false positives on
+// human cards low (BOTSTYLE.md): on 118k human 2023 cards, 35/50 puts 96% in the lowest band and 1%
+// in the highest; on 1k AI-written cards 60% / 9%. The earlier 20/40 flagged more AI but also more
+// humans (87% / 3%). Ids stay original / mixed / common for platforms.
+export const WRITING_STYLE_BANDS = { original: 35, common: 50 };
+export const BAND_LABELS = { original: 'Meatbag adjacent', mixed: 'Mixed signals', common: 'Might just be slop' };
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
 
 export async function loadAll(base = './data/') {
   await loadBotstyle(base);
   await loadCliches(base);
+  await loadPulp(base);
   try { const r = await fetch(base + 'botstyle_reference.json'); if (r.ok) REFERENCE = await r.json(); } catch { REFERENCE = null; }
 }
 
@@ -72,7 +81,7 @@ export function writingStyleBand(score, reliable, format, stats = {}, obviousTel
     return { id: 'na', label: stats.structuredWords > stats.proseWords ? 'Mostly W++/lists: too little prose to judge' : 'Too little prose to judge' };
   const B = WRITING_STYLE_BANDS;
   const id = score < B.original ? 'original' : score < B.common ? 'mixed' : 'common';
-  return { id, label: { original: 'Original', mixed: 'Mixed', common: 'Common' }[id] + (reliable ? '' : ' (low confidence)') };
+  return { id, label: BAND_LABELS[id] + (reliable ? '' : ' (low confidence)'), tentative: true };
 }
 
 function quietly(fn) {
@@ -109,6 +118,8 @@ export function scoreCard(card, opts = {}) {
   const names = tallyNames(pre.prose);
   const rates = { words: w.words.rate, phrases: w.phrases.rate, structures: st.rate };
   const peers = Object.fromEntries(['words', 'phrases', 'structures'].map(k => [k, peerPercentile(format.format, k, rates[k])]));
+  const genre = detectGenre(pre.prose, c.tags || []);
+  const pulp = pulpScore(w, st, artifacts.points, genre, WRITING_STYLE_BANDS);
   const texture = textureFeatures(pre.prose);
   const likelihood = aiStyleLikelihood(score.score, texture, pre.stats.proseWords);
   const result = {
@@ -118,6 +129,7 @@ export function scoreCard(card, opts = {}) {
     band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0),
     rates, stats: pre.stats, format, greeting, type, peers,
     reference: referencePercentiles(score.score),
+    genre, pulp, archetype: archetype({ format, greeting, genre, stats: pre.stats }),
     texture, experimental: { aiStyleLikelihood: likelihood, note: 'botstyle score + paragraph evenness; unscored, under evaluation' },
     hits: { words: w.words.hits, phrases: w.phrases.hits, structures: st.hits },
     emdash: st.emdash, artifacts, checks, cliches, names, contrast,

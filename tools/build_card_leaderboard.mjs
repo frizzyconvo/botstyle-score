@@ -8,6 +8,8 @@
 // ("fresh": run 1 + run 2 fresh mode), so models are compared on the same kind of request. The other
 // modes (anti-AI instructions, rewrites of human cards) are reported per model but not ranked.
 // References: human and mixed card sets scored with the same scorer version. Reliable English cards only.
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 const dir = process.argv[2] || join('eval', 'scores', readdirSync(join('eval', 'scores')).filter(d => /^v\d/.test(d)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).pop());
@@ -19,7 +21,7 @@ const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, 
 const gen = [...load('generated_v1').map(r => ({ ...r, mode: r.mode || 'fresh', run: 1 })), ...load('generated_v2').map(r => ({ ...r, run: 2 }))];
 const models = {};
 for (const r of gen) (models[r.model] = models[r.model] || []).push(r);
-const out = { note: 'Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.', dir, version: (gen[0] || {}).version, built: new Date().toISOString().slice(0, 10), models: [], references: [] };
+const out = { scorerName: 'BBBScorer', note: 'Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.', dir, version: (gen[0] || {}).version, built: new Date().toISOString().slice(0, 10), models: [], references: [] };
 for (const [m, rows] of Object.entries(models)) {
   const fresh = rows.filter(r => r.mode === 'fresh');
   if (!fresh.length) continue;
@@ -36,7 +38,7 @@ const refs = [
   ['Chub cards, 2025', load('raincandy_chub').filter(r => String(r.createdAt || '').startsWith('2025'))],
   ['Perchance cards, 2024–25', load('perchance')],
   ['SPB AI personas (Kimi, GLM)', load('spb_ai')],
-  ['Anti-slop AI cards (character-card-skills)', load('foreverse_ai')],
+  ['Foreverse (anti-slop AI cards)', load('foreverse_ai')],
 ];
 for (const [label, rows] of refs) if (rows.length >= 5) out.references.push({ label, kind: /AI/.test(label) ? 'ai' : 'human', ...stats(rows) });
 writeFileSync('data/botstyle_card_leaderboard.json', JSON.stringify(out, null, 1));

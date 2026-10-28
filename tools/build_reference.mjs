@@ -11,6 +11,8 @@
 //   ai_cards    generated runs (valid cards) + SPB-2602. character-card-skills cards are left out:
 //               they were written to evade exactly this kind of scoring.
 // Rebuild whenever the scorer version changes. Node only, so it runs on Windows without Python.
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 const argv = process.argv.slice(2);

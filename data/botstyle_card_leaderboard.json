@@ -1,6 +1,7 @@
 {
+ "scorerName": "BBBScorer",
  "note": "Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.",
- "dir": "eval\\scores\\v0.4.0",
+ "dir": "eval/scores/v0.4.0",
  "version": "0.4.0",
  "built": "2026-10-28",
  "models": [
@@ -474,7 +475,7 @@
    "upstream": 6.6
   },
   {
-   "label": "Anti-slop AI cards (character-card-skills)",
+   "label": "Foreverse (anti-slop AI cards)",
    "kind": "ai",
    "n": 6,
    "median": 11,

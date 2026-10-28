@@ -10,6 +10,8 @@
 // run the same way they do in the browser (pass --no-pos to mimic the Node
 // leaderboard script, which never loads the tagger).
 
+import { helpIfAsked } from './_help.mjs';
+helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync } from 'fs';
 import { createRequire } from 'module';
 import { loadSlopSets, computeSlopIndex } from '../js/metrics.js';
