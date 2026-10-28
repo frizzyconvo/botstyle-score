@@ -27,9 +27,30 @@ import { textureFeatures, aiStyleLikelihood } from './texture.js';
 // 42% of AI cards in Original and almost nothing in Common. Change here if needed.
 export const WRITING_STYLE_BANDS = { original: 20, common: 40 };
 
+let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
+
 export async function loadAll(base = './data/') {
   await loadBotstyle(base);
   await loadCliches(base);
+  try { const r = await fetch(base + 'botstyle_reference.json'); if (r.ok) REFERENCE = await r.json(); } catch { REFERENCE = null; }
+}
+
+// Share of a reference group scoring below `score` (0-100), from its 101 stored quantiles.
+function percentileIn(q, score) {
+  if (score <= q[0]) return 0;
+  if (score >= q[100]) return 100;
+  let i = 0; while (i < 100 && q[i + 1] <= score) i++;
+  const span = q[i + 1] - q[i];
+  return Math.min(100, i + (span > 0 ? (score - q[i]) / span : 0));
+}
+
+/** Where a score sits among human-written and AI-written cards: the grading the score itself
+ *  can't give (a 0-100 score isn't a percentage of anything). */
+export function referencePercentiles(score) {
+  if (!REFERENCE || !REFERENCE.groups) return null;
+  const out = {};
+  for (const [k, g] of Object.entries(REFERENCE.groups)) out[k] = { label: g.label, n: g.n, percentile: percentileIn(g.q, score) };
+  return out;
 }
 
 // Below this many prose words no label is given: one stray hit in a 17-word greeting can
@@ -86,6 +107,7 @@ export function scoreCard(card, opts = {}) {
     components: score.components, emdashPoints: score.emdashPoints, artifactPoints: score.artifactPoints,
     band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0),
     rates, stats: pre.stats, format, greeting, type, peers,
+    reference: referencePercentiles(score.score),
     texture, experimental: { aiStyleLikelihood: likelihood, note: 'botstyle score + paragraph evenness; unscored, under evaluation' },
     hits: { words: w.words.hits, phrases: w.phrases.hits, structures: st.hits },
     emdash: st.emdash, artifacts, checks, cliches, names, contrast,

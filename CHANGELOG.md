@@ -4,6 +4,25 @@ Versions follow `MAJOR.MINOR.PATCH`. A change to how scores are computed (lists,
 bands) bumps MINOR and is noted here, so scores from different versions aren't compared by accident.
 `package.json` holds the current version.
 
+## 0.3.0 (2026-10-28)
+
+Scoring output (the score itself is unchanged)
+- Each result says where it sits among 3,827 human 2023 cards and 940 AI-written cards
+  (`reference` in `scoreCard()`, `data/botstyle_reference.json`, `tools/build_reference.py`).
+
+Page
+- Original slop-score metrics moved into a collapsed "Stats for nerds" section; the over-represented
+  words/trigrams lists and the 76 MB human-profile download were removed.
+- The "Slop / Not slop" splash follows the band (Common / Original) instead of a fixed 25.
+- Panel and mobile modal share one renderer; how-it-works text rewritten for cards.
+- GitHub Pages ready: `index.html`, `.nojekyll`, `noindex`; `js/site-config.js` + `tools/cors-proxy-worker.js`
+  for Botbooru links on a hosted copy.
+
+Tools
+- `generate_ai_cards.mjs`: retries a card once at low reasoning effort when a thinking model uses the whole
+  budget reasoning; `content_filter` is a soft flag; `--retry-invalid`.
+- `score_url.mjs --fields description,first_mes` to score chosen fields only.
+
 ## 0.2.0 (2026-10-28)
 
 Scoring

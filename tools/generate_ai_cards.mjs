@@ -14,13 +14,15 @@
 //   node tools/generate_ai_cards.mjs --models "m1,m2" [--seeds eval/seeds_jai_2023h1.jsonl]
 //        [--modes fresh,antislop,rewrite] [--formats free_prose,default] [--per-style 1]
 //        [--out eval/ai_cards_v2.jsonl] [--concurrency 3] [--max-tokens 6000]
-//        [--reasoning low] [--temperature 0.8] [--max-usd 2] [--dry-run]
+//        [--reasoning low] [--temperature 0.8] [--max-usd 2] [--dry-run] [--retry-invalid] [--no-retry]
 //
 //   --per-style   cards per (model, mode, format). Keep it at 1 until the prompts are settled.
 //   --dry-run     list the jobs and print one prompt per mode; no API calls.
 //   --max-usd     stop starting new jobs once OpenRouter's reported cost passes this.
 //   --reasoning   OpenRouter reasoning effort for thinking models (low keeps cost and the
-//                 risk of running out of tokens down); omitted by default.
+//                 risk of running out of tokens down); omitted by default. A card whose reasoning
+//                 eats the whole budget is retried once at effort=low (--no-retry to skip).
+//   --retry-invalid  move cards flagged invalid to <out>_invalid.jsonl and generate them again.
 //
 // Reads BASE_URL and API_KEY from .env (OpenRouter works). Seeds: JSONL with name / tagline /
 // tags / description / first_mes (tools/build_seeds.py makes a clean SFW, pre-Jul-2023 set).
@@ -29,7 +31,7 @@
 // clarifying questions, truncation, missing greeting, "original character inspired by"
 // substitutions). Score only valid lines.
 
-import { readFileSync, appendFileSync, existsSync } from 'fs';
+import { readFileSync, appendFileSync, existsSync, writeFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { config } from 'dotenv';
 config();
@@ -128,9 +130,10 @@ function cardText(r) {
 }
 
 // ---------------------------------------------------------------- API
-async function ask(model, prompt) {
-  const body = { model, temperature: TEMP, max_tokens: MAX_TOKENS, usage: { include: true }, messages: [{ role: 'user', content: prompt }] };
-  if (args.reasoning) body.reasoning = { effort: String(args.reasoning) };
+async function ask(model, prompt, over = {}) {
+  const body = { model, temperature: TEMP, max_tokens: over.maxTokens || MAX_TOKENS, usage: { include: true }, messages: [{ role: 'user', content: prompt }] };
+  const effort = over.reasoning || args.reasoning;
+  if (effort) body.reasoning = { effort: String(effort) };
   let lastErr;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
@@ -170,7 +173,8 @@ function validate(raw, parts, finish) {
   if (REFUSAL.test(t) && !parts.headers_found) flags.push('refusal');
   if (/i['’]?m sorry,? but i (?:can(?:not|['’]t)|won['’]t) (?:assist|help|continue|comply) with (?:that|this)(?: request)?\.?\s*$/i.test(t) && t.length > 200) flags.push('cut_off');
   if (!parts.headers_found && /\?\s*\)?\s*$/.test(t) && t.length < 1500) flags.push('asked_question');
-  if (finish === 'length' || finish === 'max_tokens') flags.push('truncated');
+  if (finish === 'length' || finish === 'max_tokens') flags.push(t ? 'truncated' : 'reasoning_exhausted');
+  if (finish === 'content_filter') flags.push('content_filter');   // soft: OpenAI sometimes flags complete answers
   if (parts.headers_found && !parts.first_mes) flags.push('no_greeting');
   if (!parts.headers_found && !flags.length) flags.push('no_headers');
   // soft flags: kept valid, but worth knowing about
@@ -178,7 +182,7 @@ function validate(raw, parts, finish) {
   if (/\b(?:non-?explicit|suggestive \(non|can['’]?t create explicit)/i.test(parts.preamble)) flags.push('toned_down');
   if (parts.preamble && !/^#+\s|^\**[\w' ]{0,60}(?:card|bot|profile)\**$/i.test(parts.preamble)) flags.push('has_preamble');
   if (parts.postscript) flags.push('has_postscript');
-  const hard = ['empty', 'refusal', 'cut_off', 'asked_question', 'truncated', 'no_greeting', 'no_headers'];
+  const hard = ['empty', 'refusal', 'cut_off', 'asked_question', 'truncated', 'reasoning_exhausted', 'no_greeting', 'no_headers'];
   return { valid: !flags.some(f => hard.includes(f)), flags };
 }
 
@@ -203,6 +207,15 @@ for (let k = 0; k < PER; k++) {
   if (MODES.includes('rewrite')) for (const [v, req] of Object.entries(REWRITE)) {
     const seed = pick(`rewrite|${k}`);        // the three rewrite kinds share the human original
     plan.push({ mode: 'rewrite', variant: v, format: 'as_original', k, seed, prompt: req + '\n\n' + cardText(seed) + FORMAT_SUFFIX });
+  }
+}
+if (args['retry-invalid'] && existsSync(OUT) && !DRY) {
+  const lines = readFileSync(OUT, 'utf-8').split('\n').filter(Boolean);
+  const keep = lines.filter(l => JSON.parse(l).valid !== false), drop = lines.filter(l => JSON.parse(l).valid === false);
+  if (drop.length) {
+    appendFileSync(OUT.replace(/\.jsonl$/, '') + '_invalid.jsonl', drop.join('\n') + '\n');
+    writeFileSync(OUT, keep.length ? keep.join('\n') + '\n' : '');
+    console.log(`--retry-invalid: moved ${drop.length} invalid card(s) to ${OUT.replace(/\.jsonl$/, '')}_invalid.jsonl; they'll be regenerated`);
   }
 }
 const done = new Set(existsSync(OUT) ? readFileSync(OUT, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l).id) : []);
@@ -232,10 +245,19 @@ async function worker() {
     if (spent >= MAX_USD) { console.log(`  stopping: reported cost $${spent.toFixed(3)} reached --max-usd`); jobs.length = 0; break; }
     const j = jobs.shift();
     try {
-      const res = await ask(j.model, j.prompt);
-      const parts = split(res.text);
-      const v = validate(res.text, parts, res.finish);
-      const cost = res.usage && typeof res.usage.cost === 'number' ? res.usage.cost : null;
+      let res = await ask(j.model, j.prompt);
+      let parts = split(res.text);
+      let v = validate(res.text, parts, res.finish);
+      let cost = res.usage && typeof res.usage.cost === 'number' ? res.usage.cost : 0;
+      // A thinking model that spends the whole budget reasoning returns nothing (GLM-4.5 did, with
+      // 6,000 reasoning tokens). Retry once with low reasoning effort and twice the budget.
+      if (v.flags.includes('reasoning_exhausted') && !args['no-retry']) {
+        console.log(`  retry ${j.id}: reasoning used the whole budget, trying effort=low, ${MAX_TOKENS * 2} tokens`);
+        res = await ask(j.model, j.prompt, { reasoning: 'low', maxTokens: MAX_TOKENS * 2 });
+        parts = split(res.text); v = validate(res.text, parts, res.finish); v.flags.push('retried_low_reasoning');
+        if (res.usage && typeof res.usage.cost === 'number') cost += res.usage.cost;
+      }
+      cost = cost || null;
       if (cost) spent += cost;
       appendFileSync(OUT, JSON.stringify({
         id: j.id, createdAt: 'generated', model: j.model, mode: j.mode, variant: j.variant, style_requested: j.format, k: j.k,

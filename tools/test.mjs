@@ -109,5 +109,10 @@ const tx = scoreCard({ description: ['She runs the night ferry and hates fog.', 
 check('texture: paragraph CV computed', tx.texture.paragraphs === 3 || tx.texture.paragraphs === 4, JSON.stringify(tx.texture));
 check('texture: likelihood null under 150 prose words', tx.experimental.aiStyleLikelihood === null);
 
+// 10. reference grading
+const r10 = scoreCard({ description: 'Her eyes sparkled with mischief, a testament to her resilience. The air was thick with tension. '.repeat(20) });
+const r11 = scoreCard({ description: 'Mara runs the bakery on Elm Street and argues with everyone about rye. She owes her sister forty dollars. '.repeat(20) });
+check('reference percentiles present and ordered', r10.reference && r11.reference && r10.reference.human_2023.percentile > r11.reference.human_2023.percentile, JSON.stringify([r10.reference, r11.reference]));
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

@@ -1,6 +1,6 @@
 # botstyle-score
 
-Version **0.2.0** (see [CHANGELOG.md](CHANGELOG.md)). Run it locally: double-click `start-local.cmd` (Windows) or
+Version **0.3.0** (see [CHANGELOG.md](CHANGELOG.md)). Run it locally: double-click `start-local.cmd` (Windows) or
 `npm start`, open http://localhost:8787/, paste a Chub or Botbooru link and press Fetch card. Needs Node 18+.
 
 A fork of [sam-paech/slop-score](https://github.com/sam-paech/slop-score) adapted to score **character cards**
@@ -306,15 +306,73 @@ character-card-skills was tested (their greeting rubric rewards AI cards, so it 
 
 ## Example cards (`card-datasets/example-cards/`, outside the repo)
 
-| Card | Before | Now | Notes |
-|---|---|---|---|
-| Botbooru 75990 Genavros (hand-written) | 35 | 34.2 Mixed | description alone 37, greeting 21; driven by dark-fantasy vocabulary (primal, predator, abyss, solitude, ember, maw) that AI fiction overuses relative to Reddit stories. The personality field (60) and scenario (32) read AI-assisted. |
-| Botbooru 72660 Raquel (AI shitpost) | 18 / ~30 | 59.4 Common | words 0.70, phrases 0.29, structures 0.69 |
-| Chub Farina (your card) | ~8 | 15.6 Original | one "nearly imperceptible frown" (sentence pattern, 2.5) is most of the rise |
+Description + first message only, as the earlier scorers were run (`node tools/score_url.mjs <file> --fields description,first_mes`):
 
-The 75990 result points at a genre confound: the human baseline is modern Reddit fiction, so genre words
-of dark fantasy count as AI. A fantasy-heavy human set (fantasy cards from 2023, or fantasy novels) in the
-list weighting would test that.
+| Card | Earlier scorers | Now | vs human 2023 / AI cards | Texture (experimental) |
+|---|---|---|---|---|
+| Botbooru 75990 Genavros (hand-written) | 35 | 31.2 Mixed | higher than 92% / 47% | paragraph CV 0.35, 84% |
+| Botbooru 72660 Raquel (AI shitpost) | 18 / ~30 | 48.4 Common | 98% / 90% | CV 0.43, 90% |
+| Chub Farina (your card) | ~8 | 15.6 Original | 65% / 3% | CV 0.69, 12% |
+
+75990 is pushed up by dark-fantasy vocabulary (primal, predator, abyss, solitude, ember, maw) that AI fiction
+overuses relative to the Reddit stories the lists were weighted against: a genre confound. Farina's rise is
+mostly one "nearly imperceptible frown". With all fields the page gives 75990 34.2 (its personality field
+alone scores 60).
+
+## Grading: what the 0–100 means
+
+The score is a weighted hit rate scaled so 100 = the sloppiest 10% of card-length AI fiction; it isn't a
+percentage or a probability. Since 0.3.0 every result also says where it sits among reference cards
+(`reference` in `scoreCard()`, from `data/botstyle_reference.json`, built by `tools/build_reference.py`):
+
+| Score | Higher than … of human 2023 cards (3,827) | … of AI-written cards (940) |
+|---|---|---|
+| 5 | 15% | 0% |
+| 15 | 63% | 3% |
+| 31 | 91% | 46% |
+| 60 | 99% | 97% |
+
+So 20 and 40 sit at roughly the 80th and 98th percentile of human cards and the 10th and 75th of AI cards.
+The 0–100 number stays for continuity (leaderboard, bands, platform), and the percentile line is the
+plain-language reading. A calibrated probability from the score alone would depend on how common AI cards
+are among whatever is being scored, so percentiles against both groups are the more honest framing.
+
+## Categories vs character-card-skills
+
+Our categories already cover theirs: card type (single character, multi-character, scenario/RPG, tool)
+matches their modes (single-character, multi-NPC, scenario/RPG/simulator/narrator, helper), and
+description format + greeting voice/format/tense cover what their greeting rules check. Their five opening
+paradigms are authoring advice and can't be detected reliably by pattern. One contrast with their notes:
+they report 70% of top Western cards use asterisk-style action (`*She looks up.*`); in our data that's
+32% of 2023 human greetings but 5% of AI greetings, which write novel-style prose (25% vs 12%) and in third
+person (36% vs 18%). These are shown, not scored.
+
+## Stats for nerds (the original slop-score metrics)
+
+On 2,476 human 2023 cards vs 860 AI cards (≥150 words), AUC: upstream slop score 0.60 (botstyle 0.87),
+Flesch-Kincaid level 0.60, sentence length 0.53, paragraph length 0.38, dialogue frequency 0.46, TTR 0.50,
+MATTR-500 0.77 (but it tracks polish: chance on Gutenberg). Total words 0.84 only says AI cards are longer.
+They're kept in a collapsed "Stats for nerds" section. The over-represented words/trigrams lists were
+removed: on cards they mostly listed character names, and they needed the 76 MB human profile, which the
+page no longer downloads (load time about 1 second locally).
+
+## Generated cards, second run (in progress, `eval/ai_cards_v2.jsonl`)
+
+First 113 cards from 6 models (GPT-5-mini, Claude Sonnet 4.5, DeepSeek V3.2, Kimi K2, GLM-4.5, Llama 4
+Maverick), 1 per cell, $0.45 so far. One invalid: GLM-4.5 spent all 6,000 tokens reasoning and returned
+nothing (now retried automatically at low effort). One GPT-5-mini card finished with OpenAI's
+`content_filter` but was complete (now a soft flag). Medians so far: fresh 30.5; antislop simple 35.9,
+generic 23.1, RP 25.1; rewrite polish 21.1, improve 31.1, expand 53.7 (the human original scored 17).
+By model: DeepSeek 43.3, GLM 34.5, Claude 29.5, GPT-5-mini 29.0, Kimi 25.2, Llama 4 Maverick 19.1.
+Small samples; read as direction only.
+
+## Hosting (GitHub Pages)
+
+The page is static. `index.html` forwards to `slop-score.html`, `.nojekyll` stops GitHub's Jekyll step, and
+both pages carry `noindex` so search engines skip a closed-beta link. Chub links work from any site (Chub sends
+`Access-Control-Allow-Origin: *`). Botbooru links need a proxy on a hosted copy: deploy
+`tools/cors-proxy-worker.js` as a free Cloudflare Worker and put its URL in `js/site-config.js`; without it the
+page asks Botbooru users to download the card and drop it in.
 
 ## Next steps
 

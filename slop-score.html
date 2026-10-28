@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Botstyle Score</title>
+<meta name="robots" content="noindex, nofollow">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -516,18 +517,10 @@
         <button class="modal-close" id="closeHowItWorksModal">&times;</button>
       </div>
       <div id="howItWorksBody">
-        <h3>What is Slop Score?</h3>
-        <p>Slop Score is a leaderboard and analysis tool for computing how much a given text looks/smells like AI "slop". It looks specifically at words and patterns that occur more frequently in AI text than in human text.</p>
-        <p>Find the source code here: <a href="https://github.com/sam-paech/slop-score" target="_blank" style="color: var(--accent);">https://github.com/sam-paech/slop-score</a></p>
-
-        <h3>Not an AI Detector!</h3>
-        <p>This tool works differently than most AI detectors: It looks for glaringly over-used patterns, rather than trying to classify the text as AI or human. It will detect words and phrases that smell of AI, but it won't reliably help you avoid AI detection. The best way to avoid AI detectors is to write in your own words.</p>
-
-        <h3>Tips for the Analysis Tool</h3>
-        <ul style="line-height: 1.8;">
-          <li>Analysis works best on several pieces of writing on different topics. The more the better! It will still work on a single story or essay, but the results will be skewed by the topic.</li>
-          <li>The analysis is optimised for creative writing and essays. It may work for other domains, but will likely under-report slop.</li>
-        </ul>
+        <h3>What this is</h3>
+        <p>Botstyle Score measures how much a character card's writing leans on the stock phrasing AI models fall back on. It's a fork of <a href="https://github.com/sam-paech/slop-score" target="_blank" rel="noopener" style="color: var(--accent);">slop-score</a> by Sam Paech, rebuilt for character cards.</p>
+        <h3>Not an AI detector</h3>
+        <p>It measures AI house style, not authorship. A human who writes in that style scores high, and a model told to avoid it can score low. Read the score as "how much does this sound like default AI writing", not "was this written by AI".</p>
 
         <h3>Botstyle Score (this fork)</h3>
         <p>Built for character cards (description + greeting). Only the prose is scored: W++/PList blocks, key-value lists and copy-pasted instructions are tallied and set aside, and the score comes with a confidence range that widens when there isn't much prose.</p>
@@ -540,18 +533,12 @@
         <p>100 on a component means "as sloppy as the sloppiest 10% of card-length AI fiction". Each card is also compared with 2023 cards of the same style (free prose, headers + prose, W++/lists, in-voice…). Shared clichés, human tells, craft notes and AI-favourite names (Elara, Kael, Thorne…) are shown but not scored.</p>
         <p><strong>Writing style:</strong> Original (under 20), Mixed (20–40), Common (40 and up). About 87% of human cards from early 2023 come out Original; AI-written cards mostly land in Mixed or Common. <strong>Description format</strong> (free prose, formatted prose, compact W++/PList/JSON, lists, in-voice, hybrids) describes the layout and isn't scored. Bonus tags (Copyedit-proof, Clichemonger, A card for ants, …) flag cards in roughly the top few percent of real cards for that trait. Details: BOTSTYLE.md in the repository.</p>
 
-        <h3>Upstream Slop Score (for comparison)</h3>
-        <p>The leaderboard ranks models by their median botstyle score on card-length samples, with grey reference rows for human writing. The "Upstream slop-score metrics" section uses the original formula: 60% slop words, 25% not-x-but-y, 15% slop trigrams, normalised across the leaderboard models.</p>
-
-        <h3>Over-represented Words & Trigrams</h3>
-        <p>These sections show words and phrases that occur more frequently in the analyzed text than in typical human writing, based on:</p>
-        <ul style="line-height: 1.8;">
-          <li><strong>Words</strong>: Compared against the <a href="https://github.com/rspeer/wordfreq" target="_blank" style="color: var(--accent);">wordfreq</a> baseline (a large corpus of human language)</li>
-          <li><strong>Trigrams</strong>: Compared against a human baseline corpus of essays and creative writing</li>
-        </ul>
-
-        <h3>Additional Metrics</h3>
-        <p>The tool also provides various writing style metrics including lexical diversity (MATTR-500), vocabulary level (Flesch-Kincaid), sentence and paragraph length, and dialogue frequency to give a comprehensive view of the text's characteristics.</p>
+        <h3>How to read the score</h3>
+        <p>The 0–100 number isn't a percentage of anything, so each result also says where it sits: higher than N% of human-written cards from 2023 and M% of AI-written cards. A score above most human cards but below most AI cards is in between, and the Mixed band says the same thing.</p>
+        <h3>Texture (experimental)</h3>
+        <p>AI text tends to keep paragraphs close to the same length. The texture line reports that evenness and a likelihood that combines it with the score. It isn't part of the score yet: careful human writers can be even too.</p>
+        <h3>Stats for nerds</h3>
+        <p>The collapsed section keeps the original slop-score metrics (its slop score, slop word and trigram rates, Flesch-Kincaid level, sentence and paragraph length, dialogue frequency, MATTR). On character cards they barely tell human and AI writing apart, so they're there for curiosity, not judgement.</p>
 
         <h3>Leaderboard</h3>
         <p>Models are scored on their creative-writing outputs from a standard set of prompts, cut to card length. Lower scores mean less stock AI phrasing. These outputs were also used to build the word lists, so model scores are in-sample.</p>
@@ -565,38 +552,27 @@
   </div>
 
 <script type="module">
-import { wordsOnlyLower, alphaTokens, countItems } from './js/utils.js';
+import { wordsOnlyLower, alphaTokens } from './js/utils.js';
 import {
   loadWordfreq,
-  loadHumanProfile,
   loadSlopSets,
-  computeSlopIndex,
-  contentTokens,
-  makeNgrams,
-  rankOveruseWithCounts,
-  humanBigramFreq,
-  humanTrigramFreq,
-  lookupFrequency,
-  mergePossessives
+  computeSlopIndex
 } from './js/metrics.js';
 import { initPosTagger } from './js/pos-tagger.js';
 import { scoreText as scoreContrast } from './js/contrast-detector.js';
 // botstyle-score additions
 import { lookupZipf } from './js/metrics.js';
-import { loadBotstyle, scoreWeighted, computeBotstyleScore, BOTSTYLE_WEIGHTS, MIN_PROSE_WORDS, peerPercentile } from './js/botstyle.js';
-import { preprocessCard } from './js/card-preprocess.js';
-import { checkCard } from './js/human-tells.js';
-import { findArtifacts } from './js/ai-artifacts.js';
-import { scoreCard } from './js/score-card.js';
+import { BOTSTYLE_WEIGHTS, MIN_PROSE_WORDS, peerPercentile } from './js/botstyle.js';
+import { scoreCard, loadAll as loadBotstyleAll } from './js/score-card.js';
+import { CARD_PROXY } from './js/site-config.js';
 import { parseCardText, parseCardPng } from './js/card-import.js';
 import { fetchCard, CARD_SOURCES } from './js/card-fetch.js';
-// Served by tools/serve.mjs (npm start): route card requests through its local proxy so
-// Botbooru links work too (Botbooru sends no CORS header).
+// Botbooru sends no CORS header, so its links need a proxy: tools/serve.mjs provides one on
+// localhost (npm start); a hosted copy uses CARD_PROXY from js/site-config.js if set.
 if (/^(?:localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) CARD_SOURCES.proxy = '/proxy?url=';
+else if (CARD_PROXY) CARD_SOURCES.proxy = CARD_PROXY;
 import { DESCRIPTION_FORMATS } from './js/card-style.js';
-import { scoreStructures, EMDASH_POINTS } from './js/ai-structures.js';
-import { loadCliches, tallyCliches } from './js/cliches.js';
-import { definitionStyle, styleFamily } from './js/card-style.js';
+import { EMDASH_POINTS } from './js/ai-structures.js';
 
 const ui = {
   btn: document.getElementById('analyzeBtn'),
@@ -635,8 +611,11 @@ let analysisResourcesLoaded = false;
 let uploadedFiles = [];
 
 // Verdict animation
-function showVerdict(slopScore) {
-  const isSlop = slopScore > 25;
+// Verdict splash follows the writing-style band: Common -> "Slop", Original -> "Not slop";
+// nothing for Mixed or when there's too little to judge.
+function showVerdict(band) {
+  if (!band || band.id === 'mixed' || band.id === 'na') return;
+  const isSlop = band.id === 'common';
 
   const paintSplashSVG = `
     <svg class="paint-splash" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
@@ -1223,6 +1202,7 @@ function renderBotstyleSection(b) {
       <div class="modal-metric-value">${s.score.toFixed(1)} <span class="muted" style="font-size:0.8em;">(${s.low.toFixed(0)}–${s.high.toFixed(0)})</span></div>
       <span class="tooltip-text">${pctw(W.words)}% weighted slop words + ${pctw(W.phrases)}% weighted slop phrases + ${pctw(W.structures)}% AI sentence structures (incl. not-x-but-y), on prose only. 100 on a component = as sloppy as the sloppiest 10% of card-sized AI fiction chunks. Range is a ±1 standard-error band from the hit counts. Heavy em-dash use (over ${EMDASH_POINTS.free} per 1k words, up to +${EMDASH_POINTS.max}) and obvious AI tells (chatbot preambles/sign-offs) add points on top.</span>
     </div>
+    ${b.reference && (!b.band || b.band.id !== 'na') ? `<div class="muted" style="font-size:13px;margin:-4px 0 10px;">Higher than <b>${Math.round(b.reference.human_2023.percentile)}%</b> of ${b.reference.human_2023.label} and <b>${Math.round(b.reference.ai_cards.percentile)}%</b> of ${b.reference.ai_cards.label} (${b.reference.human_2023.n.toLocaleString()} and ${b.reference.ai_cards.n.toLocaleString()} cards).</div>` : ''}
     ${bar('Slop words', s.components.words, `${b.rates.words.toFixed(0)} weighted hits per 1k prose words`)}
     ${bar('Slop phrases', s.components.phrases, `${b.rates.phrases.toFixed(1)} weighted bigram/trigram hits per 1k prose words`)}
     ${bar('Sentence structures', s.components.structures, `${b.rates.structures.toFixed(1)} weighted hits per 1k prose words: not-x-but-y, "a hint of…", abstract similes, banter tags…`)}
@@ -1275,16 +1255,20 @@ function renderBotstyleSection(b) {
       + (lk !== null && lk !== undefined ? `<br>AI-style likelihood (botstyle score + evenness): ${Math.round(lk * 100)}%` : '')
       + `</div></div>`;
   }
-  return h + '</div><h4 style="margin:16px 0 8px;">Upstream slop-score metrics</h4>';
+  return h + '</div>';
 }
 
-function updateRightPanel(entry) {
+function detailHtml(entry) {
   const data = entry.fullData;
 
-  let html = `<h3 style="margin: 0 0 16px;">${entry.model}</h3>`;
+  let html = `<h3 style="margin: 0 0 16px;">${escHtml(entry.model)}</h3>`;
   html += renderBotstyleSection(data.botstyle);
 
   if (data.metrics) {
+    // The original slop-score metrics. On character cards they barely separate human from AI
+    // (upstream score AUC 0.60, Flesch-Kincaid 0.60, sentence length 0.53, dialogue 0.46, see
+    // BOTSTYLE.md), so they sit in a collapsed section.
+    html += `<details class="nerd-stats"><summary>Stats for nerds: original slop-score metrics</summary>`;
     // Compute normalized values for bars
     const normSlopWords = normalizeValue(data.metrics.slop_list_matches_per_1k_words || 0, normalizationRanges.slop_words);
     const normSlopTrigrams = normalizeValue(data.metrics.slop_trigram_matches_per_1k_words || 0, normalizationRanges.slop_trigrams);
@@ -1295,7 +1279,7 @@ function updateRightPanel(entry) {
         <div class="modal-metric-bg slop" style="width: ${entry.upstreamScore ?? entry.slopScore}%"></div>
         <div class="modal-metric-label">Slop Score</div>
         <div class="modal-metric-value">${(entry.upstreamScore ?? entry.slopScore).toFixed(2)}</div>
-        <span class="tooltip-text">Combined metric: 60% slop words + 25% not-x-but-y patterns + 15% slop trigrams, normalized across all models</span>
+        <span class="tooltip-text">The original slop-score formula: 60% slop words + 25% not-x-but-y patterns + 15% slop trigrams, normalised across the leaderboard models. Computed on the whole card text.</span>
       </div>
       <div class="modal-metric metric-with-tooltip">
         <div class="modal-metric-bg slop" style="width: ${normSlopWords * 100}%"></div>
@@ -1495,22 +1479,6 @@ function updateRightPanel(entry) {
       );
     }
 
-    if (data.top_over_represented && !isHumanBaseline) {
-      html += renderItemsWithShowMore(
-        data.top_over_represented.words,
-        'Top Over-represented Words',
-        w => `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`,
-        'Words that occur more frequently in this text than in typical human-authored text (based on wordfreq baseline).'
-      );
-
-      html += renderItemsWithShowMore(
-        data.top_over_represented.trigrams,
-        'Top Over-represented Trigrams',
-        t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`,
-        '3-word phrases that occur more frequently in this text than in typical human-authored text (based on human baseline corpus).'
-      );
-    }
-
     // Add contrast matches (always show, even for human-baseline)
     if (data.contrast_matches && data.contrast_matches.length > 0) {
       html += renderItemsWithShowMore(
@@ -1519,12 +1487,14 @@ function updateRightPanel(entry) {
         m => `<div class="contrast-match">${m.sentence}</div>`
       );
     }
+    html += `</details>`;
   }
+  return html;
+}
 
-  ui.panelContent.innerHTML = html;
-
+function bindDetailHandlers(root) {
   // Add click handlers for show more buttons
-  ui.panelContent.querySelectorAll('.show-more').forEach(btn => {
+  root.querySelectorAll('.show-more').forEach(btn => {
     const toggleId = btn.id.replace('_btn', '');
     const hiddenDiv = document.getElementById(`${toggleId}_hidden`);
     let expanded = false;
@@ -1538,7 +1508,7 @@ function updateRightPanel(entry) {
   });
 
   // Add click handlers for help icons
-  ui.panelContent.querySelectorAll('.help-icon').forEach(btn => {
+  root.querySelectorAll('.help-icon').forEach(btn => {
     const helpId = btn.id.replace('_btn', '');
     const helpText = document.getElementById(`${helpId}_text`);
     if (helpText) {
@@ -1549,268 +1519,14 @@ function updateRightPanel(entry) {
   });
 }
 
+function updateRightPanel(entry) {
+  ui.panelContent.innerHTML = detailHtml(entry);
+  bindDetailHandlers(ui.panelContent);
+}
+
 function showDetailModal(entry) {
-  const data = entry.fullData;
-
-  let html = `<h3>${entry.model}</h3>`;
-  html += renderBotstyleSection(data.botstyle);
-
-  if (data.metrics) {
-    // Compute normalized values for bars
-    const normSlopWords = normalizeValue(data.metrics.slop_list_matches_per_1k_words || 0, normalizationRanges.slop_words);
-    const normSlopTrigrams = normalizeValue(data.metrics.slop_trigram_matches_per_1k_words || 0, normalizationRanges.slop_trigrams);
-    const normContrast = normalizeValue(data.metrics.not_x_but_y_per_1k_chars || 0, normalizationRanges.contrast);
-
-    html += `
-      <div class="modal-metric metric-with-tooltip">
-        <div class="modal-metric-bg slop" style="width: ${entry.upstreamScore ?? entry.slopScore}%"></div>
-        <div class="modal-metric-label">Slop Score</div>
-        <div class="modal-metric-value">${(entry.upstreamScore ?? entry.slopScore).toFixed(2)}</div>
-        <span class="tooltip-text">Combined metric: 60% slop words + 25% not-x-but-y patterns + 15% slop trigrams, normalized across all models</span>
-      </div>
-      <div class="modal-metric metric-with-tooltip">
-        <div class="modal-metric-bg slop" style="width: ${normSlopWords * 100}%"></div>
-        <div class="modal-metric-label">Slop Words (per 1k words)</div>
-        <div class="modal-metric-value">${(data.metrics.slop_list_matches_per_1k_words || 0).toFixed(2)}</div>
-        <span class="tooltip-text">Frequency of AI-typical single words that appear unnaturally often in LLM outputs</span>
-      </div>
-      <div class="modal-metric metric-with-tooltip">
-        <div class="modal-metric-bg slop" style="width: ${normSlopTrigrams * 100}%"></div>
-        <div class="modal-metric-label">Slop Trigrams (per 1k words)</div>
-        <div class="modal-metric-value">${(data.metrics.slop_trigram_matches_per_1k_words || 0).toFixed(2)}</div>
-        <span class="tooltip-text">Frequency of AI-typical 3-word phrases that appear unnaturally often in LLM outputs</span>
-      </div>
-      <div class="modal-metric metric-with-tooltip">
-        <div class="modal-metric-bg slop" style="width: ${normContrast * 100}%"></div>
-        <div class="modal-metric-label">Not-x-but-y Patterns (per 1k chars)</div>
-        <div class="modal-metric-value">${(data.metrics.not_x_but_y_per_1k_chars || 0).toFixed(2)}</div>
-        <span class="tooltip-text">Frequency of contrast patterns like "not just X, but Y" which are overused by AI</span>
-      </div>
-    `;
-
-    // Writing Style Metrics
-    if (data.metrics.vocab_level !== undefined ||
-        data.metrics.avg_sentence_length !== undefined ||
-        data.metrics.avg_paragraph_length !== undefined ||
-        data.metrics.dialogue_frequency !== undefined) {
-      html += `<h4 style="margin-top: 16px;">Writing Style</h4>`;
-
-      if (data.metrics.vocab_level !== undefined) {
-        const normVocab = normalizeValue(data.metrics.vocab_level, normalizationRanges.vocab_level);
-        html += `
-          <div class="modal-metric metric-with-tooltip">
-            <div class="modal-metric-bg diversity" style="width: ${normVocab * 100}%"></div>
-            <div class="modal-metric-label">Vocab Level</div>
-            <div class="modal-metric-value">${data.metrics.vocab_level.toFixed(2)}</div>
-            <span class="tooltip-text">Flesch-Kincaid grade level - measures vocabulary complexity</span>
-          </div>
-        `;
-      }
-
-      if (data.metrics.avg_sentence_length !== undefined) {
-        const normSentence = normalizeValue(data.metrics.avg_sentence_length, normalizationRanges.avg_sentence_length);
-        html += `
-          <div class="modal-metric metric-with-tooltip">
-            <div class="modal-metric-bg diversity" style="width: ${normSentence * 100}%"></div>
-            <div class="modal-metric-label">Sentence Length</div>
-            <div class="modal-metric-value">${data.metrics.avg_sentence_length.toFixed(2)}</div>
-            <span class="tooltip-text">Average words per sentence - indicates pacing</span>
-          </div>
-        `;
-      }
-
-      if (data.metrics.avg_paragraph_length !== undefined) {
-        const normParagraph = normalizeValue(data.metrics.avg_paragraph_length, normalizationRanges.avg_paragraph_length);
-        html += `
-          <div class="modal-metric metric-with-tooltip">
-            <div class="modal-metric-bg diversity" style="width: ${normParagraph * 100}%"></div>
-            <div class="modal-metric-label">Paragraph Length</div>
-            <div class="modal-metric-value">${data.metrics.avg_paragraph_length.toFixed(2)}</div>
-            <span class="tooltip-text">Average words per paragraph - shows structural rhythm</span>
-          </div>
-        `;
-      }
-
-      if (data.metrics.dialogue_frequency !== undefined) {
-        const normDialogue = normalizeValue(data.metrics.dialogue_frequency, normalizationRanges.dialogue_frequency);
-        html += `
-          <div class="modal-metric metric-with-tooltip">
-            <div class="modal-metric-bg diversity" style="width: ${normDialogue * 100}%"></div>
-            <div class="modal-metric-label">Dialogue Frequency</div>
-            <div class="modal-metric-value">${data.metrics.dialogue_frequency.toFixed(2)}</div>
-            <span class="tooltip-text">Quoted dialogue per 1000 characters</span>
-          </div>
-        `;
-      }
-    }
-
-    if (data.metrics.lexical_diversity) {
-      html += `<h4 style="margin-top: 16px;">Lexical Diversity</h4>`;
-
-      if (data.metrics.lexical_diversity.mattr_500 !== undefined) {
-        const normMattr = normalizeValue(data.metrics.lexical_diversity.mattr_500, normalizationRanges.mattr_500);
-        html += `
-          <div class="modal-metric metric-with-tooltip">
-            <div class="modal-metric-bg diversity" style="width: ${normMattr * 100}%"></div>
-            <div class="modal-metric-label">MATTR-500</div>
-            <div class="modal-metric-value">${data.metrics.lexical_diversity.mattr_500.toFixed(4)}</div>
-            <span class="tooltip-text">Moving-Average Type-Token Ratio - measures vocabulary diversity using 500-word windows</span>
-          </div>
-        `;
-      }
-
-
-      if (data.metrics.lexical_diversity.unique_words !== undefined) {
-        html += `
-          <div class="modal-metric">
-            <div class="modal-metric-label">Unique Words</div>
-            <div class="modal-metric-value">${data.metrics.lexical_diversity.unique_words.toLocaleString()}</div>
-          </div>
-        `;
-      }
-
-      if (data.metrics.lexical_diversity.total_words !== undefined) {
-        html += `
-          <div class="modal-metric">
-            <div class="modal-metric-label">Total Words</div>
-            <div class="modal-metric-value">${data.metrics.lexical_diversity.total_words.toLocaleString()}</div>
-          </div>
-        `;
-      }
-    }
-
-    if (data.sample_count) {
-      html += `
-        <h4 style="margin-top: 16px;">Sample Info</h4>
-        <div class="modal-metric">
-          <div class="modal-metric-label">Sample Count</div>
-          <div class="modal-metric-value">${data.sample_count}</div>
-        </div>
-        <div class="modal-metric">
-          <div class="modal-metric-label">Total Characters</div>
-          <div class="modal-metric-value">${data.total_chars.toLocaleString()}</div>
-        </div>
-      `;
-    }
-
-    // Helper function to render items with show more
-    const renderItemsWithShowMore = (items, title, formatter, helpText = null) => {
-      if (!items || items.length === 0) return '';
-
-      const toggleId = 'modal_' + Math.random().toString(36).substr(2, 9);
-      const helpId = 'help_' + Math.random().toString(36).substr(2, 9);
-
-      let itemsHtml = `<h4 style="margin-top: 16px;">`;
-      itemsHtml += title;
-
-      if (helpText) {
-        itemsHtml += `<span class="help-icon" id="${helpId}_btn">?</span>`;
-      }
-
-      itemsHtml += `</h4>`;
-
-      if (helpText) {
-        itemsHtml += `<div class="help-text" id="${helpId}_text">${helpText}</div>`;
-      }
-
-      itemsHtml += `<div style="margin-top: 8px;">`;
-
-      const visibleItems = items.slice(0, 10);
-      const hiddenItems = items.slice(10);
-
-      visibleItems.forEach(item => {
-        itemsHtml += formatter(item);
-      });
-
-      if (hiddenItems.length > 0) {
-        itemsHtml += `<div id="${toggleId}_hidden" style="display:none;">`;
-        hiddenItems.forEach(item => {
-          itemsHtml += formatter(item);
-        });
-        itemsHtml += `</div>`;
-        itemsHtml += `<button class="show-more" id="${toggleId}_btn">Show ${hiddenItems.length} more</button>`;
-      }
-
-      itemsHtml += `</div>`;
-      return itemsHtml;
-    };
-
-    // Skip over-represented and slop hits for human-baseline
-    const isHumanBaseline = entry.model === 'human-baseline';
-
-    // Add slop word hits (only for user-submitted text, not for human-baseline)
-    if (data.slop_word_hits && data.slop_word_hits.length > 0 && !isHumanBaseline) {
-      html += renderItemsWithShowMore(
-        data.slop_word_hits,
-        'Slop Word Hits',
-        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
-        'Matches to a precompiled slop list produced with the slop-forensics toolkit. The list identifies words that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts.'
-      );
-    }
-
-    // Add slop trigram hits (only for user-submitted text, not for human-baseline)
-    if (data.slop_trigram_hits && data.slop_trigram_hits.length > 0 && !isHumanBaseline) {
-      html += renderItemsWithShowMore(
-        data.slop_trigram_hits,
-        'Slop Trigram Hits',
-        hit => `<span class="pill"><b>${hit[0]}</b> <span class="muted">(${hit[1]})</span></span>`,
-        'Matches to a precompiled slop trigram list produced with the slop-forensics toolkit. The list identifies 3-word phrases that are over-represented in LLM outputs compared to human writing, computed from 10 models\' outputs on essay & creative writing prompts.'
-      );
-    }
-
-    if (data.top_over_represented && !isHumanBaseline) {
-      html += renderItemsWithShowMore(
-        data.top_over_represented.words,
-        'Top Over-represented Words',
-        w => `<span class="pill"><b>${w.word}</b> <span class="muted">${w.ratio.toFixed(2)}×</span></span>`,
-        'Words that occur more frequently in this text than in typical human-authored text (based on wordfreq baseline).'
-      );
-
-      html += renderItemsWithShowMore(
-        data.top_over_represented.trigrams,
-        'Top Over-represented Trigrams',
-        t => `<span class="pill"><b>${t.phrase}</b> <span class="muted">${t.ratio.toFixed(2)}×</span></span>`,
-        '3-word phrases that occur more frequently in this text than in typical human-authored text (based on human baseline corpus).'
-      );
-    }
-
-    // Add contrast matches (always show, even for human-baseline)
-    if (data.contrast_matches && data.contrast_matches.length > 0) {
-      html += renderItemsWithShowMore(
-        data.contrast_matches,
-        'Not-x-but-y Patterns',
-        m => `<div class="contrast-match">${m.sentence}</div>`
-      );
-    }
-  }
-
-  ui.modalBody.innerHTML = html;
-
-  // Add click handlers for show more buttons
-  ui.modalBody.querySelectorAll('.show-more').forEach(btn => {
-    const toggleId = btn.id.replace('_btn', '');
-    const hiddenDiv = document.getElementById(`${toggleId}_hidden`);
-    let expanded = false;
-
-    btn.addEventListener('click', () => {
-      expanded = !expanded;
-      hiddenDiv.style.display = expanded ? 'block' : 'none';
-      const count = btn.textContent.match(/\d+/)[0];
-      btn.textContent = expanded ? 'Show less' : `Show ${count} more`;
-    });
-  });
-
-  // Add click handlers for help icons
-  ui.modalBody.querySelectorAll('.help-icon').forEach(btn => {
-    const helpId = btn.id.replace('_btn', '');
-    const helpText = document.getElementById(`${helpId}_text`);
-    if (helpText) {
-      btn.addEventListener('click', () => {
-        helpText.classList.toggle('visible');
-      });
-    }
-  });
-
+  ui.modalBody.innerHTML = detailHtml(entry);
+  bindDetailHandlers(ui.modalBody);
   ui.modal.classList.add('visible');
 }
 
@@ -1872,7 +1588,7 @@ async function loadAnalysisResources() {
     await loadWordfreq();
 
     ui.status.textContent = "loading analysis resources…";
-    await Promise.all([loadHumanProfile(), loadSlopSets(), loadBotstyle('./data/').then(() => loadCliches('./data/'))]);
+    await Promise.all([loadSlopSets(), loadBotstyleAll('./data/')]);
 
     analysisResourcesLoaded = true;
     ui.status.textContent = "ready";
@@ -1969,23 +1685,6 @@ ui.btn.addEventListener('click', async () => {
     // Slop - now returns separate scores and hit tracking
     const slopResult = computeSlopIndex(toks, true);  // trackHits = true
 
-    // Repetition score
-    const toksContent = contentTokens(toks);
-    const bigs = makeNgrams(toksContent, 2);
-    const tris = makeNgrams(toksContent, 3);
-
-    const topBCounts = rankOveruseWithCounts(bigs, humanBigramFreq, 40);
-    const topTCounts = rankOveruseWithCounts(tris, humanTrigramFreq, 40);
-
-    const top_bigram_count = topBCounts.reduce((s, r) => s + r[2], 0);
-    const top_trigram_count = topTCounts.reduce((s, r) => s + r[2], 0);
-    const content_word_count = toksContent.length;
-
-    const repetition_score =
-      content_word_count > 0
-        ? ((top_bigram_count + top_trigram_count) / content_word_count) * 1000
-        : 0;
-
     // Contrast patterns
     const contrastResult = scoreContrast(raw);
 
@@ -2038,7 +1737,6 @@ ui.btn.addEventListener('click', async () => {
         metrics: {
           slop_list_matches_per_1k_words: slopResult.wordScore,
           slop_trigram_matches_per_1k_words: slopResult.trigramScore,
-          ngram_repetition_score: repetition_score,
           not_x_but_y_per_1k_chars: contrastResult.rate_per_1k,
           lexical_diversity: {
             mattr_500: mattr,
@@ -2055,7 +1753,7 @@ ui.btn.addEventListener('click', async () => {
                    wordHits: R.hits.words.slice(0, 40), phraseHits: R.hits.phrases.slice(0, 40), rates: R.rates, structHits: R.hits.structures,
                    emdash: R.emdash, checks: R.checks, artifacts: R.artifacts, family: R.format, cliches: R.cliches,
                    band: R.band, tags: R.tags, names: R.names, greeting: R.greeting, type: R.type, peers: R.peers,
-                   texture: R.texture, experimental: R.experimental },
+                   texture: R.texture, experimental: R.experimental, reference: R.reference },
         slop_word_hits: slopResult.wordHits,
         slop_trigram_hits: slopResult.trigramHits,
         contrast_matches: contrastResult.matches.slice(0, 100).map(m => ({
@@ -2067,38 +1765,8 @@ ui.btn.addEventListener('click', async () => {
       }
     };
 
-  // Top over-represented words (vs wordfreq baseline)
-  // Merge possessives for word counts (but not for ngrams)
-  let wordCounts = countItems(toksContent);
-  wordCounts = mergePossessives(wordCounts);
-  
-  const totalWords = Array.from(wordCounts.values()).reduce((a, b) => a + b, 0);
-  const wordOverrep = [];
-  
-  for (const [w, cnt] of wordCounts.entries()) {
-    const baselineFreq = lookupFrequency(w); // proportion (0-1)
-    if (!baselineFreq) continue;
-    
-    const modelFreq = cnt / totalWords; // proportion (0-1)
-    const ratio = modelFreq / baselineFreq;
-    
-    // Only show words that are significantly over-represented
-    if (ratio > 1.5 && cnt >= 2) {
-      wordOverrep.push([w, ratio, cnt]);
-    }
-  }
-  wordOverrep.sort((a, b) => b[1] - a[1]);
-  const topWords = wordOverrep.slice(0, 100);
-
-  // Update user result with top_over_represented data
-  userResult.fullData.top_over_represented = {
-    words: topWords.map(([w, ratio, cnt]) => ({ word: w, ratio, count: cnt })),
-    bigrams: topBCounts.slice(0, 100).map(([phrase, ratio, count]) => ({ phrase, ratio, count })),
-    trigrams: topTCounts.slice(0, 100).map(([phrase, ratio, count]) => ({ phrase, ratio, count }))
-  };
-
   // Show verdict animation (botstyle score; falls back to upstream if no prose)
-  showVerdict(userResult.botstyleScore);
+  showVerdict(userResult.fullData.botstyle && userResult.fullData.botstyle.band);
 
   // Re-enable button
   ui.btn.disabled = false;

@@ -35,7 +35,7 @@ createServer(async (req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405).end(); return; }
   if (url.pathname === '/proxy') return proxy(req, res, url.searchParams.get('url') || '');
   let p = decodeURIComponent(url.pathname);
-  if (p === '/' || p === '') p = '/slop-score.html';
+  if (p === '/' || p === '') p = '/index.html';
   const file = normalize(join(ROOT, p));
   if (!file.startsWith(ROOT) || /[\\/](?:\.git|\.env|node_modules[\\/]\.bin)/.test(file.slice(ROOT.length))) { res.writeHead(403).end(); return; }
   try {

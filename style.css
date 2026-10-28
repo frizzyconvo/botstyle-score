@@ -805,3 +805,8 @@ body.dark-mode .nav-dropdown-menu {
 body.dark-mode .nav-dropdown-item:hover {
 	background: rgba(255, 255, 255, 0.1);
 }
+/* collapsed "stats for nerds" section in the detail panel */
+details.nerd-stats { margin-top: 18px; border-top: 1px solid rgba(128,128,128,0.25); padding-top: 10px; }
+details.nerd-stats > summary { cursor: pointer; font-weight: 600; padding: 4px 0; list-style-position: inside; }
+details.nerd-stats > summary:hover { color: var(--accent); }
+details.nerd-stats[open] > summary { margin-bottom: 8px; }
