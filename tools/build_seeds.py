@@ -18,7 +18,10 @@ folders = opt('--folders', '0,1').split(',')
 before, N = opt('--before', '2023-07'), int(opt('--n', '300'))
 NSFW = re.compile(r'\b(?:nsfw|r18|r-18|18\+|lewd|smut|hentai|futa|breeding|fetish|kink|bdsm|incest|yandere|non-?con|rape)\b', re.I)
 # characters described as children are skipped too (generation prompts stay unambiguous)
-MINOR = re.compile(r'\b(?:loli|shota|child|kid|toddler|preteen|middle school|elementary)\b|\b(?:[1-9]|1[0-7])\s*(?:-\s*\d+\s*)?(?:years?[ -]old|yrs?\b|y/o|yo\b)', re.I)
+# also ages written out ("at the age of four", "a six-year-old"), which the first version missed (2026-10-28)
+AGE_WORDS = r'(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen)'
+MINOR = re.compile(r'\b(?:loli|shota|child|children|kid|kids|toddler|preteen|orphanage|middle school|elementary)\b|\b(?:[1-9]|1[0-7])\s*(?:-\s*\d+\s*)?(?:years?[ -]old|yrs?\b|y/o|yo\b)'
+                   r'|\bage of (?:[1-9]|1[0-7]|' + AGE_WORDS + r')\b|\b' + AGE_WORDS + r'[ -]years?[ -]old\b', re.I)
 FUNC = set('the a an and of to in is was he she they her his it that with for on as at but you'.split())
 rows = []
 for d in folders:

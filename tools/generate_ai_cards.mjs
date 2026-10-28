@@ -27,7 +27,8 @@
 //                 leaves valid cards untouched (their scores stay right); --dry-run only reports.
 //   --include-failed  also run models marked failed in tools/_model_groups.mjs (skipped by default).
 //   --failures    list models with failed requests (<out>_errors.jsonl) or no valid cards, then exit.
-//   --rotate-seeds  rounds after the first use new seeds for fresh / antislop cards too (rewrites always do).
+//   --rotate-seeds  rounds after the first use new seeds for fresh / antislop cards too (rewrites always do), drawn from
+//                 eval/inputs/seeds_wide.jsonl when it exists (tools/build_seeds_wide.mjs; --rotate-pool <file> to change).
 //   --more        add another round for each model even if its cards exist (same prompts and seeds, new
 //                 samples; ids end in |r2, |r3…). --round N fills a specific round instead.
 //   --waste-limit N   skip the rest of a model for this run after N wasted cards in a row (failed request, reasoning
@@ -256,7 +257,15 @@ if (args.failures) {
 }
 const seeds = readFileSync(SEEDS, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l)).filter(r => r.name || r.card_name);
 if (!seeds.length) { console.error('no seeds in ' + SEEDS); process.exit(1); }
-const pick = key => seeds[parseInt(createHash('sha1').update(key).digest('hex').slice(0, 8), 16) % seeds.length];
+const pickFrom = (pool, key) => pool[parseInt(createHash('sha1').update(key).digest('hex').slice(0, 8), 16) % pool.length];
+const pick = key => pickFrom(seeds, key);
+// Rotated rounds draw from a wider pool (tools/build_seeds_wide.mjs -> eval/inputs/seeds_wide.jsonl, ~750 characters) when
+// it exists, so new rounds bring new characters; names listed in eval/inputs/seeds_skip.txt (one per line) are left out.
+// The original pool stays for round 1 and unrotated rounds, so those keep their exact prompts.
+const WIDE = args['rotate-pool'] || 'eval/inputs/seeds_wide.jsonl';
+const SKIP = existsSync('eval/inputs/seeds_skip.txt') ? new Set(readFileSync('eval/inputs/seeds_skip.txt', 'utf-8').split('\n').map(x => x.trim().toLowerCase()).filter(Boolean)) : new Set();
+const rotPool = (existsSync(WIDE) ? readFileSync(WIDE, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l)) : seeds).filter(r => !SKIP.has(String(r.name || '').trim().toLowerCase()));
+const pickRot = key => pickFrom(rotPool.length ? rotPool : seeds, key);
 
 const MODES = list(args.modes || 'fresh,antislop,rewrite');
 const FMT = args.formats ? list(args.formats) : Object.keys(FORMATS);
@@ -326,7 +335,7 @@ for (const model of (models.length ? models : ['(dry-run)'])) {
     // depends on the round, not the model, so every model still gets the same cards in the same round.
     let job = p;
     if (round > 1 && (p.mode === 'rewrite' || args['rotate-seeds'])) {
-      const seed = pick(`${p.mode === 'rewrite' ? 'rewrite' : 'concept|' + p.format}|${p.k}|r${round}`);
+      const seed = pickRot(`${p.mode === 'rewrite' ? 'rewrite' : 'concept|' + p.format}|${p.k}|r${round}`);
       const prompt = p.mode === 'rewrite' ? REWRITE[p.variant] + '\n\n' + cardText(seed) + FORMAT_SUFFIX
         : fill(FORMATS[p.format][p.k % FORMATS[p.format].length], seed) + (p.mode === 'antislop' ? '\n\n' + ANTISLOP[p.variant] : '') + FORMAT_SUFFIX;
       job = { ...p, seed, prompt };

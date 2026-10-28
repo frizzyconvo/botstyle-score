@@ -407,7 +407,8 @@ Checked against the upstream code (`slop-score.html`, `data/leaderboard_results.
 - Korshuk: the cleanest human pool, mostly W++.
 - AUTOMATIC/jaicards: 188k JanitorAI cards. The 2023 baseline, trends over time and by tag, and seeds for generating
   cards. Mostly human: it includes some AI-written cards from 2023.
-- raincandy-u Chub cards: dated 2023–2026, so they show the change over time.
+- raincandy-u Chub cards: dated 2023–2026, so they show the change over time. The 2023 ones are also generation
+  seeds.
 - Perchance: a modern mixed set, not treated as human.
 
 **AI cards**
@@ -415,6 +416,8 @@ Checked against the upstream code (`slop-score.html`, `data/leaderboard_results.
 - Foreverse's character-card-skills example cards: AI cards written to avoid AI flavor, used as hard cases.
 - Cards generated for this project by Claude, GPT, Gemini, Gemma, DeepSeek, Kimi, GLM, Llama, Mistral, TheDrummer,
   Sao10k, Anthracite, Nous, MythoMax and others. The generator also has a rewrite mode: human cards an AI has reworded.
+  Requests are built from SFW 2023 cards (no characters described as children, no real people); later rounds rotate
+  through about 750 of them so no single character dominates.
 
 **Outside references**
 - pixelnull's SloppySeconds list: a source for several sentence patterns.

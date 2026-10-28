@@ -6,6 +6,21 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.21.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- `tools/build_seeds_wide.mjs`: a wider pool of 752 seed cards (SFW JanitorAI and Chub cards from before July 2023) for
+  the card generator, so later rounds bring new characters instead of reusing the same 30.
+- Card generator: rotated rounds (rewrites from round 2 on, and fresh / antislop rounds with `--rotate-seeds`) draw from
+  the wide pool, chosen by round rather than by model so every model gets the same characters in a round. A skip list
+  leaves out names by hand.
+
+### Changed
+- Seed filters also skip characters whose age is written out in words ("at the age of four", "a six-year-old"); the
+  wide pool also skips real people, school settings and kink-coded tags.
+
 ## [0.20.1] - 2026-10-28 · BBBScorer 0.8.1
 
 ### Fixed
