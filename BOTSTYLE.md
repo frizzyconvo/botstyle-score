@@ -288,28 +288,6 @@ above 50%. Evenness is a cue careful humans share and anti-slop writers already 
 the score until it's checked on more hand-written cards. See `docs/FOREVERSE_NOTES.md` for what else in
 character-card-skills was tested (their greeting rubric rewards AI cards, so it isn't used).
 
-## Page, leaderboard, embedding
-
-- **Card links:** paste a Chub or Botbooru link and press Fetch card; the description and greeting boxes fill in and
-  each alternate greeting gets a checkbox (`js/card-fetch.js`). Chub uses the API SillyTavern's importer uses
-  (`api.chub.ai/api/characters/<creator>/<slug>?full=true`; Chub keeps the card description in `personality`).
-  Botbooru's card JSON is `botbooru.com/download/json/<id>` (the page's "Download JSON" button). Chub's API sends
-  `Access-Control-Allow-Origin: *`, so a page on any site can fetch it directly; Botbooru sends no CORS header, so
-  Botbooru links need a proxy: `tools/serve.mjs` (npm start / start-local.cmd) serves the page on localhost with a
-  `/proxy?url=` endpoint limited to Chub and Botbooru, and the page uses it automatically there. Elsewhere set
-  `CARD_SOURCES.proxy` or score server-side:
-  `node tools/score_url.mjs <link | card.json | card.png>... [--alt all|2,5] [--json]` (files work too).
-- `js/score-card.js` `scoreCard(card)` is the one entry point (page, tools, platform). It returns score, band, format,
-  tags, tagInputs, names, hits, checks and peer percentiles.
-- The leaderboard ranks the 22 models by **botstyle** median over card-length (700-word) chunks of their creative
-  outputs, with grey human reference rows (`data/botstyle_leaderboard.json`, `tools/botstyle_leaderboard.mjs`). The
-  outputs also built the lists, so model scores are in-sample.
-- No CDN dependencies: `vendor/` holds msgpack and a browser bundle of wink-pos-tagger (`node tools/build_vendor.mjs`
-  after `npm install`). Bootstrap CSS, the EQ-Bench header/nav/contact script (`js/eqbench-utils.js`), CDN fallbacks and links to
-  upstream repos were removed; the page credits slop-score once. wordfreq's attribution stays (its licence needs it).
-- `node tools/test.mjs`: regression checks (every pattern matches its example, tell rules, preprocessing and formats,
-  JSON/PNG import, clichés, score ranges for fixture cards in `tests/fixtures/`).
-
 ## Example cards (`card-datasets/example-cards/`, outside the repo)
 
 Description + first message only, as the earlier scorers were run (`node tools/score_url.mjs <file> --fields description,first_mes`):
@@ -458,14 +436,6 @@ nothing (now retried automatically at low effort). One GPT-5-mini card finished 
 generic 23.1, RP 25.1; rewrite polish 21.1, improve 31.1, expand 53.7 (the human original scored 17).
 By model: DeepSeek 43.3, GLM 34.5, Claude 29.5, GPT-5-mini 29.0, Kimi 25.2, Llama 4 Maverick 19.1.
 Small samples; read as direction only.
-
-## Hosting (GitHub Pages)
-
-The page is static. `index.html` forwards to `slop-score.html`, `.nojekyll` stops GitHub's Jekyll step, and
-both pages carry `noindex` so search engines skip a closed-beta link. Chub links work from any site (Chub sends
-`Access-Control-Allow-Origin: *`). Botbooru links need a proxy on a hosted copy: deploy
-`tools/cors-proxy-worker.js` as a free Cloudflare Worker and put its URL in `js/site-config.js`; without it the
-page asks Botbooru users to download the card and drop it in.
 
 ## Next steps
 
