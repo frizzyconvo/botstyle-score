@@ -13,6 +13,7 @@ Scorer 0.5.0 (scores identical to 0.4.0; bands and read-outs change)
   archetype tag with length badge.
 
 Page
+- Footer links to the GitHub repo.
 - The field picker starts with only Description and First message ticked, for links, uploads and pasted
   JSON alike. Personality, scenario and example dialogue can be ticked by hand.
 - Leaderboard references: JanitorAI rows were tagged kind "ai" because the label contains "AI"; now "human".
