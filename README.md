@@ -9,6 +9,13 @@ Made by [frizzy_conversation_93532](https://botbooru.com/profile/78685). A pseud
 license, but no longer tracks upstream (word lists, scoring, card handling and the leaderboard are rebuilt for
 character cards).
 
+**How it differs from slop-score:** slop-score counts every hit on its word and phrase lists the same, and its
+lists come from 10 models' essays and stories (so they include essay and business words). BBBScorer weights each
+word and phrase by how much more AI fiction uses it than human fiction, adds sentence patterns, scores only the
+prose, scores the description and first message separately, and puts 100 at the most AI-styled tenth of AI-written
+cards instead of stretching each measure between 22 models and a human baseline. Details:
+[BOTSTYLE.md](BOTSTYLE.md#how-bbbscorer-differs-from-slop-score).
+
 - **How it works, and what every band, tag, format and label means:** [BOTSTYLE.md](BOTSTYLE.md)
 - **What changed in each version:** [CHANGELOG.md](CHANGELOG.md)
 

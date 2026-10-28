@@ -182,6 +182,7 @@ export function scoreCard(card, opts = {}) {
     genre, pulp, archetype: archetype({ format, greeting, genre, stats: pre.stats }),
     texture, experimental: { aiStyleLikelihood: likelihood, note: 'botstyle score + paragraph evenness; unscored, under evaluation' },
     hits: { words: w.words.hits, phrases: w.phrases.hits, structures: st.hits },
+    partTexts: { description: definition, greeting: greetings.join('\n\n') },   // what each part score was computed on
     emdash: st.emdash, artifacts, checks, cliches, names, contrast,
     prose: pre.prose, text, definitionText: definition, minProseWords: MIN_PROSE_WORDS,
   };

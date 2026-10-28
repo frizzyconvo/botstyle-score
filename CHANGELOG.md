@@ -6,6 +6,23 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.15.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- The BBBScorer-vs-original section shows the description and first message on their own for both scorers, and how
+  their lists differ (the original counts every list hit the same; BBBScorer weights each item).
+- An asterisk on bite-sized scores (under 350 scored words), on the result and in Your cards.
+- Card generator: a waste guard. A model that wastes 3 cards in a row (failed requests, reasoning that uses the whole
+  budget, invalid cards) is skipped for the rest of that run; after one card whose reasoning used the whole budget,
+  that model's remaining cards start at low reasoning effort; `--max-usd-model` caps one model's cost per run.
+
+### Changed
+- BOTSTYLE.md: "How BBBScorer differs from slop-score" rewritten as a side-by-side table checked against the upstream
+  code (its 0–100 stretches each measure between the lowest and highest of 23 entries, 22 models and a human
+  baseline, padded 10%); data sets, outside references and tooling are back in their own section.
+
 ## [0.14.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.

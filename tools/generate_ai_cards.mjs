@@ -27,6 +27,9 @@
 //   --failures    list models with failed requests (<out>_errors.jsonl) or no valid cards, then exit.
 //   --more        add another round for each model even if its cards exist (same prompts and seeds, new
 //                 samples; ids end in |r2, |r3…). --round N fills a specific round instead.
+//   --waste-limit N   skip the rest of a model for this run after N wasted cards in a row (failed request, reasoning
+//                 used the whole budget, or invalid card); default 3.
+//   --max-usd-model X skip the rest of a model once it has cost X in this run.
 //   --no-score    don't score the new cards when the run finishes (by default it runs
 //                 score_all.mjs --only generated_v2 --force, unless another scoring run is active).
 // Each card records at (timestamp), elapsed_ms and out_words; failed requests go to <out>_errors.jsonl.
@@ -302,28 +305,37 @@ if (DRY) {
 }
 
 let n = 0, bad = 0, spent = 0;
-const modelErrors = {};   // consecutive request errors per model; 3 in a row skips that model
+// Waste guard, per model: a failed request, a card whose reasoning used the whole budget, or an invalid card counts
+// as wasted; WASTE_LIMIT in a row skips the rest of that model for this run (this round), so a model that keeps
+// failing can't burn the budget. After the first "reasoning used the whole budget", the model's remaining cards start
+// at low reasoning effort with twice the budget instead of paying for a full attempt and then a retry.
+// --max-usd-model caps what one model may cost in this run.
+const WASTE_LIMIT = Number(args['waste-limit'] || 3), MAX_USD_MODEL = args['max-usd-model'] ? Number(args['max-usd-model']) : Infinity;
+const modelErrors = {}, wasted = {}, lowFirst = {}, spentBy = {}, skipped = {};
+const skipModel = (m, why) => { if (!skipped[m]) { skipped[m] = why; console.error(`  skipping the rest of ${m} this round: ${why}`); } };
 async function worker() {
   while (jobs.length) {
     if (spent >= MAX_USD) { console.log(`  stopping: reported cost $${spent.toFixed(3)} reached --max-usd`); jobs.length = 0; break; }
     const j = jobs.shift();
-    if ((modelErrors[j.model] || 0) >= 3) continue;
+    if (skipped[j.model]) continue;
     try {
       const t0 = Date.now();
-      let res = await ask(j.model, j.prompt);
+      let res = await ask(j.model, j.prompt, lowFirst[j.model] ? { reasoning: 'low', maxTokens: MAX_TOKENS * 2 } : {});
       let parts = split(res.text);
       let v = validate(res.text, parts, res.finish);
       let cost = res.usage && typeof res.usage.cost === 'number' ? res.usage.cost : 0;
+      const exhausted = v.flags.includes('reasoning_exhausted');
+      if (exhausted && !lowFirst[j.model]) { lowFirst[j.model] = true; console.log(`  ${j.model}: reasoning used the whole budget; its remaining cards start at effort=low, ${MAX_TOKENS * 2} tokens`); }
       // A thinking model that spends the whole budget reasoning returns nothing (GLM-4.5 did, with
       // 6,000 reasoning tokens). Retry once with low reasoning effort and twice the budget.
-      if (v.flags.includes('reasoning_exhausted') && !args['no-retry']) {
+      if (exhausted && !args['no-retry']) {
         console.log(`  retry ${j.id}: reasoning used the whole budget, trying effort=low, ${MAX_TOKENS * 2} tokens`);
         res = await ask(j.model, j.prompt, { reasoning: 'low', maxTokens: MAX_TOKENS * 2 });
         parts = split(res.text); v = validate(res.text, parts, res.finish); v.flags.push('retried_low_reasoning');
         if (res.usage && typeof res.usage.cost === 'number') cost += res.usage.cost;
       }
       cost = cost || null;
-      if (cost) spent += cost;
+      if (cost) { spent += cost; spentBy[j.model] = (spentBy[j.model] || 0) + cost; }
       appendFileSync(OUT, JSON.stringify({
         id: j.id, round: j.round || 1, createdAt: 'generated', model: j.model, mode: j.mode, variant: j.variant, style_requested: j.format, k: j.k,
         seed_id: j.seed.id, seed_name: j.seed.name || j.seed.card_name, prompt: j.prompt,
@@ -333,17 +345,24 @@ async function worker() {
         valid: v.valid, flags: v.flags, source: 'AI',
       }) + '\n');
       n++; if (!v.valid) bad++; modelErrors[j.model] = 0;
+      wasted[j.model] = !v.valid || exhausted ? (wasted[j.model] || 0) + 1 : 0;
+      if (wasted[j.model] >= WASTE_LIMIT) skipModel(j.model, `${WASTE_LIMIT} wasted cards in a row (reasoning used the whole budget, or invalid: ${v.flags.join(',') || 'no flags'})`);
+      if ((spentBy[j.model] || 0) >= MAX_USD_MODEL) skipModel(j.model, `reported cost $${spentBy[j.model].toFixed(3)} reached --max-usd-model`);
       console.log(`  ${v.valid ? 'ok ' : 'BAD'} ${j.id}${v.flags.length ? ' [' + v.flags.join(',') + ']' : ''}${cost ? ` $${cost.toFixed(4)}` : ''}`);
     } catch (e) {
       console.error(`  ERR ${j.id}: ${e.message}`);
       // failed requests are logged so failed models can be listed later (node tools/generate_ai_cards.mjs --failures)
       appendFileSync(OUT.replace(/\.jsonl$/, '') + '_errors.jsonl', JSON.stringify({ at: new Date().toISOString(), id: j.id, model: j.model, error: String(e.message).slice(0, 300) }) + '\n');
-      if ((modelErrors[j.model] = (modelErrors[j.model] || 0) + 1) === 3) console.error(`  skipping the rest of ${j.model}: 3 failed requests in a row (wrong id or unavailable?)`);
+      modelErrors[j.model] = (modelErrors[j.model] || 0) + 1; wasted[j.model] = (wasted[j.model] || 0) + 1;
+      if (modelErrors[j.model] >= 3) skipModel(j.model, '3 failed requests in a row (wrong id or unavailable?)');
+      else if (wasted[j.model] >= WASTE_LIMIT) skipModel(j.model, `${WASTE_LIMIT} wasted requests in a row`);
     }
   }
 }
 await Promise.all(Array.from({ length: CONC }, worker));
 console.log(`finished: ${n} written to ${OUT} (${bad} flagged invalid); reported cost $${spent.toFixed(3)}`);
+if (Object.keys(spentBy).length) console.log('  cost by model: ' + Object.entries(spentBy).map(([m, c]) => `${m} $${c.toFixed(3)}`).join(', '));
+if (Object.keys(skipped).length) console.log('  skipped this round: ' + Object.entries(skipped).map(([m, w]) => `${m} (${w})`).join('; '));
 
 // Score the new cards straight away (BBBScorer + original formula), unless --no-score or nothing was written.
 // score_all refuses to start while another scoring run is active (exit code 3), so they never collide.

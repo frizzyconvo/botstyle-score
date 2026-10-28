@@ -198,7 +198,7 @@ const ORIGIN_LABEL = { chub: 'Chub', bb: 'Botbooru', json: 'JSON', png: 'PNG', t
 function entryFor(card, meta, r, fields, alts) {
   const prev = store.all().find(x => x.key === meta.key) || {};
   return { key: meta.key, name: card.name || meta.file || 'Card', link: meta.link || null, source: meta.source, origin: originOf(meta), score: +r.score.toFixed(1), band: r.band.id,
-    reliable: r.reliable, proseWords: r.stats.proseWords, version: r.version, fields: fieldList(fields, alts), at: new Date().toISOString(),
+    reliable: r.reliable, proseWords: r.stats.proseWords, totalWords: r.stats.totalWords, version: r.version, fields: fieldList(fields, alts), at: new Date().toISOString(),
     creator: prev.creator || false, aiUse: prev.aiUse ?? null, shared: prev.shared || false };
 }
 function scoreAndSave(card, meta, fields, alts) {
@@ -244,7 +244,8 @@ function renderResult(r) {
     + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favored words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Tentative bands</b> (still calibrating): ${BAND_LABELS.original} <i>(${BAND_TAGLINES.original.toLowerCase()})</i> under ${WB.original} · ${BAND_LABELS.mixed} <i>(${BAND_TAGLINES.mixed.toLowerCase()})</i> ${WB.original}–${WB.common} · ${BAND_LABELS.common} <i>(${BAND_TAGLINES.common.toLowerCase()})</i> ${WB.common}+</span></span>`;
   const used = fieldList(state.fields, state.alts);
   const orig = nerdStats(r.text);
-  let L = `<div class="score-hero"><div><div class="score-num">${r.score.toFixed(1)}</div><div class="score-sub">range ${r.low.toFixed(0)}–${r.high.toFixed(0)}</div>${orig ? `<div class="score-sub" title="Sam Paech's original slop-score formula on the same text (what Botbooru lists)">original slop score ${orig.upstream.toFixed(1)}</div>` : ''}</div>
+  const short = band.id !== 'na' && st.totalWords < 350, starMark = short ? '<span class="star score-star" title="Bite-sized card: the score rests on few words, so treat it as rough">*</span>' : '';
+  let L = `<div class="score-hero"><div><div class="score-num">${r.score.toFixed(1)}${starMark}</div><div class="score-sub">range ${r.low.toFixed(0)}–${r.high.toFixed(0)}</div>${orig ? `<div class="score-sub" title="Sam Paech's original slop-score formula on the same text (what Botbooru lists)">original slop score ${orig.upstream.toFixed(1)}</div>` : ''}</div>
     <div class="score-meta"><span class="band ${band.id}">${esc(band.label || 'Low confidence')}</span>${band.tagline ? `<span class="band-tag">${esc(band.tagline)}</span>` : ''}${band.id !== 'na' ? '<span class="tent" title="Band names and cut-offs are tentative while the scorer is calibrated">tentative</span>' : ''}${pop}
       <div class="score-cap">${esc(state.card.name || 'This card')} · ${esc(used.join(', ') || 'nothing selected')}</div>
       ${r.archetype ? `<div class="arch" title="${esc(r.archetype.blurb || '')}"><span class="arch-tag">${esc(r.archetype.label)}</span>${r.archetype.size ? `<span class="arch-size" title="${esc(r.archetype.size.note)}">${esc(r.archetype.size.label)}</span>` : ''}<span class="faint small"> archetype · experimental</span></div>` : ''}</div></div>
@@ -253,7 +254,7 @@ function renderResult(r) {
     ${meter('Sentence structures', r.components.structures, `${r.rates.structures.toFixed(1)} weighted hits per 1k prose words: not-x-but-y, "a hint of…", abstract similes, banter tags…`)}
     ${r.emdash && r.emdash.points > 0 ? `<div class="note">Em-dashes: ${r.emdash.count} (${r.emdash.rate.toFixed(1)} per 1k words) → +${r.emdash.points.toFixed(1)}</div>` : ''}
     <div class="note">Scored ${st.proseWords} prose words of ${st.totalWords} (${st.structuredWords} in lists/W++/key-value lines, ${st.boilerplateWords} in boilerplate).
-      ${st.proseWords < MIN_PROSE_WORDS && band.id !== 'na' ? ' <b>Short: low confidence.</b>' : st.totalWords < 350 && band.id !== 'na' ? ' <b>Short card:</b> the score rests on few words, so treat it as rough.' : ''}${st.nonEnglish ? ' <b>Doesn\'t look like English; the word lists are English-only.</b>' : ''}</div>`;
+      ${st.proseWords < MIN_PROSE_WORDS && band.id !== 'na' ? ' <b>Short: low confidence.</b>' : short ? ' <span class="star">*</span><b>Bite-sized:</b> the score rests on few words, so treat it as rough.' : ''}${st.nonEnglish ? ' <b>Doesn\'t look like English; the word lists are English-only.</b>' : ''}</div>`;
   // The description and first message are always separate inputs; say so when one is missing.
   const cc0 = state.card || {}, noDesc = !String(cc0.description || '').trim(), noGreet = !String(cc0.first_mes || '').trim();
   if (noDesc || noGreet) L += `<div class="alert"><b>${noDesc && noGreet ? 'No description or first message.' : noDesc ? 'No description.' : 'No first message.'}</b> ${noDesc ? 'Every card should have a description; ' : ''}${noDesc && !noGreet ? 'this score is the first message alone.' : noGreet && !noDesc ? 'This score is the description alone. If the greeting is pasted into the description box, move it to the first-message box.' : ''}</div>`;
@@ -326,6 +327,17 @@ function formatPop(fmt) {
     + (mix.length ? `This card's description: ${mix.join(', ')}${sh.first_person >= 0.045 ? '; written in first person' : ''}.` : '') + ` Format isn't scored; it says how the card is laid out and which cards it's compared with.</span></span>`;
 }
 
+// Description and greeting, each on its own, for both scorers. BBBScorer blends the two by length; the original
+// scores the whole text at once, so its parts are shown for comparison only.
+function partRow(r) {
+  const P = r.parts || {}, T = r.partTexts || {};
+  const cell = k => { const p = P[k]; if (!p || !T[k]) return null; const u = originalParts(T[k], state.norm);
+    return { b: `${p.score.toFixed(1)}${p.reliable ? '' : '*'}`, o: u ? u.score.toFixed(1) : '–' }; };
+  const d = cell('description'), g = cell('greeting'); if (!d && !g) return '';
+  const fmt = (x, k) => x ? `${k} <b>${x}</b>` : `${k} –`;
+  return `<span class="cmp-l">Parts</span><span>${fmt(d && d.b, 'description')} · ${fmt(g && g.b, 'first message')}; blended by length</span><span>${fmt(d && d.o, 'description')} · ${fmt(g && g.o, 'first message')}; scored as one text</span>`;
+}
+
 // BBBScorer vs the original slop score on the same text: what each counts, and why they differ on this card.
 function compareSection(r) {
   if (!state.norm || r.band.id === 'na') return '';
@@ -339,11 +351,13 @@ function compareSection(r) {
       <span class="small">BBBScorer <b>${r.score.toFixed(1)}</b> · original <b>${up.score.toFixed(1)}</b> · ${gap >= 0 ? '+' : '−'}${Math.abs(gap).toFixed(1)}${flag}</span></summary>
     <div class="cmp-grid small"><span></span><b>BBBScorer</b><b>Original</b>
       ${row('Text', `prose only: ${st.proseWords} of ${st.totalWords} words`, `everything: ${up.tokens} words`)}
+      ${partRow(r)}
       ${row('Words', `${r.rates.words.toFixed(0)} weighted hits per 1k, AI-vs-human list (60%) → ${pctOf(r.components.words)}`, `${up.words} slop-list words per 1k (60%) → ${pctOf(up.parts.words)}`)}
       ${row('Phrases', `${r.rates.phrases.toFixed(1)} two/three-word hits per 1k (25%) → ${pctOf(r.components.phrases)}`, `${up.trigrams} slop trigrams per 1k (15%) → ${pctOf(up.parts.trigrams)}`)}
       ${row('Patterns', `${r.rates.structures.toFixed(1)} per 1k: not-x-but-y + 28 others (15%) → ${pctOf(r.components.structures)}`, `${up.contrast} not-x-but-y per 1k characters (25%) → ${pctOf(up.parts.contrast)}`)}
       ${row('Extras', `em-dashes +${r.emdashPoints.toFixed(1)}, chatbot leftovers +${r.artifactPoints}`, 'none')}
-      ${row('100 means', 'the most AI-styled tenth of AI-written cards', 'the sloppiest of 22 models\' story averages')}</div>
+      ${row('Lists', 'from fiction, AI vs human; each item weighted by how strongly AI favors it', 'from 10 models\' essays and stories; every hit counts the same')}
+      ${row('100 means', 'the most AI-styled tenth of AI-written cards', 'past the sloppiest of 22 models (Gemma 3 4B) on stories and essays')}</div>
     <div class="small dim" style="margin-top:6px">Original slop-list words found: ${origWords}.</div>
     ${why.length ? `<div class="small" style="margin-top:6px"><b>Why they differ here</b><ul>${why.map(x => `<li>${esc(x.text)}</li>`).join('')}</ul></div>` : ''}
     <div class="faint small">Gaps of ${DISPARITY.big}+ points are common: the two measure different things on different scales. Botbooru shows its own slop-score figure, which doesn't always match the original formula on the description and first message.</div></details>`;
@@ -381,7 +395,7 @@ function renderMine() {
     + (mineByCreator.length ? `<div class="stat"><b>${median(mineByCreator.map(x => x.score)).toFixed(1)}</b><span>median, cards you made (${mineByCreator.length})</span></div>` : '')
     + (vers.length > 1 ? `<div class="stat"><b>${vers.length}</b><span>BBBScorer versions mixed</span></div>` : '');
   $('mineList').innerHTML = [...list].reverse().map(x => `<div class="item"><span class="nm">${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-    <span class="sc">${x.score.toFixed(1)}</span><span class="meta"><span class="band ${x.band}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[x.band] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse)}` : ''}</span>
+    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}</span><span class="meta"><span class="band ${x.band}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[x.band] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse)}` : ''}</span>
     <button class="x" type="button" data-key="${esc(x.key)}" title="Remove">✕</button></div>`).join('');
   $('mineList').querySelectorAll('button.x').forEach(b => b.addEventListener('click', () => { store.remove(b.dataset.key); renderMine(); renderBoard(); }));
 }

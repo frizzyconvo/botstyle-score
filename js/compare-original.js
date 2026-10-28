@@ -59,10 +59,11 @@ export function explainDifference(r, up) {
   const out = [], st = r.stats, share = st.totalWords ? st.proseWords / st.totalWords : 1, gap = r.score - up.score;
   const bbbOnly = (r.hits.phrases || []).slice(0, 4).map(x => `"${x.example || x.item}"`).concat((r.hits.structures || []).slice(0, 3).map(x => x.label));
   // the scale: the original is stretched between 22 models' story averages, so cards bunch up low on it
-  out.push({ side: 'both', text: `Different scales. 100 on BBBScorer means "as AI-styled as the most AI-styled tenth of AI-written cards". The original stretches 0–100 between the averages of 22 models' stories, so most cards, AI-written ones included, land under 30 on it (AI-written cards: median about 7–18).` });
+  out.push({ side: 'both', text: `Different scales. 100 on BBBScorer means "as AI-styled as the most AI-styled tenth of AI-written cards". The original stretches each measure between the lowest and highest of 23 entries (22 models and a human baseline) on stories and essays, so most cards, AI-written ones included, land under 30 on it (AI-written cards: median about 7–18).` });
+  out.push({ side: 'both', text: `Different lists, counted differently. The original's list comes from 10 models' essays and stories (it includes essay and business words like "delve" and "pivotal"), and every hit counts the same. BBBScorer's lists come from fiction, and each word and phrase is weighted by how much more AI uses it than human writers.` });
   if (gap > 0 && (r.components.phrases >= .3 || r.components.structures >= .3) && bbbOnly.length)
     out.push({ side: 'bbb', text: `BBBScorer counts phrases and sentence patterns the original's lists don't have: ${bbbOnly.join(', ')}.` });
-  if (gap > 0 && up.words < 8) out.push({ side: 'bbb', text: `Few words from the original's slop list (${up.words} per 1,000 words). Its list was built from stories, and much card-writing AI vocabulary isn't on it; BBBScorer's list weights words by how much more AI fiction uses them than human fiction.` });
+  if (gap > 0 && up.words < 8) out.push({ side: 'bbb', text: `Few words from the original's slop list (${up.words} per 1,000 words${up.words === 0 ? ', so it sits at its floor' : ''}). Much card-writing AI vocabulary isn't on it.` });
   if (share < .6) out.push({ side: gap > 0 ? 'bbb' : 'orig', text: `Only ${Math.round(share * 100)}% of the text is prose. BBBScorer scores just the prose (${st.proseWords} words); the original counts lists, headers and instructions too (${up.tokens} words), which ${gap > 0 ? 'dilutes its rate' : 'can add its list words'}.` });
   if (gap < 0 && up.words >= 20) out.push({ side: 'orig', text: `Many words from the original's slop list (${up.words} per 1,000), but they're words human writers use a lot too, so BBBScorer weights them low.` });
   if (gap < 0 && up.trigrams >= 1) out.push({ side: 'orig', text: `The original finds slop-list three-word phrases (${up.trigrams} per 1,000) that BBBScorer drops or weights low.` });
@@ -70,5 +71,6 @@ export function explainDifference(r, up) {
   if (r.emdashPoints > 0) out.push({ side: 'bbb', text: `Em-dash overuse adds ${r.emdashPoints.toFixed(1)} points on BBBScorer only.` });
   if (r.artifactPoints > 0) out.push({ side: 'bbb', text: `Chatbot leftovers add ${r.artifactPoints} points on BBBScorer only.` });
   if (r.mixed) out.push({ side: 'bbb', text: `The ${r.mixed.higher} reads ${r.mixed.gap.toFixed(0)} points more AI-styled than the other part; BBBScorer scores the two separately and blends them, the original scores them together.` });
+  if (gap > 0 && r.components.words >= .5 && up.words >= 8) out.push({ side: 'bbb', text: `Strongly AI-favored words weigh more on BBBScorer: its top words here are ${(r.hits.words || []).slice(0, 5).map(x => `"${x.item}"`).join(', ')}.` });
   return out;
 }

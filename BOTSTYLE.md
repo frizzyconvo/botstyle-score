@@ -9,7 +9,7 @@ Numbers below are from the **BBBScorer v0.8.1** scoring run.
 [Bands](#bands) · [Formats](#formats) · [Greeting](#greeting) · [Tags](#tags) · [Archetypes](#archetypes) ·
 [Genre and pulp read](#genre-and-pulp-read) · [Other read-outs](#other-read-outs-not-scored) ·
 [Leaderboard](#leaderboard) · [Public list](#public-list) · [Known limits](#known-limits) ·
-[How it was tested](#how-it-was-tested) · [Glossary](#glossary) · [Credits](#credits)
+[How it was tested](#how-it-was-tested) · [Data and references](#data-and-references) · [Glossary](#glossary) · [Credits](#credits)
 
 ## What it is
 
@@ -63,13 +63,13 @@ metrics are under "Stats for nerds".
 counts, their word, phrase and pattern rates, extras, and what 100 means on each, then the reasons they differ on
 that card. Big gaps are normal, mostly for two reasons:
 
-- **Different scales.** The original stretches 0–100 between the averages of 22 models' *stories*, so character
-  cards, AI-written ones included, mostly land under 30 on it (AI-written cards: median about 7–18). BBBScorer puts
-  100 at the most AI-styled tenth of AI-written cards.
-- **Different lists.** The original's slop list was built from story outputs ("murmurs", "glances", "tapestry"). A
-  lot of card-writing AI vocabulary isn't on it, so an obviously AI-written card can have zero hits and land on the
-  original's floor of 1.2. BBBScorer weights every word and phrase by how much more AI fiction uses it than human
-  fiction, and adds sentence patterns.
+- **Different scales.** The original stretches each measure between the lowest and highest of 23 entries (22 models
+  and a human baseline) on stories and essays, so character cards, AI-written ones included, mostly land under 30 on
+  it (AI-written cards: median about 7–18). BBBScorer puts 100 at the most AI-styled tenth of AI-written cards.
+- **Different lists, counted differently.** The original's list comes from essays and stories ("murmurs",
+  "tapestry", "delve", "pivotal"), and every hit counts the same. A lot of card-writing AI vocabulary isn't on it,
+  so an obviously AI-written card can have zero hits and land on the original's floor of 1.2. BBBScorer weights
+  every word and phrase by how much more AI fiction uses it than human fiction, and adds sentence patterns.
 
 BBBScorer also scores only prose (lists and instructions dilute the original's rate) and scores the description and
 first message separately. Botbooru shows its own slop-score figure; it doesn't always match the original formula on
@@ -357,16 +357,59 @@ AI-written cards (see [Bands](#bands)), which makes these numbers a little pessi
 
 ### How BBBScorer differs from slop-score
 
-- **Purpose:** slop-score ranks models on long essays and stories. BBBScorer scores one card.
-- **Weighting:** slop-score ranks words by how often AI uses them compared with general English. BBBScorer weights
-  every word, two-word and three-word phrase by how often AI fiction uses it compared with human fiction, from
-  creative-writing prompts only, with topic words, number phrases and character names dropped (a card named Elara
-  isn't penalized every time her name comes up).
-- **Matching:** contractions split the same way as when the lists were built, and a two-word phrase inside a
-  matched three-word phrase isn't counted twice.
-- **Scale:** slop-score stretches scores between the averages of its 23 leaderboard models, so one three-word phrase
-  could cost a human writer about 13 points. BBBScorer anchors to AI-written cards and damps repeats by density.
-- **Third part:** slop-score's 15% is three-word phrases; here it's sentence structures.
+Checked against the upstream code (`slop-score.html`, `data/leaderboard_results.json`).
+
+| | Original slop score | BBBScorer |
+|---|---|---|
+| **Made for** | Ranking models on long essays and stories ("optimised for creative writing and essays") | One character card |
+| **Text** | Everything it's given, as one text | Prose only (lists, W++/PLists, headers, pasted instructions set aside); description and first message scored separately, then blended by length |
+| **Where the lists come from** | Words and three-word phrases over-represented in 10 models' outputs on essay **and** creative-writing prompts, against human text (wordfreq for words). So the list mixes story slop ("murmurs", "tapestry") with essay and business register ("delve", "crucial", "pivotal", "stakeholders", "holistic") and model-favorite names | Words, two- and three-word phrases from creative writing only, AI fiction against human fiction; topic words, number phrases and character names dropped (a card named Elara isn't penalized every time her name comes up) |
+| **How a hit counts** | **Every list hit counts the same**: the score is hits per 1,000 words, however strongly AI favors that word | **Each word and phrase is weighted** by how much more often AI fiction uses it than human fiction |
+| **Repeats** | Every repeat counts in full | Diminishing: k uses of an item count w × (1 + ln k), judged by density so length doesn't move the score |
+| **Matching** | Many listed three-word phrases could never fire (lists built on stopword-free text, matched against the full token stream) | Matched the way the lists were built, contractions split the same way; a two-word phrase inside a matched three-word one isn't counted twice |
+| **The three parts** | 60% list words, 25% not-x-but-y, 15% list trigrams | 60% words, 25% two/three-word phrases, 15% sentence structures (not-x-but-y plus 27 patterns) |
+| **Scale** | Each measure stretched between the lowest and highest of 23 entries (22 models and a human baseline) on stories and essays, padded 10% at both ends. 0 = 2.1 list words per 1,000; 100 = 43.9, beyond Gemma 3 4B, the sloppiest model. Cards mostly land under 30, AI-written ones included, and one three-word phrase could cost a human writer about 13 points | 100 = as AI-styled as the most AI-styled tenth of AI-written character cards (each part anchored separately) |
+| **Extras** | None | Em-dash overuse (up to +10), chatbot leftovers (+40 each, up to +80) |
+| **Per format / per part** | One formula for everything | One set of lists, weights and calibration for every format and for both the description and the greeting. Format only picks the peer group shown in the read-out ("vs 2023 cards in the same format") |
+
+**Results on the shared test sets** (AUC, original → BBBScorer): SlopReview 0.930 → 0.977 (humans flagged above 25:
+9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.69 → 0.90.
+
+## Data and references
+
+**For building and testing the lists**
+- SlopReview (DrRiceIO7): Reddit WritingPrompts stories against stories from about 22 models. The main test set, but
+  optimistic (its human side overlaps the human writing used to weight the lists).
+- Gutenberg antislop-DPO (sam-paech): the independent test.
+- Upstream's outputs from 22 models (`upstream/results/`).
+- Nitral-AI's slop-forensics profile of human Reddit writing, the human side of the weighting.
+
+**Human and mixed cards**
+- Korshuk: the cleanest human pool, mostly W++.
+- AUTOMATIC/jaicards: 188k JanitorAI cards. The 2023 baseline, trends over time and by tag, and seeds for generating
+  cards. Mostly human: it includes some AI-written cards from 2023.
+- raincandy-u Chub cards: dated 2023–2026, so they show the change over time.
+- Perchance: a modern mixed set, not treated as human.
+
+**AI cards**
+- SPB-2602 (marcodsn): Kimi and GLM personas.
+- Foreverse's character-card-skills example cards: AI cards written to avoid AI flavor, used as hard cases.
+- Cards generated for this project by Claude, GPT, Gemini, Gemma, DeepSeek, Kimi, GLM, Llama, Mistral, TheDrummer,
+  Sao10k, Anthracite, Nous, MythoMax and others. The generator also has a rewrite mode: human cards an AI has reworded.
+
+**Outside references**
+- pixelnull's SloppySeconds list: a source for several sentence patterns.
+- TheDrummer's UnslopNemo list of 65 target phrases, checked against cards (no gain, so not used).
+- Foreverse's character-card-skills: their scoring rubric, card categories, and a blind test where AI judges mostly
+  got human vs AI backwards. That test is part of why BBBScorer calls itself not an AI detector.
+- The ARB paper (arXiv 2607.29539): its finding that detectors fail on human text an AI has reworded led to the
+  generator's rewrite mode.
+- From upstream: the wordfreq port and the local part-of-speech tagger.
+
+**Tooling upstream doesn't have**: versioned scoring runs that resume where they stopped, with regression checks
+between versions; builders for the reference and the card leaderboard, and the calibration script; the card
+generator with cost caps, retries and a waste guard; scoring of any folder or zip of cards; the per-model report;
+the pulp word-list builder and the phrase checker.
 
 ## Glossary
 
