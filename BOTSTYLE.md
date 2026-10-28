@@ -82,8 +82,7 @@ novelists didn't write "her heart pounding".
 **Scorer 0.5.0 (tentative): Original under 35, Mixed 35–50, Common 50+**, shown as *Meatbag adjacent* / *Mixed signals* /
 *Might just be slop*. The cut-offs were widened on purpose to keep false alarms on human cards low while the
 scorer is untested: on the v0.4.0 reference, 118,571 human cards (2023) split 96 / 3 / 1 and 1,005 AI-written
-cards 60 / 31 / 9 (with 20/40: 87 / 10 / 3 and 10 / 63 / 27). Genavros (Botbooru 75990, 34.2) now reads as
-Original. The scores themselves are unchanged from 0.4.0.
+cards 60 / 31 / 9 (with 20/40: 87 / 10 / 3 and 10 / 63 / 27). The scores themselves are unchanged from 0.4.0.
 
 History, 0.4.0: **Original** under 20, **Mixed** 20–40, **Common** 40+. Card-length text scores lower than stories, so the 30/60 split
 fits poorly: it put 42% of AI-written cards (SPB) in Original and almost none in Common. Share in each band
