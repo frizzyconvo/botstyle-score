@@ -97,92 +97,6 @@
    }
   },
   {
-   "model": "thedrummer/unslopnemo-12b",
-   "n": 4,
-   "median": 56.5,
-   "p25": 40.5,
-   "p75": 88.8,
-   "original": 25,
-   "common": 50,
-   "pulp": null,
-   "upstream": 48.6,
-   "byMode": {
-    "fresh": {
-     "n": 4,
-     "median": 56.5,
-     "p25": 40.5,
-     "p75": 88.8,
-     "original": 25,
-     "common": 50,
-     "pulp": null,
-     "upstream": 48.6
-    },
-    "antislop": {
-     "n": 9,
-     "median": 34.2,
-     "p25": 30.8,
-     "p75": 58.3,
-     "original": 55.6,
-     "common": 33.3,
-     "pulp": null,
-     "upstream": 34
-    },
-    "rewrite": {
-     "n": 2,
-     "median": 32.6,
-     "p25": 19.4,
-     "p75": 32.6,
-     "original": 100,
-     "common": 0,
-     "pulp": null,
-     "upstream": 13.8
-    }
-   }
-  },
-  {
-   "model": "mistralai/mistral-nemo",
-   "n": 5,
-   "median": 42.3,
-   "p25": 19.5,
-   "p75": 46.3,
-   "original": 40,
-   "common": 20,
-   "pulp": null,
-   "upstream": 21.8,
-   "byMode": {
-    "fresh": {
-     "n": 5,
-     "median": 42.3,
-     "p25": 19.5,
-     "p75": 46.3,
-     "original": 40,
-     "common": 20,
-     "pulp": null,
-     "upstream": 21.8
-    },
-    "antislop": {
-     "n": 8,
-     "median": 40.8,
-     "p25": 34.2,
-     "p75": 49.9,
-     "original": 37.5,
-     "common": 12.5,
-     "pulp": null,
-     "upstream": 30.8
-    },
-    "rewrite": {
-     "n": 2,
-     "median": 40.9,
-     "p25": 25.6,
-     "p75": 40.9,
-     "original": 50,
-     "common": 0,
-     "pulp": null,
-     "upstream": 46.9
-    }
-   }
-  },
-  {
    "model": "z-ai/glm-4.5",
    "n": 7,
    "median": 39.2,
@@ -439,6 +353,96 @@
      "upstream": 18.1
     }
    }
+  }
+ ],
+ "pending": [
+  {
+   "model": "thedrummer/unslopnemo-12b",
+   "n": 4,
+   "median": 56.5,
+   "p25": 40.5,
+   "p75": 88.8,
+   "original": 25,
+   "common": 50,
+   "pulp": null,
+   "upstream": 48.6,
+   "byMode": {
+    "fresh": {
+     "n": 4,
+     "median": 56.5,
+     "p25": 40.5,
+     "p75": 88.8,
+     "original": 25,
+     "common": 50,
+     "pulp": null,
+     "upstream": 48.6
+    },
+    "antislop": {
+     "n": 9,
+     "median": 34.2,
+     "p25": 30.8,
+     "p75": 58.3,
+     "original": 55.6,
+     "common": 33.3,
+     "pulp": null,
+     "upstream": 34
+    },
+    "rewrite": {
+     "n": 2,
+     "median": 32.6,
+     "p25": 19.4,
+     "p75": 32.6,
+     "original": 100,
+     "common": 0,
+     "pulp": null,
+     "upstream": 13.8
+    }
+   },
+   "why": "tuned to strip stock phrasing from RP chat, not to write cards"
+  },
+  {
+   "model": "mistralai/mistral-nemo",
+   "n": 5,
+   "median": 42.3,
+   "p25": 19.5,
+   "p75": 46.3,
+   "original": 40,
+   "common": 20,
+   "pulp": null,
+   "upstream": 21.8,
+   "byMode": {
+    "fresh": {
+     "n": 5,
+     "median": 42.3,
+     "p25": 19.5,
+     "p75": 46.3,
+     "original": 40,
+     "common": 20,
+     "pulp": null,
+     "upstream": 21.8
+    },
+    "antislop": {
+     "n": 8,
+     "median": 40.8,
+     "p25": 34.2,
+     "p75": 49.9,
+     "original": 37.5,
+     "common": 12.5,
+     "pulp": null,
+     "upstream": 30.8
+    },
+    "rewrite": {
+     "n": 2,
+     "median": 40.9,
+     "p25": 25.6,
+     "p75": 40.9,
+     "original": 50,
+     "common": 0,
+     "pulp": null,
+     "upstream": 46.9
+    }
+   },
+   "why": "base model of UnslopNemo"
   }
  ],
  "references": [

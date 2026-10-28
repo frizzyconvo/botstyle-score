@@ -513,3 +513,17 @@ node tools/test.mjs                                                       # regr
 - `score_all.mjs` writes genre, genre2, archetype, pulp, pulpAdjusted and pulpFlag per card, and a
   `run-log.jsonl` line per dataset (start/end, cards, words, words/s), so the next overnight run gives
   genre-level and pulp-level breakdowns.
+
+## UnslopNemo's target list vs cards (tools/phrase_check.mjs)
+
+TheDrummer published the 65 phrases UnslopNemo v1 was trained away from (RP chat replies;
+data/unslopnemo_targets.json). Checked on description + first message: 23,370 human 2023 cards (11.6M words;
+JanitorAI sampled 1 in 8) vs 1,106 AI-written cards (0.9M words).
+
+- AI-leaning in cards too (worth adding or up-weighting): punctuate/punctuating (13× / 7×), conspiratorial
+  (9×), voice low (3.8×), barely above a whisper (3.7×), mischief (2.4×), mix of / mixture of (2.2×).
+- Absent from cards in both sets: most of the explicit and chat-action phrases (wet pop, kiss-bruised lips,
+  the ball is in your court…). They're chat-reply habits, not card writing.
+- More common in human cards: couldn't/can't help but (20× / 7× more human), mischievous, admit it,
+  half-lidded, voice dripping. RP chat clichés that human card writers share, so they stay out of the scorer.
+- The AI set is small (0.9M words), so phrases under ~5 per million are noise either way.
