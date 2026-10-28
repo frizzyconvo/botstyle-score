@@ -21,11 +21,10 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const words = t => (String(t || '').match(/[A-Za-z']+/g) || []).length;
 const FIELDS = [['description', 'Description'], ['personality', 'Personality'], ['scenario', 'Scenario'], ['first_mes', 'First message'], ['mes_example', 'Example dialogue']];
-const DEFAULT_ON = { description: true, personality: true, scenario: true, first_mes: true, mes_example: false };
-// Link lookups start with personality and scenario unticked: site metadata often stuffs tags, summaries or
-// boilerplate into them. The user can still tick them in the field picker.
-const LINK_DEFAULT_ON = { ...DEFAULT_ON, personality: false, scenario: false };
-const defaultFields = meta => ({ ...(meta && meta.source === 'link' ? LINK_DEFAULT_ON : DEFAULT_ON) });
+// Ticked by default: what the page says it scores (description + first message). Personality, scenario and
+// example dialogue can be ticked in the field picker.
+const DEFAULT_ON = { description: true, personality: false, scenario: false, first_mes: true, mes_example: false };
+const defaultFields = () => ({ ...DEFAULT_ON });
 const STORE = 'bb-botstyle-runs';
 
 const state = { ready: false, card: null, meta: null, fields: { ...DEFAULT_ON }, alts: new Set(), result: null, board: null, norm: null };
@@ -133,7 +132,7 @@ function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^=
 // ---------------------------------------------------------------- field picker
 function setCard(card, meta) {
   card.alternate_greetings = Array.isArray(card.alternate_greetings) ? card.alternate_greetings.filter(g => typeof g === 'string' && g.trim()) : [];
-  state.card = card; state.meta = meta; state.fields = defaultFields(meta); state.alts = new Set();
+  state.card = card; state.meta = meta; state.fields = defaultFields(); state.alts = new Set();
   renderPicker(); rescore(true);
 }
 

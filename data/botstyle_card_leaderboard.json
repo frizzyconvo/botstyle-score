@@ -460,7 +460,7 @@
   },
   {
    "label": "JanitorAI cards, May–Jun 2023",
-   "kind": "ai",
+   "kind": "human",
    "n": 10849,
    "median": 10,
    "p25": 5.9,
@@ -472,7 +472,7 @@
   },
   {
    "label": "JanitorAI cards, Jul 2023–Feb 2024",
-   "kind": "ai",
+   "kind": "human",
    "n": 105601,
    "median": 9.9,
    "p25": 5.9,

@@ -46,7 +46,7 @@ const refs = [
   ['SPB AI personas (Kimi, GLM)', load('spb_ai')],
   ['Foreverse (anti-slop AI cards)', load('foreverse_ai')],
 ];
-for (const [label, rows] of refs) if (rows.length >= 5) out.references.push({ label, kind: /AI/.test(label) ? 'ai' : 'human', ...stats(rows) });
+for (const [label, rows] of refs) if (rows.length >= 5) out.references.push({ label, kind: /\bAI\b/.test(label) ? 'ai' : 'human', ...stats(rows) });
 writeFileSync('data/botstyle_card_leaderboard.json', JSON.stringify(out, null, 1));
 console.log(`${out.models.length} models, ${out.references.length} reference sets from ${dir}`);
 for (const m of out.models) console.log(`  ${m.median.toString().padStart(5)}  n=${String(m.n).padStart(3)}  ${m.model}`);

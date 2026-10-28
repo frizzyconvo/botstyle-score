@@ -13,8 +13,9 @@ Scorer 0.5.0 (scores identical to 0.4.0; bands and read-outs change)
   archetype tag with length badge.
 
 Page
-- Link lookups start with Personality and Scenario unticked in the field picker (uploads and pasted
-  JSON still tick everything). Tick them to include them.
+- The field picker starts with only Description and First message ticked, for links, uploads and pasted
+  JSON alike. Personality, scenario and example dialogue can be ticked by hand.
+- Leaderboard references: JanitorAI rows were tagged kind "ai" because the label contains "AI"; now "human".
 - "BBBScorer v…" everywhere; "slop" wording kept only for the top band and the original slop-score stats.
 - Result shows the tentative marker, archetype, pulp read and genre read.
 - Leaderboard link at the top; leaderboard rows show sample size, a clearer * for fewer than 20 cards, band
