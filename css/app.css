@@ -237,3 +237,5 @@ html { scroll-behavior: smooth; }
 .pulp.pulp_and_ai .pulp-flag { color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); }
 .star { color: var(--gold); font-weight: 800; font-size: 1.25em; line-height: 0; margin-right: 1px; }
 .bl .n.low { color: var(--gold); font-weight: 700; }
+.brow.pending { border-left-style: dashed; border-left-color: var(--faint); opacity: .75; }
+.brow.pending .bl { color: var(--dim); }

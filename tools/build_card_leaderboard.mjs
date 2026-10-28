@@ -23,16 +23,19 @@ const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, 
   upstream: q(rows.map(r => r.upstream).filter(x => x !== null && x !== undefined), .5) }; };
 const gen = [...load('generated_v1').map(r => ({ ...r, mode: r.mode || 'fresh', run: 1 })), ...load('generated_v2').map(r => ({ ...r, run: 2 }))];
 const models = {};
+// Pending: not ranked. UnslopNemo was tuned to strip stock phrasing out of RP chat replies, and Mistral
+// Nemo is its base; neither was made for writing cards, so ranking them on card writing isn't fair yet.
+const PENDING = { 'thedrummer/unslopnemo-12b': 'tuned to strip stock phrasing from RP chat, not to write cards', 'mistralai/mistral-nemo': 'base model of UnslopNemo' };
 for (const r of gen) (models[r.model] = models[r.model] || []).push(r);
-const out = { scorerName: 'BBBScorer', note: 'Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.', dir, version: (gen[0] || {}).version, bands: WB, scorer: SCORER_VERSION, built: new Date().toISOString().slice(0, 10), models: [], references: [] };
+const out = { scorerName: 'BBBScorer', note: 'Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.', dir, version: (gen[0] || {}).version, bands: WB, scorer: SCORER_VERSION, built: new Date().toISOString().slice(0, 10), models: [], pending: [], references: [] };
 for (const [m, rows] of Object.entries(models)) {
   const fresh = rows.filter(r => r.mode === 'fresh');
   if (!fresh.length) continue;
   const byMode = {};
   for (const mode of ['fresh', 'antislop', 'rewrite']) { const x = rows.filter(r => r.mode === mode); if (x.length) byMode[mode] = stats(x); }
-  out.models.push({ model: m, ...stats(fresh), byMode });
+  (PENDING[m] ? out.pending : out.models).push({ model: m, ...stats(fresh), byMode, ...(PENDING[m] ? { why: PENDING[m] } : {}) });
 }
-out.models.sort((a, b) => b.median - a.median);
+out.models.sort((a, b) => b.median - a.median); out.pending.sort((a, b) => b.median - a.median);
 const refs = [
   ['Korshuk cards, Feb–Apr 2023', load('korshuk')],
   ['JanitorAI cards, May–Jun 2023', load('jaicards').filter(r => String(r.createdAt || '') < '2023-07')],

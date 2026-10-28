@@ -317,6 +317,8 @@ function renderBoard() {
     `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}`)).join('');
   h += `<div class="group-label">Reference card sets</div>` + B.references.map(r => row('ref', r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1),
     `${r.n.toLocaleString()} cards · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`)).join('');
+  if ((B.pending || []).length) h += `<div class="group-label">Pending, not ranked · tuned for RP chat, not card writing</div>` + B.pending.map(m => row('pending', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
+    `${esc(m.model)} · ${esc(m.why || '')} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}`)).join('');
   $('boardRows').innerHTML = h;
   $('boardNote').innerHTML = `BBBScorer v${esc(B.scorer || B.version)}${B.scorer && B.version && B.scorer !== B.version ? ` (scores from the v${esc(B.version)} run; same numbers)` : ''}. Bars: middle half of each set's cards; line: median; n = cards in the set. <span class="star">*</span> fewer than 20 cards, so a rough guess. Click a row for details.`;
   $('boardRows').querySelectorAll('.brow').forEach(el => el.addEventListener('click', () => { const d = el.querySelector('.bdetail'); if (d) d.hidden = !d.hidden; }));
