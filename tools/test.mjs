@@ -217,5 +217,24 @@ check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zB
   check('RP slop stays out of the cliché rate', Math.abs(c.phrasesPer1k * (t.split(' ').length) - c2.phrasesPer1k * (t.split(' ').length - 4)) < 1e-6 || c.phraseHits.length === c2.phraseHits.length);
 }
 
+// Sexual-content read: field labels, orientation labels, names and "no NSFW" rules aren't content
+{
+  const { detectNsfw } = await import('../js/nsfw.js');
+  const clean = detectNsfw('Sex: Female. Sexuality: bisexual; sexual orientation: gay. Dick Grayson draws his naked blade. No NSFW, no smut. Kick ass.');
+  check('nsfw: labels, names and rules are not content', clean.level === 'none' && clean.mentions >= 2, JSON.stringify(clean));
+  check('nsfw: explicit text reads explicit', detectNsfw('She moans as he gropes her, and they have sex until her orgasm.').level === 'explicit');
+  check('nsfw: suggestive text reads suggestive', detectNsfw('A sultry smile, lingerie under the coat, thighs crossed.').level === 'suggestive');
+  check('nsfw: tags reported', detectNsfw('A knight.', ['Fantasy', 'NSFW']).tagged.join() === 'NSFW');
+}
+// Old-school AI read: checked items decide the level; one word repeated can't; Wikipedia-only items don't count
+{
+  const { oldSchoolTells } = await import('../js/old-school.js');
+  const old = oldSchoolTells('Lyra is a force to be reckoned with, known for her sharp wit and unwavering loyalty. Her meticulously kept journal is a testament to the intricacies of her craft, reflecting the vibrant tapestry of her life.');
+  check('old-school: older-model register reads strong', old.level === 'strong', JSON.stringify(old));
+  check('old-school: one word repeated is not enough', oldSchoolTells('Vibrant. Vibrant. Vibrant. Vibrant streets.').level === 'none');
+  const wiki = oldSchoolTells('Furthermore, she plays a crucial role in the guild. Overall, she is fostering peace. Moreover, it is important to note her pivotal role.');
+  check('old-school: Wikipedia-only items are listed but do not count', wiki.level === 'none' && wiki.hits.length > 0 && wiki.hits.every(h => !h.checked));
+}
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

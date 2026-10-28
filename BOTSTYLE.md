@@ -7,7 +7,7 @@ Numbers below are from the **BBBScorer v0.8.1** scoring run.
 
 **Contents:** [What it is](#what-it-is) · [What gets scored](#what-gets-scored) · [The score](#the-score) ·
 [Bands](#bands) · [Formats](#formats) · [Greeting](#greeting) · [Tags](#tags) · [Archetypes](#archetypes) ·
-[Genre and pulp read](#genre-and-pulp-read) · [Other read-outs](#other-read-outs-not-scored) ·
+[Genre and pulp read](#genre-and-pulp-read) · [Other read-outs](#other-read-outs-unscored) ·
 [Leaderboard](#leaderboard) · [Public list](#public-list) · [Known limits](#known-limits) ·
 [How it was tested](#how-it-was-tested) · [Data and references](#data-and-references) · [Glossary](#glossary) · [Credits](#credits)
 
@@ -114,7 +114,7 @@ Weight per hit in brackets; "provisional" patterns are card-specific and backed 
 | Banter dialogue tag (…," she teased / purred / smirked) | 0.72 | "Miss me?" she purred |
 | "it was as if" | 0.7 | it was as if the world had stopped |
 
-Switched off (in the code, not scored): RP-reply tells ("conspiratorial", "voice low", "punctuating", "mischief") from
+Switched off (in the code, unscored): RP-reply tells ("conspiratorial", "voice low", "punctuating", "mischief") from
 the UnslopNemo list, which added nothing on cards. The full list of lists and how each was built is in
 [docs/LISTS.md](docs/LISTS.md).
 
@@ -131,26 +131,24 @@ The model talking to whoever prompted it. **Scored** (40 points each, up to 80):
 | Chat or prompt template tokens | `<\|im_start\|>`, `[INST]`, `### Response:` |
 | Generator commentary on its own output | "This description captures…" |
 
-**Worth a look** (shown, not scored, because people produce these too): Human:/Assistant: transcript lines, JSON
+**Worth a look** (shown, unscored, because people produce these too): Human:/Assistant: transcript lines, JSON
 card-field residue (`"first_mes": "…"`), unfilled placeholders ("[Insert name]", lorem ipsum), word-count or
 "Option 1:" notes, text that ends mid-sentence.
 
 ## Bands
 
-Tentative, still being calibrated.
-
 | Score | Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
 |---|---|---|---|---|
-| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 42% |
+| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 43% |
 | 40–60 | **Mixed** | *Mixed signals* | 4% | 28% |
-| 60 and up | **Common** | *Might just be slop* | 2% | 30% |
+| 60 and up | **Common** | *Might just be slop* | 2% | 29% |
 | (too short or not English) | **Low confidence** / no band | | | |
 
 The band names say how common the card's phrasing is in AI writing. The taglines are just for fun and shown next
 to them.
 
 The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,129
-(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 2,631, median 46.
+(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 2,855, median 45.
 
 **The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
 AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
@@ -223,7 +221,7 @@ cards, so a tag means "this card is unusual", not "this card is bad".
 
 ## Archetypes
 
-One experimental, just-for-fun label per card, from its format, greeting and genre: a genre adjective plus a
+Hidden on the page for now while the list is redone (it's still stored with scores). One experimental, just-for-fun label per card, from its format, greeting and genre: a genre adjective plus a
 noun, e.g. "Gothic novelist", "Sci-fi dossier-keeper", "The minimalist" (no adjective for general cards).
 
 | Noun | When |
@@ -249,7 +247,7 @@ Genre adjectives: High-fantasy (fantasy), Gothic (horror / dark), Sci-fi, Romant
 General, from genre keywords per 1,000 prose words plus a boost for matching card tags. A second genre is shown
 when it's close.
 
-**Pulp read** (experimental, not scored): pulpy fantasy, horror, action and romance writing shares a lot of
+**Pulp read** (experimental, unscored): pulpy fantasy, horror, action and romance writing shares a lot of
 vocabulary with AI models ("ancient", "shadows", "crimson"). The pulp read shows how much of a card's AI-favored
 word weight is genre vocabulary that human genre cards use about as often, and what the score would be without
 it. When pulp vocabulary is 15%+ of the word weight and the card scores 40+, it gets one of two flags:
@@ -257,7 +255,12 @@ it. When pulp vocabulary is 15%+ of the word weight and the card scores 40+, it 
 - **Reads as pulp, not AI-styled:** without the genre vocabulary it would drop under 40.
 - **Pulpy and AI-suspect:** it stays at 40+ even without it.
 
-## Other read-outs (not scored)
+## Other read-outs (unscored)
+
+On the page, each read-out section carries an **Unscored** tag (shown to help, never counted in the score), and the ones
+still being tuned an **Experimental** tag. Words with a dotted underline (greeting layout, point of view, tense, genre)
+explain themselves on hover or tap.
+
 
 - **Human tells:** mistakes models almost never make. Lowercase "i" in narration, contractions without
   apostrophes, common misspellings, likely typos (a word the English frequency list doesn't know, or barely knows,
@@ -270,7 +273,7 @@ it. When pulp vocabulary is 15%+ of the word weight and the card scores 40+, it 
 - **Craft notes:** card-writing issues anyone can introduce. Mixed RP format (\*She says,\* "…"), writing
   {{user}}'s actions or words, narrating what "you" do or feel, a gendered pronoun right after {{user}},
   jailbreak or permission lines in the card, runs of sentences all starting with the same name.
-- **Shared clichés:** phrases humans and models both use. Counted, not scored.
+- **Shared clichés:** phrases humans and models both use. Counted, unscored.
 - **RP slop:** TheDrummer's UnslopNemo list of RP chat clichés ("hips swaying", "a shiver down", "...for now"),
   shown under the shared clichés. Not scored: tested against cards, human card writers use most of them as much as
   models do. Entries already scored or already among the shared clichés aren't listed twice.
@@ -281,6 +284,17 @@ it. When pulp vocabulary is 15%+ of the word weight and the card scores 40+, it 
 - **Texture** (experimental): paragraph evenness. AI text keeps paragraphs close to the same length (length CV
   around 0.32 vs 0.67 for 2023 human cards). Shown with an "AI-style likelihood" that combines it with the score.
   Careful human writers can be even too.
+- **Old-school AI** (experimental): the essay and character-sheet register of older models, ChatGPT-era GPT-3.5 / GPT-4
+  and 2024-era open models such as Phi-4, Mistral Small, Gemma 3 and Llama 3 ("a testament to", "meticulously",
+  "intricacies", "a force to be reckoned with", "her sharp wit", ", reflecting the…"). The scored lists come from fiction,
+  so they miss this register. It counts different items, not repeats: two make "a few older-model habits", three at 4+
+  per 1,000 words "reads like an older model". Newer models almost never write this way (0.5% of their cards, against
+  16% for older models and 3–6% of 2023 cards), so it points at older bots, and people use some of it too. Items from
+  Wikipedia's "Signs of AI writing" guide that are as common in 2023 cards as in any model we tested ("Furthermore,",
+  "Overall,", "plays a crucial role") are listed greyed and don't count. Checks in [docs/LISTS.md](docs/LISTS.md).
+- **Sexual content:** explicit or suggestive wording and NSFW-type tags, read from every field and greeting whatever is
+  ticked for scoring. A word list: it can miss implied content, and it filters the usual false alarms ("Sex: Female",
+  "sexual orientation", "Dick" as a name, "naked blade", "no NSFW" rules).
 - **Stats for nerds:** the original slop-score metrics (slop words and trigrams per 1,000, not-x-but-y rate,
   Flesch-Kincaid grade, sentence and paragraph length, dialogue, MATTR), on the scored fields and on every field.
   On character cards they barely separate human from AI writing.
@@ -355,7 +369,7 @@ the same link sit in a fold under the newest one.
   median of about 14 (9 in 10 land in Original-ish); with 150–250 words, about 23. The band cut-offs are the same
   at every length, so human cards that short almost never reach Common either (0.1%, against 3–4% of very long
   human cards). Treat a low score on a bite-sized card as "not enough to go on".
-- **Repetition isn't an AI sign on cards** (see [Other read-outs](#other-read-outs-not-scored)).
+- **Repetition isn't an AI sign on cards** (see [Other read-outs](#other-read-outs-unscored)).
 - **English only.** The word lists are English; other languages get no band.
 
 ## How it was tested
@@ -364,10 +378,10 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 from 2023 (mostly human) vs 2,631 AI-written | 0.76 | 0.87 |
+| Character cards: 108,129 from 2023 (mostly human) vs 2,855 AI-written | 0.75 | 0.86 |
 
-On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 30% of AI-written cards and the original
-slop score 21%.
+On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 29% of AI-written cards and the original
+slop score 20%.
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
@@ -392,7 +406,7 @@ Checked against the upstream code (upstream's `slop-score.html` page and `data/l
 | **Per format / per part** | One formula for everything | One set of lists, weights and calibration for every format and for both the description and the greeting. Format only picks the peer group shown in the read-out ("vs 2023 cards in the same format") |
 
 **Results on the shared test sets** (AUC, original → BBBScorer): SlopReview 0.930 → 0.977 (humans flagged above 25:
-9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.76 → 0.87.
+9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.75 → 0.86.
 
 ## Data and references
 

@@ -6,6 +6,40 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.23.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- **Old-school AI** read-out (experimental, unscored, `js/old-school.js`): the essay and character-sheet register of older
+  models, ChatGPT-era GPT-3.5 / GPT-4 and 2024-era open models ("a testament to", "meticulously", "a force to be reckoned
+  with", "her sharp wit"). Counts different items, not repeats. Items from Wikipedia's "Signs of AI writing" guide that
+  are as common in 2023 cards as in any model tested are listed greyed and don't count. Checks in `docs/LISTS.md`.
+- **Sexual content** read-out (unscored, `js/nsfw.js`): explicit or suggestive wording and NSFW-type tags, read from
+  every field and greeting, with filters for "Sex: Female", "sexual orientation", names and "no NSFW" rules.
+- Result header with the card's name, where it came from, and exactly which fields were scored (with word counts) and
+  which were left out.
+- **Experimental** and **Unscored** tags on result sections, in place of "not scored" / "not part of the score" text.
+- Dotted-underline explanations for the greeting layout, point of view, tense and genre in Card details.
+- Tests for both read-outs (126 pass).
+
+### Changed
+- Scoring runs never rescore: a dataset that already has a file for that scorer version only gets its new cards scored,
+  and a big dataset stopped halfway resumes from a checkpoint written every 15 s. `--force` (or `--rescore`) starts over;
+  `--new` is now the default.
+- The card generator scores new cards with the live scorer and the prepared next one (when it has a run).
+- "Card" is now **Card details**, with the format, greeting, genre and type labels in their own column.
+- The BBBScorer-vs-original numbers sit on their own line under the heading.
+- The archetype label is hidden on the page while the list is redone (it's still stored with scores); the size badge
+  stays.
+- The "tentative" tag next to the band is gone, here and in "How it works".
+
+### Fixed
+- `tools/organize_eval.mjs` (run first by the overnight scoring script) moved a prepared newer scorer's run (0.9.0) to
+  `eval/old/`, so the next run for that version started from nothing. It now only moves runs for older scorer versions.
+- Popups (ⓘ and the new explanations) were cut off at the bottom of the result and could sit under the next panel. They
+  now open above or below to stay on screen.
+
 ## [0.22.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged. Housekeeping: docs, licenses and unused files.

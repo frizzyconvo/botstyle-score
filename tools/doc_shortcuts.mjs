@@ -43,6 +43,8 @@ export const DOCS = [
   ['Eval - Latest AI-model report', 'eval/scores/v{cur}/ai-models.md', "Per-model report for the live scorer's run. Local only."],
   ['Eval - Latest scorer manifest (SCORER)', 'eval/scores/v{cur}/SCORER.md', 'Exactly which scorer, settings and lists (with checksums) the live run used. Local only.'],
   ['Eval - Latest scorer comparison', 'eval/scores/v{cur}/compare', 'What moved between the previous run and the live one. Local only.'],
+  ['Eval - Experiment - 0.9.0 full run vs 0.8.1', 'eval/experiments/v090_full_run.md', 'The complete 0.9.0 scoring run against 0.8.1: AUC, caught at 2%, bands by length, format and model, takeaways. Local only.'],
+  ['Eval - Experiment - archetype, genre and pulp', 'eval/experiments/archetype_genre.md', 'Do the archetype inputs cluster; genre read checked against card tags; pulp and genre gaps. Local only.'],
   ['Eval - Experiment - 0.9.0 final results', 'eval/experiments/v090_final2.md', 'BBBScorer 0.9.0 against 0.8.1 with the card-mined lists, on cards the lists never saw. Local only.'],
   ['Eval - Experiment - 0.9.0 first final', 'eval/experiments/v090_final.md', 'Earlier 0.9.0 results, before the card-mined lists. Local only.'],
   ['Eval - Experiment - 0.9.0 report', 'eval/experiments/v090_report.md', 'Change-by-change 0.9.0 experiment report. Local only.'],

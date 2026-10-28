@@ -496,6 +496,89 @@
    }
   },
   {
+   "model": "openai/gpt-5.4-nano",
+   "n": 5,
+   "median": 54.6,
+   "p25": 42.9,
+   "p75": 75.1,
+   "original": 20,
+   "common": 40,
+   "pulp": 0,
+   "upstream": 28.9,
+   "byMode": {
+    "fresh": {
+     "n": 5,
+     "median": 54.6,
+     "p25": 42.9,
+     "p75": 75.1,
+     "original": 20,
+     "common": 40,
+     "pulp": 0,
+     "upstream": 28.9
+    },
+    "antislop": {
+     "n": 8,
+     "median": 41.5,
+     "p25": 22.8,
+     "p75": 63,
+     "original": 50,
+     "common": 25,
+     "pulp": 4,
+     "upstream": 13.8
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 60,
+     "p25": 20.6,
+     "p75": 61.9,
+     "original": 33.3,
+     "common": 33.3,
+     "pulp": 10,
+     "upstream": 6.8
+    }
+   },
+   "styles": {
+    "lazy": null,
+    "min": {
+     "style": "first_person",
+     "n": 1,
+     "median": 18.8
+    },
+    "max": {
+     "style": "lists",
+     "n": 1,
+     "median": 78
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 1,
+      "median": 18.8
+     },
+     {
+      "style": "interview",
+      "n": 1,
+      "median": 42.9
+     },
+     {
+      "style": "free_prose",
+      "n": 1,
+      "median": 54.6
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 75.1
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 78
+     }
+    ]
+   }
+  },
+  {
    "model": "deepseek/deepseek-v4-flash-0731",
    "n": 14,
    "median": 53.9,
@@ -1982,24 +2065,24 @@
   },
   {
    "model": "meta-llama/llama-4-maverick",
-   "n": 18,
+   "n": 23,
    "median": 35.6,
    "p25": 10.6,
-   "p75": 50.1,
-   "original": 61.1,
-   "common": 11.1,
+   "p75": 52.4,
+   "original": 56.5,
+   "common": 13,
    "pulp": 18,
-   "upstream": 28.2,
+   "upstream": 23.8,
    "byMode": {
     "fresh": {
-     "n": 18,
+     "n": 23,
      "median": 35.6,
      "p25": 10.6,
-     "p75": 50.1,
-     "original": 61.1,
-     "common": 11.1,
+     "p75": 52.4,
+     "original": 56.5,
+     "common": 13,
      "pulp": 18,
-     "upstream": 28.2
+     "upstream": 23.8
     },
     "antislop": {
      "n": 29,
@@ -2030,8 +2113,8 @@
     },
     "min": {
      "style": "first_person",
-     "n": 3,
-     "median": 5.1
+     "n": 4,
+     "median": 11.9
     },
     "max": {
      "style": "interview",
@@ -2041,18 +2124,23 @@
     "all": [
      {
       "style": "first_person",
-      "n": 3,
-      "median": 5.1
+      "n": 4,
+      "median": 11.9
      },
      {
       "style": "free_prose",
-      "n": 4,
+      "n": 5,
       "median": 18.5
      },
      {
       "style": "lists",
-      "n": 2,
+      "n": 3,
       "median": 35.6
+     },
+     {
+      "style": "compact",
+      "n": 3,
+      "median": 42.3
      },
      {
       "style": "default",
@@ -2061,13 +2149,8 @@
      },
      {
       "style": "formatted_prose",
-      "n": 2,
+      "n": 3,
       "median": 51.5
-     },
-     {
-      "style": "compact",
-      "n": 2,
-      "median": 58.9
      },
      {
       "style": "interview",
@@ -2079,24 +2162,24 @@
   },
   {
    "model": "sao10k/l3-lunaris-8b",
-   "n": 36,
+   "n": 47,
    "median": 34.8,
-   "p25": 9.8,
+   "p25": 10.8,
    "p75": 51,
-   "original": 58.3,
-   "common": 8.3,
+   "original": 59.6,
+   "common": 12.8,
    "pulp": 27,
-   "upstream": 14.4,
+   "upstream": 14.2,
    "byMode": {
     "fresh": {
-     "n": 36,
+     "n": 47,
      "median": 34.8,
-     "p25": 9.8,
+     "p25": 10.8,
      "p75": 51,
-     "original": 58.3,
-     "common": 8.3,
+     "original": 59.6,
+     "common": 12.8,
      "pulp": 27,
-     "upstream": 14.4
+     "upstream": 14.2
     },
     "antislop": {
      "n": 7,
@@ -2121,77 +2204,77 @@
    },
    "styles": {
     "lazy": {
-     "n": 1,
-     "median": 9.5,
+     "n": 3,
+     "median": 13.5,
      "upstream": 1.2
     },
     "min": {
      "style": "compact",
-     "n": 3,
+     "n": 4,
      "median": 3.3
     },
     "max": {
-     "style": "formatted_prose",
-     "n": 8,
-     "median": 53.5
+     "style": "free_prose",
+     "n": 10,
+     "median": 53.9
     },
     "all": [
      {
       "style": "compact",
-      "n": 3,
+      "n": 4,
       "median": 3.3
      },
      {
-      "style": "default",
-      "n": 1,
-      "median": 9.5
+      "style": "interview",
+      "n": 8,
+      "median": 12.8
      },
      {
-      "style": "interview",
-      "n": 7,
-      "median": 9.8
+      "style": "default",
+      "n": 3,
+      "median": 13.5
      },
      {
       "style": "first_person",
-      "n": 5,
-      "median": 16.4
+      "n": 7,
+      "median": 20.4
      },
      {
       "style": "lists",
-      "n": 4,
-      "median": 44.9
-     },
-     {
-      "style": "free_prose",
-      "n": 8,
-      "median": 48.7
+      "n": 5,
+      "median": 40.3
      },
      {
       "style": "formatted_prose",
-      "n": 8,
+      "n": 10,
       "median": 53.5
+     },
+     {
+      "style": "free_prose",
+      "n": 10,
+      "median": 53.9
      }
     ]
    }
   },
   {
    "model": "thedrummer/skyfall-36b-v2",
-   "n": 56,
+   "n": 62,
    "median": 34.2,
-   "p25": 15.9,
+   "p25": 13.1,
    "p75": 51.6,
-   "original": 58.9,
-   "common": 16.1,
+   "original": 58.1,
+   "common": 17.7,
    "pulp": 23,
    "upstream": 14.8,
    "byMode": {
     "fresh": {
-     "n": 56,
+     "n": 62,
      "median": 34.2,
-     "p25": 15.9,
+     "p25": 13.1,
      "p75": 51.6,
-     "original": 58.9,
-     "common": 16.1,
+     "original": 58.1,
+     "common": 17.7,
      "pulp": 23,
      "upstream": 14.8
     },
@@ -2224,29 +2307,29 @@
     },
     "min": {
      "style": "compact",
-     "n": 9,
+     "n": 10,
      "median": 10
     },
     "max": {
      "style": "free_prose",
-     "n": 9,
-     "median": 58.5
+     "n": 10,
+     "median": 60.2
     },
     "all": [
      {
       "style": "compact",
-      "n": 9,
+      "n": 10,
       "median": 10
      },
      {
       "style": "interview",
-      "n": 6,
-      "median": 17.3
+      "n": 7,
+      "median": 12
      },
      {
       "style": "first_person",
-      "n": 9,
-      "median": 17.6
+      "n": 10,
+      "median": 20.7
      },
      {
       "style": "default",
@@ -2254,43 +2337,43 @@
       "median": 38.6
      },
      {
-      "style": "lists",
-      "n": 9,
-      "median": 42.7
-     },
-     {
       "style": "formatted_prose",
-      "n": 9,
+      "n": 10,
       "median": 49.1
      },
      {
+      "style": "lists",
+      "n": 10,
+      "median": 54.6
+     },
+     {
       "style": "free_prose",
-      "n": 9,
-      "median": 58.5
+      "n": 10,
+      "median": 60.2
      }
     ]
    }
   },
   {
    "model": "openai/gpt-4o-2024-11-20",
-   "n": 12,
+   "n": 18,
    "median": 33.7,
    "p25": 21.2,
-   "p75": 77.4,
+   "p75": 65.3,
    "original": 66.7,
    "common": 33.3,
    "pulp": 12,
-   "upstream": 29.2,
+   "upstream": 26.4,
    "byMode": {
     "fresh": {
-     "n": 12,
+     "n": 18,
      "median": 33.7,
      "p25": 21.2,
-     "p75": 77.4,
+     "p75": 65.3,
      "original": 66.7,
      "common": 33.3,
      "pulp": 12,
-     "upstream": 29.2
+     "upstream": 26.4
     },
     "antislop": {
      "n": 7,
@@ -2321,18 +2404,18 @@
     },
     "min": {
      "style": "compact",
-     "n": 1,
+     "n": 2,
      "median": 10.6
     },
     "max": {
      "style": "formatted_prose",
-     "n": 2,
-     "median": 95.5
+     "n": 3,
+     "median": 95
     },
     "all": [
      {
       "style": "compact",
-      "n": 1,
+      "n": 2,
       "median": 10.6
      },
      {
@@ -2341,53 +2424,53 @@
       "median": 19.2
      },
      {
+      "style": "lists",
+      "n": 3,
+      "median": 24.2
+     },
+     {
       "style": "interview",
-      "n": 2,
+      "n": 3,
       "median": 33
      },
      {
-      "style": "lists",
-      "n": 2,
-      "median": 33.7
-     },
-     {
       "style": "first_person",
-      "n": 2,
+      "n": 3,
       "median": 34.7
      },
      {
       "style": "free_prose",
-      "n": 2,
-      "median": 77.4
+      "n": 3,
+      "median": 65.4
      },
      {
       "style": "formatted_prose",
-      "n": 2,
-      "median": 95.5
+      "n": 3,
+      "median": 95
      }
     ]
    }
   },
   {
    "model": "mistralai/mistral-small-24b-instruct-2501",
-   "n": 11,
+   "n": 16,
    "median": 32.2,
-   "p25": 14.5,
+   "p25": 10.7,
    "p75": 59.6,
-   "original": 72.7,
-   "common": 18.2,
+   "original": 68.8,
+   "common": 18.8,
    "pulp": 29,
-   "upstream": 22,
+   "upstream": 18.9,
    "byMode": {
     "fresh": {
-     "n": 11,
+     "n": 16,
      "median": 32.2,
-     "p25": 14.5,
+     "p25": 10.7,
      "p75": 59.6,
-     "original": 72.7,
-     "common": 18.2,
+     "original": 68.8,
+     "common": 18.8,
      "pulp": 29,
-     "upstream": 22
+     "upstream": 18.9
     },
     "antislop": {
      "n": 10,
@@ -2418,19 +2501,19 @@
     },
     "min": {
      "style": "interview",
-     "n": 2,
-     "median": 14.5
+     "n": 3,
+     "median": 10.2
     },
     "max": {
      "style": "free_prose",
-     "n": 1,
+     "n": 2,
      "median": 83.6
     },
     "all": [
      {
       "style": "interview",
-      "n": 2,
-      "median": 14.5
+      "n": 3,
+      "median": 10.2
      },
      {
       "style": "first_person",
@@ -2438,8 +2521,13 @@
       "median": 23.2
      },
      {
+      "style": "compact",
+      "n": 3,
+      "median": 32.2
+     },
+     {
       "style": "lists",
-      "n": 1,
+      "n": 2,
       "median": 35.1
      },
      {
@@ -2448,18 +2536,13 @@
       "median": 35.5
      },
      {
-      "style": "compact",
-      "n": 2,
-      "median": 59.6
-     },
-     {
       "style": "formatted_prose",
-      "n": 2,
-      "median": 62.8
+      "n": 3,
+      "median": 53.8
      },
      {
       "style": "free_prose",
-      "n": 1,
+      "n": 2,
       "median": 83.6
      }
     ]
@@ -2467,22 +2550,22 @@
   },
   {
    "model": "sao10k/l3.1-euryale-70b",
-   "n": 45,
+   "n": 49,
    "median": 31.9,
-   "p25": 14.6,
-   "p75": 50.4,
-   "original": 60,
-   "common": 17.8,
+   "p25": 14.1,
+   "p75": 54.8,
+   "original": 59.2,
+   "common": 20.4,
    "pulp": 16,
    "upstream": 17.9,
    "byMode": {
     "fresh": {
-     "n": 45,
+     "n": 49,
      "median": 31.9,
-     "p25": 14.6,
-     "p75": 50.4,
-     "original": 60,
-     "common": 17.8,
+     "p25": 14.1,
+     "p75": 54.8,
+     "original": 59.2,
+     "common": 20.4,
      "pulp": 16,
      "upstream": 17.9
     },
@@ -2519,9 +2602,9 @@
      "median": 7.1
     },
     "max": {
-     "style": "formatted_prose",
-     "n": 8,
-     "median": 55.3
+     "style": "free_prose",
+     "n": 10,
+     "median": 67.1
     },
     "all": [
      {
@@ -2531,12 +2614,12 @@
      },
      {
       "style": "first_person",
-      "n": 9,
+      "n": 10,
       "median": 14.1
      },
      {
       "style": "compact",
-      "n": 3,
+      "n": 4,
       "median": 16.1
      },
      {
@@ -2550,14 +2633,14 @@
       "median": 50.4
      },
      {
-      "style": "free_prose",
+      "style": "formatted_prose",
       "n": 9,
-      "median": 54.8
+      "median": 55.3
      },
      {
-      "style": "formatted_prose",
-      "n": 8,
-      "median": 55.3
+      "style": "free_prose",
+      "n": 10,
+      "median": 67.1
      }
     ]
    }
@@ -2757,6 +2840,103 @@
    }
   },
   {
+   "model": "anthropic/claude-fable-5.1",
+   "n": 14,
+   "median": 23.1,
+   "p25": 15.2,
+   "p75": 38.6,
+   "original": 78.6,
+   "common": 14.3,
+   "pulp": 6,
+   "upstream": 9,
+   "byMode": {
+    "fresh": {
+     "n": 14,
+     "median": 23.1,
+     "p25": 15.2,
+     "p75": 38.6,
+     "original": 78.6,
+     "common": 14.3,
+     "pulp": 6,
+     "upstream": 9
+    },
+    "antislop": {
+     "n": 9,
+     "median": 18.4,
+     "p25": 11.2,
+     "p75": 25.4,
+     "original": 100,
+     "common": 0,
+     "pulp": 4,
+     "upstream": 1.2
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 20.8,
+     "p25": 17.9,
+     "p75": 33.4,
+     "original": 100,
+     "common": 0,
+     "pulp": 6,
+     "upstream": 8.7
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 2,
+     "median": 38.6,
+     "upstream": 14.4
+    },
+    "min": {
+     "style": "compact",
+     "n": 2,
+     "median": 18.8
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 2,
+     "median": 71.1
+    },
+    "all": [
+     {
+      "style": "compact",
+      "n": 2,
+      "median": 18.8
+     },
+     {
+      "style": "interview",
+      "n": 2,
+      "median": 21.5
+     },
+     {
+      "style": "free_prose",
+      "n": 2,
+      "median": 24.1
+     },
+     {
+      "style": "first_person",
+      "n": 2,
+      "median": 31.9
+     },
+     {
+      "style": "default",
+      "n": 2,
+      "median": 38.6
+     },
+     {
+      "style": "lists",
+      "n": 2,
+      "median": 47.9
+     },
+     {
+      "style": "formatted_prose",
+      "n": 2,
+      "median": 71.1
+     }
+    ]
+   }
+  },
+  {
    "model": "nousresearch/hermes-4-405b",
    "n": 37,
    "median": 22.9,
@@ -2951,98 +3131,84 @@
    }
   },
   {
-   "model": "anthropic/claude-fable-5.1",
-   "n": 7,
-   "median": 18.8,
-   "p25": 14.3,
-   "p75": 23.1,
-   "original": 85.7,
-   "common": 14.3,
-   "pulp": 6,
-   "upstream": 7.3,
+   "model": "openai/gpt-6-luna",
+   "n": 32,
+   "median": 19.1,
+   "p25": 14.7,
+   "p75": 30.4,
+   "original": 78.1,
+   "common": 12.5,
+   "pulp": 0,
+   "upstream": 13.8,
    "byMode": {
     "fresh": {
-     "n": 7,
-     "median": 18.8,
-     "p25": 14.3,
-     "p75": 23.1,
-     "original": 85.7,
-     "common": 14.3,
-     "pulp": 6,
-     "upstream": 7.3
+     "n": 32,
+     "median": 19.1,
+     "p25": 14.7,
+     "p75": 30.4,
+     "original": 78.1,
+     "common": 12.5,
+     "pulp": 0,
+     "upstream": 13.8
     },
     "antislop": {
-     "n": 9,
-     "median": 18.4,
-     "p25": 11.2,
-     "p75": 25.4,
-     "original": 100,
+     "n": 7,
+     "median": 29.4,
+     "p25": 7,
+     "p75": 39.4,
+     "original": 85.7,
      "common": 0,
-     "pulp": 4,
-     "upstream": 1.2
+     "pulp": 5,
+     "upstream": 14.1
     },
     "rewrite": {
      "n": 3,
-     "median": 20.8,
-     "p25": 17.9,
-     "p75": 33.4,
+     "median": 15,
+     "p25": 10.9,
+     "p75": 17.4,
      "original": 100,
      "common": 0,
-     "pulp": 6,
-     "upstream": 8.7
+     "pulp": 5,
+     "upstream": 13.1
     }
    },
    "styles": {
-    "lazy": {
-     "n": 1,
-     "median": 19.8,
-     "upstream": 1.2
-    },
+    "lazy": null,
     "min": {
      "style": "interview",
-     "n": 1,
-     "median": 12
+     "n": 4,
+     "median": 15.7
     },
     "max": {
      "style": "formatted_prose",
-     "n": 1,
-     "median": 61.1
+     "n": 7,
+     "median": 65.2
     },
     "all": [
      {
       "style": "interview",
-      "n": 1,
-      "median": 12
+      "n": 4,
+      "median": 15.7
      },
      {
       "style": "first_person",
-      "n": 1,
-      "median": 14.3
+      "n": 7,
+      "median": 16.1
      },
      {
       "style": "lists",
-      "n": 1,
-      "median": 15.2
-     },
-     {
-      "style": "compact",
-      "n": 1,
-      "median": 18.8
-     },
-     {
-      "style": "default",
-      "n": 1,
-      "median": 19.8
+      "n": 7,
+      "median": 17.3
      },
      {
       "style": "free_prose",
-      "n": 1,
-      "median": 23.1
+      "n": 7,
+      "median": 17.4
      },
      {
       "style": "formatted_prose",
-      "n": 1,
-      "median": 61.1
+      "n": 7,
+      "median": 65.2
      }
     ]
    }
@@ -3145,108 +3311,25 @@
    }
   },
   {
-   "model": "openai/gpt-6-luna",
-   "n": 27,
-   "median": 17.4,
-   "p25": 14.7,
-   "p75": 30.4,
-   "original": 77.8,
-   "common": 11.1,
-   "pulp": 0,
-   "upstream": 13.8,
-   "byMode": {
-    "fresh": {
-     "n": 27,
-     "median": 17.4,
-     "p25": 14.7,
-     "p75": 30.4,
-     "original": 77.8,
-     "common": 11.1,
-     "pulp": 0,
-     "upstream": 13.8
-    },
-    "antislop": {
-     "n": 7,
-     "median": 29.4,
-     "p25": 7,
-     "p75": 39.4,
-     "original": 85.7,
-     "common": 0,
-     "pulp": 5,
-     "upstream": 14.1
-    },
-    "rewrite": {
-     "n": 3,
-     "median": 15,
-     "p25": 10.9,
-     "p75": 17.4,
-     "original": 100,
-     "common": 0,
-     "pulp": 5,
-     "upstream": 13.1
-    }
-   },
-   "styles": {
-    "lazy": null,
-    "min": {
-     "style": "interview",
-     "n": 3,
-     "median": 15.7
-    },
-    "max": {
-     "style": "formatted_prose",
-     "n": 6,
-     "median": 65.2
-    },
-    "all": [
-     {
-      "style": "interview",
-      "n": 3,
-      "median": 15.7
-     },
-     {
-      "style": "first_person",
-      "n": 6,
-      "median": 16.1
-     },
-     {
-      "style": "free_prose",
-      "n": 6,
-      "median": 17.4
-     },
-     {
-      "style": "lists",
-      "n": 6,
-      "median": 20.2
-     },
-     {
-      "style": "formatted_prose",
-      "n": 6,
-      "median": 65.2
-     }
-    ]
-   }
-  },
-  {
    "model": "openai/gpt-6-astra",
-   "n": 7,
-   "median": 15.8,
-   "p25": 11.8,
+   "n": 14,
+   "median": 16.3,
+   "p25": 13.2,
    "p75": 32.7,
-   "original": 85.7,
+   "original": 78.6,
    "common": 0,
-   "pulp": 4,
-   "upstream": 7.2,
+   "pulp": 6,
+   "upstream": 9.9,
    "byMode": {
     "fresh": {
-     "n": 7,
-     "median": 15.8,
-     "p25": 11.8,
+     "n": 14,
+     "median": 16.3,
+     "p25": 13.2,
      "p75": 32.7,
-     "original": 85.7,
+     "original": 78.6,
      "common": 0,
-     "pulp": 4,
-     "upstream": 7.2
+     "pulp": 6,
+     "upstream": 9.9
     },
     "antislop": {
      "n": 9,
@@ -3271,55 +3354,55 @@
    },
    "styles": {
     "lazy": {
-     "n": 1,
-     "median": 11.8,
-     "upstream": 5.7
+     "n": 2,
+     "median": 13.2,
+     "upstream": 20.1
     },
     "min": {
-     "style": "first_person",
-     "n": 1,
-     "median": 9.7
+     "style": "interview",
+     "n": 2,
+     "median": 13.2
     },
     "max": {
      "style": "formatted_prose",
-     "n": 1,
-     "median": 42.7
+     "n": 2,
+     "median": 49.4
     },
     "all": [
      {
-      "style": "first_person",
-      "n": 1,
-      "median": 9.7
-     },
-     {
       "style": "default",
-      "n": 1,
-      "median": 11.8
+      "n": 2,
+      "median": 13.2
      },
      {
       "style": "interview",
-      "n": 1,
+      "n": 2,
       "median": 13.2
      },
      {
       "style": "compact",
-      "n": 1,
+      "n": 2,
       "median": 15.8
      },
      {
       "style": "free_prose",
-      "n": 1,
+      "n": 2,
       "median": 25.9
      },
      {
+      "style": "first_person",
+      "n": 2,
+      "median": 26
+     },
+     {
       "style": "lists",
-      "n": 1,
-      "median": 32.7
+      "n": 2,
+      "median": 43.9
      },
      {
       "style": "formatted_prose",
-      "n": 1,
-      "median": 42.7
+      "n": 2,
+      "median": 49.4
      }
     ]
    }
@@ -3522,24 +3605,24 @@
   {
    "kind": "model",
    "model": "thedrummer/unslopnemo-12b",
-   "n": 31,
-   "median": 30,
+   "n": 37,
+   "median": 27.2,
    "p25": 17.5,
-   "p75": 56,
-   "original": 64.5,
-   "common": 19.4,
-   "pulp": 19,
-   "upstream": 10.3,
+   "p75": 53.8,
+   "original": 64.9,
+   "common": 16.2,
+   "pulp": 20,
+   "upstream": 16,
    "byMode": {
     "fresh": {
-     "n": 31,
-     "median": 30,
+     "n": 37,
+     "median": 27.2,
      "p25": 17.5,
-     "p75": 56,
-     "original": 64.5,
-     "common": 19.4,
-     "pulp": 19,
-     "upstream": 10.3
+     "p75": 53.8,
+     "original": 64.9,
+     "common": 16.2,
+     "pulp": 20,
+     "upstream": 16
     },
     "antislop": {
      "n": 15,
@@ -3564,25 +3647,30 @@
    },
    "styles": {
     "lazy": {
-     "n": 7,
+     "n": 8,
      "median": 23.4,
-     "upstream": 6.8
+     "upstream": 19.2
     },
     "min": {
-     "style": "first_person",
-     "n": 7,
-     "median": 6.9
+     "style": "interview",
+     "n": 1,
+     "median": 6.8
     },
     "max": {
-     "style": "lists",
-     "n": 2,
-     "median": 74.5
+     "style": "free_prose",
+     "n": 8,
+     "median": 69.3
     },
     "all": [
      {
+      "style": "interview",
+      "n": 1,
+      "median": 6.8
+     },
+     {
       "style": "first_person",
-      "n": 7,
-      "median": 6.9
+      "n": 8,
+      "median": 8.3
      },
      {
       "style": "compact",
@@ -3591,23 +3679,23 @@
      },
      {
       "style": "default",
-      "n": 7,
+      "n": 8,
       "median": 23.4
      },
      {
       "style": "formatted_prose",
-      "n": 7,
+      "n": 8,
       "median": 53.3
      },
      {
-      "style": "free_prose",
-      "n": 7,
-      "median": 69.3
+      "style": "lists",
+      "n": 3,
+      "median": 53.8
      },
      {
-      "style": "lists",
-      "n": 2,
-      "median": 74.5
+      "style": "free_prose",
+      "n": 8,
+      "median": 69.3
      }
     ]
    },

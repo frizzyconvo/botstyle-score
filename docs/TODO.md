@@ -90,3 +90,15 @@ the convenience layer around them: the double-click batch scripts, the doc short
 - [ ] **Test on a clean machine** (a fresh container or VM: clone, install, test, serve, score a folder), then
       document Linux setup in the README.
 - [ ] Optional: a Dockerfile or dev container for a one-command setup.
+
+## Read-outs and labels
+
+- **Old-school AI:** check it against cards from GPT-3.5 Turbo and GPT-4 (the models early-2023 AI cards most likely
+  came from). It was tuned on 2024-era open models; Wikipedia's essay transitions ("Furthermore,", "Overall,") turned up
+  only in 2023 cards, so they're listed but not counted until then.
+- **Genre read:** use card tags first; the keyword reads for Romance and Modern are mostly noise (they fire on ordinary
+  card vocabulary). Rebuild the other genres' words from what tagged cards use, then rebuild the pulp list from
+  tag-labeled genre cards.
+- **Archetypes:** being redone from the axes that carry information and don't overlap (description format, greeting
+  point of view, size); hidden on the page until then.
+- **Contemporary cards:** AI-written romance and modern-setting cards rarely reach Common (the scored lists lean fantasy).

@@ -38,7 +38,8 @@
 //                 (e.g. "|t1.2"), so they sit beside the default cards instead of counting as the same card.
 //   --min-p P     OpenRouter min_p (a common RP sampler setting); cards get "|mp<P>" in their id.
 //   --no-score    don't score the new cards when the run finishes (by default it runs
-//                 score_all.mjs --only generated_v2 --new: only cards not scored yet, unless another scoring run is active).
+//                 score_all.mjs --only generated_v2, with the live scorer and the prepared next one: only cards not scored yet,
+//                 unless another scoring run is active).
 // Each card records at (timestamp), elapsed_ms and out_words; failed requests go to <out>_errors.jsonl.
 //
 // Reads BASE_URL and API_KEY from .env (OpenRouter works). Seeds: JSONL with name / tagline /
@@ -419,14 +420,20 @@ console.log(`finished: ${n} written to ${OUT} (${bad} flagged invalid); reported
 if (Object.keys(spentBy).length) console.log('  cost by model: ' + Object.entries(spentBy).map(([m, c]) => `${m} $${c.toFixed(3)}`).join(', '));
 if (Object.keys(skipped).length) console.log('  skipped this round: ' + Object.entries(skipped).map(([m, w]) => `${m} (${w})`).join('; '));
 
-// Score the new cards straight away (BBBScorer + original formula), unless --no-score or nothing was written. Only cards
-// not yet in this scorer version's file are scored (--new); the rest of the dataset keeps its scores.
+// Score the new cards straight away (BBBScorer + original formula), unless --no-score or nothing was written: with the
+// live scorer, and with the prepared next one too when it has a scoring run (eval/scores/v<NEXT_SCORER>/), so both
+// versions always cover the same cards. Only cards not yet in each version's file are scored.
 // score_all refuses to start while another scoring run is active (exit code 3), so they never collide.
 const DATASET_FOR = { 'ai_cards_v2.jsonl': 'generated_v2', 'ai_cards.jsonl': 'generated_v1' };
 const dsName = DATASET_FOR[OUT.replace(/\\/g, '/').split('/').pop()];
 if (n > 0 && !args['no-score'] && dsName) {
-  console.log(`\nscoring ${dsName} with the current scorer…`);
   const { spawnSync } = await import('child_process');
-  const r = spawnSync(process.execPath, ['tools/score_all.mjs', '--only', dsName, '--new'], { stdio: 'inherit' });
-  if (r.status === 3) console.log(`Not scored now: another scoring run is active. Run later: node tools/score_all.mjs --only ${dsName} --new`);
+  const { NEXT_SCORER } = await import('../js/scorer-profile.js');
+  const { existsSync: has } = await import('fs');
+  const versions = [null, ...(NEXT_SCORER && has(`eval/scores/v${NEXT_SCORER}`) ? [NEXT_SCORER] : [])];
+  for (const v of versions) {
+    console.log(`\nscoring ${dsName} with ${v ? `the prepared scorer ${v}` : 'the current scorer'}…`);
+    const r = spawnSync(process.execPath, ['tools/score_all.mjs', '--only', dsName, ...(v ? ['--scorer', v] : [])], { stdio: 'inherit' });
+    if (r.status === 3) { console.log(`Not scored now: another scoring run is active. Run later: dev\\score-new.cmd (or node tools/score_all.mjs --only ${dsName}${v ? ` --scorer ${v}` : ''})`); break; }
+  }
 } else if (n > 0 && !dsName) console.log(`(not scored automatically: ${OUT} isn't one of the scored datasets)`);

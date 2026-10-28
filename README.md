@@ -68,12 +68,14 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 - **Tests:** `npm test`.
 - **Doc shortcuts** (Windows): `npm run shortcuts` puts a shortcut to every doc, local-only ones included, in `docs/`.
 - **Score every dataset** with the current scorer (versioned, resumable, about 45 minutes):
-  `npm run score-all`. Results go to `eval/scores/v<version>/`; read `notes.md` there first. Then rebuild what
+  `npm run score-all`. Cards already scored by that scorer version are never scored again: datasets that already have a
+  file only get their new cards, and a run stopped halfway resumes from its checkpoint. `--force` (or `--rescore`) starts
+  over. Results go to `eval/scores/v<version>/`; read `notes.md` there first. Then rebuild what
   the page uses with `npm run leaderboard` and `npm run reference`.
-- **Next scorer version (0.9.0, prepared, not live):** `npm run score-all -- --scorer 0.9.0` scores into its own folder;
+- **Next scorer version (0.9.0, prepared, not live):** `npm run score-all -- --scorer 0.9.0` scores into its own folder (tidying `eval/` leaves it alone);
   what it changes and how it tested is in [docs/TODO.md](docs/TODO.md).
-- **Score only new cards** in a dataset (what the card generator runs after each round): `npm run score-all -- --only
-  generated_v2 --new`. Cards already scored by this scorer version keep their rows.
+- **Score only new cards** in a dataset (what the card generator runs after each round, for the live scorer and the prepared next one): `npm run score-all --
+  --only generated_v2`. Cards already scored by this scorer version keep their rows.
 - **Score cards at any path** (a folder of card PNG/JSON files, a Perchance characters folder, a .zip, optionally
   with a folder or pattern inside it, or one card file): `npm run score-path -- "<path>" --name <short name>`
   (`--label ai|human|mixed|unknown`). Only scores are written, to `eval/scores/v<version>/<name>.jsonl` with a section

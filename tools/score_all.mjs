@@ -2,13 +2,17 @@
 // score_all.mjs - Score every card dataset with the current scorer and keep the results by version,
 // for regression testing. Safe to leave running overnight: it resumes where it stopped.
 //
+// Already-scored cards are never scored twice: a dataset that already has a file for this scorer version only gets
+// its new cards scored (cards no longer valid in the source are dropped), and a big dataset stopped halfway picks up
+// from its checkpoint (<dataset>.jsonl.partial, written every 15 s). --force (or --rescore) redoes everything.
+//
 //   node tools/score_all.mjs                 # everything (double-click score-all.cmd on Windows)
 //   node tools/score_all.mjs --only korshuk,perchance
 //   node tools/score_all.mjs --limit 200     # quick trial: first 200 cards per dataset (-> _trial/)
-//   node tools/score_all.mjs --force         # rescore datasets already done for this version
+//   node tools/score_all.mjs --force         # rescore everything from scratch for this version (same: --rescore)
 //   node tools/score_all.mjs --scorer 0.9.0  # score with the prepared next scorer version (eval/scores/v0.9.0/)
-//   node tools/score_all.mjs --only generated_v2 --new   # score only cards not in this version's file yet (appends;
-//                                            # what generate_ai_cards.mjs runs after a generation round)
+//   node tools/score_all.mjs --only generated_v2   # score only that dataset's new cards (what generate_ai_cards.mjs
+//                                            # runs after a generation round; --new is accepted and is the default)
 //   node tools/score_all.mjs --add "C:\cards\pack.zip\books\*.png" --name jammy_books [--label ai|human|mixed|unknown]
 //                                            # score cards at any path (folder, Perchance folder, .zip, card file) as an
 //                                            # extra dataset; only scores are written (eval/scores/v<ver>/<name>.jsonl),
@@ -67,7 +71,7 @@ const opt = k => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : null);
 // --scorer 0.9.0: score with the prepared next version (its own folder, eval/scores/v0.9.0/). Default: 0.8.1.
 if (opt('--scorer')) setScorerProfile(opt('--scorer'));
 const SCORER_VERSION = scorerVersion();
-let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force'), NEW_ONLY = argv.includes('--new') && !argv.includes('--force');
+let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force') || argv.includes('--rescore');
 // --limit trial runs go to a _trial subfolder so they never count as a finished dataset
 const OUT = join(ROOT, 'eval', 'scores', 'v' + SCORER_VERSION, ...(LIMIT ? ['_trial'] : []));
 mkdirSync(OUT, { recursive: true });
@@ -244,17 +248,21 @@ for (const ds of DATASETS) {
   if (ONLY && !ONLY.includes(ds.name)) continue;
   dsIndex++;
   const outFile = join(OUT, ds.name + '.jsonl');
-  // --new: keep this version's existing rows and score only cards whose id isn't among them yet.
-  const kept = NEW_ONLY && existsSync(outFile) ? readJsonl(outFile) : null;
+  // Keep this version's existing rows (or a stopped run's checkpoint) and score only cards whose id isn't among them.
+  const partial = outFile + '.partial';
+  if (FORCE || LIMIT) { try { unlinkSync(partial); } catch { /* none */ } }
+  const resumeFrom = FORCE || LIMIT ? null : existsSync(outFile) ? outFile : existsSync(partial) ? partial : null;
+  const kept = resumeFrom ? readFileSync(resumeFrom, 'utf-8').split('\n').flatMap(l => { try { return l ? [JSON.parse(l)] : []; } catch { return []; } }).filter(x => !x.error) : null;   // a checkpoint's last line may be cut off
   const keptIds = kept ? new Set(kept.map(x => x.id)) : null;
-  if (existsSync(outFile) && !FORCE && !kept) { console.log(`${ds.name}: already scored for v${SCORER_VERSION} (use --new to add new cards, --force to redo)`); continue; }
+  if (resumeFrom === partial) say(`${ds.name}: resuming a stopped run (${kept.length.toLocaleString()} cards already scored)`);
   if (ds.name === 'jaicards') { const c = await jaicardsCache(); if (!c) { console.log('jaicards: not found, skipped'); continue; } ds.rows = () => jsonlStream(c); }
   if (ds.need && !existsSync(ds.need)) { console.log(`${ds.name}: ${ds.need} not found, skipped`); continue; }
   if (ds.extra && !sourceKind(ds.source)) { console.log(`${ds.name}: ${ds.source} not found, skipped`); continue; }
   const t0 = Date.now(), startedAt = new Date().toISOString(); const rows = []; let n = 0, totalWords = 0;   // rows are small (no card text)
   const total = ds.name === 'jaicards' ? countLines(join(CARDS, 'jaicards-cards-js', 'jaicards_cards.jsonl')) : ds.need ? countLines(ds.need) : null;
   say(`[${dsIndex}/${todo.length}] ${ds.name}: scoring${kept ? ` new cards only (${kept.length.toLocaleString()} already scored)` : total ? ` ${total.toLocaleString()} cards` : ''}…`);
-  let lastSay = Date.now(); const stillThere = new Set();   // --new: ids still valid in the source
+  let lastSay = Date.now(), flushed = 0; const stillThere = new Set();   // ids still valid in the source
+  if (!LIMIT && resumeFrom !== partial) { try { unlinkSync(partial); } catch { /* none */ } }   // a checkpoint only ever holds this run's rows
   for (const raw of ds.rows()) {
     if (raw.valid === false || (ds.skip && ds.skip.has(raw.id))) continue;
     if (LIMIT && n >= LIMIT) break;
@@ -276,6 +284,7 @@ for (const ds of DATASETS) {
     totalWords += r.stats.totalWords || 0;
     if (Date.now() - lastSay > 15000) {
       lastSay = Date.now(); touchLock();
+      if (!LIMIT && rows.length > flushed) { appendFileSync(partial, rows.slice(flushed).map(x => JSON.stringify(x)).join('\n') + '\n'); flushed = rows.length; }
       const secs = (Date.now() - t0) / 1000, rate = n / Math.max(1, secs);
       say(`[${dsIndex}/${todo.length}] ${ds.name}: ${n.toLocaleString()}${total ? ` / ${total.toLocaleString()} (${(100 * n / total).toFixed(1)}%)` : ''} cards, ${Math.round(rate * 60).toLocaleString()} cards/min${total ? `, about ${fmtDur((total - n) / rate)} left` : ''}`);
     }
@@ -283,11 +292,12 @@ for (const ds of DATASETS) {
   const scoredNow = rows.length;
   if (kept) {
     const gone = kept.filter(x => !stillThere.has(x.id)).length;   // cards since marked invalid or removed from the source
-    if (!scoredNow && !gone) { say(`[${dsIndex}/${todo.length}] ${ds.name}: no new cards (${kept.length.toLocaleString()} already scored)`); continue; }
+    if (!scoredNow && !gone && resumeFrom === outFile) { say(`[${dsIndex}/${todo.length}] ${ds.name}: no new cards (${kept.length.toLocaleString()} already scored)`); continue; }
     rows.unshift(...kept.filter(x => stillThere.has(x.id)));
     if (gone) say(`  dropped ${gone} row(s) whose cards are no longer valid in the source`);
   }
   writeFileSync(outFile, rows.map(x => JSON.stringify(x)).join('\n') + '\n');
+  try { unlinkSync(partial); } catch { /* none */ }
   const ok = rows.filter(x => !x.error && x.reliable && !x.nonEnglish);
   const bands = {}; for (const x of rows) if (!x.error) bands[x.band] = (bands[x.band] || 0) + 1;
   const byYear = {}; for (const x of ok) { const y = String(x.createdAt || '').slice(0, 4) || 'undated'; (byYear[y] = byYear[y] || []).push(x.score); }

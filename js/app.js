@@ -18,6 +18,8 @@ import { wordsOnlyLower, alphaTokens } from './utils.js';
 import { scoreText as scoreContrast } from './contrast-detector.js';
 import { BOTSTYLE_WEIGHTS, MIN_PROSE_WORDS } from './botstyle.js';
 import { FORMAT_INFO, formatLabel, requestStyleLabel, GREETING_FORMATS, GREETING_POV } from './card-style.js';
+import { detectNsfw } from './nsfw.js';
+import { oldSchoolTells } from './old-school.js';
 import { EMDASH_POINTS } from './ai-structures.js';
 import { CARD_PROXY, PUBLIC_RUNS } from './site-config.js';
 import { originalParts, explainDifference, disparity, DISPARITY } from './compare-original.js';
@@ -243,21 +245,52 @@ function nerdStats(text) {
 }
 
 // ---------------------------------------------------------------- result
+// Popups (the ⓘ bodies and dotted-underline hints) are placed against the viewport when they open, so they never run
+// off the bottom of the page or under the next panel: below the trigger when there's room, otherwise above it.
+function placePopup(trigger) {
+  const body = trigger.querySelector(':scope > .pop-body, :scope > .hint-body'); if (!body) return;
+  body.classList.add('placed'); body.style.left = body.style.top = '0px';
+  const t = trigger.getBoundingClientRect(), vw = document.documentElement.clientWidth, vh = window.innerHeight, pad = 12;
+  const sec = trigger.closest('.sec, .score-hero, .card-banner'), wantW = body.classList.contains('pop-body') && sec ? Math.min(sec.getBoundingClientRect().width, 560) : null;
+  if (wantW) body.style.width = wantW + 'px';
+  const b = body.getBoundingClientRect();   // at left/top 0: b.left / b.top is where "fixed" is measured from (a panel with backdrop-filter moves it)
+  const left = Math.max(pad, Math.min(wantW && sec ? sec.getBoundingClientRect().left : t.left, vw - b.width - pad));
+  const below = t.bottom + 6, above = t.top - 6 - b.height;
+  const top = below + b.height <= vh - pad || above < pad ? Math.min(below, Math.max(pad, vh - pad - b.height)) : above;
+  body.style.left = (left - b.left) + 'px'; body.style.top = (top - b.top) + 'px';
+}
+for (const ev of ['mouseover', 'focusin']) document.addEventListener(ev, e => { const t = e.target.closest && e.target.closest('.pop, .hint'); if (t && !t.contains(e.relatedTarget)) placePopup(t); });
+window.addEventListener('scroll', () => { const t = document.querySelector('.pop:hover, .pop:focus, .hint:hover, .hint:focus'); if (t) placePopup(t); }, { passive: true });
 const pct = x => Math.round(x * 100);
+// Section tags: "Experimental" (still being tuned) and "Unscored" (shown, never counted in the score).
+const EXP = '<span class="stag exp" title="Still being tuned">Experimental</span>', UNS = '<span class="stag uns" title="Shown to help; never counted in the score">Unscored</span>';
+// A word with a dotted underline that explains itself on hover or tap.
+const hint = (text, tip) => `<span class="hint" tabindex="0">${esc(text)}<span class="hint-body" role="tooltip">${tip}</span></span>`;
+const TENSE_TIP = { past: 'Past tense: narration says what happened ("she walked in").', present: 'Present tense: narration says what is happening ("she walks in").', mixed: 'Mixed tense: narration switches between past and present.' };
+const POV_TIP = { second_person: 'Second person: the greeting talks to {{user}} as "you".', first_person: 'First person: the character narrates as "I".', third_person: 'Third person: narration about "she / he / they".', unclear: 'Not enough narration to tell the point of view.' };
+const GENRE_TIP = { fantasy: 'magic, swords, kingdoms, elves, dragons, gods…', horror: 'blood, ghosts, curses, monsters, the undead…', scifi: 'starships, planets, androids, cyber-, lasers…', romance: 'love, kisses, flirting, dating, desire…',
+  modern: 'school, office, apartments, phones, coffee, parties…', action: 'battles, missions, soldiers, weapons, assassins…', general: 'no genre stands out.' };
 function renderResult(r) {
   const el = $('result'); el.hidden = false;
   const W = BOTSTYLE_WEIGHTS, st = r.stats, band = r.band, ref = r.reference;
   const meter = (label, v, tip) => `<div class="meter"><div class="fill" style="width:${Math.min(100, v * 100)}%"></div><span>${label}</span><b>${(v * 100).toFixed(0)}</b><div class="tip">${tip}</div></div>`;
   const pop = `<span class="pop" tabindex="0" aria-label="What this number means">i<span class="pop-body">`
     + (ref && ref.human_2023 && band.id !== 'na' ? `Higher than <b>${Math.round(ref.human_2023.percentile)}%</b> of ${esc(ref.human_2023.label)} (${ref.human_2023.n.toLocaleString()}) and <b>${Math.round(ref.ai_cards.percentile)}%</b> of ${esc(ref.ai_cards.label)} (${ref.ai_cards.n.toLocaleString()}).${ref.version && !SAME_SCORES_AS.includes(ref.version) ? ` <i>These comparison cards were scored with BBBScorer v${esc(ref.version)}, not v${esc(SCORER_VERSION)}, so the percentages are approximate until they're rescored.</i>` : ''}<br><br>` : '')
-    + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favored words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Tentative bands</b> (still calibrating): ${BAND_LABELS.original} <i>(${BAND_TAGLINES.original.toLowerCase()})</i> under ${WB.original} · ${BAND_LABELS.mixed} <i>(${BAND_TAGLINES.mixed.toLowerCase()})</i> ${WB.original}–${WB.common} · ${BAND_LABELS.common} <i>(${BAND_TAGLINES.common.toLowerCase()})</i> ${WB.common}+</span></span>`;
+    + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favored words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Bands:</b> ${BAND_LABELS.original} <i>(${BAND_TAGLINES.original.toLowerCase()})</i> under ${WB.original} · ${BAND_LABELS.mixed} <i>(${BAND_TAGLINES.mixed.toLowerCase()})</i> ${WB.original}–${WB.common} · ${BAND_LABELS.common} <i>(${BAND_TAGLINES.common.toLowerCase()})</i> ${WB.common}+</span></span>`;
   const used = fieldList(state.fields, state.alts);
   const orig = nerdStats(r.text);
   const short = band.id !== 'na' && st.totalWords < 350, starMark = short ? '<span class="star score-star" title="Bite-sized card: the score rests on few words, so treat it as rough">*</span>' : '';
+  const cc1 = state.card || {}, src = ORIGIN_LABEL[originOf(state.meta || {})];
+  const scoredF = FIELDS.filter(([k]) => state.fields[k] && String(cc1[k] || '').trim()).map(([k, l]) => `<span class="fchip">${esc(l)} <i>${words(cc1[k])} words</i></span>`)
+    .concat(state.alts.size ? [`<span class="fchip">${state.alts.size} alternate greeting${state.alts.size > 1 ? 's' : ''}</span>`] : []);
+  const leftOut = FIELDS.filter(([k]) => !state.fields[k] && String(cc1[k] || '').trim()).map(([, l]) => l)
+    .concat(cc1.alternate_greetings && cc1.alternate_greetings.length > state.alts.size ? [`${cc1.alternate_greetings.length - state.alts.size} alternate greeting${cc1.alternate_greetings.length - state.alts.size > 1 ? 's' : ''}`] : []);
+  const banner = `<div class="card-banner"><div class="card-title">${esc(cc1.name || 'Untitled card')}${src && src !== 'text' ? `<span class="src-chip">${esc(src)}</span>` : ''}</div>
+    <div class="scored-line"><span class="k">Scored</span>${scoredF.join('') || '<span class="faint">nothing selected</span>'}</div>
+    ${leftOut.length ? `<div class="scored-line faint small"><span class="k">Left out</span>${esc(leftOut.join(', '))} <span class="faint">(tick them above to include)</span></div>` : ''}</div>`;
   let L = `<div class="score-hero"><div><div class="score-num">${r.score.toFixed(1)}${starMark}</div><div class="score-sub">range ${r.low.toFixed(0)}–${r.high.toFixed(0)}</div>${orig ? `<div class="score-sub" title="Sam Paech's original slop-score formula on the same text (what Botbooru lists)">original slop score ${orig.upstream.toFixed(1)}</div>` : ''}</div>
-    <div class="score-meta"><span class="band ${band.id}">${esc(band.label || 'Low confidence')}</span>${band.tagline ? `<span class="band-tag">${esc(band.tagline)}</span>` : ''}${band.id !== 'na' ? '<span class="tent" title="Band names and cut-offs are tentative while the scorer is calibrated">tentative</span>' : ''}${pop}
-      <div class="score-cap">${esc(state.card.name || 'This card')} · ${esc(used.join(', ') || 'nothing selected')}</div>
-      ${r.archetype ? `<div class="arch" title="${esc(r.archetype.blurb || '')}"><span class="arch-tag">${esc(r.archetype.label)}</span>${r.archetype.size ? `<span class="arch-size" title="${esc(r.archetype.size.note)}">${esc(r.archetype.size.label)}</span>` : ''}<span class="faint small"> archetype · experimental</span></div>` : ''}</div></div>
+    <div class="score-meta"><span class="band ${band.id}">${esc(band.label || 'Low confidence')}</span>${band.tagline ? `<span class="band-tag">${esc(band.tagline)}</span>` : ''}${pop}
+      ${r.archetype && r.archetype.size ? `<div class="arch"><span class="arch-size" title="${esc(r.archetype.size.note)}">${esc(r.archetype.size.label)}</span></div>` : ''}</div></div>
     ${meter('AI-favored words', r.components.words, `${r.rates.words.toFixed(0)} weighted hits per 1k prose words`)}
     ${meter('AI-favored phrases', r.components.phrases, `${r.rates.phrases.toFixed(1)} weighted bigram/trigram hits per 1k prose words`)}
     ${meter('Sentence structures', r.components.structures, `${r.rates.structures.toFixed(1)} weighted hits per 1k prose words: not-x-but-y, "a hint of…", abstract similes, banter tags…`)}
@@ -273,12 +306,12 @@ function renderResult(r) {
   else if (partTxt.length > 1) L += `<div class="note">Each part alone: ${partTxt.join(' · ')}.</div>`;
   if (r.pulp && band.id !== 'na' && r.pulp.score > 0) {   // nothing to say when no AI-favored word is genre vocabulary
     const P = r.pulp;
-    L += `<div class="sec pulp${P.flag ? ' ' + P.flag : ''}"><h3>Pulp read · experimental</h3>${P.flag ? `<div class="pulp-flag">${esc(P.flagLabel)}</div>` : ''}
+    L += `<div class="sec pulp${P.flag ? ' ' + P.flag : ''}"><h3>Pulp read ${EXP}${UNS}</h3>${P.flag ? `<div class="pulp-flag">${esc(P.flagLabel)}</div>` : ''}
       <div class="small">${Math.round(P.score)}% of the AI-favored word weight is genre vocabulary that human ${esc((r.genre && r.genre.label) || 'genre')} cards use a lot too. Without it: <b>${P.adjusted.toFixed(1)}</b>${P.delta > 0.05 ? ` (−${P.delta.toFixed(1)})` : ''}.</div>
       ${P.words && P.words.length ? `<div>${P.words.slice(0, 12).map(w => `<span class="tag">${esc(w.item || w)}</span>`).join('')}</div>` : ''}
-      <div class="faint small">Not part of the score. The pulp list is small and still being tuned.</div></div>`;
+      <div class="faint small">The pulp list is small and still being tuned.</div></div>`;
   }
-  if (r.tags.length) L += `<div class="sec"><h3>Tags</h3>${r.tags.map(t => `<span class="tag" title="${esc(t.note)}">${esc(t.label)}</span>`).join('')}</div>`;
+  if (r.tags.length) L += `<div class="sec"><h3>Tags ${UNS}</h3>${r.tags.map(t => `<span class="tag" title="${esc(t.note)}">${esc(t.label)}</span>`).join('')}</div>`;
   if (r.artifacts && r.artifacts.hits.length) L += `<div class="alert"><b>Obvious AI tells</b> (+${r.artifacts.points}): the chatbot talking to whoever prompted it.<ul>${r.artifacts.hits.map(x => `<li>${esc(x.label)} ×${x.count}<span class="ex">${x.examples.slice(0, 2).map(esc).join('<br>')}</span></li>`).join('')}</ul></div>`;
   L += saveBox(r);
 
@@ -292,20 +325,32 @@ function renderResult(r) {
   }
   R += compareSection(r);
   const f = r.format.format, g = r.greeting;
-  R += `<div class="sec"><h3>Card</h3>Format: <b>${esc(formatLabel(f))}</b>${formatPop(r.format)}`
-    + (r.peers ? `<div class="faint small">vs 2023 cards in the same format: ${Object.entries(r.peers).filter(([, p]) => p !== null && p !== undefined).map(([k, p]) => `${k} ${p}th pct${p >= 90 ? ' ⚑' : ''}`).join(', ')}</div>` : '')
-    + (g && g.primary !== 'none' ? `<div class="small">Greeting: ${esc((GREETING_FORMATS[g.rp] || [g.rp])[0].toLowerCase())}, ${esc(GREETING_POV[g.pov] || g.pov)}, ${esc(g.tense)} tense${g.endsWithQuestion ? ', ends on a question' : ''}</div>` : '')
-    + (r.genre ? `<div class="small">Genre read: ${esc(r.genre.label)}${r.genre.secondary ? ` + ${esc(r.genre.secondaryLabel)}` : ''} <span class="faint">(keywords and tags, experimental)</span></div>` : '')
-    + (r.type && r.type !== 'single_character' ? `<div class="small">Type: ${esc(r.type.replace('_', ' / '))}</div>` : '') + '</div>';
-  const group = (title, items, blurb) => !items.length ? '' : `<div class="sec"><h3>${title}</h3><span class="faint small">Not scored. ${blurb}</span><ul>${items.map(x => `<li>${esc(x.label)} ×${x.count}${x.examples && x.examples.length ? `<span class="ex">${x.examples.slice(0, 2).map(esc).join('<br>')}</span>` : ''}</li>`).join('')}</ul></div>`;
+  const gl = g ? (GREETING_FORMATS[g.rp] || [g.rp, '']) : null;
+  R += `<div class="sec"><h3>Card details ${UNS}</h3><div class="kv2">`
+    + `<span class="k">Format</span><span><b>${esc(formatLabel(f))}</b>${formatPop(r.format)}`
+    + (r.peers ? `<span class="faint small d-block">vs 2023 cards in the same format: ${Object.entries(r.peers).filter(([, p]) => p !== null && p !== undefined).map(([k, p]) => `${k} ${p}th pct${p >= 90 ? ' ⚑' : ''}`).join(', ')}</span>` : '') + '</span>'
+    + (g && g.primary !== 'none' ? `<span class="k">Greeting</span><span>${hint(gl[0].toLowerCase(), `<b>${esc(gl[0])}</b>: ${esc(gl[1])}`)}, ${hint(GREETING_POV[g.pov] || g.pov, esc(POV_TIP[g.pov] || ''))}, ${hint(g.tense + ' tense', esc(TENSE_TIP[g.tense] || ''))}${g.endsWithQuestion ? ', ends on a question' : ''}</span>` : '')
+    + (r.genre ? `<span class="k">Genre read</span><span>${hint(r.genre.label, `<b>${esc(r.genre.label)}</b>: ${esc(GENRE_TIP[r.genre.primary] || '')} Read from genre words per 1,000 prose words, plus the card's tags.`)}${r.genre.secondary ? ` + ${hint(r.genre.secondaryLabel, `<b>${esc(r.genre.secondaryLabel)}</b>: ${esc(GENRE_TIP[r.genre.secondary] || '')}`)}` : ''} ${EXP}</span>` : '')
+    + (r.type && r.type !== 'single_character' ? `<span class="k">Type</span><span>${esc(r.type.replace('_', ' / '))}</span>` : '') + '</div></div>';
+  // Old-school AI: the register of ChatGPT-era and 2024-era models (js/old-school.js), on the scored text.
+  const OS = oldSchoolTells(r.text);
+  if (OS.level !== 'none') R += `<div class="sec"><h3>Old-school AI ${EXP}${UNS}</h3><div class="small"><b>${OS.level === 'strong' ? 'Reads like an older model' : 'A few older-model habits'}</b>${OS.items ? `: ${OS.items} different checked item${OS.items > 1 ? 's' : ''} (${OS.per1k} per 1k words)` : ''}.</div>`
+    + `<ul>${OS.hits.map(h => `<li${h.checked ? '' : ' class="faint"'}>${esc(h.label)} ×${h.count}<span class="ex">${h.examples.map(esc).join(' · ')}</span></li>`).join('')}</ul>`
+    + `<span class="faint small">The essay and character-sheet register of older models: ChatGPT-era GPT-3.5 / GPT-4 and 2024-era open models (Phi-4, Mistral Small, Gemma 3, Llama 3). Newer models almost never write this way, so it points at older bots, and people use some of it too. Greyed items are from Wikipedia's "Signs of AI writing" list and don't count toward the level: on cards they're as common in 2023 cards as in any model tested.</span></div>`;
+  // Sexual content: every field of the card, alternate greetings and tags, whatever is ticked for scoring.
+  const cc2 = state.card || {}, NS = detectNsfw([cc2.description, cc2.personality, cc2.scenario, cc2.first_mes, cc2.mes_example, ...(cc2.alternate_greetings || [])].filter(Boolean).join('\n\n'), cc2.tags || []);
+  if (NS.level !== 'none' || NS.tagged.length) R += `<div class="sec"><h3>Sexual content ${UNS}</h3><div class="small"><b>${NS.level === 'explicit' ? 'Explicit' : NS.level === 'suggestive' ? 'Suggestive' : 'No sexual wording found'}</b>${NS.level !== 'none' ? `: ${NS.explicit} explicit and ${NS.suggestive} suggestive word${NS.explicit + NS.suggestive > 1 ? 's' : ''}` : ''}${NS.tagged.length ? ` · tagged ${NS.tagged.map(esc).join(', ')}` : ''}.</div>`
+    + (NS.hits.length ? `<div>${NS.hits.slice(0, 12).map(x => `<span class="tag">${esc(x.item)}${x.count > 1 ? ' ×' + x.count : ''}</span>`).join('')}</div>` : '')
+    + `<span class="faint small">Read from every field and greeting, not only the scored ones. It's a word list, so it can miss implied content and trip on words with an everyday sense.</span></div>`;
+  const group = (title, items, blurb) => !items.length ? '' : `<div class="sec"><h3>${title} ${UNS}</h3><span class="faint small">${blurb}</span><ul>${items.map(x => `<li>${esc(x.label)} ×${x.count}${x.examples && x.examples.length ? `<span class="ex">${x.examples.slice(0, 2).map(esc).join('<br>')}</span>` : ''}</li>`).join('')}</ul></div>`;
   if (r.artifacts && r.artifacts.notes && r.artifacts.notes.length) R += group('Worth a look', r.artifacts.notes, 'Drafts and exports produce these too.');
   if (r.cliches && (r.cliches.phraseHits.length || (r.cliches.rpHits || []).length)) {
     const chips = a => a.slice(0, 20).map(x => `<span class="tag">${esc(x.item)}${x.count > 1 ? ' ×' + x.count : ''}</span>`).join('');
     const rp = r.cliches.rpHits || [];
-    R += `<div class="sec"><h3>Shared clichés</h3><span class="faint small">Not scored: humans and models both use these.</span>${r.cliches.phraseHits.length ? `<div>${chips(r.cliches.phraseHits)}</div>` : ''}`
-      + (rp.length ? `<div class="small" style="margin-top:6px"><b>RP slop</b> <span class="faint">(UnslopNemo's list of RP chat clichés, not scored)</span></div><div>${chips(rp)}</div>` : '') + `</div>`;
+    R += `<div class="sec"><h3>Shared clichés ${UNS}</h3><span class="faint small">Humans and models both use these.</span>${r.cliches.phraseHits.length ? `<div>${chips(r.cliches.phraseHits)}</div>` : ''}`
+      + (rp.length ? `<div class="small" style="margin-top:6px"><b>RP slop</b> <span class="faint">(UnslopNemo's list of RP chat clichés)</span></div><div>${chips(rp)}</div>` : '') + `</div>`;
   }
-  if (r.names.length) R += `<div class="sec"><h3>AI-favorite names</h3><span class="faint small">Not scored: characters can have these names too.</span><div>${r.names.map(x => `<span class="tag">${esc(x.item)}</span>`).join('')}</div></div>`;
+  if (r.names.length) R += `<div class="sec"><h3>AI-favorite names ${UNS}</h3><span class="faint small">Characters can have these names too.</span><div>${r.names.map(x => `<span class="tag">${esc(x.item)}</span>`).join('')}</div></div>`;
   R += group('Human tells', r.checks.humanTells || [], 'Mistakes models almost never make.');
   R += group('Craft notes', r.checks.craftNotes || [], 'Card-writing issues anyone can introduce.');
   // Repeated wording: a writing note, not scored. In our data human cards repeat themselves more than AI ones.
@@ -313,20 +358,20 @@ function renderResult(r) {
   const repLine = (label, x, cut) => { if (x && x.per1k >= cut && x.top.length) rep.push(`<li>${label}: ${x.count} repeat${x.count > 1 ? 's' : ''} (${x.per1k}/1k words), e.g. ${x.top.slice(0, 3).map(t => `“${esc(Array.isArray(t) ? t[0] : t)}”${Array.isArray(t) ? ' ×' + t[1] : ''}`).join(', ')}</li>`); };
   repLine('Inside the description', RP.description, 15); repLine('Inside the first message', RP.greeting, 5); repLine('Description and first message share wording', RP.between, 8);
   if (RP.altReuse && RP.altReuse.count) rep.push(`<li class="faint">Alternate greetings reuse ${RP.altReuse.count} phrase${RP.altReuse.count > 1 ? 's' : ''} from the first message (normal when greetings are reworked).</li>`);
-  if (rep.length) R += `<div class="sec"><h3>Repeated wording</h3><span class="faint small">Not scored. Repetition is a writing issue; in our data human cards repeat themselves more often than AI-written ones.</span><ul>${rep.join('')}</ul></div>`;
+  if (rep.length) R += `<div class="sec"><h3>Repeated wording ${UNS}</h3><span class="faint small">Repetition is a writing issue; in our data human cards repeat themselves more often than AI-written ones.</span><ul>${rep.join('')}</ul></div>`;
   if (r.texture && r.texture.paraCv !== null) {
     const lk = r.experimental.aiStyleLikelihood;
-    R += `<div class="sec"><h3>Texture · experimental</h3><span class="small">Paragraph evenness: length CV ${r.texture.paraCv.toFixed(2)} over ${r.texture.paragraphs} paragraphs (2023 human cards ~0.67, AI-written ~0.32; lower = more even).${lk !== null ? ` AI-style likelihood (score + evenness): <b>${Math.round(lk * 100)}%</b>.` : ''} Not scored: careful writers can be even too.</span></div>`;
+    R += `<div class="sec"><h3>Texture ${EXP}${UNS}</h3><span class="small">Paragraph evenness: length CV ${r.texture.paraCv.toFixed(2)} over ${r.texture.paragraphs} paragraphs (2023 human cards ~0.67, AI-written ~0.32; lower = more even).${lk !== null ? ` AI-style likelihood (score + evenness): <b>${Math.round(lk * 100)}%</b>.` : ''} Careful writers can be even too.</span></div>`;
   }
   const nn = nerdStats(r.text);
   const cc = state.card || {}, everything = [cc.description, cc.personality, cc.scenario, cc.first_mes, cc.mes_example, ...(cc.alternate_greetings || [])].filter(Boolean).join('\n\n');
   const nAll = everything && everything !== r.text ? nerdStats(everything) : null;
-  if (nn) R += `<details class="nerd"><summary>Stats for nerds: original slop-score metrics (Sam Paech)</summary><div class="kv">
+  if (nn) R += `<details class="nerd"><summary>Stats for nerds: original slop-score metrics (Sam Paech) ${UNS}</summary><div class="kv">
     <span>Original slop score (scored fields)</span><b>${nn.upstream.toFixed(1)}</b>${nAll ? `<span>Original slop score (every field and every greeting)</span><b>${nAll.upstream.toFixed(1)}</b>` : ''}<span>Slop words per 1k</span><b>${nn.words.toFixed(2)}</b><span>Slop trigrams per 1k</span><b>${nn.trigrams.toFixed(2)}</b>
     <span>Not-x-but-y per 1k chars</span><b>${nn.contrast.toFixed(2)}</b><span>Flesch-Kincaid grade</span><b>${nn.fk.toFixed(1)}</b><span>Words per sentence</span><b>${nn.sentLen.toFixed(1)}</b>
     <span>Words per paragraph</span><b>${nn.paraLen.toFixed(0)}</b><span>Dialogue (quote pairs per 1k chars)</span><b>${nn.dialogue.toFixed(2)}</b><span>MATTR${nn.n >= 500 ? '-500' : ' (TTR, short text)'}</span><b>${nn.mattr.toFixed(3)}</b>
     </div><p class="faint small">On character cards these barely separate human from AI writing; here for curiosity.</p></details>`;
-  el.innerHTML = `<div class="res-head"><h2 class="section">Result</h2><button id="clearResultBtn" class="ghost clear-btn" type="button" title="Clear the result, the loaded card and the text boxes">Clear result</button></div><div class="res-grid"><div>${L}</div><div>${R}</div></div>`;
+  el.innerHTML = `<div class="res-head"><h2 class="section">Result</h2><button id="clearResultBtn" class="ghost clear-btn" type="button" title="Clear the result, the loaded card and the text boxes">Clear result</button></div>${banner}<div class="res-grid"><div>${L}</div><div>${R}</div></div>`;
   $('clearResultBtn').addEventListener('click', clearResult);
   bindSaveBox();
 }
@@ -363,7 +408,7 @@ function compareSection(r) {
   const row = (label, a, b) => `<span class="cmp-l">${label}</span><span>${a}</span><span>${b}</span>`;
   const origWords = (up.wordHits || []).slice(0, 10).map(x => `${esc(x.item)}${x.count > 1 ? ' ×' + x.count : ''}`).join(', ') || 'none';
   return `<details class="sec cmp"${Math.abs(gap) >= 20 ? ' open' : ''}><summary><h3>BBBScorer vs the original slop score</h3>
-      <span class="small">BBBScorer <b>${r.score.toFixed(1)}</b> · original <b>${up.score.toFixed(1)}</b> · ${gap >= 0 ? '+' : '−'}${Math.abs(gap).toFixed(1)}${flag}</span></summary>
+      <span class="small cmp-vals">BBBScorer <b>${r.score.toFixed(1)}</b> · original <b>${up.score.toFixed(1)}</b> · ${gap >= 0 ? '+' : '−'}${Math.abs(gap).toFixed(1)}${flag}</span></summary>
     <div class="cmp-grid small"><span></span><b>BBBScorer</b><b>Original</b>
       ${row('Text', `prose only: ${st.proseWords} of ${st.totalWords} words`, `everything: ${up.tokens} words`)}
       ${partRow(r)}

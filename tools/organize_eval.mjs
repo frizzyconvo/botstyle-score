@@ -4,8 +4,8 @@
 //   eval/ai-cards/      AI cards we generated and the generator's error / invalid logs
 //   eval/inputs/        generation seeds, flattened / cut test sets
 //   eval/experiments/   one-off experiments (eval_cards.mjs, phrase_check.mjs)
-//   eval/scores/v<ver>/ the run for the current scorer only, with its notes.md and comparison with the previous run
-//   eval/old/           superseded: older runs (old/scores/), pre-versioning scores (old/unversioned-scores/),
+//   eval/scores/v<ver>/ the run for the current scorer, plus runs for newer (prepared, opt-in) scorers
+//   eval/old/           superseded: runs for older scorers (old/scores/), pre-versioning scores (old/unversioned-scores/),
 //                       stale backups (old/backups/)
 //
 // Also rewrites the Windows shortcuts in docs/ (not in git) to every doc, via tools/doc_shortcuts.mjs, which can
@@ -56,7 +56,11 @@ for (const src of [EVAL, join(EVAL, 'legacy', 'unversioned-scores')]) for (const
 rmEmpty(join(EVAL, 'legacy', 'unversioned-scores')); rmEmpty(join(EVAL, 'legacy'));
 // 4. superseded runs -> old/scores/; loose comparison files -> the newer run's folder
 if (existsSync(PATHS.scores)) {
-  for (const d of readdirSync(PATHS.scores).filter(d => /^v\d/.test(d) && d.slice(1) !== current)) move(join(PATHS.scores, d), PATHS.oldScores);
+  // Only runs OLDER than the live scorer are superseded. A newer one (a prepared, opt-in scorer such as 0.9.0) stays:
+  // moving it made the next `score-all.cmd --scorer 0.9.0` start again from nothing.
+  const older = v => { const a = v.split('.').map(Number), b = String(current).split('.').map(Number);
+    for (let i = 0; i < Math.max(a.length, b.length); i++) if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) < (b[i] || 0); return false; };
+  for (const d of readdirSync(PATHS.scores).filter(d => /^v\d/.test(d) && current && older(d.slice(1)))) move(join(PATHS.scores, d), PATHS.oldScores);
   for (const f of readdirSync(PATHS.scores).filter(f => /^compare-.*\.txt$/.test(f))) {
     const m = f.match(/^compare-v?([\d.]+)-v?([\d.]+)\.txt$/); const target = m && runDirs().find(r => r.version === m[2]);
     if (target) move(join(PATHS.scores, f), target.dir, `compare-v${m[1]}.txt`);

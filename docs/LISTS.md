@@ -30,6 +30,8 @@ Four kinds of source, kept apart so each can be redone or replaced on its own te
 | Shared clichés | 1 + 4 | Entries our builder dropped from the scored lists because human writers use them too, plus SloppySeconds patterns that failed the test | Unscored |
 | RP slop | 2 | TheDrummer's UnslopNemo target list, unchanged | Unscored |
 | Pulp words | 1 | Our card sets: scored words human genre cards use as often as AI cards | Unscored read-out |
+| Old-school AI items | 3 + 1 | Wikipedia's "Signs of AI writing" guide plus stock character-sheet lines, each checked against 2023 cards and our generated cards; only those older models use 2.5×+ as often as 2023 cards count | Unscored read-out |
+| Sexual-content words | 1 | Written for this tool; checked by hand against JanitorAI cards with and without the NSFW flag | Unscored read-out |
 | Scale anchor, reference, format peers, length cut-offs | 1 | Our scoring runs over the card sets (length cut-offs: provisional, from a sample) | Calibration |
 | Original slop-score lists | 2 | sam-paech/slop-score, unchanged | The original score only |
 | Typo dictionary | 2 | word-list (MIT) | Typo read-out |
@@ -85,6 +87,29 @@ Entries of two letters or fewer ("wi" from Wi-Fi, "ai") and the junk set in `JUN
 | Reference percentiles | `data/botstyle_reference.json` | | `tools/build_reference.mjs` | The ⓘ next to the score, bands in "How it works" |
 | Extra dictionary (typo check) | `data/extra_words.txt` | | from the word-list package (MIT) | Rare real words the typo check shouldn't flag |
 | Original slop-score lists | `data/slop_list*.json` | | upstream, unchanged | The original slop score only |
+| Old-school AI items | `js/old-school.js` (in code) | 5 checked groups, 2 listed groups | hand-written regexes, checked on the 0.9.0 evaluation sample (see below) | Old-school AI read-out |
+| Sexual-content words | `js/nsfw.js` (in code) | explicit and suggestive lists, plus context filters | hand-written | Sexual-content read-out |
+
+**Old-school AI check** (2026-10-28, cards with 150+ words; in-sample, since the items were picked on the same cards).
+Share of cards reading "some" or "strong":
+
+| Set | Cards | some or strong | strong |
+|---|---|---|---|
+| Korshuk, Feb–Apr 2023 | 695 | 0.6% | 0.0% |
+| Chub, before Jul 2023 | 1,683 | 5.7% | 2.7% |
+| JanitorAI, May 2023–Feb 2024 | 17,675 | 3.1% | 1.0% |
+| SPB-2602 (Kimi, GLM) | 594 | 0.3% | 0.0% |
+| Our cards from older models (Phi-4, Mistral Small, Gemma 3, Llama 3.x, Euryale, Hermes, Maverick, GPT-4o, Gemini 2.5) | 911 | 15.9% | 5.2% |
+| Our cards from newer models (GPT-5/6, Claude 4.5+, GLM 5, Kimi K2, Gemini 3, DeepSeek V4) | 427 | 0.5% | 0.0% |
+
+Wikipedia's essay transitions ("Furthermore,", "Moreover,", "Overall,", "Additionally,") and items such as "plays a
+crucial role", "fostering" and "showcased" turned up in 2023 cards but in none of the models we could test, so they're
+listed, not counted. They may be GPT-3.5's own habits (we have no GPT-3.5 cards yet) or simply human essay style.
+
+**Sexual-content check** (all 188,834 JanitorAI cards with 60+ words). JanitorAI's NSFW flag means "NSFW allowed", not
+"has sexual content", so it isn't a label: flagged cards read 44% explicit, 16% suggestive, 40% none; unflagged cards 21%
+explicit, 13% suggestive, 66% none. Read by hand, nearly all unflagged "explicit" cards do have explicit wording; the
+misses left are rules that only say "sex" and "sexual" ("no sexual content").
 
 ## History
 
@@ -92,6 +117,7 @@ Newest first. Scorer versions in brackets.
 
 | Date | List | Change | Why |
 |---|---|---|---|
+| 2026-10-28 (app 0.23.0) | Old-school AI items, sexual-content words | First added, as unscored read-outs | Requested: a read for older (ChatGPT-era) bots the fiction-built lists miss, and a sexual-content read |
 | 2026-10-28 (0.9.0, prepared) | Card-mined lists | First built: 217 words, 31 two-word phrases from 2,258 generated cards (162 and 27 not in the story lists) | The story lists come from 22 models' stories; card writing has its own habits ("fiercely loyal", "tilts her head", "leather-bound") |
 | 2026-10-28 (0.9.0, prepared) | Sentence structures | found_herself, it_was_as_if, hung_heavy, felt_a_surge, unspoken, not_just_shes off | Rechecked on cards: no separation, or they lean human |
 | 2026-10-28 (0.9.0, prepared) | Pulp words | Count at half weight in the score (were read-out only) | Raised AUC on cards (0.862 → 0.866 on its own) |
