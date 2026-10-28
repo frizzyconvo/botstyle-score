@@ -15,6 +15,71 @@ http://localhost:8787/. Paste a Chub or Botbooru link, upload card PNG/JSON file
 versioned, for regression checks): `npm run score-all`, then `npm run leaderboard` and `npm run reference`.
 Every tool takes `--help`. Local-only helper scripts go in `dev/` (not committed).
 
+---
+
+# How BBBScorer differs from slop-score
+
+## Purpose and input
+
+* What it scores: slop-score ranks models on long essays and stories. BBBScorer gives one score for one card: its description and greetings, with alternate greetings optional.
+* Getting the card in: it takes Chub and Botbooru links, V1/V2/V3 and Pygmalion JSON, and card PNGs. There’s a field picker for choosing which parts count.
+* Prose only: W++, PLists, key-value blocks, bullets, headers and pasted jailbreaks are counted and shown but left out of the score.
+
+## How the word and phrase lists are built
+
+* Weighting: upstream ranks words by how often AI uses them compared with general English, and ranks phrases only by how often AI uses them. BBBScorer weights every word, two-word and three-word phrase by how often AI fiction uses it compared with human fiction.
+* Source text: it uses creative-writing prompts only. Words tied to the prompt’s topic, number phrases and character names are dropped, so a card named Elara isn’t penalised every time her name comes up.
+* Matching: upstream’s matching meant many three-word phrases could never fire. BBBScorer matches with contractions split the same way as when the lists were built, and doesn’t count a two-word phrase again when it sits inside a matched three-word one.
+* Repeats: a phrase used k times counts w × (1 + ln k) rather than once per hit.
+
+## How the score is put together
+
+* Normalising: upstream stretches scores between the averages of its 23 leaderboard models, so a single three-word phrase could cost a human writer about 13 points. BBBScorer compares rates with the 90th percentile of 700-word chunks of AI fiction, and one hit now costs about 3 points.
+* Third part of the score: upstream’s 15% was three-word phrases. Here it’s sentence structures: “not X but Y” plus 24 patterns (“a flicker of”, “the air was thick”, “a mix of X and Y”…). Each pattern was kept only if it separated human from AI text in both test sets.
+* Extras: em-dashes add up to 6 points. Clear chatbot leftovers (preambles, sign-offs, refusals, chat-template tokens) add 25 each, up to 50.
+* Read-outs: there’s an uncertainty range and a low-confidence warning under 150 words of prose. Human tells, craft notes, AI-favourite names, card format, genre, pulp score, archetype and texture are shown but not scored.
+* Bands: the 35/50 bands were set from about 118k human cards and 1,005 AI cards.
+
+## Results on the shared test sets
+
+* SlopReview: AUC 0.930 → 0.977. Humans flagged above 25 dropped from 9.9% to 2.6%.
+* Gutenberg antislop-DPO: AUC 0.973 → 0.996. Humans flagged above 25 dropped from 2.5% to 0.1%.
+
+## Datasets
+
+* For building and testing the lists:
+  * SlopReview (DrRiceIO7): Reddit WritingPrompts stories against stories from about 22 models. It’s the main test set, but optimistic.
+  * Gutenberg antislop-DPO (sam-paech): the independent test.
+  * Upstream’s results/ outputs from 22 models.
+  * Nitral-AI’s slop-forensics profile of human Reddit writing, used as the human side of the weighting.
+* Human and mixed cards:
+  * Korshuk: the cleanest human pool, mostly W++.
+  * AUTOMATIC/jaicards: 188k JanitorAI cards. Used for the 2023 baseline, the trends over time and by tag, and as seeds for generating cards.
+  * raincandy-u Chub cards: dated 2023–2026, so they show the change over time.
+  * Perchance: a modern mixed set, not treated as human.
+* AI cards:
+  * SPB-2602 (marcodsn): Kimi and GLM personas.
+  * Foreverse’s character-card-skills example cards: AI cards written to avoid AI flavour, used as hard cases.
+* Generated cards
+  * Claude, GPT, DeepSeek, Kimi, GLM, Llama, Mistral, TheDrummer, Sao10k, Anthracite, Nous, MythoMax. The generator has a rewrite mode for human text an AI has reworded.
+
+## Outside references
+
+* pixelnull’s SloppySeconds list: a source for several sentence patterns.
+* TheDrummer’s UnslopNemo list of 65 target phrases, checked against cards with phrase_check.
+* Foreverse’s character-card-skills: their scoring rubric, card categories, and a blind test where AI judges mostly got human vs AI backwards. That test is part of why BBBScorer calls itself not an AI detector.
+* The ARB paper (arXiv 2607.29539): its finding that detectors fail on human text an AI has reworded led to the generator’s rewrite mode.
+* From upstream: the wordfreq port, plus the local part-of-speech tagger, now also usable from Node scripts.
+
+## Tooling upstream doesn’t have
+
+* Scoring runs: versioned overnight scoring that resumes where it stopped, and regression checks between scorer versions.
+* Reference and leaderboard: builders for the human-card reference and the card leaderboard, plus the calibration script.
+* Generation: the card generator, with a cost cap and retries.
+* Word lists: the pulp word-list builder and the phrase checker.
+
+---
+
 The original slop-score README follows for reference.
 
 ---
