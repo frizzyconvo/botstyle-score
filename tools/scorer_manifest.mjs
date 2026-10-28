@@ -63,7 +63,7 @@ function manifest(ref) {   // ref = null -> working tree
     mixed: /MIXED_GAP/.test(sc) ? `flag when both parts ≥ ${m(sc, /MIXED_MIN_WORDS = (\d+)/)} prose words and ≥ ${m(sc, /MIXED_GAP = (\d+)/)} points apart` : 'none',
     dialogue: /subkind: speech \? 'dialogue'|subkind === 'dialogue'|'dialogue'/.test(read('js/card-preprocess.js') || '') ? 'in-character dialogue counted as prose' : 'labeled/bulleted dialogue lines dropped as lists',
     structures: { contrast: 'not-x-but-y', patterns: patterns.map(p => ({ ...p, off: disabled.includes(p.id) })) },
-    lists: ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_names.json', 'botstyle_pulp_words.json', 'botstyle_card_drop.json', 'botstyle_calibration.json', 'botstyle_reference.json', 'botstyle_length_bands.json'].map(listInfo).filter(Boolean),
+    lists: ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_names.json', 'botstyle_pulp_words.json', 'botstyle_calibration.json', 'botstyle_reference.json', 'botstyle_length_bands.json'].map(listInfo).filter(Boolean),
     changelog,
   };
 }

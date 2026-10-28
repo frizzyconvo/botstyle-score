@@ -106,8 +106,9 @@ export async function loadWordfreq() {
   }
 }
 
-export async function loadHumanProfile() {
-  const res = await fetch("./data/human_writing_profile.json");
+// Used only by upstream/generate-leaderboard.mjs; the profile isn't in data/ any more (see upstream/README.md).
+export async function loadHumanProfile(path = "./data/human_writing_profile.json") {
+  const res = await fetch(path);
   if (!res.ok) throw new Error("human_writing_profile.json missing");
   const j = await res.json();
   const hp = j["human-authored"] || j["human"] || j;

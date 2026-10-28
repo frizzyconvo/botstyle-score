@@ -383,6 +383,12 @@ the same link sit in a fold under the newest one.
 On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 29% of AI-written cards and the original
 slop score 20%.
 
+**Cards of known provenance** (18 so far: creator-stated, plus a few suspected). All 4 hand-written cards land in
+Original-ish (7–23). All 9 cards their creators say were written with ChatGPT or DeepSeek land in Mixed or Common (48–78).
+Of the 4 partly AI-written cards, the AI-edited one scores 50 (Mixed), but the two whose creators give 60% AI score 20 and
+31 and the 30% one 7: much of their AI-written profiles is lists and key-value lines, which aren't scored, and their
+hand-written greetings score low. Too few cards for rates yet; the set is growing.
+
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
 and Chub, 2023) against AI personas (SPB-2602) and cards generated for this project. The 2023 side includes some

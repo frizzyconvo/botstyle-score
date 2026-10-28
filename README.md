@@ -76,6 +76,9 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
   what it changes and how it tested is in [docs/TODO.md](docs/TODO.md).
 - **Score only new cards** in a dataset (what the card generator runs after each round, for the live scorer and the prepared next one): `npm run score-all --
   --only generated_v2`. Cards already scored by this scorer version keep their rows.
+- **Provenance set:** cards of known or suspected authorship go in `card-datasets/provenance-split-dataset/`, each
+  with a row in its `provenance.csv` (provenance human / ai / mixed, confidence confirmed / suspected, AI share, which
+  parts AI wrote, evidence). `npm run score-all -- --only provenance` scores them; see `tools/_provenance.mjs`.
 - **Score cards at any path** (a folder of card PNG/JSON files, a Perchance characters folder, a .zip, optionally
   with a folder or pattern inside it, or one card file): `npm run score-path -- "<path>" --name <short name>`
   (`--label ai|human|mixed|unknown`). Only scores are written, to `eval/scores/v<version>/<name>.jsonl` with a section

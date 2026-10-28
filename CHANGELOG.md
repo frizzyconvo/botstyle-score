@@ -6,6 +6,28 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.24.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- **Provenance set** (`tools/_provenance.mjs`): a scoring dataset of cards whose authorship is known or suspected,
+  labeled in a `provenance.csv` manifest next to the cards: provenance (human / ai / mixed), confidence (confirmed /
+  suspected), the AI share and which parts AI wrote when the creator says, the model, source and evidence. Scored like
+  the other datasets, with the labels stored on each row. `node tools/_provenance.mjs --check` lists cards missing from
+  the manifest.
+- Scoring rows carry a **fingerprint** of the scorer's settings and scored lists. A dataset scored with other settings
+  under the same version number is scored again instead of being kept (a prepared version can change between runs).
+- Generated cards carry the tags of the human card they were made from, as a creator would tag them. Tags only feed the
+  genre and card-type read-outs.
+
+### Changed
+- Batch scoring loads the typo dictionary like the page does, so typo-based human tells match the page.
+
+### Removed
+- `tools/card_calibrate.mjs` and the page's attempt to load the word-drop list it wrote (the list hasn't existed since
+  0.5.0; the request failed on every page load).
+
 ## [0.23.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.

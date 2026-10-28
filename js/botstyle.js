@@ -75,9 +75,6 @@ export async function loadBotstyle(base = './data/') {
   const toMap = rows => new Map(rows.map(r => [r[0], r[1]]));
   const [w, b, t] = await Promise.all([get('botstyle_words.json'), get('botstyle_bigrams.json'), get('botstyle_trigrams.json')]);
   lists = { words: toMap(w), bigrams: toMap(b), trigrams: toMap(t) };
-  // Optional card calibration (tools/card_calibrate.mjs): words human cards use at least as often
-  // as AI cards (genre vocabulary like "realm", "legendary") are not scored. Absent = full list.
-  try { const drop = await get('botstyle_card_drop.json'); for (const k of Object.keys(drop.words || {})) lists.words.delete(k); lists.cardDrop = Object.keys(drop.words || {}).length; } catch { /* no drop list */ }
   try { calibration = await get('botstyle_calibration.json'); } catch { calibration = null; }
   try { peers = await get('botstyle_peers.json'); } catch { peers = null; }
   try { names = new Set((await get('botstyle_names.json')).map(r => r[0])); } catch { names = null; }

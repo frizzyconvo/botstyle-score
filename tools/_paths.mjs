@@ -23,6 +23,7 @@ export const PATHS = {
   aiCardsV2: cards('ai_cards_v2.jsonl'),
   // other inputs: generation seeds, flattened/cut test sets
   seeds: first(E('inputs', 'seeds_jai_2023h1.jsonl'), E('seeds_jai_2023h1.jsonl')),
+  seedsWide: E('inputs', 'seeds_wide.jsonl'),
   gutenberg600: first(E('inputs', 'gutenberg_eval_600w.jsonl'), E('gutenberg_eval_600w.jsonl')),
   // experiments (eval_cards.mjs, phrase_check.mjs)
   sample: first(E('experiments', 'eval_sample.jsonl'), E('eval_sample.jsonl')),

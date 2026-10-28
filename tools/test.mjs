@@ -236,5 +236,12 @@ check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zB
   check('old-school: Wikipedia-only items are listed but do not count', wiki.level === 'none' && wiki.hits.length > 0 && wiki.hits.every(h => !h.checked));
 }
 
+// provenance manifest: CSV with quotes, commas and newlines inside fields
+{
+  const { parseCsv } = await import('./_provenance.mjs');
+  const rows = parseCsv('\uFEFFfile,provenance,notes\r\na.json,ai,"says ""60%"", AI"\nb.json,human,"two\nlines"\n');
+  check('provenance csv parses quotes and newlines', rows.length === 2 && rows[0].notes === 'says "60%", AI' && rows[1].notes === 'two\nlines' && rows[1].provenance === 'human' && rows[0].file === 'a.json', JSON.stringify(rows));
+}
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

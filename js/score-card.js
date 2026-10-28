@@ -1,5 +1,5 @@
 // score-card.js - One call that runs the whole botstyle pipeline on a character card.
-// Used by slop-score.html, tools/score_cards.mjs, and meant for platforms embedding
+// Used by the page (js/app.js), the scoring tools (tools/score_all.mjs and others), and meant for platforms embedding
 // the scorer. Works in the browser and in Node (the contrast detector's stage-2 POS
 // patterns only run if a tagger is available; see pos-tagger.js / setPosTagger()).
 //

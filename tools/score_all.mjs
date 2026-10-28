@@ -32,13 +32,15 @@
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
 import { PATHS } from './_paths.mjs';
+import { provenanceCards, PROVENANCE_DIR } from './_provenance.mjs';
 import { readCards, sourceKind } from './_card_sources.mjs';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, renameSync, openSync, readSync, closeSync, writeSync, appendFileSync, unlinkSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { loadAll, scoreCard } from '../js/score-card.js';
-import { setScorerProfile, scorerVersion } from '../js/scorer-profile.js';
+import { setScorerProfile, scorerVersion, scorerProfile } from '../js/scorer-profile.js';
+import { createHash } from 'crypto';
 import { setPosTagger } from '../js/pos-tagger.js';
 import { formatLabel } from '../js/card-style.js';
 import { disparity, DISPARITY } from '../js/compare-original.js';
@@ -49,7 +51,8 @@ import { scoreText as scoreContrast } from '../js/contrast-detector.js';
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const CARDS = process.env.BOTSTYLE_CARDS ? resolve(process.env.BOTSTYLE_CARDS) : resolve(ROOT, '..', 'card-datasets');
 const require = createRequire(import.meta.url);
-globalThis.fetch = async u => ({ ok: true, json: async () => JSON.parse(readFileSync(join(ROOT, u.replace(/^\.\//, '')), 'utf-8')) });
+// File-backed fetch for the scorer's loaders; text() too, so the typo dictionary (data/extra_words.txt) loads as on the page.
+globalThis.fetch = async u => { const p = join(ROOT, u.replace(/^\.\//, '')); return { ok: existsSync(p), json: async () => JSON.parse(readFileSync(p, 'utf-8')), text: async () => readFileSync(p, 'utf-8') }; };
 await loadAll('./data/'); await loadSlopSets(); setPosTagger(require('wink-pos-tagger')());
 // The original slop-score formula, for comparison (same normalization as the upstream leaderboard).
 const LB = JSON.parse(readFileSync(join(ROOT, 'data', 'leaderboard_results.json'), 'utf-8')).results;
@@ -71,6 +74,13 @@ const opt = k => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : null);
 // --scorer 0.9.0: score with the prepared next version (its own folder, eval/scores/v0.9.0/). Default: 0.8.1.
 if (opt('--scorer')) setScorerProfile(opt('--scorer'));
 const SCORER_VERSION = scorerVersion();
+// Fingerprint of what decides the scores besides the code version: the profile's switches and every scored data file.
+// A prepared version can change (0.9.0 gained card-mined lists after its first run started), so rows carry `fp` and
+// rows from another fingerprint are scored again instead of being kept.
+const FP = (() => { const h = createHash('sha1'); h.update(JSON.stringify(scorerProfile()));
+  for (const f of ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_calibration.json', 'botstyle_pulp_words.json', 'botstyle_card_lists.json', 'botstyle_length_bands.json', 'botstyle_card_drop.json']) {
+    const p = join(ROOT, 'data', f); h.update(f + ':' + (existsSync(p) ? createHash('sha1').update(readFileSync(p)).digest('hex') : 'none')); }
+  return h.digest('hex').slice(0, 10); })();
 let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force') || argv.includes('--rescore');
 // --limit trial runs go to a _trial subfolder so they never count as a finished dataset
 const OUT = join(ROOT, 'eval', 'scores', 'v' + SCORER_VERSION, ...(LIMIT ? ['_trial'] : []));
@@ -106,9 +116,16 @@ function* jsonlStream(p) {   // reads in 4 MB chunks, so the ~1 GB JanitorAI cac
     if (rest.trim()) yield JSON.parse(rest);
   } finally { closeSync(fd); }
 }
+// Generated cards carry the tags of the human card they were made from (seed_tags, or looked up by seed_id), as a
+// creator would tag a card they had written with AI. Tags only feed read-outs (genre, card type), never the score.
+let SEED_TAGS = null;
+function* withSeedTags(rows) {
+  if (!SEED_TAGS) { SEED_TAGS = new Map(); for (const f of [PATHS.seeds, PATHS.seedsWide]) if (f && existsSync(f)) for (const l of readFileSync(f, 'utf-8').split('\n')) { try { const r = l && JSON.parse(l); if (r && r.id != null && r.tags) SEED_TAGS.set(String(r.id), r.tags); } catch { /* skip */ } } }
+  for (const r of rows) yield r.tags || r.seed_tags || !r.seed_id ? { ...r, tags: r.tags || r.seed_tags } : { ...r, tags: SEED_TAGS.get(String(r.seed_id)) };
+}
 const tagsOf = t => Array.isArray(t) ? t : typeof t === 'string' ? (t.match(/[^\[\]",']+/g) || []).map(x => x.trim()).filter(Boolean) : [];
 const card = r => ({ id: r.id, name: r.name || r.card_name || '', createdAt: r.createdAt || r.created_at || null, description: r.description || '', personality: r.personality || '',
-  scenario: r.scenario || '', first_mes: r.first_mes || '', tags: tagsOf(r.tags || r.topics) });
+  scenario: r.scenario || '', first_mes: r.first_mes || '', tags: tagsOf(r.tags || r.topics), prov: r.prov });
 
 // ---- JanitorAI: flatten the per-card files once into a cache ----
 function jaicardsCache() {
@@ -166,10 +183,12 @@ const DATASETS = [
   { name: 'spb_ai', label: 'ai', rows: function* () { let i = 0; for (const r of jsonlStream(join(CARDS, 'spb-2602-ai-personas', 'data.jsonl'))) yield { id: 'spb/' + i++, description: r.persona_text }; }, need: join(CARDS, 'spb-2602-ai-personas', 'data.jsonl') },
   { name: 'example_cards', label: 'example', rows: () => cardFiles(join(CARDS, 'example-cards'), f => /\.json$/i.test(f)) },
   { name: 'foreverse_ai', label: 'ai', rows: () => cardFiles(resolve(ROOT, '..', 'character-card-skills', 'cards', 'en'), f => /\.v2\.json$/i.test(f)) },
-  { name: 'generated_v1', label: 'ai', rows: () => jsonlStream(PATHS.aiCardsV1), need: PATHS.aiCardsV1,
+  { name: 'generated_v1', label: 'ai', rows: () => withSeedTags(jsonlStream(PATHS.aiCardsV1)), need: PATHS.aiCardsV1,
     skip: (() => { try { return new Set(JSON.parse(readFileSync(PATHS.aiCardsV1Invalid, 'utf-8'))); } catch { return new Set(); } })() },
-  { name: 'generated_v2', label: 'ai', rows: () => jsonlStream(PATHS.aiCardsV2), need: PATHS.aiCardsV2 },
-  { name: 'jaicards', label: 'human', rows: null },   // filled in below (needs the cache)
+  { name: 'generated_v2', label: 'ai', rows: () => withSeedTags(jsonlStream(PATHS.aiCardsV2)), need: PATHS.aiCardsV2 },
+  { name: 'jaicards', label: 'human', rows: null },
+  // Cards of known or suspected provenance (tools/_provenance.mjs): label per card from provenance.csv.
+  { name: 'provenance', label: r => r.prov ? r.prov.provenance : 'unknown', rows: () => provenanceCards(), need: join(PROVENANCE_DIR, 'provenance.csv') },   // filled in below (needs the cache)
 ];
 
 // ---- extra datasets: any path the user points at (--add), remembered in eval/extra-datasets.json ----
@@ -242,7 +261,7 @@ const summary = existsSync(join(OUT, 'summary.json')) ? JSON.parse(readFileSync(
 // Record exactly which scorer this run used (weights, lists, anchors, bands) next to its results.
 if (!LIMIT) { try { const { spawnSync } = await import('child_process'); spawnSync(process.execPath, [join(ROOT, 'tools', 'scorer_manifest.mjs'), ...(opt('--scorer') ? ['--scorer', opt('--scorer')] : [])], { cwd: ROOT, stdio: 'ignore' }); } catch { /* manifest is optional */ } }
 const todo = DATASETS.filter(ds => !ONLY || ONLY.includes(ds.name));
-say(`BBBScorer ${SCORER_VERSION}: ${todo.length} dataset(s) -> ${OUT}`);
+say(`BBBScorer ${SCORER_VERSION} (fingerprint ${FP}): ${todo.length} dataset(s) -> ${OUT}`);
 let dsIndex = 0;
 for (const ds of DATASETS) {
   if (ONLY && !ONLY.includes(ds.name)) continue;
@@ -252,7 +271,10 @@ for (const ds of DATASETS) {
   const partial = outFile + '.partial';
   if (FORCE || LIMIT) { try { unlinkSync(partial); } catch { /* none */ } }
   const resumeFrom = FORCE || LIMIT ? null : existsSync(outFile) ? outFile : existsSync(partial) ? partial : null;
-  const kept = resumeFrom ? readFileSync(resumeFrom, 'utf-8').split('\n').flatMap(l => { try { return l ? [JSON.parse(l)] : []; } catch { return []; } }).filter(x => !x.error) : null;   // a checkpoint's last line may be cut off
+  const read = resumeFrom ? readFileSync(resumeFrom, 'utf-8').split('\n').flatMap(l => { try { return l ? [JSON.parse(l)] : []; } catch { return []; } }).filter(x => !x.error) : null;   // a checkpoint's last line may be cut off
+  // Rows scored with other lists or settings (another fingerprint) are scored again; rows from before fingerprints existed are kept.
+  const kept = read ? read.filter(x => !x.fp || x.fp === FP) : null;
+  if (read && kept.length < read.length) say(`${ds.name}: ${(read.length - kept.length).toLocaleString()} row(s) were scored with other lists or settings (fingerprint changed): scoring them again`);
   const keptIds = kept ? new Set(kept.map(x => x.id)) : null;
   if (resumeFrom === partial) say(`${ds.name}: resuming a stopped run (${kept.length.toLocaleString()} cards already scored)`);
   if (ds.name === 'jaicards') { const c = await jaicardsCache(); if (!c) { console.log('jaicards: not found, skipped'); continue; } ds.rows = () => jsonlStream(c); }
@@ -272,7 +294,7 @@ for (const ds of DATASETS) {
     try { r = scoreCard(c); } catch (e) { rows.push({ id: c.id, dataset: ds.name, version: SCORER_VERSION, error: e.message }); continue; }
     const up = upstreamParts(r.text), disp = disparity(r, up);
     rows.push({ id: c.id, name: String(c.name || '').slice(0, 60), dataset: ds.name, label: typeof ds.label === 'function' ? ds.label(c) : ds.label, createdAt: c.createdAt, model: raw.model, mode: raw.mode, style: raw.style_requested, round: raw.round,
-      version: r.version, score: +r.score.toFixed(2), upstream: up ? up.score : null, upstreamParts: up, disparity: disp,
+      version: r.version, fp: FP, score: +r.score.toFixed(2), upstream: up ? up.score : null, upstreamParts: up, disparity: disp,
       desc: r.parts.description ? r.parts.description.score : null, greet: r.parts.greeting ? r.parts.greeting.score : null, joint: +r.joint.score.toFixed(2), mixed: r.mixed,
       repeats: { desc: r.repetition.description.per1k, greet: r.repetition.greeting.per1k, between: r.repetition.between.per1k }, low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,
       proseWords: r.stats.proseWords, totalWords: r.stats.totalWords, format: r.format.format, greeting: r.greeting ? r.greeting.primary : null, type: r.type,
@@ -280,7 +302,7 @@ for (const ds of DATASETS) {
       paraCv: r.texture.paraCv === null ? null : +r.texture.paraCv.toFixed(3), aiStyleLikelihood: r.experimental.aiStyleLikelihood === null ? null : +r.experimental.aiStyleLikelihood.toFixed(3),
       tags: r.tags.map(t => t.id), genre: r.genre.primary, genre2: r.genre.secondary, archetype: r.archetype.id,
       pulp: r.pulp ? r.pulp.score : null, pulpAdjusted: r.pulp ? r.pulp.adjusted : null, pulpFlag: r.pulp ? r.pulp.flag : null,
-      rpSlop: r.cliches && r.cliches.rpHits ? r.cliches.rpHits.reduce((a, x) => a + x.count, 0) : null, temperature: raw.temperature ?? undefined });
+      rpSlop: r.cliches && r.cliches.rpHits ? r.cliches.rpHits.reduce((a, x) => a + x.count, 0) : null, temperature: raw.temperature ?? undefined, prov: c.prov || undefined });
     totalWords += r.stats.totalWords || 0;
     if (Date.now() - lastSay > 15000) {
       lastSay = Date.now(); touchLock();
@@ -292,7 +314,7 @@ for (const ds of DATASETS) {
   const scoredNow = rows.length;
   if (kept) {
     const gone = kept.filter(x => !stillThere.has(x.id)).length;   // cards since marked invalid or removed from the source
-    if (!scoredNow && !gone && resumeFrom === outFile) { say(`[${dsIndex}/${todo.length}] ${ds.name}: no new cards (${kept.length.toLocaleString()} already scored)`); continue; }
+    if (!scoredNow && !gone && resumeFrom === outFile && kept.length === read.length) { say(`[${dsIndex}/${todo.length}] ${ds.name}: no new cards (${kept.length.toLocaleString()} already scored)`); continue; }
     rows.unshift(...kept.filter(x => stillThere.has(x.id)));
     if (gone) say(`  dropped ${gone} row(s) whose cards are no longer valid in the source`);
   }
@@ -302,7 +324,7 @@ for (const ds of DATASETS) {
   const bands = {}; for (const x of rows) if (!x.error) bands[x.band] = (bands[x.band] || 0) + 1;
   const byYear = {}; for (const x of ok) { const y = String(x.createdAt || '').slice(0, 4) || 'undated'; (byYear[y] = byYear[y] || []).push(x.score); }
   summary.datasets[ds.name] = { n: rows.length, reliable: ok.length, errors: rows.filter(x => x.error).length, median: median(ok.map(x => x.score)), bands,
-    byYear: Object.fromEntries(Object.entries(byYear).sort().map(([y, v]) => [y, { n: v.length, median: median(v) }])), limit: LIMIT || undefined, at: new Date().toISOString() };
+    byYear: Object.fromEntries(Object.entries(byYear).sort().map(([y, v]) => [y, { n: v.length, median: median(v) }])), fp: FP, limit: LIMIT || undefined, at: new Date().toISOString() };
   writeFileSync(join(OUT, 'summary.json'), JSON.stringify(summary, null, 1));
   writeNotes(ds.name, rows);
   // performance log: one line per dataset run (eval/scores/v<version>/run-log.jsonl)

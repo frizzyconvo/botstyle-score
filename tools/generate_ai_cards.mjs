@@ -394,7 +394,7 @@ async function worker() {
       if (cost) { spent += cost; spentBy[j.model] = (spentBy[j.model] || 0) + cost; }
       appendFileSync(OUT, JSON.stringify({
         id: j.id, round: j.round || 1, createdAt: 'generated', model: j.model, temperature: TEMP, ...(MIN_P !== null ? { min_p: MIN_P } : {}), mode: j.mode, variant: j.variant, style_requested: j.format, k: j.k,
-        seed_id: j.seed.id, seed_name: j.seed.name || j.seed.card_name, prompt: j.prompt,
+        seed_id: j.seed.id, seed_name: j.seed.name || j.seed.card_name, seed_tags: Array.isArray(j.seed.tags) ? j.seed.tags : undefined, prompt: j.prompt,
         description: parts.description, first_mes: parts.first_mes, preamble: parts.preamble, postscript: parts.postscript,
         raw: res.text, finish_reason: res.finish, usage: res.usage, cost, provider: res.provider, gen_id: res.gen_id,
         at: new Date().toISOString(), elapsed_ms: Date.now() - t0, out_words: (res.text.match(/[A-Za-z']+/g) || []).length,
