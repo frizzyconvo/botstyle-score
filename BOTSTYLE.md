@@ -299,12 +299,18 @@ Only these plain requests are ranked. Each model's report (click a row) also sho
 
 On each row: the bar is the middle half of that set's cards, the line is the median, the big number is the
 BBBScorer median and "orig" the original slop-score median. Under each model: **styles** = the lowest to highest
-median across its request styles (lazy prompt aside), and **lazy** = its lazy-prompt median. **n** = cards in
-the set; **\*** = fewer than 20 cards, so a rough guess. Sort by BBBScorer median, original slop-score median, or
-card count.
+median across its request styles (lazy prompt aside), and **lazy** = its lazy-prompt median. Under each card set:
+its dates. **n** = cards in the set; **\*** = fewer than 20 cards, so a rough guess. Sort by BBBScorer median,
+original slop-score median, or number of cards (**# cards**).
 
-**Pending, not ranked:** UnslopNemo and its base, Mistral Nemo. UnslopNemo was tuned to strip stock phrasing from
-RP chat replies, not to write cards, so ranking it here isn't fair yet.
+**Just for fun, not ranked:**
+- UnslopNemo and its base, Mistral Nemo. UnslopNemo was tuned to strip stock phrasing from RP chat replies, not to
+  write cards, so ranking it here isn't fair.
+- Extra card sets of unknown origin (human, AI or both): Perchance cards (NSFW) and Someone's SillyTavern Archive
+  (undated).
+- **Failed** models, shown with a hatched red background: most of their cards failed the format checks, so the
+  usable rest isn't a fair sample. MythoMax (ignores the output format), Hermes 3 70B (loops until cut off) and
+  Aion RP (about 40% of its cards fail). The card generator skips them unless told otherwise.
 
 **Reference card sets:** real card sets scored with the same version.
 
@@ -315,7 +321,7 @@ RP chat replies, not to write cards, so ranking it here isn't fair yet.
 | JanitorAI cards, Jul 2023–Feb 2024 | 97,042 | 12.2 | 94% | 2% |
 | Chub cards, before Jul 2023 | 1,582 | 18.2 | 88% | 3% |
 | Chub cards, 2025 | 680 | 33.5 | 61% | 15% |
-| Perchance cards, 2024–25 (human and AI-assisted) | 424 | 36.5 | 55% | 20% |
+| Perchance cards (SFW), 2024–25 (human and AI-assisted) | 424 | 36.5 | 55% | 20% |
 | SPB-2602 AI personas (Kimi, GLM) | 593 | 55.1 | 14% | 37% |
 | Foreverse anti-slop AI cards | 6 | 21.1 | 100% | 0% |
 

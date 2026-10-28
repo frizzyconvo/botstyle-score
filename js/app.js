@@ -403,7 +403,7 @@ function renderMine() {
 // ---------------------------------------------------------------- leaderboard
 // Sort order for each leaderboard group: BBBScorer median (default), original slop score, or card count. (A lazy-prompt
 // sort was dropped: most models have only 1-2 lazy-prompt cards, so it ranked noise.)
-const BOARD_SORTS = { median: ['BBBScorer', x => x.median], upstream: ['Original', x => x.upstream ?? -1], n: ['Cards', x => x.n] };
+const BOARD_SORTS = { median: ['BBBScorer', x => x.median], upstream: ['Original', x => x.upstream ?? -1], n: ['# cards', x => x.n] };
 function renderBoard() {
   const B = state.board; if (!B) return;
   const sortKey = state.boardSort || 'median', sorter = (BOARD_SORTS[sortKey] || BOARD_SORTS.median)[1];
@@ -425,10 +425,19 @@ function renderBoard() {
     return `<span class="bl-sub" title="Range: lowest to highest median across the request styles (lazy prompt aside). Lazy: the lazy-prompt median.">${S.min && S.max ? `<span class="nw">styles ${S.min.median.toFixed(0)}–${S.max.median.toFixed(0)}</span>` : ''}${S.min && S.max && S.lazy ? ' · ' : ''}${S.lazy ? `<span class="nw">lazy ${S.lazy.median.toFixed(0)}</span>` : ''}</span>`; };
   h += `<div class="group-label">AI models · cards written for this test</div>` + sorted(B.models).map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
     `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m))).join('');
-  h += `<div class="group-label">Reference card sets</div>` + sorted(B.references).map(r => row('ref', r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1),
-    `${r.n.toLocaleString()} cards · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`, r.upstream)).join('');
-  if ((B.pending || []).length) h += `<div class="group-label">Pending, not ranked · tuned for RP chat, not card writing</div>` + sorted(B.pending).map(m => row('pending', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)} · ${esc(m.why || '')} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}<br>${styleTxt(m)}`, m.upstream, styleInline(m))).join('');
+  // Card sets: dates (if any) go on a second line under the name.
+  const setDetail = r => `${r.n.toLocaleString()} cards${r.sub ? ` · ${esc(r.sub)}` : ''} · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`;
+  const setRow = (cls, r) => row(cls, r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1), setDetail(r), r.upstream, r.sub ? `<span class="bl-sub">${esc(r.sub)}</span>` : '');
+  h += `<div class="group-label">Reference card sets</div>` + sorted(B.references).map(r => setRow('ref', r)).join('');
+  // Just for fun, not ranked: models not made for writing cards, extra card sets of unknown origin, and failed models
+  // (most of their cards failed the format checks, so what's left isn't a fair sample). Older data files call it "pending".
+  const fun = B.fun || (B.pending || []).map(m => ({ kind: 'model', ...m }));
+  const funModel = (cls, m, extra) => row(cls, m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
+    `${esc(m.model)} · ${esc(m.why || '')}${m.failedShare != null ? ` (${m.failedShare}% of ${m.generated} generated cards failed)` : ''} · ${modeTxt(m)} · ${m.n} usable plain-request cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}<br>${styleTxt(m)}`, m.upstream, extra);
+  const funRow = x => x.kind === 'set' ? setRow('ref fun', x)
+    : x.kind === 'failed' ? funModel('failed', x, `<span class="bl-sub"><span class="fail-chip">failed</span>${x.failedShare != null ? ` ${x.failedShare}% of its cards` : ''}</span>`)
+    : funModel('fun', x, styleInline(x));
+  if (fun.length) h += `<div class="group-label">Just for fun · not ranked</div>` + ['model', 'set', 'failed'].map(k => sorted(fun.filter(x => (x.kind || 'model') === k)).map(funRow).join('')).join('');
   $('boardRows').innerHTML = h;
   const stale = B.version && !SAME_SCORES_AS.includes(B.version);
   $('boardNote').innerHTML = `${stale ? `<b>Built from the BBBScorer v${esc(B.version)} run</b>; this page scores with v${esc(SCORER_VERSION)}, so the leaderboard numbers will change once it's rebuilt from a v${esc(SCORER_VERSION)} run.` : `BBBScorer v${esc(SCORER_VERSION)}.`} Bars: middle half of each set's cards; line: median; n = cards in the set. <span class="star">*</span> fewer than 20 cards, so a rough guess. Click a row for details.`;

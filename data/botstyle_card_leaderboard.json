@@ -1,7 +1,7 @@
 {
  "scorerName": "BBBScorer",
  "note": "Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.",
- "dir": "eval\\scores\\v0.8.1",
+ "dir": "eval/scores/v0.8.1",
  "version": "0.8.1",
  "bands": {
   "original": 40,
@@ -10,6 +10,103 @@
  "scorer": "0.8.1",
  "built": "2026-10-28",
  "models": [
+  {
+   "model": "google/gemma-3-4b-it",
+   "n": 7,
+   "median": 69.1,
+   "p25": 53.6,
+   "p75": 96.3,
+   "original": 14.3,
+   "common": 71.4,
+   "pulp": 7,
+   "upstream": 61.5,
+   "byMode": {
+    "fresh": {
+     "n": 7,
+     "median": 69.1,
+     "p25": 53.6,
+     "p75": 96.3,
+     "original": 14.3,
+     "common": 71.4,
+     "pulp": 7,
+     "upstream": 61.5
+    },
+    "antislop": {
+     "n": 7,
+     "median": 71.8,
+     "p25": 42.9,
+     "p75": 89.4,
+     "original": 14.3,
+     "common": 71.4,
+     "pulp": 7,
+     "upstream": 62.5
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 76.5,
+     "p25": 28.1,
+     "p75": 99.7,
+     "original": 33.3,
+     "common": 66.7,
+     "pulp": 13,
+     "upstream": 42.6
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 69.1,
+     "upstream": 67.7
+    },
+    "min": {
+     "style": "compact",
+     "n": 1,
+     "median": 30.8
+    },
+    "max": {
+     "style": "lists",
+     "n": 1,
+     "median": 97.1
+    },
+    "all": [
+     {
+      "style": "compact",
+      "n": 1,
+      "median": 30.8
+     },
+     {
+      "style": "interview",
+      "n": 1,
+      "median": 53.6
+     },
+     {
+      "style": "first_person",
+      "n": 1,
+      "median": 65.1
+     },
+     {
+      "style": "default",
+      "n": 1,
+      "median": 69.1
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 92
+     },
+     {
+      "style": "free_prose",
+      "n": 1,
+      "median": 96.3
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 97.1
+     }
+    ]
+   }
+  },
   {
    "model": "deepseek/deepseek-v3.2-exp",
    "n": 25,
@@ -200,6 +297,195 @@
       "style": "formatted_prose",
       "n": 3,
       "median": 80.5
+     }
+    ]
+   }
+  },
+  {
+   "model": "google/gemma-3-12b-it",
+   "n": 7,
+   "median": 58.6,
+   "p25": 33.1,
+   "p75": 75.9,
+   "original": 42.9,
+   "common": 42.9,
+   "pulp": 11,
+   "upstream": 23.9,
+   "byMode": {
+    "fresh": {
+     "n": 7,
+     "median": 58.6,
+     "p25": 33.1,
+     "p75": 75.9,
+     "original": 42.9,
+     "common": 42.9,
+     "pulp": 11,
+     "upstream": 23.9
+    },
+    "antislop": {
+     "n": 8,
+     "median": 87.9,
+     "p25": 65.5,
+     "p75": 93,
+     "original": 0,
+     "common": 75,
+     "pulp": 8,
+     "upstream": 52.1
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 81.8,
+     "p25": 44,
+     "p75": 86.1,
+     "original": 0,
+     "common": 66.7,
+     "pulp": 19,
+     "upstream": 27.4
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 74.1,
+     "upstream": 23.9
+    },
+    "min": {
+     "style": "interview",
+     "n": 1,
+     "median": 29.9
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 1,
+     "median": 83.3
+    },
+    "all": [
+     {
+      "style": "interview",
+      "n": 1,
+      "median": 29.9
+     },
+     {
+      "style": "compact",
+      "n": 1,
+      "median": 33.1
+     },
+     {
+      "style": "first_person",
+      "n": 1,
+      "median": 38.4
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 58.6
+     },
+     {
+      "style": "default",
+      "n": 1,
+      "median": 74.1
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 75.9
+     },
+     {
+      "style": "free_prose",
+      "n": 1,
+      "median": 83.3
+     }
+    ]
+   }
+  },
+  {
+   "model": "google/gemma-4-31b-it",
+   "n": 6,
+   "median": 57.8,
+   "p25": 46.9,
+   "p75": 69.2,
+   "original": 16.7,
+   "common": 33.3,
+   "pulp": 14,
+   "upstream": 33.6,
+   "byMode": {
+    "fresh": {
+     "n": 6,
+     "median": 57.8,
+     "p25": 46.9,
+     "p75": 69.2,
+     "original": 16.7,
+     "common": 33.3,
+     "pulp": 14,
+     "upstream": 33.6
+    },
+    "antislop": {
+     "n": 8,
+     "median": 43.2,
+     "p25": 29.2,
+     "p75": 46.2,
+     "original": 50,
+     "common": 0,
+     "pulp": 6,
+     "upstream": 34.9
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 59.1,
+     "p25": 27.5,
+     "p75": 69.4,
+     "original": 33.3,
+     "common": 33.3,
+     "pulp": 9,
+     "upstream": 28.9
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 69.2,
+     "upstream": 49
+    },
+    "min": {
+     "style": "interview",
+     "n": 1,
+     "median": 7.7
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 1,
+     "median": 79.2
+    },
+    "all": [
+     {
+      "style": "interview",
+      "n": 1,
+      "median": 7.7
+     },
+     {
+      "style": "first_person",
+      "n": 1,
+      "median": 46.9
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 56
+     },
+     {
+      "style": "free_prose",
+      "n": 1,
+      "median": 57.8
+     },
+     {
+      "style": "default",
+      "n": 1,
+      "median": 69.2
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 79.2
      }
     ]
    }
@@ -588,58 +874,6 @@
       "style": "lists",
       "n": 2,
       "median": 69.1
-     }
-    ]
-   }
-  },
-  {
-   "model": "gryphe/mythomax-l2-13b",
-   "n": 2,
-   "median": 48.2,
-   "p25": 8.7,
-   "p75": 48.2,
-   "original": 50,
-   "common": 0,
-   "pulp": 29,
-   "upstream": 61.2,
-   "byMode": {
-    "fresh": {
-     "n": 2,
-     "median": 48.2,
-     "p25": 8.7,
-     "p75": 48.2,
-     "original": 50,
-     "common": 0,
-     "pulp": 29,
-     "upstream": 61.2
-    }
-   },
-   "styles": {
-    "lazy": {
-     "n": 1,
-     "median": 8.7,
-     "upstream": 5.8
-    },
-    "min": {
-     "style": "free_prose",
-     "n": 1,
-     "median": 48.2
-    },
-    "max": {
-     "style": "free_prose",
-     "n": 1,
-     "median": 48.2
-    },
-    "all": [
-     {
-      "style": "default",
-      "n": 1,
-      "median": 8.7
-     },
-     {
-      "style": "free_prose",
-      "n": 1,
-      "median": 48.2
      }
     ]
    }
@@ -1359,73 +1593,6 @@
    }
   },
   {
-   "model": "nousresearch/hermes-3-llama-3.1-70b",
-   "n": 3,
-   "median": 32.5,
-   "p25": 9.7,
-   "p75": 39,
-   "original": 100,
-   "common": 0,
-   "pulp": 68,
-   "upstream": 12.6,
-   "byMode": {
-    "fresh": {
-     "n": 3,
-     "median": 32.5,
-     "p25": 9.7,
-     "p75": 39,
-     "original": 100,
-     "common": 0,
-     "pulp": 68,
-     "upstream": 12.6
-    },
-    "antislop": {
-     "n": 3,
-     "median": 35.3,
-     "p25": 27,
-     "p75": 38.2,
-     "original": 100,
-     "common": 0,
-     "pulp": 30,
-     "upstream": 29.1
-    }
-   },
-   "styles": {
-    "lazy": {
-     "n": 1,
-     "median": 9.7,
-     "upstream": 1.2
-    },
-    "min": {
-     "style": "free_prose",
-     "n": 1,
-     "median": 32.5
-    },
-    "max": {
-     "style": "formatted_prose",
-     "n": 1,
-     "median": 39
-    },
-    "all": [
-     {
-      "style": "default",
-      "n": 1,
-      "median": 9.7
-     },
-     {
-      "style": "free_prose",
-      "n": 1,
-      "median": 32.5
-     },
-     {
-      "style": "formatted_prose",
-      "n": 1,
-      "median": 39
-     }
-    ]
-   }
-  },
-  {
    "model": "sao10k/l3.1-euryale-70b",
    "n": 19,
    "median": 31.9,
@@ -1897,88 +2064,78 @@
    }
   },
   {
-   "model": "aion-labs/aion-rp-llama-3.1-8b",
-   "n": 6,
-   "median": 19.7,
-   "p25": 19,
-   "p75": 25.6,
-   "original": 83.3,
-   "common": 0,
-   "pulp": 25,
-   "upstream": 11.3,
+   "model": "anthropic/claude-fable-5.1",
+   "n": 7,
+   "median": 18.8,
+   "p25": 14.3,
+   "p75": 23.1,
+   "original": 85.7,
+   "common": 14.3,
+   "pulp": 6,
+   "upstream": 7.3,
    "byMode": {
     "fresh": {
-     "n": 6,
-     "median": 19.7,
-     "p25": 19,
-     "p75": 25.6,
-     "original": 83.3,
-     "common": 0,
-     "pulp": 25,
-     "upstream": 11.3
-    },
-    "antislop": {
-     "n": 11,
-     "median": 21.6,
-     "p25": 16.3,
-     "p75": 32.2,
-     "original": 90.9,
-     "common": 0,
-     "pulp": 20,
-     "upstream": 6.6
-    },
-    "rewrite": {
-     "n": 4,
-     "median": 24.1,
-     "p25": 9.6,
-     "p75": 39,
-     "original": 100,
-     "common": 0,
+     "n": 7,
+     "median": 18.8,
+     "p25": 14.3,
+     "p75": 23.1,
+     "original": 85.7,
+     "common": 14.3,
      "pulp": 6,
-     "upstream": 5.5
+     "upstream": 7.3
     }
    },
    "styles": {
     "lazy": {
      "n": 1,
-     "median": 25.6,
-     "upstream": 3.8
+     "median": 19.8,
+     "upstream": 1.2
     },
     "min": {
-     "style": "first_person",
+     "style": "interview",
      "n": 1,
-     "median": 2.8
+     "median": 12
     },
     "max": {
-     "style": "free_prose",
-     "n": 2,
-     "median": 54.1
+     "style": "formatted_prose",
+     "n": 1,
+     "median": 61.1
     },
     "all": [
      {
-      "style": "first_person",
+      "style": "interview",
       "n": 1,
-      "median": 2.8
+      "median": 12
      },
      {
-      "style": "formatted_prose",
+      "style": "first_person",
       "n": 1,
-      "median": 19
+      "median": 14.3
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 15.2
      },
      {
       "style": "compact",
       "n": 1,
-      "median": 19.7
+      "median": 18.8
      },
      {
       "style": "default",
       "n": 1,
-      "median": 25.6
+      "median": 19.8
      },
      {
       "style": "free_prose",
-      "n": 2,
-      "median": 54.1
+      "n": 1,
+      "median": 23.1
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 61.1
      }
     ]
    }
@@ -2164,6 +2321,83 @@
    }
   },
   {
+   "model": "openai/gpt-6-astra",
+   "n": 7,
+   "median": 15.8,
+   "p25": 11.8,
+   "p75": 32.7,
+   "original": 85.7,
+   "common": 0,
+   "pulp": 4,
+   "upstream": 7.2,
+   "byMode": {
+    "fresh": {
+     "n": 7,
+     "median": 15.8,
+     "p25": 11.8,
+     "p75": 32.7,
+     "original": 85.7,
+     "common": 0,
+     "pulp": 4,
+     "upstream": 7.2
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 11.8,
+     "upstream": 5.7
+    },
+    "min": {
+     "style": "first_person",
+     "n": 1,
+     "median": 9.7
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 1,
+     "median": 42.7
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 1,
+      "median": 9.7
+     },
+     {
+      "style": "default",
+      "n": 1,
+      "median": 11.8
+     },
+     {
+      "style": "interview",
+      "n": 1,
+      "median": 13.2
+     },
+     {
+      "style": "compact",
+      "n": 1,
+      "median": 15.8
+     },
+     {
+      "style": "free_prose",
+      "n": 1,
+      "median": 25.9
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 32.7
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 42.7
+     }
+    ]
+   }
+  },
+  {
    "model": "meta-llama/llama-4-maverick",
    "n": 7,
    "median": 14.6,
@@ -2256,8 +2490,9 @@
    }
   }
  ],
- "pending": [
+ "fun": [
   {
+   "kind": "model",
    "model": "mistralai/mistral-nemo",
    "n": 5,
    "median": 43.7,
@@ -2346,6 +2581,7 @@
    "why": "base model of UnslopNemo"
   },
   {
+   "kind": "model",
    "model": "thedrummer/unslopnemo-12b",
    "n": 9,
    "median": 35.9,
@@ -2432,11 +2668,256 @@
     ]
    },
    "why": "tuned to strip stock phrasing from RP chat, not to write cards"
+  },
+  {
+   "kind": "set",
+   "label": "Perchance cards (NSFW)",
+   "sub": "2024–25",
+   "n": 325,
+   "median": 35,
+   "p25": 13,
+   "p75": 61.8,
+   "original": 56,
+   "common": 27.4,
+   "pulp": 23,
+   "upstream": 9.5
+  },
+  {
+   "kind": "set",
+   "label": "Someone's SillyTavern Archive",
+   "sub": "undated",
+   "n": 202,
+   "median": 17.1,
+   "p25": 11.5,
+   "p75": 26.8,
+   "original": 89.6,
+   "common": 2,
+   "pulp": 20,
+   "upstream": 3.8
+  },
+  {
+   "kind": "failed",
+   "model": "gryphe/mythomax-l2-13b",
+   "n": 2,
+   "median": 48.2,
+   "p25": 8.7,
+   "p75": 48.2,
+   "original": 50,
+   "common": 0,
+   "pulp": 29,
+   "upstream": 61.2,
+   "byMode": {
+    "fresh": {
+     "n": 2,
+     "median": 48.2,
+     "p25": 8.7,
+     "p75": 48.2,
+     "original": 50,
+     "common": 0,
+     "pulp": 29,
+     "upstream": 61.2
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 8.7,
+     "upstream": 5.8
+    },
+    "min": {
+     "style": "free_prose",
+     "n": 1,
+     "median": 48.2
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 1,
+     "median": 48.2
+    },
+    "all": [
+     {
+      "style": "default",
+      "n": 1,
+      "median": 8.7
+     },
+     {
+      "style": "free_prose",
+      "n": 1,
+      "median": 48.2
+     }
+    ]
+   },
+   "why": "ignores the output format: most cards have no section headers or no greeting",
+   "generated": 33,
+   "failedShare": 85
+  },
+  {
+   "kind": "failed",
+   "model": "nousresearch/hermes-3-llama-3.1-70b",
+   "n": 3,
+   "median": 32.5,
+   "p25": 9.7,
+   "p75": 39,
+   "original": 100,
+   "common": 0,
+   "pulp": 68,
+   "upstream": 12.6,
+   "byMode": {
+    "fresh": {
+     "n": 3,
+     "median": 32.5,
+     "p25": 9.7,
+     "p75": 39,
+     "original": 100,
+     "common": 0,
+     "pulp": 68,
+     "upstream": 12.6
+    },
+    "antislop": {
+     "n": 3,
+     "median": 35.3,
+     "p25": 27,
+     "p75": 38.2,
+     "original": 100,
+     "common": 0,
+     "pulp": 30,
+     "upstream": 29.1
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 9.7,
+     "upstream": 1.2
+    },
+    "min": {
+     "style": "free_prose",
+     "n": 1,
+     "median": 32.5
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 1,
+     "median": 39
+    },
+    "all": [
+     {
+      "style": "default",
+      "n": 1,
+      "median": 9.7
+     },
+     {
+      "style": "free_prose",
+      "n": 1,
+      "median": 32.5
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 39
+     }
+    ]
+   },
+   "why": "loops: most cards run on until they are cut off",
+   "generated": 19,
+   "failedShare": 68
+  },
+  {
+   "kind": "failed",
+   "model": "aion-labs/aion-rp-llama-3.1-8b",
+   "n": 6,
+   "median": 19.7,
+   "p25": 19,
+   "p75": 25.6,
+   "original": 83.3,
+   "common": 0,
+   "pulp": 25,
+   "upstream": 11.3,
+   "byMode": {
+    "fresh": {
+     "n": 6,
+     "median": 19.7,
+     "p25": 19,
+     "p75": 25.6,
+     "original": 83.3,
+     "common": 0,
+     "pulp": 25,
+     "upstream": 11.3
+    },
+    "antislop": {
+     "n": 11,
+     "median": 21.6,
+     "p25": 16.3,
+     "p75": 32.2,
+     "original": 90.9,
+     "common": 0,
+     "pulp": 20,
+     "upstream": 6.6
+    },
+    "rewrite": {
+     "n": 4,
+     "median": 24.1,
+     "p25": 9.6,
+     "p75": 39,
+     "original": 100,
+     "common": 0,
+     "pulp": 6,
+     "upstream": 5.5
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 25.6,
+     "upstream": 3.8
+    },
+    "min": {
+     "style": "first_person",
+     "n": 1,
+     "median": 2.8
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 2,
+     "median": 54.1
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 1,
+      "median": 2.8
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 19
+     },
+     {
+      "style": "compact",
+      "n": 1,
+      "median": 19.7
+     },
+     {
+      "style": "default",
+      "n": 1,
+      "median": 25.6
+     },
+     {
+      "style": "free_prose",
+      "n": 2,
+      "median": 54.1
+     }
+    ]
+   },
+   "why": "about 40% of its cards fail the format checks (no headers or no greeting)",
+   "generated": 38,
+   "failedShare": 39
   }
  ],
  "references": [
   {
-   "label": "Korshuk cards, Feb–Apr 2023",
+   "label": "Korshuk cards",
+   "sub": "Feb–Apr 2023",
    "kind": "human",
    "n": 360,
    "median": 7.5,
@@ -2448,7 +2929,8 @@
    "upstream": 3.1
   },
   {
-   "label": "JanitorAI cards, May–Jun 2023",
+   "label": "JanitorAI cards",
+   "sub": "May–Jun 2023",
    "kind": "human",
    "n": 9145,
    "median": 11.6,
@@ -2460,7 +2942,8 @@
    "upstream": 3
   },
   {
-   "label": "JanitorAI cards, Jul 2023–Feb 2024",
+   "label": "JanitorAI cards",
+   "sub": "Jul 2023–Feb 2024",
    "kind": "human",
    "n": 97042,
    "median": 12.2,
@@ -2472,7 +2955,8 @@
    "upstream": 3.7
   },
   {
-   "label": "Chub cards, before Jul 2023",
+   "label": "Chub cards",
+   "sub": "before Jul 2023",
    "kind": "human",
    "n": 1582,
    "median": 18.2,
@@ -2484,7 +2968,8 @@
    "upstream": 5.5
   },
   {
-   "label": "Chub cards, 2025",
+   "label": "Chub cards",
+   "sub": "2025",
    "kind": "human",
    "n": 680,
    "median": 33.5,
@@ -2496,7 +2981,8 @@
    "upstream": 10.9
   },
   {
-   "label": "Perchance cards, 2024–25",
+   "label": "Perchance cards (SFW)",
+   "sub": "2024–25",
    "kind": "human",
    "n": 424,
    "median": 36.5,
@@ -2509,6 +2995,7 @@
   },
   {
    "label": "SPB AI personas (Kimi, GLM)",
+   "sub": "",
    "kind": "ai",
    "n": 593,
    "median": 55.1,
@@ -2521,6 +3008,7 @@
   },
   {
    "label": "Foreverse (anti-slop AI cards)",
+   "sub": "",
    "kind": "ai",
    "n": 6,
    "median": 21.1,

@@ -71,6 +71,9 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
   with a folder or pattern inside it, or one card file): `npm run score-path -- "<path>" --name <short name>`
   (`--label ai|human|mixed|unknown`). Only scores are written, to `eval/scores/v<version>/<name>.jsonl` with a section
   in that run's `notes.md`; the path is remembered so later full runs score it again (`--extras` lists them).
+- **Current results at a glance** (read-only, safe during a scoring or generation run): `npm run results`
+  (`--quick` skips the big JanitorAI file): what's running, every dataset's median and bands, each AI model's
+  BBBScorer and original medians, residual and cost per card, and the numbers the page shows.
 - **Per-model report** for the generated AI cards (BBBScorer vs the original score, regression, residuals, cost):
   `node tools/model_report.mjs`.
 - **Compare with the previous run:** `node tools/compare_scores.mjs --previous`.

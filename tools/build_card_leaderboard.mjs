@@ -8,11 +8,15 @@
 // ("fresh": run 1 + run 2 fresh mode), so models are compared on the same kind of request. The other
 // modes (anti-AI instructions, rewrites of human cards) are reported per model but not ranked.
 // References: human and mixed card sets scored with the same scorer version. Reliable English cards only.
+// Just for fun (not ranked): models not made for writing cards, failed models (tools/_model_groups.mjs; their cards
+// mostly fail the format checks, so the rest isn't a fair sample) and extra card sets of unknown origin.
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { WRITING_STYLE_BANDS as WB, SCORER_VERSION } from '../js/score-card.js';
+import { FAILED, JUST_FOR_FUN } from './_model_groups.mjs';
+import { PATHS } from './_paths.mjs';
 // band shares are recomputed from the score with the current cut-offs, so older score files stay usable
 const dir = process.argv[2] || join('eval', 'scores', readdirSync(join('eval', 'scores')).filter(d => /^v\d/.test(d)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).pop());
 const load = n => existsSync(join(dir, n + '.jsonl')) ? readFileSync(join(dir, n + '.jsonl'), 'utf-8').split('\n').filter(Boolean).map(JSON.parse).filter(r => !r.error && r.reliable && !r.nonEnglish) : [];
@@ -23,11 +27,14 @@ const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, 
   upstream: q(rows.map(r => r.upstream).filter(x => x !== null && x !== undefined), .5) }; };
 const gen = [...load('generated_v1').map(r => ({ ...r, mode: r.mode || 'fresh', run: 1 })), ...load('generated_v2').map(r => ({ ...r, run: 2 }))];
 const models = {};
-// Pending: not ranked. UnslopNemo was tuned to strip stock phrasing out of RP chat replies, and Mistral
-// Nemo is its base; neither was made for writing cards, so ranking them on card writing isn't fair yet.
-const PENDING = { 'thedrummer/unslopnemo-12b': 'tuned to strip stock phrasing from RP chat, not to write cards', 'mistralai/mistral-nemo': 'base model of UnslopNemo' };
+// Share of each model's generated cards that failed the format checks (valid and invalid records from the generator).
+const attempts = {};
+const readJsonl = f => existsSync(f) ? readFileSync(f, 'utf-8').split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean) : [];
+for (const c of [...readJsonl(PATHS.aiCardsV1), ...readJsonl(PATHS.aiCardsV2), ...readJsonl(PATHS.aiCardsV2.replace(/\.jsonl$/, '_invalid.jsonl'))]) {
+  const a = attempts[c.model] = attempts[c.model] || { all: 0, failed: 0 }; a.all++; if (c.valid === false) a.failed++;
+}
 for (const r of gen) (models[r.model] = models[r.model] || []).push(r);
-const out = { scorerName: 'BBBScorer', note: 'Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.', dir, version: (gen[0] || {}).version, bands: WB, scorer: SCORER_VERSION, built: new Date().toISOString().slice(0, 10), models: [], pending: [], references: [] };
+const out = { scorerName: 'BBBScorer', note: 'Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.', dir, version: (gen[0] || {}).version, bands: WB, scorer: SCORER_VERSION, built: new Date().toISOString().slice(0, 10), models: [], fun: [], references: [] };
 for (const [m, rows] of Object.entries(models)) {
   const fresh = rows.filter(r => r.mode === 'fresh');
   if (!fresh.length) continue;
@@ -40,21 +47,34 @@ for (const [m, rows] of Object.entries(models)) {
   const styleMed = Object.entries(byStyle).map(([k, v]) => ({ style: k, n: v.length, median: q(v.map(x => x.score), .5) })).sort((a, b) => a.median - b.median);
   const lazy = byStyle.default ? { n: byStyle.default.length, median: q(byStyle.default.map(x => x.score), .5), upstream: q(byStyle.default.map(x => x.upstream).filter(x => x != null), .5) } : null;
   const styles = { lazy, min: styleMed.find(x => x.style !== 'default') || null, max: [...styleMed].reverse().find(x => x.style !== 'default') || null, all: styleMed };
-  (PENDING[m] ? out.pending : out.models).push({ model: m, ...stats(fresh), byMode, styles, ...(PENDING[m] ? { why: PENDING[m] } : {}) });
+  const entry = { model: m, ...stats(fresh), byMode, styles };
+  if (FAILED[m]) { const a = attempts[m] || { all: 0, failed: 0 }; out.fun.push({ kind: 'failed', ...entry, why: FAILED[m], generated: a.all, failedShare: a.all ? +(100 * a.failed / a.all).toFixed(0) : null }); }
+  else if (JUST_FOR_FUN[m]) out.fun.push({ kind: 'model', ...entry, why: JUST_FOR_FUN[m] });
+  else out.models.push(entry);
 }
-out.models.sort((a, b) => b.median - a.median); out.pending.sort((a, b) => b.median - a.median);
+out.models.sort((a, b) => b.median - a.median);
+// [label, dates (shown on a second line; '' = none), rows]
 const refs = [
-  ['Korshuk cards, Feb–Apr 2023', load('korshuk')],
-  ['JanitorAI cards, May–Jun 2023', load('jaicards').filter(r => String(r.createdAt || '') < '2023-07')],
-  ['JanitorAI cards, Jul 2023–Feb 2024', load('jaicards').filter(r => String(r.createdAt || '') >= '2023-07')],
-  ['Chub cards, before Jul 2023', load('raincandy_chub').filter(r => String(r.createdAt || '') < '2023-07')],
-  ['Chub cards, 2025', load('raincandy_chub').filter(r => String(r.createdAt || '').startsWith('2025'))],
-  ['Perchance cards, 2024–25', load('perchance')],
-  ['SPB AI personas (Kimi, GLM)', load('spb_ai')],
-  ['Foreverse (anti-slop AI cards)', load('foreverse_ai')],
+  ['Korshuk cards', 'Feb–Apr 2023', load('korshuk')],
+  ['JanitorAI cards', 'May–Jun 2023', load('jaicards').filter(r => String(r.createdAt || '') < '2023-07')],
+  ['JanitorAI cards', 'Jul 2023–Feb 2024', load('jaicards').filter(r => String(r.createdAt || '') >= '2023-07')],
+  ['Chub cards', 'before Jul 2023', load('raincandy_chub').filter(r => String(r.createdAt || '') < '2023-07')],
+  ['Chub cards', '2025', load('raincandy_chub').filter(r => String(r.createdAt || '').startsWith('2025'))],
+  ['Perchance cards (SFW)', '2024–25', load('perchance')],
+  ['SPB AI personas (Kimi, GLM)', '', load('spb_ai')],
+  ['Foreverse (anti-slop AI cards)', '', load('foreverse_ai')],
 ];
-for (const [label, rows] of refs) if (rows.length >= 5) out.references.push({ label, kind: /\bAI\b/.test(label) ? 'ai' : 'human', ...stats(rows) });
+for (const [label, sub, rows] of refs) if (rows.length >= 5) out.references.push({ label, sub, kind: /\bAI\b/.test(label) ? 'ai' : 'human', ...stats(rows) });
+// Extra card sets scored with score_all --add: origin unknown (human, AI or both), so just for fun.
+const extraSets = [
+  ['Perchance cards (NSFW)', '2024–25', 'perchance-aicc-nsfw'],
+  ["Someone's SillyTavern Archive", 'undated', 'cardnsfwjammy'],
+];
+for (const [label, sub, name] of extraSets) { const rows = load(name); if (rows.length >= 5) out.fun.push({ kind: 'set', label, sub, ...stats(rows) }); }
+const funOrder = { model: 0, set: 1, failed: 2 };
+out.fun.sort((a, b) => funOrder[a.kind] - funOrder[b.kind] || b.median - a.median);
 writeFileSync('data/botstyle_card_leaderboard.json', JSON.stringify(out, null, 1));
 console.log(`${out.models.length} models, ${out.references.length} reference sets from ${dir}`);
 for (const m of out.models) console.log(`  ${m.median.toString().padStart(5)}  n=${String(m.n).padStart(3)}  ${m.model}`);
-for (const r of out.references) console.log(`  ${String(r.median).padStart(5)}  n=${String(r.n).padStart(4)}  ${r.label}`);
+for (const r of out.references) console.log(`  ${String(r.median).padStart(5)}  n=${String(r.n).padStart(4)}  ${r.label}${r.sub ? ', ' + r.sub : ''}`);
+for (const r of out.fun) console.log(`  ${String(r.median).padStart(5)}  n=${String(r.n).padStart(4)}  just for fun (${r.kind}): ${r.model || r.label}${r.failedShare != null ? `, ${r.failedShare}% of ${r.generated} failed` : ''}`);

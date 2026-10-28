@@ -24,6 +24,7 @@
 //                 eats the whole budget is retried once at effort=low (--no-retry to skip).
 //   --retry-invalid  move cards flagged invalid to <out>_invalid.jsonl and generate them again.
 //   --reparse     re-split / re-validate the existing cards with the current parser (no API calls).
+//   --include-failed  also run models marked failed in tools/_model_groups.mjs (skipped by default).
 //   --failures    list models with failed requests (<out>_errors.jsonl) or no valid cards, then exit.
 //   --more        add another round for each model even if its cards exist (same prompts and seeds, new
 //                 samples; ids end in |r2, |r3…). --round N fills a specific round instead.
@@ -71,7 +72,12 @@ const argv = process.argv.slice(2);
 const args = {};
 for (let i = 0; i < argv.length; i++) if (argv[i].startsWith('--')) args[argv[i].slice(2)] = argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[++i] : true;
 const list = v => String(v || '').split(',').map(s => s.trim()).filter(Boolean);
-const models = list(args.models);
+import { FAILED } from './_model_groups.mjs';
+// Failed models (tools/_model_groups.mjs) are left out unless --include-failed: their cards mostly fail the format checks.
+const models = list(args.models).filter(m => {
+  if (!FAILED[m] || args['include-failed'] || args.failures) return true;
+  console.log(`skipping ${m}: marked failed (${FAILED[m]}); --include-failed to run it anyway`); return false;
+});
 const DRY = !!args['dry-run'];
 if (!models.length && !DRY && !args.reparse && !args.failures) { console.error('need --models "a,b" (or --dry-run)'); process.exit(1); }
 const SEEDS = args.seeds || PATHS.seeds;

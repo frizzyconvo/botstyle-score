@@ -6,6 +6,25 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.17.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- Leaderboard: a **Just for fun** group (not ranked) replaces "Pending". It holds UnslopNemo and Mistral Nemo, two
+  extra card sets of unknown origin (Perchance cards (NSFW) and Someone's SillyTavern Archive), and **failed** models,
+  shown on a hatched red background with a "failed" mark and the share of their cards that failed the format checks:
+  MythoMax, Hermes 3 70B and Aion RP.
+- `npm run results` (`tools/results.mjs`): current results at a glance, read-only, so it's safe to run during a
+  scoring run or card generation.
+- Card generator: models marked failed (`tools/_model_groups.mjs`) are skipped unless `--include-failed`.
+
+### Changed
+- Leaderboard: card-set dates moved to a second line under the name; on phones, card-set names wrap instead of being
+  cut off. The other Perchance set is now "Perchance cards (SFW)".
+- Leaderboard: the card-count sort button reads "# cards".
+- "How it works" describes the Just for fun group and the failed models.
+
 ## [0.16.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.
