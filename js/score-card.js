@@ -28,14 +28,15 @@ import { archetype } from './archetypes.js';
 // can be ahead of it for page-only changes). Bump it (and CHANGELOG.md) whenever a change can move
 // scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it, so
 // stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
-export const SCORER_VERSION = '0.5.0';
-// Versions whose botstyle *numbers* are identical to this one (0.5.0 changed band cut-offs and
-// labels and added genre/pulp/archetype read-outs, not the score), so references built with them
-// still apply.
-export const SAME_SCORES_AS = ['0.4.0', '0.5.0'];
+export const SCORER_VERSION = '0.6.0';
+// Versions whose botstyle *numbers* are identical to this one, so references built with them still apply.
+// 0.6.0 changed the default fields and counts in-character dialogue, so older references don't.
+export const SAME_SCORES_AS = ['0.6.0'];
+// Card fields scored by default (scoreCard opts.fields overrides): what the page says it scores.
+export const DEFAULT_FIELDS = ['description', 'first_mes'];
 
 // Writing-style bands, tentative while the tool is being tested. Set to keep false positives on
-// human cards low (BOTSTYLE.md): on 118k human 2023 cards, 35/50 puts 96% in the lowest band and 1%
+// human cards low (dev notes): on 118k human 2023 cards, 35/50 puts 96% in the lowest band and 1%
 // in the highest; on 1k AI-written cards 60% / 9%. The earlier 20/40 flagged more AI but also more
 // humans (87% / 3%). Ids stay original / mixed / common for platforms.
 export const WRITING_STYLE_BANDS = { original: 35, common: 50 };
@@ -92,14 +93,17 @@ function quietly(fn) {
 
 /**
  * @param {object|string} card  { description, personality, scenario, first_mes, alternate_greetings, tags }
- * @param {object} opts         { includeAltGreetings: false, includeExampleDialogue: false, lookupZipf: fn (typo check) }
+ * @param {object} opts         { fields: DEFAULT_FIELDS, includeAltGreetings: false, includeExampleDialogue: false, lookupZipf: fn (typo check) }
  */
 export function scoreCard(card, opts = {}) {
   const c = typeof card === 'string' ? { description: card } : (card || {});
-  // opts.includeExampleDialogue: score the card's example dialogue too (off by default; the
-  // published scores and references use description + personality + scenario + greeting).
-  const definition = [c.description, c.personality, c.scenario, opts.includeExampleDialogue ? c.mes_example : ''].filter(Boolean).join('\n\n');
-  const greetings = [c.first_mes].concat(opts.includeAltGreetings ? (c.alternate_greetings || []) : []).filter(Boolean);
+  // Which card fields count. Default: description + first message, as the page says. Personality,
+  // scenario and example dialogue only count when asked for (opts.fields, or the older
+  // opts.includeExampleDialogue). Scorer 0.5.0 and earlier always added personality + scenario.
+  const F = new Set(opts.fields || DEFAULT_FIELDS);
+  if (opts.includeExampleDialogue) F.add('mes_example');
+  const definition = ['description', 'personality', 'scenario', 'mes_example'].filter(k => F.has(k)).map(k => c[k]).filter(Boolean).join('\n\n');
+  const greetings = (F.has('first_mes') ? [c.first_mes] : []).concat(opts.includeAltGreetings ? (c.alternate_greetings || []) : []).filter(Boolean);
   const text = [definition].concat(greetings).filter(Boolean).join('\n\n');
 
   const pre = preprocessCard(text);

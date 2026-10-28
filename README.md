@@ -21,9 +21,9 @@ Every tool takes `--help`. Local-only helper scripts go in `dev/` (not committed
 
 ## Purpose and input
 
-* What it scores: slop-score ranks models on long essays and stories. BBBScorer gives one score for one card: its description and greetings, with alternate greetings optional.
+* What it scores: slop-score ranks models on long essays and stories. BBBScorer gives one score for one card: its description and first message by default, with other fields and alternate greetings optional.
 * Getting the card in: it takes Chub and Botbooru links, V1/V2/V3 and Pygmalion JSON, and card PNGs. There’s a field picker for choosing which parts count.
-* Prose only: W++, PLists, key-value blocks, bullets, headers and pasted jailbreaks are counted and shown but left out of the score.
+* Prose only: W++, PLists, key-value blocks, bullets, headers and pasted jailbreaks are counted and shown but left out of the score. In-character dialogue counts.
 
 ## How the word and phrase lists are built
 
@@ -35,7 +35,7 @@ Every tool takes `--help`. Local-only helper scripts go in `dev/` (not committed
 ## How the score is put together
 
 * Normalising: upstream stretches scores between the averages of its 23 leaderboard models, so a single three-word phrase could cost a human writer about 13 points. BBBScorer compares rates with the 90th percentile of 700-word chunks of AI fiction, and one hit now costs about 3 points.
-* Third part of the score: upstream’s 15% was three-word phrases. Here it’s sentence structures: “not X but Y” plus 24 patterns (“a flicker of”, “the air was thick”, “a mix of X and Y”…). Each pattern was kept only if it separated human from AI text in both test sets.
+* Third part of the score: upstream’s 15% was three-word phrases. Here it’s sentence structures: “not X but Y” plus 27 patterns (“a flicker of”, “the air was thick”, “a mix of X and Y”…). Each pattern was kept only if it separated human from AI text in both test sets.
 * Extras: em-dashes add up to 6 points. Clear chatbot leftovers (preambles, sign-offs, refusals, chat-template tokens) add 25 each, up to 50.
 * Read-outs: there’s an uncertainty range and a low-confidence warning under 150 words of prose. Human tells, craft notes, AI-favourite names, card format, genre, pulp score, archetype and texture are shown but not scored.
 * Bands: the 35/50 bands were set from about 118k human cards and 1,005 AI cards.

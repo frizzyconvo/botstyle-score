@@ -11,7 +11,7 @@
 // summary.json (n, median, bands, by year). Rows also carry `upstream` (the original slop-score formula),
 // genre, archetype and the experimental pulp score. run-log.jsonl records start/end time, cards, words,
 // ms per card and words per second for each dataset (performance tracking). Compare two versions with tools/compare_scores.mjs.
-// Card datasets are read from ../card-datasets (see BOTSTYLE.md); missing ones are skipped.
+// Card datasets are read from ../card-datasets (see --help in each flattener); missing ones are skipped.
 // The first run also flattens JanitorAI's 188,834 card files into one JSONL cache (slowest step).
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);

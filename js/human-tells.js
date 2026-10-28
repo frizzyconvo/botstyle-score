@@ -131,7 +131,9 @@ export function checkCard(text, opts = {}) {
   for (const [rx, label] of HOMOPHONE_RX) add(humanTells, 'homophone', `Word mix-up: ${label}`, collect(text, rx));
   add(humanTells, 'doubled_word', 'Doubled words ("the the")', collect(text, /\b(the|a|an|to|of|and|in|on|at|for|with|is|was|are|it|her|his|my|your|their|be|as|by|from|but|or|if|i)\s+\1\b/gi));
   add(humanTells, 'space_before_punct', 'Space before punctuation ("word ,")', collect(text, /[A-Za-z]\s+[,;:!?](?![!?]|\s*[)\]])|[A-Za-z]\s+\.(?!\.)(?=\s|$)/g));
-  add(humanTells, 'missing_space_after', 'Missing space after punctuation ("end.Start")', collect(text, /[a-z]{3}[.!?][A-Z][a-z]{2,}|[a-z]{3},[a-z]{3,}(?![,a-z]*,)/g));
+  // W++ / PList / bracketed trait lists ({muscular,blue eyes}, [Likes: a, b]) are list syntax, not typos.
+  const noLists = text.replace(/\{[^{}\n]*\}|\[[^\[\]\n]*\]/g, ' ');
+  add(humanTells, 'missing_space_after', 'Missing space after punctuation ("end.Start")', collect(noLists, /[a-z]{3}[.!?][A-Z][a-z]{2,}|[a-z]{3},[a-z]{3,}(?![,a-z]*,)/g));
   add(humanTells, 'odd_ellipsis', 'Two-dot or 4+-dot ellipses', collect(text, /(?<!\.)\.\.(?!\.)|\.{4,}/g));
   add(humanTells, 'repeated_punct', 'Repeated !!! / ??? / ?!?!', collect(text, /[!?]{3,}/g));
   add(humanTells, 'double_hyphen', 'Typewriter dash ("--")', collect(text, /\w\s?--\s?\w/g));

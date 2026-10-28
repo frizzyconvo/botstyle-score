@@ -1,7 +1,7 @@
 // bonus-tags.js - Fun, descriptive tags for outliers. Not scored.
 //
 // Thresholds sit in roughly the top 0.2-3.5% of real cards (Korshuk, JanitorAI, Chub;
-// see BOTSTYLE.md), so a tag means "this card stands out", not "this card is bad".
+// see the dev notes), so a tag means "this card stands out", not "this card is bad".
 
 export const TAG_THRESHOLDS = {
   // % = share of 15.7k English real cards (Korshuk, JanitorAI, Chub 2023-2025) that get the tag

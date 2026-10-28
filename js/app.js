@@ -162,7 +162,7 @@ function buildCard(card, fields, alts) {
 }
 function runScore(card, fields, alts) {
   const c = buildCard(card, fields, alts);
-  return scoreCard(c, { lookupZipf, includeAltGreetings: c.alternate_greetings.length > 0, includeExampleDialogue: !!fields.mes_example });
+  return scoreCard(c, { lookupZipf, fields: FIELDS.map(([k]) => k).filter(k => fields[k]), includeAltGreetings: c.alternate_greetings.length > 0 });
 }
 function fieldList(fields, alts) { return FIELDS.filter(([k]) => fields[k] && (!state.card || String(state.card[k] || '').trim())).map(([, l]) => l).concat(alts.size ? [`${alts.size} alt greeting${alts.size > 1 ? 's' : ''}`] : []); }
 
@@ -205,6 +205,16 @@ function nerdStats(text) {
 }
 
 // ---------------------------------------------------------------- result
+// The ticked parts scored one at a time (description, first message, alternate greetings together),
+// shown next to the card score. Read-out only.
+function partScores() {
+  if (!state.card) return [];
+  const c = state.card, out = [];
+  const one = (label, text) => { if (!String(text || '').trim()) return; const r = scoreCard({ description: text }, { lookupZipf }); if (r.stats.proseWords >= 60) out.push({ label, score: r.score, reliable: r.reliable }); };
+  for (const [k, label] of FIELDS) if (state.fields[k]) one(label, c[k]);
+  if (state.alts.size) one('Alternate greetings', [...state.alts].map(i => c.alternate_greetings[i]).join('\n\n'));
+  return out;
+}
 const pct = x => Math.round(x * 100);
 function renderResult(r) {
   const el = $('result'); el.hidden = false;
@@ -224,6 +234,9 @@ function renderResult(r) {
     ${r.emdash && r.emdash.points > 0 ? `<div class="note">Em-dashes: ${r.emdash.count} (${r.emdash.rate.toFixed(1)} per 1k words) → +${r.emdash.points.toFixed(1)}</div>` : ''}
     <div class="note">Scored ${st.proseWords} prose words of ${st.totalWords} (${st.structuredWords} in lists/W++/key-value lines, ${st.boilerplateWords} in boilerplate).
       ${st.proseWords < MIN_PROSE_WORDS && band.id !== 'na' ? ' <b>Short: low confidence.</b>' : ''}${st.nonEnglish ? ' <b>Doesn\'t look like English; the word lists are English-only.</b>' : ''}</div>`;
+  const parts = partScores();
+  if (parts.length > 1) L += `<div class="note">Each part alone: ${parts.map(p => `${esc(p.label)} <b>${p.score.toFixed(1)}</b>${p.reliable ? '' : ' <span class="faint">(short)</span>'}`).join(' · ')}.
+    <span class="faint">The card score above treats them as one text, so a long description can hide an AI-styled greeting (or the reverse).</span></div>`;
   if (r.pulp && band.id !== 'na') {
     const P = r.pulp;
     L += `<div class="sec pulp${P.flag ? ' ' + P.flag : ''}"><h3>Pulp read · experimental</h3>${P.flag ? `<div class="pulp-flag">${esc(P.flagLabel)}</div>` : ''}
@@ -258,11 +271,13 @@ function renderResult(r) {
     R += `<div class="sec"><h3>Texture · experimental</h3><span class="small">Paragraph evenness: length CV ${r.texture.paraCv.toFixed(2)} over ${r.texture.paragraphs} paragraphs (2023 human cards ~0.67, AI-written ~0.32; lower = more even).${lk !== null ? ` AI-style likelihood (score + evenness): <b>${Math.round(lk * 100)}%</b>.` : ''} Not scored: careful writers can be even too.</span></div>`;
   }
   const nn = nerdStats(r.text);
+  const cc = state.card || {}, everything = [cc.description, cc.personality, cc.scenario, cc.first_mes, cc.mes_example, ...(cc.alternate_greetings || [])].filter(Boolean).join('\n\n');
+  const nAll = everything && everything !== r.text ? nerdStats(everything) : null;
   if (nn) R += `<details class="nerd"><summary>Stats for nerds: original slop-score metrics (Sam Paech)</summary><div class="kv">
-    <span>Original slop score (whole text)</span><b>${nn.upstream.toFixed(1)}</b><span>Slop words per 1k</span><b>${nn.words.toFixed(2)}</b><span>Slop trigrams per 1k</span><b>${nn.trigrams.toFixed(2)}</b>
+    <span>Original slop score (scored fields)</span><b>${nn.upstream.toFixed(1)}</b>${nAll ? `<span>Original slop score (every field and every greeting)</span><b>${nAll.upstream.toFixed(1)}</b>` : ''}<span>Slop words per 1k</span><b>${nn.words.toFixed(2)}</b><span>Slop trigrams per 1k</span><b>${nn.trigrams.toFixed(2)}</b>
     <span>Not-x-but-y per 1k chars</span><b>${nn.contrast.toFixed(2)}</b><span>Flesch-Kincaid grade</span><b>${nn.fk.toFixed(1)}</b><span>Words per sentence</span><b>${nn.sentLen.toFixed(1)}</b>
     <span>Words per paragraph</span><b>${nn.paraLen.toFixed(0)}</b><span>Dialogue (quote pairs per 1k chars)</span><b>${nn.dialogue.toFixed(2)}</b><span>MATTR${nn.n >= 500 ? '-500' : ' (TTR, short text)'}</span><b>${nn.mattr.toFixed(3)}</b>
-    </div><p class="faint small">On character cards these barely separate human from AI writing (BOTSTYLE.md); here for curiosity.</p></details>`;
+    </div><p class="faint small">On character cards these barely separate human from AI writing; here for curiosity.</p></details>`;
   el.innerHTML = `<h2 class="section">Result</h2><div class="res-grid"><div>${L}</div><div>${R}</div></div>`;
   bindSaveBox();
 }

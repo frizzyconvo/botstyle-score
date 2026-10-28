@@ -50,6 +50,9 @@ const STRUCTURED_LINE = [
   { id: 'tag_line', rx: /^\s*<\/?[a-z_][\w\- ]{0,30}>\s*$/i },
 ];
 
+// In-character speech: a quoted stretch of at least three words ("I... overthink everything.").
+const SPEECH_RX = /["“][^"“”\n]*?\b\w+\b[^"“”\n]*?\s\S+\s[^"“”\n]*?["”]/;
+const hasSpeech = t => SPEECH_RX.test(t);
 const KV_RX = /^\s*(?:[-*•+]\s*)?[*_]{0,2}([A-Za-z][\w '’/&()-]{0,32}?)[*_]{0,2}\s*[:=]\s*[*_]{0,2}\s*(.*)$/;
 const BULLET_RX = /^\s*(?:[-*•+▪◦]|\d{1,2}[.)])\s+(.*)$/;
 
@@ -116,9 +119,12 @@ export function preprocessCard(raw) {
     if (kv && !/^(?:https?|said|says|asked)$/i.test(kv[1].trim()) && wordCount(kv[1]) <= 4) {
       const rest = kv[2] || '';
       // "Backstory: She grew up in..." -> the value is prose; keep it, drop the label.
-      if (wordCount(rest) >= 12 && !looksLikeList(rest)) {
+      // "A: "I... don't know." blushes" or "{{char}}: "…"" -> in-character dialogue, counted as prose
+      // however short. Interview questions ("Q: How does {{char}}…") are the template, not the character.
+      const speech = hasSpeech(rest) && !/^q(?:uestion)?$/i.test(kv[1].trim());
+      if (speech || (wordCount(rest) >= 12 && !looksLikeList(rest))) {
         segments.push({ kind: 'structured', subkind: 'label', text: kv[1] });
-        segments.push({ kind: 'prose', subkind: 'kv_value', text: rest });
+        segments.push({ kind: 'prose', subkind: speech ? 'dialogue' : 'kv_value', text: rest });
         proseParts.push(rest);
       } else {
         segments.push({ kind: 'structured', subkind: 'key_value', text: s });
@@ -129,8 +135,8 @@ export function preprocessCard(raw) {
     const bl = s.match(BULLET_RX);
     if (bl) {
       const rest = bl[1];
-      if (wordCount(rest) >= 15 && !looksLikeList(rest)) {
-        segments.push({ kind: 'prose', subkind: 'bullet_prose', text: rest });
+      if (hasSpeech(rest) || (wordCount(rest) >= 15 && !looksLikeList(rest))) {
+        segments.push({ kind: 'prose', subkind: hasSpeech(rest) ? 'dialogue' : 'bullet_prose', text: rest });
         proseParts.push(rest);
       } else {
         segments.push({ kind: 'structured', subkind: 'bullet', text: s });

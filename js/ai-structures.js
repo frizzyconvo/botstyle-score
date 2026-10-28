@@ -55,6 +55,10 @@ export const STRUCTURE_PATTERNS = [
   P('it_was_as_if', '"it was as if"', /\bit was as if\b/gi, 0.7, 'it was as if the world had stopped'),
   P('kind_of_that', '"the kind of X that …"', /\bthe (?:kind|sort|type) of \w+(?: \w+)? (?:that|which|who|you|only)\b/gi, 0.75, 'the kind of person who remembers birthdays', true),
   P('equal_measure', '"equal parts X and Y"', /\bin (?:equal|perfect) measure\b|\bequal parts \w+ and \w+/gi, 0.75, 'equal parts charm and menace', true),
+  // From TheDrummer's UnslopNemo target list (RP chat replies), the phrases that also lean AI in cards
+  // (tools/phrase_check.mjs): "punctuate/-ing" (not "punctuated", already a scored word), "conspiratorial",
+  // "<her> voice low", "mischief". Card-only evidence, so provisional; weight set by tools/eval_cards.mjs.
+  P('rp_reply_tells', 'RP-reply tells ("conspiratorial", "voice low", "punctuating")', /\bconspiratorial\w*|\bpunctuat(?:e|es|ing)\b|\b(?:her|his|their|my|your) voice low\b|\bmischief\b/gi, 1.5, 'she leaned in, conspiratorial, voice low', true),
 ];
 
 const WORD_RX = /[A-Za-z]+(?:'[A-Za-z]+)?/g;
@@ -70,12 +74,16 @@ export function emdashPoints(rate) {
  * @param {Array} contrastMatches  matches from contrast-detector.js on the same prose
  * @returns {{rate, se, hits, contrastCount, nWords, emdash: {count, rate, points}}}
  */
+// Structure ids switched off (experiments; tools/eval_cards.mjs toggles these).
+export const DISABLED_STRUCTURES = new Set(['rp_reply_tells']);
+
 export function scoreStructures(prose, contrastMatches = []) {
   const text = String(prose || '');
   const nWords = (text.match(WORD_RX) || []).length;
   const per = nWords ? 1000 / nWords : 0;
   let s = 0, v = 0; const hits = [];
   for (const p of STRUCTURE_PATTERNS) {
+    if (DISABLED_STRUCTURES.has(p.id)) continue;
     p.rx.lastIndex = 0;
     let m = text.match(p.rx);
     if (m && p.dedupeContrast && contrastMatches && contrastMatches.length) {

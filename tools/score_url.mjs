@@ -3,7 +3,7 @@
 // or from local card files (.json / .png), several at once.
 // Usage: node tools/score_url.mjs <url | card.json | card.png>... [--alt all|2,5,6] [--fields description,first_mes] [--json]
 //   --fields   score only these card fields (e.g. description,first_mes to compare with scores that
-//              ignored personality/scenario); default: description, personality, scenario, first message
+//              ignored personality/scenario); default: description + first message (BBBScorer 0.6.0+)
 //   --alt all     include every alternate greeting; --alt 2,5 picks greetings by number
 //                 (#1 is the first message, alternates are #2, #3, … as on the page)
 //   --json        print the full result object instead of a summary
@@ -46,7 +46,7 @@ for (const src of inputs) {
   const alts = card.alternate_greetings || [];
   const picked = !altArg ? [] : altArg === 'all' ? alts : altArg.split(',').map(n => alts[+n - 2]).filter(Boolean);
   if (fieldsArg) for (const f of ['description', 'personality', 'scenario', 'first_mes']) if (!fieldsArg.includes(f)) card[f] = '';
-  const r = scoreCard({ ...card, alternate_greetings: picked }, { includeAltGreetings: picked.length > 0 });
+  const r = scoreCard({ ...card, alternate_greetings: picked }, { includeAltGreetings: picked.length > 0, ...(fieldsArg ? { fields: fieldsArg } : {}) });
   if (args.includes('--json')) { console.log(JSON.stringify({ source: src, ...r, prose: undefined, text: undefined }, null, 1)); continue; }
   console.log(`${card.name}: botstyle ${r.score.toFixed(1)} (${r.low.toFixed(0)}–${r.high.toFixed(0)}), ${r.band.label} writing style`);
   console.log(`  words ${r.components.words.toFixed(2)}  phrases ${r.components.phrases.toFixed(2)}  structures ${r.components.structures.toFixed(2)}  em-dash +${r.emdashPoints.toFixed(1)}  tells +${r.artifactPoints}`);
