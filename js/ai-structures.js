@@ -21,6 +21,7 @@
 // EMDASH_POINTS.max points on top of the score, reached at 16/1k.
 
 import { repeatWeight } from './botstyle.js';
+import { scorerProfile } from './scorer-profile.js';
 export const CONTRAST_WEIGHT = 2.0;   // per not-x-but-y match
 export const EMDASH_POINTS = { free: 6, full: 16, max: 10 };   // max was 6 before scorer 0.7.0 (narrower scale)
 
@@ -62,6 +63,20 @@ export const STRUCTURE_PATTERNS = [
   P('rp_reply_tells', 'RP-reply tells ("conspiratorial", "voice low", "punctuating")', /\bconspiratorial\w*|\bpunctuat(?:e|es|ing)\b|\b(?:her|his|their|my|your) voice low\b|\bmischief\b/gi, 1.5, 'she leaned in, conspiratorial, voice low', true),
 ];
 
+// Where each pattern came from (docs/LISTS.md). "candidate" = written for this project as a regex candidate in
+// tools/mine_structures.py (ideas from reading AI fiction, CharGen's phrase examples and our own lists) and kept only
+// because it separated human from AI text on SlopReview and Gutenberg; "SloppySeconds" = taken from pixelnull's community
+// pattern list, same test; "cards" = written for cards, backed by AI card sets only (provisional); "UnslopNemo" =
+// TheDrummer's published target list.
+export const PATTERN_SOURCES = {
+  hint_of: 'candidate', testament_reminder: 'candidate', air_thick: 'candidate', maybe_just_maybe: 'candidate', imperceptible: 'candidate',
+  abstract_simile: 'candidate', mix_of: 'candidate', weight_of: 'candidate', eyes_that_held: 'candidate', low_hum: 'candidate',
+  noun_of_abstract: 'candidate', voice_texture: 'candidate', as_if_world: 'candidate', practiced_ease: 'candidate', rhetorical_qa: 'candidate',
+  unspoken: 'candidate', every_every: 'candidate', banter_tag: 'candidate', not_just_shes: 'cards',
+  seemed_to: 'SloppySeconds', stock_beats: 'SloppySeconds', hung_heavy: 'SloppySeconds', felt_a_surge: 'SloppySeconds',
+  found_herself: 'SloppySeconds', it_was_as_if: 'SloppySeconds', kind_of_that: 'cards', equal_measure: 'cards', rp_reply_tells: 'UnslopNemo',
+};
+
 const WORD_RX = /[A-Za-z]+(?:'[A-Za-z]+)?/g;
 const EMDASH_RX = /—|–| -- /g;
 
@@ -79,12 +94,14 @@ export function emdashPoints(rate) {
 export const DISABLED_STRUCTURES = new Set(['rp_reply_tells']);
 
 export function scoreStructures(prose, contrastMatches = []) {
-  const text = String(prose || '');
+  // 0.9.0 (stripRpAsterisks): `"Miss me?" *she purrs.*` -> `"Miss me?" she purrs.` before the patterns run
+  const text = scorerProfile().stripRpAsterisks ? String(prose || '').replace(/\*+/g, '') : String(prose || '');
   const nWords = (text.match(WORD_RX) || []).length;
   const per = nWords ? 1000 / nWords : 0;
   let s = 0, v = 0; const hits = [];
+  const prof = scorerProfile(), off = new Set(prof.patternsOff || []), on = new Set(prof.patternsOn || []);
   for (const p of STRUCTURE_PATTERNS) {
-    if (DISABLED_STRUCTURES.has(p.id)) continue;
+    if ((DISABLED_STRUCTURES.has(p.id) && !on.has(p.id)) || off.has(p.id)) continue;
     p.rx.lastIndex = 0;
     let m = text.match(p.rx);
     if (m && p.dedupeContrast && contrastMatches && contrastMatches.length) {

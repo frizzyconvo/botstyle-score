@@ -11,6 +11,7 @@ export async function loadPulp(base = './data/') {
   try { const r = await fetch(base + 'botstyle_pulp_words.json'); if (r.ok) PULP = new Set(Object.keys((await r.json()).words || {})); } catch { PULP = null; }
 }
 export function pulpLoaded() { return !!PULP; }
+export function pulpWords() { return PULP; }
 
 /**
  * @param {object} w   scoreWeighted() result      @param {object} st  scoreStructures() result

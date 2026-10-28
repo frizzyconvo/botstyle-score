@@ -5,6 +5,8 @@
 // rates. We score prose only and report how much of the card that was, so a
 // card that is mostly lists gets a wide confidence band instead of a bogus score.
 
+import { scorerProfile } from './scorer-profile.js';
+
 const MACRO_RX = /\{\{\s*(char|user|bot|original)\s*\}\}|<\s*(BOT|USER)\s*>/gi;
 
 // Lines that are instructions to the model / platform rather than character writing.
@@ -44,6 +46,8 @@ const STRUCTURED_LINE = [
   { id: 'wpp', rx: /\w+\s*\(\s*["'][^"']*["']\s*(?:\+\s*["'][^"']*["']\s*)*\)|^\s*[\[{]\s*\w+\s*\(/ },
   // PList: [Name's personality: a, b, c; appearance: x, y]
   { id: 'plist', rx: /^\s*\[[^\]]{0,600}:[^\]]*,[^\]]*\]\s*$/ },
+  // 0.9.0: the same wrapped in parentheses or braces, "([Name: …; personality: …])" (plistParens)
+  { id: 'plist', rx: /^\s*[({]\s*\[[^\]]{0,600}:[^\]]*[,;][^\]]*\]\s*[)}]\s*$/, profile: 'plistParens' },
   // Markdown / bold section headers
   { id: 'header', rx: /^\s*(?:#{1,6}\s+\S|[*_]{2}[^*_\n]{1,40}[*_]{2}\s*:?\s*$|[A-Z][A-Z \-'&/]{2,30}:?\s*$)/ },
   // XML-ish section tags on their own line
@@ -120,7 +124,8 @@ export function preprocessCard(raw) {
       continue;
     }
 
-    const st = STRUCTURED_LINE.find(x => x.rx.test(s));
+    const P = scorerProfile();
+    const st = STRUCTURED_LINE.find(x => (!x.profile || P[x.profile]) && x.rx.test(s));
     if (st) { segments.push({ kind: 'structured', subkind: st.id, text: s }); continue; }
 
     const kv = s.match(KV_RX);

@@ -10,7 +10,8 @@
 //
 // A plain string is accepted too (treated as description + greeting pasted together).
 
-import { loadBotstyle, scoreWeighted, computeBotstyleScore, peerPercentile, tallyNames, MIN_PROSE_WORDS } from './botstyle.js';
+import { loadBotstyle, scoreWeighted, computeBotstyleScore, peerPercentile, tallyNames, MIN_PROSE_WORDS, setWordFactors } from './botstyle.js';
+import { scorerProfile, scorerVersion, DEFAULT_SCORER, NEXT_SCORER } from './scorer-profile.js';
 import { preprocessCard } from './card-preprocess.js';
 import { scoreStructures } from './ai-structures.js';
 import { findArtifacts } from './ai-artifacts.js';
@@ -21,7 +22,7 @@ import { bonusTags, tagInputs } from './bonus-tags.js';
 import { scoreText as scoreContrast } from './contrast-detector.js';
 import { textureFeatures, aiStyleLikelihood } from './texture.js';
 import { detectGenre } from './genre.js';
-import { loadPulp, pulpScore } from './pulp.js';
+import { loadPulp, pulpScore, pulpWords } from './pulp.js';
 import { archetype } from './archetypes.js';
 import { cardRepetition } from './repetition.js';
 
@@ -29,7 +30,10 @@ import { cardRepetition } from './repetition.js';
 // can be ahead of it for page-only changes). Bump it (and CHANGELOG.md) whenever a change can move
 // scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it, so
 // stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
+// The default stays here as a literal (tools/scorer_manifest.mjs reads it from the source); it must equal DEFAULT_SCORER in
+// scorer-profile.js (a test checks). 0.9.0 is prepared there and only used when a tool opts in.
 export const SCORER_VERSION = '0.8.1';
+export { NEXT_SCORER };
 // Versions whose botstyle *numbers* are identical to this one, so references built with them still apply.
 // 0.7.0 re-anchored the scale to AI-written cards and made repeat damping length-independent, so older
 // references don't apply.
@@ -47,11 +51,48 @@ export const BAND_LABELS = { original: 'Original-ish', mixed: 'Mixed', common: '
 export const BAND_TAGLINES = { original: 'Meatbag adjacent', mixed: 'Mixed signals', common: 'Might just be slop' };
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
+let LENGTH_BANDS = null;   // data/botstyle_length_bands.json: band cut-offs by prose length (0.9.0 lengthBands)
 
 export async function loadAll(base = './data/') {
   // extra_words.txt (~0.6 MB compressed) only feeds the typo read-out, so it loads alongside the rest
   await Promise.all([loadBotstyle(base), loadCliches(base), loadPulp(base), loadExtraWords(base)]);
   try { const r = await fetch(base + 'botstyle_reference.json'); if (r.ok) REFERENCE = await r.json(); } catch { REFERENCE = null; }
+  try { const r = await fetch(base + 'botstyle_length_bands.json'); if (r.ok) LENGTH_BANDS = await r.json(); } catch { LENGTH_BANDS = null; }
+  setWordFactors(pulpWords());
+}
+
+// 0.9.0 lengthBands: the cut-offs for a card with this many prose words. Same 40 / 60 everywhere otherwise.
+export function bandCuts(proseWords) {
+  if (!scorerProfile().lengthBands || !LENGTH_BANDS || !LENGTH_BANDS.bins) return { ...WRITING_STYLE_BANDS, byLength: false };
+  const b = LENGTH_BANDS.bins.find(x => proseWords >= x.from && (x.to === null || proseWords < x.to)) || LENGTH_BANDS.bins[LENGTH_BANDS.bins.length - 1];
+  return { original: b.original, common: b.common, byLength: true, from: b.from, to: b.to };
+}
+
+// 0.9.0 compactValues: trait values inside W++ ("a" + "b") and PList ([x: a, b; y: c]) blocks. AI-written blocks use
+// phrase-length values; 2023 cards mostly one or two words (mean 3.9 vs 2.4 words per value, AUC 0.79).
+export function compactValueStats(text) {
+  const t = String(text || ''), v = [];
+  for (const m of t.matchAll(/"([^"\n]{1,200})"/g)) if (/\(\s*"|\+\s*"|"\s*\+/.test(t.slice(Math.max(0, m.index - 3), m.index + m[0].length + 3))) v.push(m[1]);
+  for (const m of t.matchAll(/\[([^\[\]\n]{20,3000})\]/g)) { if (!/:/.test(m[1])) continue; for (const seg of m[1].split(/;/)) for (const x of seg.split(':').slice(1).join(':').split(/,/)) if (x.trim()) v.push(x.trim()); }
+  const lens = v.map(x => (x.match(/[A-Za-z']+/g) || []).length).filter(n => n > 0);
+  return { values: lens.length, meanWords: lens.length ? lens.reduce((a, b) => a + b, 0) / lens.length : 0 };
+}
+function compactPoints(stats) {
+  const c = scorerProfile().compactValues;
+  if (!c || stats.values < c.minValues) return 0;
+  return c.max * Math.max(0, Math.min(1, (stats.meanWords - c.from) / (c.to - c.from)));
+}
+// 0.9.0 texture: paragraph-length evenness on the scored prose (each line is a paragraph, 5+ words).
+export function paragraphCv(prose) {
+  const p = String(prose || '').split(/\n+/).map(x => (x.match(/[A-Za-z']+/g) || []).length).filter(n => n >= 5);
+  if (p.length < 2) return { paragraphs: p.length, cv: null };
+  const m = p.reduce((a, b) => a + b, 0) / p.length, sd = Math.sqrt(p.reduce((a, b) => a + (b - m) ** 2, 0) / p.length);
+  return { paragraphs: p.length, cv: sd / m };
+}
+function texturePoints(pc, proseWords) {
+  const c = scorerProfile().texture;
+  if (!c || pc.cv === null || pc.paragraphs < c.minParagraphs || proseWords < c.minWords) return 0;
+  return Math.max(c.min, Math.min(c.max, c.perUnit * (c.pivot - pc.cv)));
 }
 
 // Share of a reference group scoring below `score` (0-100), from its 101 stored quantiles.
@@ -77,13 +118,13 @@ export function referencePercentiles(score) {
 // reach 40+ (2023 human cards under 20 prose words: 4% would land in Common).
 export const MIN_JUDGE_WORDS = 40;
 
-export function writingStyleBand(score, reliable, format, stats = {}, obviousTell = false) {
+export function writingStyleBand(score, reliable, format, stats = {}, obviousTell = false, cuts = WRITING_STYLE_BANDS) {
   if (format === 'boilerplate') return { id: 'na', label: 'Not enough character writing to judge' };
   if (stats.nonEnglish) return { id: 'na', label: 'Not English (the word lists are English-only)' };
   // an obvious chatbot tell ("Certainly! Here is…") is conclusive at any length
   if (!obviousTell && stats.proseWords !== undefined && stats.proseWords < MIN_JUDGE_WORDS)
     return { id: 'na', label: stats.structuredWords > stats.proseWords ? 'Mostly W++/lists: too little prose to judge' : 'Too little prose to judge' };
-  const B = WRITING_STYLE_BANDS;
+  const B = cuts || WRITING_STYLE_BANDS;
   const id = score < B.original ? 'original' : score < B.common ? 'mixed' : 'common';
   return { id, label: BAND_LABELS[id] + (reliable ? '' : ' (low confidence)'), tagline: BAND_TAGLINES[id], tentative: true };
 }
@@ -154,6 +195,12 @@ export function scoreCard(card, opts = {}) {
       score.score = blend('score'); score.low = blend('low'); score.high = blend('high');
     }
   }
+  // 0.9.0 extra points (both 0 under 0.8.1): long W++ / PList trait values, and paragraph evenness (+) or
+  // unevenness (−). Like em-dash and chatbot-leftover points, they sit on top of the word / phrase / pattern score.
+  const compact = compactValueStats(definition), pCv = paragraphCv(pre.prose);
+  const extra = { compactValues: +compactPoints(compact).toFixed(2), texture: +texturePoints(pCv, pre.stats.proseWords).toFixed(2) };
+  const extraPts = extra.compactValues + extra.texture;
+  if (extraPts) for (const k of ['score', 'low', 'high']) score[k] = Math.max(0, Math.min(100, score[k] + extraPts));
   if (mixed && opts.mixedPolicy === 'higher') {
     const hi = parts[mixed.higher];
     if (hi.score > score.score) { score.score = hi.score; score.low = Math.max(score.low, hi.low); score.high = Math.max(score.high, hi.high); }
@@ -173,10 +220,11 @@ export function scoreCard(card, opts = {}) {
   const texture = textureFeatures(pre.prose);
   const likelihood = aiStyleLikelihood(score.score, texture, pre.stats.proseWords);
   const result = {
-    version: SCORER_VERSION,
+    version: scorerVersion(),
     score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable, joint, parts, mixed, repetition,
     components: score.components, emdashPoints: score.emdashPoints, artifactPoints: score.artifactPoints,
-    band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0),
+    band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0, bandCuts(pre.stats.proseWords)),
+    bandCuts: bandCuts(pre.stats.proseWords), extraPoints: extra, compactValues: compact, paragraphEvenness: pCv,
     rates, stats: pre.stats, format, greeting, type, peers,
     reference: referencePercentiles(score.score),
     genre, pulp, archetype: archetype({ format, greeting, genre, stats: pre.stats }),

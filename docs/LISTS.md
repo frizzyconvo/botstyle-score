@@ -8,6 +8,52 @@ threshold) live in the builder, next to a comment, and are recorded in the histo
 Each scoring run's `SCORER.md` records the entry count and a checksum of every list it used, so two runs can be
 checked for "same lists or not" without diffing.
 
+## Where each list comes from
+
+Four kinds of source, kept apart so each can be redone or replaced on its own terms:
+
+1. **Built by us from data** (rerunnable: same inputs + builder = same list). Rebuild commands are below.
+2. **Taken from someone else's list, as published** (we don't regenerate these; we can only update to a newer copy).
+3. **From papers and research** (findings we tested; nothing is copied into a list unless it passed our own test).
+4. **Community lists and anecdotes** (hand-made lists, forum and Discord lore, user feedback): ideas only, used after
+   they pass the same human-vs-AI test, and labeled as such.
+
+| List or pattern set | Kind | Source | Used how |
+|---|---|---|---|
+| AI-favored words, two- and three-word phrases | 1 | AI side: upstream slop-score's outputs from 22 models (creative prompts). Human side: Nitral-AI's slop-forensics profile of Reddit WritingPrompts stories | Scored |
+| Sentence patterns marked "candidate" | 1 + 4 | Regex candidates written for this project (`tools/mine_structures.py`), some suggested by CharGen's phrase examples; kept only if they separated human from AI text on SlopReview **and** Gutenberg | Scored |
+| Sentence patterns marked "SloppySeconds" | 4 | pixelnull's SloppySeconds community list; kept only if they passed the same test | Scored |
+| Sentence patterns marked "cards" | 1 | Written for character cards; backed by AI card sets only (provisional weights) | Scored |
+| RP-reply tells | 2 | TheDrummer's UnslopNemo target list | Off |
+| AI-favorite names | 1 | Candidates from the same 22-model outputs, kept only if a second, independent set confirms them (SlopReview, SPB-2602 vs 2023 cards, Gutenberg rewrites) | Unscored |
+| Shared clichés | 1 + 4 | Entries our builder dropped from the scored lists because human writers use them too, plus SloppySeconds patterns that failed the test | Unscored |
+| RP slop | 2 | TheDrummer's UnslopNemo target list, unchanged | Unscored |
+| Pulp words | 1 | Our card sets: scored words human genre cards use as often as AI cards | Unscored read-out |
+| Scale anchor, reference, format peers, length cut-offs | 1 | Our scoring runs over the card sets (length cut-offs: provisional, from a sample) | Calibration |
+| Original slop-score lists | 2 | sam-paech/slop-score, unchanged | The original score only |
+| Typo dictionary | 2 | word-list (MIT) | Typo read-out |
+| "Don't sound like AI" rules in the card generator | 4 | Written for this tool, modeled on humanizer lists (avoid-ai-writing), Sukino's banned tokens, character-card-skills and SloppySeconds | Generating test cards only |
+
+Research we tested but don't copy lists from: StoryScope (discourse features of AI fiction; its surface-checkable
+findings were rechecked on cards), the ARB paper (why the generator has a rewrite mode), the Antislop paper (the method
+behind slop-forensics and auto-antislop), Wikipedia's "Signs of AI writing" and tropes.fyi (via the unslop skills).
+
+### Rebuilding the lists we build
+
+Paths are relative to the repo; the card sets and test sets sit in a folder next to it.
+
+| List | Command |
+|---|---|
+| Words, phrases (and name candidates) | `python3 tools/build_lists.py` (needs `upstream/results/` and the slop-forensics human profile) |
+| AI-favorite names | `python3 tools/corroborate_names.py <slopreview> <gutenberg> <spb_cards> <human_cards>...` |
+| Shared clichés | `python3 tools/build_cliches.py [SloppySeconds settings.js]` |
+| Pulp words | `node tools/build_pulp_words.mjs` |
+| Sentence-pattern candidates | `python3 tools/mine_structures.py` (writes `mine_results.json`; weights are copied into `js/ai-structures.js` by hand) |
+| Scale anchor | `node tools/calibrate_cards.mjs` |
+| Reference percentiles | `npm run reference` |
+| Length cut-offs (BBBScorer 0.9.0) | `node tools/build_length_bands.mjs` |
+| Format peers | `python3 tools/build_peers.py <scores.jsonl>... --before 2023-07` |
+
 ## Scored
 
 | List | File | Entries | Built by | From |
@@ -44,6 +90,9 @@ Newest first. Scorer versions in brackets.
 
 | Date | List | Change | Why |
 |---|---|---|---|
+| 2026-10-28 (0.9.0, prepared) | Sentence structures | found_herself, it_was_as_if, hung_heavy, felt_a_surge, unspoken, not_just_shes off | Rechecked on cards: no separation, or they lean human |
+| 2026-10-28 (0.9.0, prepared) | Pulp words | Count at half weight in the score (were read-out only) | Raised AUC on cards (0.862 → 0.866 on its own) |
+| 2026-10-28 (0.9.0, prepared) | Length cut-offs | First built, provisional, from a sample | Same false-positive rate at every card length |
 | 2026-10-28 (app 0.18.0) | RP slop | UnslopNemo's list shown again, unscored, under Shared clichés | Checked against cards (no gain as a score), still useful to creators as RP chat clichés |
 | 2026-10-28 [0.6.0] | Sentence structures | "RP-reply tells" (conspiratorial, voice low, punctuating, mischief) added but switched off | No AUC gain on cards (+0.000 to +0.002, in-sample) |
 | 2026-10-28 [0.5.0] | Pulp words | First built: 112 words | Genre vocabulary was pushing human dark-fantasy and horror cards up |

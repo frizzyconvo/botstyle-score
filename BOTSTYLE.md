@@ -141,8 +141,8 @@ Tentative, still being calibrated.
 
 | Score | Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
 |---|---|---|---|---|
-| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 41% |
-| 40–60 | **Mixed** | *Mixed signals* | 4% | 29% |
+| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 42% |
+| 40–60 | **Mixed** | *Mixed signals* | 4% | 28% |
 | 60 and up | **Common** | *Might just be slop* | 2% | 30% |
 | (too short or not English) | **Low confidence** / no band | | | |
 
@@ -150,7 +150,7 @@ The band names say how common the card's phrasing is in AI writing. The taglines
 to them.
 
 The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,129
-(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 2,483, median 46.
+(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 2,631, median 46.
 
 **The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
 AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
@@ -306,7 +306,8 @@ Only these plain requests are ranked. Each model's report (click a row) also sho
 On each row: the bar is the middle half of that set's cards, the line is the median, the big number is the
 BBBScorer median and "orig" the original slop-score median. Under each model: **styles** = the lowest to highest
 median across its request styles (lazy prompt aside), and **lazy** = its lazy-prompt median. Under each card set:
-its dates. **n** = cards in the set; **\*** = fewer than 20 cards, so a rough guess. Sort by BBBScorer median,
+its dates. **n** = cards in the set; **\*** = fewer than 20 cards, so a rough guess (**Hide models with under 20
+cards** leaves those models out; card sets always show). Sort by BBBScorer median,
 original slop-score median, or number of cards (**# cards**).
 
 **Just for fun, not ranked:**
@@ -362,10 +363,10 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 from 2023 (mostly human) vs 2,483 AI-written | 0.75 | 0.87 |
+| Character cards: 108,129 from 2023 (mostly human) vs 2,631 AI-written | 0.76 | 0.87 |
 
 On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 30% of AI-written cards and the original
-slop score 20%.
+slop score 21%.
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
@@ -390,7 +391,7 @@ Checked against the upstream code (`slop-score.html`, `data/leaderboard_results.
 | **Per format / per part** | One formula for everything | One set of lists, weights and calibration for every format and for both the description and the greeting. Format only picks the peer group shown in the read-out ("vs 2023 cards in the same format") |
 
 **Results on the shared test sets** (AUC, original → BBBScorer): SlopReview 0.930 → 0.977 (humans flagged above 25:
-9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.75 → 0.87.
+9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.76 → 0.87.
 
 ## Data and references
 

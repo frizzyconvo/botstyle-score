@@ -18,6 +18,7 @@
 //    score carries a confidence band from the hit counts.
 
 import { normalizeQuotes } from './utils.js';
+import { scorerProfile } from './scorer-profile.js';
 
 const STOPWORDS = new Set(`i me my myself we our ours ourselves you your yours yourself yourselves
 he him his himself she her hers herself it its itself they them their theirs themselves what
@@ -95,8 +96,13 @@ export function getCalibration() { return calibration; }
 export const REF_WORDS = 700;
 export function repeatWeight(k, nWords) {
   const n = Math.max(1, nWords), x = k * REF_WORDS / n;
-  return (x <= 1 ? x : 1 + Math.log(x)) * n / REF_WORDS;
+  // 0.9.0 (maxRepeat): one item counts at most maxRepeat × its weight per 700 words
+  const cap = scorerProfile().maxRepeat, c = x <= 1 ? x : 1 + Math.log(x);
+  return (cap ? Math.min(cap, c) : c) * n / REF_WORDS;
 }
+// Per-word weight multipliers (0.9.0 pulpWeight): set by score-card.js from the pulp word list.
+let wordFactor = null;
+export function setWordFactors(map) { wordFactor = map; }
 
 export function scoreWeighted(proseText) {
   if (!lists) throw new Error('call loadBotstyle() first');
@@ -122,8 +128,9 @@ export function scoreWeighted(proseText) {
   const agg = (hits, map) => {
     let s = 0, v = 0;
     const rows = [];
+    const pw = map === lists.words && wordFactor ? scorerProfile().pulpWeight : 1;
     for (const [g, k] of hits) {
-      const w = map.get(g);
+      const w = map.get(g) * (pw !== 1 && wordFactor.has(g) ? pw : 1);
       s += w * repeatWeight(k, nWords); v += w * w * k;
       rows.push({ item: g, count: k, weight: w, ...(example.has(g) ? { example: example.get(g) } : {}) });
     }

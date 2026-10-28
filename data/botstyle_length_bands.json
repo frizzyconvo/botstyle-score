@@ -1,0 +1,54 @@
+{
+ "about": "Band cut-offs by prose length for BBBScorer 0.9.0 (tools/build_length_bands.mjs): Original-ish below the 94th percentile of 2023 cards (mostly human) of that length, Common from the 98th.",
+ "source": "PROVISIONAL: a 23.5k-card sample of 2023 cards scored with the 0.9.0 rules (dev experiment), not a full scoring run. Rebuild with node tools/build_length_bands.mjs after the 0.9.0 rescore.",
+ "note": "provisional",
+ "built": "2026-10-28",
+ "points": {
+  "original": 0.94,
+  "common": 0.98
+ },
+ "bins": [
+  {
+   "from": 0,
+   "to": 150,
+   "original": 14.9,
+   "common": 25,
+   "n": 6687
+  },
+  {
+   "from": 150,
+   "to": 250,
+   "original": 26.9,
+   "common": 40.1,
+   "n": 3908
+  },
+  {
+   "from": 250,
+   "to": 350,
+   "original": 34.7,
+   "common": 56.8,
+   "n": 2843
+  },
+  {
+   "from": 350,
+   "to": 500,
+   "original": 38.8,
+   "common": 61.3,
+   "n": 3267
+  },
+  {
+   "from": 500,
+   "to": 800,
+   "original": 42.4,
+   "common": 63.5,
+   "n": 3866
+  },
+  {
+   "from": 800,
+   "to": null,
+   "original": 44,
+   "common": 67.9,
+   "n": 2977
+  }
+ ]
+}

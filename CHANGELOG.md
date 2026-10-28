@@ -6,6 +6,34 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.19.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged. BBBScorer 0.9.0 is prepared but not switched on.
+
+### Added
+- **Clear result** button: empties the result, the loaded card and the text boxes.
+- Leaderboard: **Hide models with under 20 cards** (remembered in the browser; card sets always show).
+- BBBScorer 0.9.0, opt-in only (`js/scorer-profile.js`, `score_all.mjs --scorer 0.9.0`): band cut-offs by prose length,
+  PLists wrapped in parentheses read as PLists, a cap on how much one repeated word or phrase can count, RP asterisks
+  removed before the sentence patterns, paragraph evenness, genre ("pulp") words at half weight, and six sentence
+  patterns that don't separate on cards switched off. Points for phrase-length W++ / PList entries were built and
+  tested but left off. `tools/build_length_bands.mjs` builds the length cut-offs from a scoring run;
+  `data/botstyle_length_bands.json` holds provisional ones from a sample. On that sample: AUC 0.862 → 0.885, short
+  AI-written cards in Common 6% → 20%, 2023 cards in Common 2% at every length (was 0.2% short, 3.9% long).
+- `docs/LISTS.md`: where every list and pattern comes from (built by us, taken from others, research, community), and
+  how to rebuild the ones we build. Each sentence pattern records its source in the code.
+- `docs/TODO.md`: a short summary of the next scorer version and what has been tried.
+- `tools/probe_names.mjs`: cheap probes for the names, places and titles models reach for, by genre (candidates
+  only, unscored).
+- Card generator: rewrites use a new human card each round (all rounds reused one card per slot before), and
+  `--rotate-seeds` does the same for plain and "don't sound like AI" requests; `--reparse --only-invalid` re-checks
+  failed cards without touching valid ones.
+
+### Changed
+- "Type or paste" reads **Hide text boxes** and is highlighted while the boxes are open.
+- Card generator accepts misspelled or renamed section headings from small models ("### DESRIPTION", "### Greeting",
+  "**Description:**" with text on the same line); such cards carry a `loose_headers` note.
+
 ## [0.18.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.

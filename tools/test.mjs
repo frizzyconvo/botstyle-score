@@ -139,6 +139,26 @@ check('interview question is not prose', !dlg.segments.some(x => x.kind === 'pro
 const wppTells = scoreCard({ description: '[Appearance:{muscular,blue eyes,blonde hair,horns,claws,fangs} Personality:{playful,confident,dominant}]\nShe rules the tower and laughs at anyone who climbs it.' });
 check('W++ commas are not missing-space typos', !(wppTells.checks.humanTells || []).some(t => t.id === 'missing_space_after'));
 check('default fields: personality not scored', scoreCard({ description: 'She bakes bread.', personality: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
+check('default fields: scenario not scored', scoreCard({ description: 'She bakes bread.', scenario: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
+// BBBScorer 0.9.0 is prepared but opt-in: the default stays 0.8.1, and 0.9.0 changes only what it says it changes
+{
+  const SP = await import('../js/scorer-profile.js');
+  check('default scorer is 0.8.1', SP.scorerVersion() === '0.8.1' && scoreCard('She bakes bread.').version === '0.8.1');
+  const { SCORER_VERSION } = await import('../js/score-card.js');
+  check('SCORER_VERSION matches the default profile', SCORER_VERSION === SP.DEFAULT_SCORER);
+  const plist = '([Name: Mira; voice: low and melodic, like wind through the rings of a distant planet; backstory: born from the quiet wish of an ancient comet, she drifts between planets and rooftops offering company and perspective; goals: to help others feel seen, to remind people that they are part of something vast and beautiful])';
+  const before = scoreCard({ description: plist }).stats.proseWords;
+  SP.setScorerProfile('0.9.0');
+  const after = scoreCard({ description: plist }).stats.proseWords;
+  check('0.9.0: PList wrapped in parentheses is not prose', before > 20 && after === 0, `${before} -> ${after}`);
+  check('0.9.0: personality still not scored', scoreCard({ description: 'She bakes bread.', personality: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
+  const wpp = '[character("Brett"){ personality("A little insecure beneath his sunny confidence" + "Tries to be helpful even when lost" + "Wants everyone to like him" + "Eagerly agrees with every suggestion" + "Looks for the silver lining" + "Calls people dude and buddy") }]';
+  check('0.9.0: compact-value points are off (tested, left out)', scoreCard({ description: wpp }).extraPoints.compactValues === 0);
+  SP.setScorerProfile('0.9.0', { compactValues: { minValues: 6, from: 2.5, to: 5, max: 20 } });
+  check('compact-value switch: long W++ values add points', scoreCard({ description: wpp, first_mes: 'Hey buddy, you made it! Come on in, grab a chair, I saved you the good one by the window.' }).extraPoints.compactValues > 0);
+  SP.setScorerProfile();
+  check('profile back to 0.8.1', scoreCard('She bakes bread.').version === '0.8.1' && scoreCard({ description: wpp }).extraPoints.compactValues === 0);
+}
 
 // 0.8.0: card score blends the separately scored parts; repetition is measured, not scored
 const { repeatsWithin, sharedBetween } = await import('../js/repetition.js');

@@ -68,6 +68,8 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 - **Score every dataset** with the current scorer (versioned, resumable, about 45 minutes):
   `npm run score-all`. Results go to `eval/scores/v<version>/`; read `notes.md` there first. Then rebuild what
   the page uses with `npm run leaderboard` and `npm run reference`.
+- **Next scorer version (0.9.0, prepared, not live):** `npm run score-all -- --scorer 0.9.0` scores into its own folder;
+  what it changes and how it tested is in [docs/TODO.md](docs/TODO.md).
 - **Score only new cards** in a dataset (what the card generator runs after each round): `npm run score-all -- --only
   generated_v2 --new`. Cards already scored by this scorer version keep their rows.
 - **Score cards at any path** (a folder of card PNG/JSON files, a Perchance characters folder, a .zip, optionally

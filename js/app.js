@@ -50,6 +50,15 @@ const store = {
 };
 
 // ---------------------------------------------------------------- loading
+// "Type or paste" reads and looks different while the text boxes are open.
+function syncManualBtn() { const open = !$('manual').hidden, b = $('manualBtn'); b.setAttribute('aria-expanded', String(open)); b.classList.toggle('on', open); b.textContent = open ? 'Hide text boxes' : 'Type or paste'; }
+// Clear result: back to an empty page (result, loaded card, field picker, link and text boxes).
+function clearResult() {
+  state.result = null; state.card = null; state.meta = null;
+  const el = $('result'); el.hidden = true; el.innerHTML = '';
+  $('picker').hidden = true; $('cardUrl').value = ''; $('descInput').value = ''; $('greetInput').value = ''; status('Ready. Paste a link, upload a card, or type text.');
+  renderBoard(); $('inputBar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 function status(msg, busy = false) { $('status').innerHTML = (busy ? '<span class="spin"></span>' : '') + msg; }
 function error(msg) { $('errors').textContent = msg || ''; }
 
@@ -87,7 +96,7 @@ function setupUi() {
   $('fetchBtn').addEventListener('click', fromLink);
   $('cardUrl').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); fromLink(); } });
   $('fileInput').addEventListener('change', e => { fromFiles([...e.target.files]); e.target.value = ''; });
-  $('manualBtn').addEventListener('click', () => { const m = $('manual'); m.hidden = !m.hidden; $('manualBtn').setAttribute('aria-expanded', String(!m.hidden)); if (!m.hidden) $('descInput').focus(); });
+  $('manualBtn').addEventListener('click', () => { const m = $('manual'); m.hidden = !m.hidden; syncManualBtn(); if (!m.hidden) $('descInput').focus(); });
   $('scoreTextBtn').addEventListener('click', fromText);
   const bar = $('inputBar');
   ['dragenter', 'dragover'].forEach(t => bar.addEventListener(t, e => { e.preventDefault(); bar.classList.add('dragover'); }));
@@ -317,7 +326,8 @@ function renderResult(r) {
     <span>Not-x-but-y per 1k chars</span><b>${nn.contrast.toFixed(2)}</b><span>Flesch-Kincaid grade</span><b>${nn.fk.toFixed(1)}</b><span>Words per sentence</span><b>${nn.sentLen.toFixed(1)}</b>
     <span>Words per paragraph</span><b>${nn.paraLen.toFixed(0)}</b><span>Dialogue (quote pairs per 1k chars)</span><b>${nn.dialogue.toFixed(2)}</b><span>MATTR${nn.n >= 500 ? '-500' : ' (TTR, short text)'}</span><b>${nn.mattr.toFixed(3)}</b>
     </div><p class="faint small">On character cards these barely separate human from AI writing; here for curiosity.</p></details>`;
-  el.innerHTML = `<h2 class="section">Result</h2><div class="res-grid"><div>${L}</div><div>${R}</div></div>`;
+  el.innerHTML = `<div class="res-head"><h2 class="section">Result</h2><button id="clearResultBtn" class="ghost clear-btn" type="button" title="Clear the result, the loaded card and the text boxes">Clear result</button></div><div class="res-grid"><div>${L}</div><div>${R}</div></div>`;
+  $('clearResultBtn').addEventListener('click', clearResult);
   bindSaveBox();
 }
 
@@ -408,16 +418,18 @@ function renderMine() {
 // ---------------------------------------------------------------- leaderboard
 // Sort order for each leaderboard group: BBBScorer median (default), original slop score, or card count. (A lazy-prompt
 // sort was dropped: most models have only 1-2 lazy-prompt cards, so it ranked noise.)
+let hideSmall = false; try { hideSmall = localStorage.getItem('bb-board-hide-small') === '1'; } catch { /* ignore */ }
 const BOARD_SORTS = { median: ['BBBScorer', x => x.median], upstream: ['Original', x => x.upstream ?? -1], n: ['# cards', x => x.n] };
 function renderBoard() {
   const B = state.board; if (!B) return;
   const sortKey = state.boardSort || 'median', sorter = (BOARD_SORTS[sortKey] || BOARD_SORTS.median)[1];
   const sorted = list => [...(list || [])].sort((a, b) => sorter(b) - sorter(a));
+  const big = m => !hideSmall || (m.n || 0) >= 20;   // "hide models with under 20 cards" (models only; card sets stay)
   const orig = v => v == null ? '' : `<span class="orig" title="Original slop-score (Sam Paech's formula) median">orig ${(+v).toFixed(1)}</span>`;
   const row = (cls, label, n, p25, med, p75, val, detail, up = null, extra = '') => `<div class="brow ${cls}"><div class="bl" title="${esc(label)}"><span class="bl-name">${esc(label)}<span class="n${n && n < 20 ? ' low' : ''}"${n && n < 20 ? ' title="Fewer than 20 cards: treat as a rough guess"' : ''}>${n ? (n < 20 ? '<span class="star">*</span>' : '') + 'n=' + n.toLocaleString() : ''}</span></span>${extra}</div>
     <div class="track"><div class="iqr" style="left:${Math.min(100, p25)}%;width:${Math.max(1, Math.min(100, p75) - Math.min(100, p25))}%"></div><div class="med" style="left:${Math.min(100, med)}%"></div></div>
     <div class="bv">${val}${orig(up)}</div>${detail ? `<div class="bdetail" hidden>${detail}</div>` : ''}</div>`;
-  let h = `<div class="board-sort small faint">Sort by: ${Object.entries(BOARD_SORTS).map(([k, [l]]) => `<button type="button" class="ghost sort-btn${k === sortKey ? ' on' : ''}" data-sort="${k}">${l}</button>`).join(' ')}</div>`;
+  let h = `<div class="board-sort small faint">Sort by: ${Object.entries(BOARD_SORTS).map(([k, [l]]) => `<button type="button" class="ghost sort-btn${k === sortKey ? ' on' : ''}" data-sort="${k}">${l}</button>`).join(' ')} <label class="check hide-small"><input type="checkbox" id="hideSmallChk"${hideSmall ? ' checked' : ''}> Hide models with under 20 cards</label></div>`;
   const mine = store.all();
   if (state.result && state.result.band.id !== 'na') { const r = state.result; h += `<div class="group-label">Yours</div>` + row('you', state.card.name || 'This card', 0, r.low, r.score, r.high, r.score.toFixed(1), ''); }
   if (mine.length >= 2) { const s = mine.map(x => x.score).sort((a, b) => a - b); const q = p => s[Math.min(s.length - 1, Math.floor(p * s.length))];
@@ -428,7 +440,7 @@ function renderBoard() {
   // Second line under the model name: range of request-style medians, and the lazy prompt's median.
   const styleInline = m => { const S = m.styles; if (!S || !(S.min && S.max) && !S.lazy) return '';
     return `<span class="bl-sub" title="Range: lowest to highest median across the request styles (lazy prompt aside). Lazy: the lazy-prompt median.">${S.min && S.max ? `<span class="nw">styles ${S.min.median.toFixed(0)}–${S.max.median.toFixed(0)}</span>` : ''}${S.min && S.max && S.lazy ? ' · ' : ''}${S.lazy ? `<span class="nw">lazy ${S.lazy.median.toFixed(0)}</span>` : ''}</span>`; };
-  h += `<div class="group-label">AI models · cards written for this test</div>` + sorted(B.models).map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
+  h += `<div class="group-label">AI models · cards written for this test</div>` + sorted(B.models.filter(big)).map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
     `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m))).join('');
   // Card sets: dates (if any) go on a second line under the name.
   const setDetail = r => `${r.n.toLocaleString()} cards${r.sub ? ` · ${esc(r.sub)}` : ''} · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`;
@@ -442,11 +454,12 @@ function renderBoard() {
   const funRow = x => x.kind === 'set' ? setRow('ref fun', x)
     : x.kind === 'failed' ? funModel('failed', x, `<span class="bl-sub"><span class="fail-chip">failed</span>${x.failedShare != null ? ` ${x.failedShare}% of its cards` : ''}</span>`)
     : funModel('fun', x, styleInline(x));
-  if (fun.length) h += `<div class="group-label">Just for fun · not ranked</div>` + ['model', 'set', 'failed'].map(k => sorted(fun.filter(x => (x.kind || 'model') === k)).map(funRow).join('')).join('');
+  if (fun.length) h += `<div class="group-label">Just for fun · not ranked</div>` + ['model', 'set', 'failed'].map(k => sorted(fun.filter(x => (x.kind || 'model') === k && (k === 'set' || big(x)))).map(funRow).join('')).join('');
   $('boardRows').innerHTML = h;
   const stale = B.version && !SAME_SCORES_AS.includes(B.version);
   $('boardNote').innerHTML = `${stale ? `<b>Built from the BBBScorer v${esc(B.version)} run</b>; this page scores with v${esc(SCORER_VERSION)}, so the leaderboard numbers will change once it's rebuilt from a v${esc(SCORER_VERSION)} run.` : `BBBScorer v${esc(SCORER_VERSION)}.`} Bars: middle half of each set's cards; line: median; n = cards in the set. <span class="star">*</span> fewer than 20 cards, so a rough guess. Click a row for details.`;
   $('boardRows').querySelectorAll('.brow').forEach(el => el.addEventListener('click', () => { const d = el.querySelector('.bdetail'); if (d) d.hidden = !d.hidden; }));
+  const hs = $('hideSmallChk'); if (hs) { hs.addEventListener('click', ev => ev.stopPropagation()); hs.addEventListener('change', () => { hideSmall = hs.checked; try { localStorage.setItem('bb-board-hide-small', hideSmall ? '1' : '0'); } catch { /* ignore */ } renderBoard(); }); }
   $('boardRows').querySelectorAll('.sort-btn').forEach(el => el.addEventListener('click', ev => { ev.stopPropagation(); state.boardSort = el.dataset.sort; try { localStorage.setItem('bb-board-sort', state.boardSort); } catch { /* ignore */ } renderBoard(); }));
 }
 

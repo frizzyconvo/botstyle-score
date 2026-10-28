@@ -1,6 +1,60 @@
 # To do
 
-Open work that isn't about scores. Scorer ideas live with the scoring-run notes, not here.
+Open work, and a short summary of where scoring changes stand.
+
+## Scoring: next version and what's been tried
+
+**BBBScorer 0.9.0 is prepared but not switched on.** The page and every stored score still use 0.8.1. The changes sit
+behind switches in `js/scorer-profile.js` and are used only when a tool asks for them
+(`node tools/score_all.mjs --scorer 0.9.0`). Before it goes live: a full rescore with 0.9.0, the length cut-offs
+rebuilt from that run (`node tools/build_length_bands.mjs`), the scale anchor checked, and the reference and
+leaderboard rebuilt.
+
+In 0.9.0:
+- **Cut-offs by length.** One 40 / 60 cut-off for every card treats short and long cards differently: a human card
+  under 150 prose words almost never reaches 60, while 3–4% of very long ones do, and short AI-written cards almost all
+  land in Original-ish. 0.9.0 cuts each length range at the same points of 2023 cards of that length.
+- **Genre words count half.** Words that human fantasy, horror, action and romance cards use as often as AI cards
+  ("realm", "crimson", "primal") count at half weight.
+- **Six sentence patterns off.** They were picked on stories; on character cards they don't separate human from AI
+  writing, or lean human ("found herself …ing", "it was as if").
+- **PList in parentheses.** `([Name: …; personality: …])` was read as prose; now it's a PList like any other.
+- **Repeats capped.** One word or phrase can count at most 2.5 times its weight per 700 words, so a topical word used
+  over and over ("eternity" on a card about an eternal god) can't carry a card.
+- **RP asterisks.** Asterisks are removed before the sentence patterns run, so `"Miss me?" *she purrs.*` is read like
+  `"Miss me?" she purrs.`
+- **Paragraph evenness.** AI-written cards keep paragraphs close to the same length; 0.9.0 adds a few points for very
+  even paragraphs and takes a few off for very uneven ones.
+
+**How 0.9.0 does on a sample** (23.5k cards from 2023, mostly human; 2.9k AI-written; half the 2023 cards set the
+length cut-offs and the other half tests them):
+
+| | 0.8.1 | 0.9.0 |
+|---|---|---|
+| Separation (AUC) | 0.862 | 0.885 |
+| 2023 cards landing in Common | 1.6% | 2.0% |
+| … under 150 / over 800 prose words | 0.2% / 3.9% | 2.3% / 2.3% |
+| AI-written cards in Common | 27% | 31% |
+| … short (under 250 words) / compact requests / in voice / long (800+) | 6% / 13% / 8% / 41% | 20% / 20% / 11% / 43% |
+| Short AI-written cards in Original-ish | 82% | 60% |
+
+Two candidates were tested and left out of 0.9.0: points for phrase-length W++ / PList entries (half the 2023 compact
+cards write entries that way too, so it raised human compact cards as much as AI ones), and switching UnslopNemo's
+RP-reply tells back on (no gain). Down-weighting genre ("pulp") words by half and switching off six sentence patterns
+that don't separate on cards (they were picked on stories) went in.
+
+Tried and not used (each may come back with more data): scoring the higher of description and greeting instead of a
+blend; separate scale anchors for description and greeting; repetition as an AI sign (on cards, people repeat
+themselves more than models); personality and scenario in the default fields; AI-favorite names in the score;
+UnslopNemo's RP phrases as a scored pattern (now shown as RP slop); and these sentence habits, which don't separate
+human from AI writing on cards: "not X. not Y. just Z.", "as if" similes, RP body language (breath hitched, jaw
+clenched), zeugma, "-ing" sentence openers, trailing "-ing" clauses, three-adjective lists, repeated sentence openers,
+"quietly / deeply" adverbs (already covered by the word list) and sentence-length variety. Clipped fragments ("Not
+yet." "Mostly.") show promise in first-person greetings but need speech separated from narration first.
+
+Still open: re-mining the word lists from current models' character cards (holding some models out, since the current
+lists were built partly from the outputs of models on the leaderboard), the pulp read inside the score, a stricter
+human baseline, AI-themed characters, and comparing scores by percentile instead of points in the run notes.
 
 ## Linux version (or a setup that runs on Linux)
 

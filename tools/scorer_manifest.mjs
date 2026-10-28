@@ -63,7 +63,7 @@ function manifest(ref) {   // ref = null -> working tree
     mixed: /MIXED_GAP/.test(sc) ? `flag when both parts ≥ ${m(sc, /MIXED_MIN_WORDS = (\d+)/)} prose words and ≥ ${m(sc, /MIXED_GAP = (\d+)/)} points apart` : 'none',
     dialogue: /subkind: speech \? 'dialogue'|subkind === 'dialogue'|'dialogue'/.test(read('js/card-preprocess.js') || '') ? 'in-character dialogue counted as prose' : 'labeled/bulleted dialogue lines dropped as lists',
     structures: { contrast: 'not-x-but-y', patterns: patterns.map(p => ({ ...p, off: disabled.includes(p.id) })) },
-    lists: ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_names.json', 'botstyle_pulp_words.json', 'botstyle_card_drop.json', 'botstyle_calibration.json', 'botstyle_reference.json'].map(listInfo).filter(Boolean),
+    lists: ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_names.json', 'botstyle_pulp_words.json', 'botstyle_card_drop.json', 'botstyle_calibration.json', 'botstyle_reference.json', 'botstyle_length_bands.json'].map(listInfo).filter(Boolean),
     changelog,
   };
 }
@@ -76,15 +76,20 @@ function toMd(x) {
   row('Scale anchor', x.anchor ? `${x.anchor.source}: words ${x.anchor.p90.words}, phrases ${x.anchor.p90.phrases}, structures ${x.anchor.p90.structures}` : null);
   row('Repeats', x.repeats); row('Bands', x.bands); row('Band labels', x.bandLabels); row('Em-dash points', x.emdash); row('Chatbot-leftover points', x.artifacts);
   row('Not-x-but-y weight', x.contrastWeight); row('Mixed cards', x.mixed); row('Dialogue', x.dialogue); row('Low confidence under', x.minProseWords ? `${x.minProseWords} prose words` : null);
-  row('Scores identical to', x.sameScoresAs);
+  row('Scores identical to', x.profile ? null : x.sameScoresAs);
+  if (x.profile) row('Rule switches (js/scorer-profile.js)', Object.entries(x.profile).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join('; '));
   L.push('', '## Sentence-structure patterns', '', x.structures.patterns.map(p => `${p.id} ${p.weight}${p.off ? ' (off)' : ''}`).join(' · ') || '(none found)');
   L.push('', '## Data files', '', '| File | Entries | sha256 (first 12) |', '|---|---|---|', ...x.lists.map(l => `| ${l.file} | ${l.entries ?? '–'} | ${l.sha256} |`));
   if (x.changelog) L.push('', '## Changelog entry', '', x.changelog.replace(/^## /, '### '));
   return L.join('\n') + '\n';
 }
 
+// --scorer <v>: a version prepared in js/scorer-profile.js (working tree only): same code, different rule switches.
+const PROFILE = opt('--scorer') ? (await import('../js/scorer-profile.js')).PROFILES[opt('--scorer')] : null;
 function writeFor(version, ref) {
-  const x = manifest(ref); if (!x.version) { console.log(`  ${version}: could not read the scorer at ${ref}`); return; }
+  const x = manifest(ref);
+  if (PROFILE && !ref) { x.version = opt('--scorer'); x.profile = PROFILE; x.bands = PROFILE.lengthBands ? 'by prose length (data/botstyle_length_bands.json)' : x.bands; }
+  if (!x.version) { console.log(`  ${version}: could not read the scorer at ${ref}`); return; }
   const dir = runDir(x.version); mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'SCORER.md'), toMd(x)); writeFileSync(join(dir, 'scorer.json'), JSON.stringify(x, null, 1));
   console.log(`  v${x.version}: ${join(dir, 'SCORER.md')} (${ref || 'working tree'})`);

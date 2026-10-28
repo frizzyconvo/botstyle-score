@@ -6,6 +6,7 @@
 //   node tools/score_all.mjs --only korshuk,perchance
 //   node tools/score_all.mjs --limit 200     # quick trial: first 200 cards per dataset (-> _trial/)
 //   node tools/score_all.mjs --force         # rescore datasets already done for this version
+//   node tools/score_all.mjs --scorer 0.9.0  # score with the prepared next scorer version (eval/scores/v0.9.0/)
 //   node tools/score_all.mjs --only generated_v2 --new   # score only cards not in this version's file yet (appends;
 //                                            # what generate_ai_cards.mjs runs after a generation round)
 //   node tools/score_all.mjs --add "C:\cards\pack.zip\books\*.png" --name jammy_books [--label ai|human|mixed|unknown]
@@ -32,7 +33,8 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSy
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { loadAll, scoreCard, SCORER_VERSION } from '../js/score-card.js';
+import { loadAll, scoreCard } from '../js/score-card.js';
+import { setScorerProfile, scorerVersion } from '../js/scorer-profile.js';
 import { setPosTagger } from '../js/pos-tagger.js';
 import { formatLabel } from '../js/card-style.js';
 import { disparity, DISPARITY } from '../js/compare-original.js';
@@ -62,6 +64,9 @@ const upstreamScore = text => { const u = upstreamParts(text); return u ? u.scor
 // Disparity marks and reasons: js/compare-original.js (shared with the page).
 const argv = process.argv.slice(2);
 const opt = k => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : null);
+// --scorer 0.9.0: score with the prepared next version (its own folder, eval/scores/v0.9.0/). Default: 0.8.1.
+if (opt('--scorer')) setScorerProfile(opt('--scorer'));
+const SCORER_VERSION = scorerVersion();
 let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force'), NEW_ONLY = argv.includes('--new') && !argv.includes('--force');
 // --limit trial runs go to a _trial subfolder so they never count as a finished dataset
 const OUT = join(ROOT, 'eval', 'scores', 'v' + SCORER_VERSION, ...(LIMIT ? ['_trial'] : []));
@@ -231,7 +236,7 @@ const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) =
 const summary = existsSync(join(OUT, 'summary.json')) ? JSON.parse(readFileSync(join(OUT, 'summary.json'), 'utf-8')) : { version: SCORER_VERSION, datasets: {} };
 
 // Record exactly which scorer this run used (weights, lists, anchors, bands) next to its results.
-if (!LIMIT) { try { const { spawnSync } = await import('child_process'); spawnSync(process.execPath, [join(ROOT, 'tools', 'scorer_manifest.mjs')], { cwd: ROOT, stdio: 'ignore' }); } catch { /* manifest is optional */ } }
+if (!LIMIT) { try { const { spawnSync } = await import('child_process'); spawnSync(process.execPath, [join(ROOT, 'tools', 'scorer_manifest.mjs'), ...(opt('--scorer') ? ['--scorer', opt('--scorer')] : [])], { cwd: ROOT, stdio: 'ignore' }); } catch { /* manifest is optional */ } }
 const todo = DATASETS.filter(ds => !ONLY || ONLY.includes(ds.name));
 say(`BBBScorer ${SCORER_VERSION}: ${todo.length} dataset(s) -> ${OUT}`);
 let dsIndex = 0;

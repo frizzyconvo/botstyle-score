@@ -23,9 +23,11 @@
 //                 risk of running out of tokens down); omitted by default. A card whose reasoning
 //                 eats the whole budget is retried once at effort=low (--no-retry to skip).
 //   --retry-invalid  move cards flagged invalid to <out>_invalid.jsonl and generate them again.
-//   --reparse     re-split / re-validate the existing cards with the current parser (no API calls).
+//   --reparse     re-split / re-validate the existing cards with the current parser (no API calls). --only-invalid
+//                 leaves valid cards untouched (their scores stay right); --dry-run only reports.
 //   --include-failed  also run models marked failed in tools/_model_groups.mjs (skipped by default).
 //   --failures    list models with failed requests (<out>_errors.jsonl) or no valid cards, then exit.
+//   --rotate-seeds  rounds after the first use new seeds for fresh / antislop cards too (rewrites always do).
 //   --more        add another round for each model even if its cards exist (same prompts and seeds, new
 //                 samples; ids end in |r2, |r3…). --round N fills a specific round instead.
 //   --waste-limit N   skip the rest of a model for this run after N wasted cards in a row (failed request, reasoning
@@ -190,13 +192,25 @@ async function ask(model, prompt, over = {}) {
 }
 
 // ---------------------------------------------------------------- parse + validate
+// Section headings models use for the two parts. Small models (Llama 3.2 1B / 3B, Llama 3.1 8B) misspell or rename
+// them ("### DESRIPTION", "### Greeting", "**Description:** text on the same line"), so the second pass accepts those.
+const DESC_H = /^[ \t]*(?:#{1,3}[ \t]*)?\**[ \t]*DESCRIPTION[ \t]*\**[ \t]*:?[ \t]*\**[ \t]*$/im;
+const FIRST_H = /^[ \t]*(?:#{1,3}[ \t]*)?\**[ \t]*FIRST MESSAGE[ \t]*\**[ \t]*:?[ \t]*\**[ \t]*$/im;
+const DESC_LOOSE = /^[ \t]*(?:#{1,3}[ \t]*)?\**[ \t]*(?:CHARACTER[ \t]+)?DES?C?R?I?P?T?I?O?N(?<=DESCRIPTION|DESRIPTION|DESCRIPTON|DESCRITION|DESCRIPION)[ \t]*\**[ \t]*:?[ \t]*\**[ \t]*/im;
+const FIRST_LOOSE = /^[ \t]*(?:#{1,3}[ \t]*)?\**[ \t]*(?:FIRST[ \t]+MESSAGE|FIRST[ \t]+MES|GREETING|OPENING(?:[ \t]+MESSAGE)?|INTRO(?:DUCTION|DUCTORY)?[ \t]+MESSAGE|INITIAL[ \t]+MESSAGE|FIRST[ \t]+GREETING)[ \t]*\**[ \t]*:?[ \t]*\**[ \t]*/im;
 function split(raw) {
+  const strict = splitWith(raw, DESC_H, FIRST_H);
+  if (strict.headers_found && strict.first_mes) return strict;
+  const loose = splitWith(raw, DESC_LOOSE, FIRST_LOOSE);
+  return loose.headers_found && loose.first_mes && loose.description ? { ...loose, loose: true } : strict;
+}
+function splitWith(raw, DH, FH) {
   const t = String(raw || '');
   // '### DESCRIPTION', 'DESCRIPTION:', '**Description**' ... (MythoMax drops the ###)
-  const m = t.match(/^[ \t]*(?:#{1,3}[ \t]*)?\**[ \t]*DESCRIPTION[ \t]*\**[ \t]*:?[ \t]*\**[ \t]*$/im);
+  const m = t.match(DH);
   const preamble = m ? t.slice(0, m.index).trim() : '';
   const body = m ? t.slice(m.index + m[0].length) : t;
-  const g = body.match(/^[ \t]*(?:#{1,3}[ \t]*)?\**[ \t]*FIRST MESSAGE[ \t]*\**[ \t]*:?[ \t]*\**[ \t]*$/im);
+  const g = body.match(FH);
   const description = (g ? body.slice(0, g.index) : body).trim();
   let first_mes = g ? body.slice(g.index + g[0].length).trim() : '';
   // trailing notes after the greeting ("---\nNotes: …", "### Tips") are the model talking to the
@@ -224,6 +238,7 @@ function validate(raw, parts, finish) {
   if (/\b(?:non-?explicit|suggestive \(non|can['’]?t create explicit)/i.test(parts.preamble)) flags.push('toned_down');
   if (parts.preamble && !/^#+\s|^\**[\w' ]{0,60}(?:card|bot|profile)\**$/i.test(parts.preamble)) flags.push('has_preamble');
   if (parts.postscript) flags.push('has_postscript');
+  if (parts.loose) flags.push('loose_headers');   // soft: headings were misspelled or renamed (small models)
   const hard = ['empty', 'refusal', 'cut_off', 'asked_question', 'truncated', 'reasoning_exhausted', 'no_greeting', 'no_headers'];
   return { valid: !flags.some(f => hard.includes(f)), flags };
 }
@@ -265,15 +280,21 @@ for (let k = 0; k < PER; k++) {
 // e.g. after the parser learns a new heading style. Rewrites OUT in place (backup: OUT.bak).
 if (args.reparse) {
   const lines = readFileSync(OUT, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l));
-  writeFileSync(OUT + '.bak', lines.map(l => JSON.stringify(l)).join('\n') + '\n');
+  if (!args['dry-run']) writeFileSync(OUT + '.bak', lines.map(l => JSON.stringify(l)).join('\n') + '\n');
   let fixed = 0;
+  const onlyInvalid = !!args['only-invalid'], dry = !!args['dry-run'], recovered = {};
   for (const r of lines) {
+    if (onlyInvalid && r.valid !== false) continue;
     const parts = split(r.raw); const v = validate(r.raw, parts, r.finish_reason);
+    if (!r.valid && v.valid) recovered[r.model] = (recovered[r.model] || 0) + 1;
+    if (dry) { if (v.valid !== r.valid) fixed++; continue; }
     if (v.valid !== r.valid) fixed++;
     Object.assign(r, { description: parts.description, first_mes: parts.first_mes, preamble: parts.preamble, postscript: parts.postscript, valid: v.valid, flags: v.flags.concat((r.flags || []).filter(f => f === 'retried_low_reasoning')) });
   }
+  if (Object.keys(recovered).length) console.log('now valid: ' + Object.entries(recovered).map(([m, k]) => `${m} ${k}`).join(', '));
+  if (dry) { console.log(`--dry-run: ${fixed} card(s) would change validity; nothing written`); process.exit(0); }
   writeFileSync(OUT, lines.map(l => JSON.stringify(l)).join('\n') + '\n');
-  console.log(`reparsed ${lines.length} cards in ${OUT}; ${fixed} changed validity (backup ${OUT}.bak)`);
+  console.log(`reparsed ${onlyInvalid ? 'the invalid cards' : lines.length + ' cards'} in ${OUT}; ${fixed} changed validity (backup ${OUT}.bak)`);
   process.exit(0);
 }
 if (args['retry-invalid'] && existsSync(OUT) && !DRY) {
@@ -300,7 +321,17 @@ for (const model of (models.length ? models : ['(dry-run)'])) {
     // sampler settings other than the default become part of the id (same prompt and seed, different sampling)
     const samp = (TEMP !== DEFAULT_TEMP ? `|t${TEMP}` : '') + (MIN_P !== null ? `|mp${MIN_P}` : '');
     const id = [model, p.mode, p.variant, p.format, p.k].join('|') + samp + (round > 1 ? `|r${round}` : '');
-    if (!done.has(id)) jobs.push({ id, model, round, ...p });
+    // New seeds for later rounds: rewrites always (round 1 reused one human card per k for every round, and that card
+    // was a pasted wiki article), fresh / antislop with --rotate-seeds (wider topic spread for list mining). The seed
+    // depends on the round, not the model, so every model still gets the same cards in the same round.
+    let job = p;
+    if (round > 1 && (p.mode === 'rewrite' || args['rotate-seeds'])) {
+      const seed = pick(`${p.mode === 'rewrite' ? 'rewrite' : 'concept|' + p.format}|${p.k}|r${round}`);
+      const prompt = p.mode === 'rewrite' ? REWRITE[p.variant] + '\n\n' + cardText(seed) + FORMAT_SUFFIX
+        : fill(FORMATS[p.format][p.k % FORMATS[p.format].length], seed) + (p.mode === 'antislop' ? '\n\n' + ANTISLOP[p.variant] : '') + FORMAT_SUFFIX;
+      job = { ...p, seed, prompt };
+    }
+    if (!done.has(id)) jobs.push({ id, model, round, ...job });
   }
 }
 if (args.more || args.round) console.log('rounds: ' + [...new Set(jobs.map(j => `${j.model} r${j.round}`))].join(', '));
