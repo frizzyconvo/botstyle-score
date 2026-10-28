@@ -57,7 +57,7 @@ if (opt('--shard')) {
   for (const c of jsonl(SAMPLE)) {
     if (++i % n !== k - 1) continue;
     const r = scoreCard(c);
-    const row = { set: c.set, src: c.src, df: S(r), d: r.parts.description, g: r.parts.greeting };
+    const row = { set: c.set, src: c.src, df: S(r), d: r.parts.description, g: r.parts.greeting, rep: { d: r.repetition.description.per1k, g: r.repetition.greeting.per1k, between: r.repetition.between.per1k }, rates: r.rates, emdash: r.emdashPoints, art: r.artifactPoints };
     buf.push(JSON.stringify(row)); m++;
     if (buf.length >= 200) { appendFileSync(out, buf.join('\n') + '\n'); buf = []; }
   }

@@ -38,7 +38,8 @@ Every tool takes `--help`. Local-only helper scripts go in `dev/` (not committed
 * Third part of the score: upstream’s 15% was three-word phrases. Here it’s sentence structures: “not X but Y” plus 27 patterns (“a flicker of”, “the air was thick”, “a mix of X and Y”…). Each pattern was kept only if it separated human from AI text in both test sets.
 * Extras: em-dashes add up to 10 points. Clear chatbot leftovers (preambles, sign-offs, refusals, chat-template tokens) add 40 each, up to 80.
 * Read-outs: there’s an uncertainty range and a low-confidence warning under 150 words of prose. Human tells, craft notes, AI-favourite names, card format, genre, pulp score, archetype and texture are shown but not scored.
-* Bands: 50 / 75, set on 5,313 human 2023 cards and 1,061 AI-written cards. Mixed cards (description and greeting far apart) are flagged.
+* Description and first message are scored separately and blended (each up to 400 words), so a long description can't hide the greeting.
+* Bands: 40 / 60, set on 5,313 human 2023 cards and 1,061 AI-written cards. Mixed cards (description and greeting far apart) are flagged.
 
 ## Results on the shared test sets
 

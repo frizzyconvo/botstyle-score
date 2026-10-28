@@ -13,9 +13,11 @@
 // ms per card and words per second for each dataset (performance tracking). Compare two versions with tools/compare_scores.mjs.
 // Card datasets are read from ../card-datasets (see --help in each flattener); missing ones are skipped.
 // The first run also flattens JanitorAI's 188,834 card files into one JSONL cache (slowest step).
+// Progress (dataset n of N, cards done, % and time left) prints every 15 s and goes to progress.log in the
+// output folder (or --log <file>). A lock file stops two scoring runs at once (--ignore-lock overrides).
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, renameSync, openSync, readSync, closeSync, writeSync, appendFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, renameSync, openSync, readSync, closeSync, writeSync, appendFileSync, unlinkSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
@@ -74,6 +76,25 @@ const ONLY = opt('--only') ? opt('--only').split(',') : null, LIMIT = Number(opt
 // --limit trial runs go to a _trial subfolder so they never count as a finished dataset
 const OUT = join(ROOT, 'eval', 'scores', 'v' + SCORER_VERSION, ...(LIMIT ? ['_trial'] : []));
 mkdirSync(OUT, { recursive: true });
+
+// Lock: one scoring run at a time (generate_ai_cards.mjs checks it before scoring new cards).
+const LOCK = join(ROOT, 'eval', 'scores', '.score_all.lock');
+if (existsSync(LOCK) && !argv.includes('--ignore-lock')) {
+  const age = (Date.now() - statSync(LOCK).mtimeMs) / 60000;
+  if (age < 10) { console.log(`Another scoring run looks active (${LOCK}, updated ${age.toFixed(0)} min ago). Wait for it, or pass --ignore-lock.`); process.exit(3); }
+}
+const touchLock = () => { try { writeFileSync(LOCK, JSON.stringify({ pid: process.pid, at: new Date().toISOString(), version: SCORER_VERSION })); } catch { /* ignore */ } };
+touchLock();
+const dropLock = () => { try { if (existsSync(LOCK) && JSON.parse(readFileSync(LOCK, 'utf-8')).pid === process.pid) unlinkSync(LOCK); } catch { /* ignore */ } };
+process.on('exit', dropLock); process.on('SIGINT', () => { dropLock(); process.exit(130); });
+
+// Progress: a line every few seconds on screen and in the log (--log <file>, default eval/scores/v<ver>/progress.log).
+const LOGFILE = argv.includes('--log') ? resolve(argv[argv.indexOf('--log') + 1]) : join(OUT, 'progress.log');
+const say = msg => { const line = `[${new Date().toLocaleTimeString()}] ${msg}`; console.log(line); try { appendFileSync(LOGFILE, line + '\n'); } catch { /* ignore */ } };
+const fmtDur = s => s < 90 ? `${Math.round(s)}s` : s < 5400 ? `${Math.round(s / 60)} min` : `${(s / 3600).toFixed(1)} h`;
+// Card counts up front, so progress can show a percentage and an ETA. JSONL files: count lines (fast).
+function countLines(p) { if (!p || !existsSync(p)) return null; const fd = openSync(p, 'r'), buf = Buffer.alloc(8 << 20); let n = 0, k, last = 10;
+  try { while ((k = readSync(fd, buf, 0, buf.length, null)) > 0) { for (let i = 0; i < k; i++) if (buf[i] === 10) n++; last = buf[k - 1]; } } finally { closeSync(fd); } return n + (last !== 10 ? 1 : 0); }
 
 const readJsonl = p => existsSync(p) ? readFileSync(p, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l)) : [];
 function* jsonlStream(p) {   // reads in 4 MB chunks, so the ~1 GB JanitorAI cache never sits in memory whole
@@ -186,19 +207,26 @@ function writeNotes(name, rows) {
     + `- Why BBB is higher: ${reasons(up)}\n- Why the original is higher: ${reasons(down)}\n`
     + (up.length ? `\nBiggest "BBB higher":\n${ex(up)}\n` : '') + (down.length ? `\nBiggest "original higher":\n${ex(down)}\n` : '');
   appendFileSync(NOTES, md);
-  console.log(`  notes: Spearman ${spearman.toFixed(2)}, ${flagged.length} disparities (${vb.length} very big)${warn.length ? ' — CHECK: ' + warn.join('; ') : ''}`);
+  say(`  notes: Spearman ${spearman.toFixed(2)}, ${flagged.length} disparities (${vb.length} very big)${warn.length ? ' — CHECK: ' + warn.join('; ') : ''}`);
 }
 
 const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
 const summary = existsSync(join(OUT, 'summary.json')) ? JSON.parse(readFileSync(join(OUT, 'summary.json'), 'utf-8')) : { version: SCORER_VERSION, datasets: {} };
 
+const todo = DATASETS.filter(ds => !ONLY || ONLY.includes(ds.name));
+say(`BBBScorer ${SCORER_VERSION}: ${todo.length} dataset(s) -> ${OUT}`);
+let dsIndex = 0;
 for (const ds of DATASETS) {
   if (ONLY && !ONLY.includes(ds.name)) continue;
+  dsIndex++;
   const outFile = join(OUT, ds.name + '.jsonl');
   if (existsSync(outFile) && !FORCE) { console.log(`${ds.name}: already scored for v${SCORER_VERSION} (use --force to redo)`); continue; }
   if (ds.name === 'jaicards') { const c = await jaicardsCache(); if (!c) { console.log('jaicards: not found, skipped'); continue; } ds.rows = () => jsonlStream(c); }
   if (ds.need && !existsSync(ds.need)) { console.log(`${ds.name}: ${ds.need} not found, skipped`); continue; }
   const t0 = Date.now(), startedAt = new Date().toISOString(); const rows = []; let n = 0, totalWords = 0;   // rows are small (no card text)
+  const total = ds.name === 'jaicards' ? countLines(join(CARDS, 'jaicards-cards-js', 'jaicards_cards.jsonl')) : ds.need ? countLines(ds.need) : null;
+  say(`[${dsIndex}/${todo.length}] ${ds.name}: scoring${total ? ` ${total.toLocaleString()} cards` : ''}…`);
+  let lastSay = Date.now();
   for (const raw of ds.rows()) {
     if (raw.valid === false || (ds.skip && ds.skip.has(raw.id))) continue;
     if (LIMIT && n >= LIMIT) break;
@@ -208,14 +236,19 @@ for (const ds of DATASETS) {
     const up = upstreamParts(r.text), disp = disparity(r, up);
     rows.push({ id: c.id, name: String(c.name || '').slice(0, 60), dataset: ds.name, label: typeof ds.label === 'function' ? ds.label(c) : ds.label, createdAt: c.createdAt, model: raw.model, mode: raw.mode, round: raw.round,
       version: r.version, score: +r.score.toFixed(2), upstream: up ? up.score : null, upstreamParts: up, disparity: disp,
-      desc: r.parts.description ? r.parts.description.score : null, greet: r.parts.greeting ? r.parts.greeting.score : null, mixed: r.mixed, low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,
+      desc: r.parts.description ? r.parts.description.score : null, greet: r.parts.greeting ? r.parts.greeting.score : null, joint: +r.joint.score.toFixed(2), mixed: r.mixed,
+      repeats: { desc: r.repetition.description.per1k, greet: r.repetition.greeting.per1k, between: r.repetition.between.per1k }, low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,
       proseWords: r.stats.proseWords, totalWords: r.stats.totalWords, format: r.format.format, greeting: r.greeting ? r.greeting.primary : null, type: r.type,
       comp: Object.fromEntries(Object.entries(r.components).map(([k, v]) => [k, +v.toFixed(3)])), emdashPoints: +r.emdashPoints.toFixed(2), artifactPoints: r.artifactPoints,
       paraCv: r.texture.paraCv === null ? null : +r.texture.paraCv.toFixed(3), aiStyleLikelihood: r.experimental.aiStyleLikelihood === null ? null : +r.experimental.aiStyleLikelihood.toFixed(3),
       tags: r.tags.map(t => t.id), genre: r.genre.primary, genre2: r.genre.secondary, archetype: r.archetype.id,
       pulp: r.pulp ? r.pulp.score : null, pulpAdjusted: r.pulp ? r.pulp.adjusted : null, pulpFlag: r.pulp ? r.pulp.flag : null });
     totalWords += r.stats.totalWords || 0;
-    if (n % 5000 === 0) console.log(`  ${new Date().toISOString().slice(11, 19)} ${ds.name}: ${n} scored, ${(totalWords / Math.max(1, (Date.now() - t0) / 1000)).toFixed(0)} words/s`);
+    if (Date.now() - lastSay > 15000) {
+      lastSay = Date.now(); touchLock();
+      const secs = (Date.now() - t0) / 1000, rate = n / Math.max(1, secs);
+      say(`[${dsIndex}/${todo.length}] ${ds.name}: ${n.toLocaleString()}${total ? ` / ${total.toLocaleString()} (${(100 * n / total).toFixed(1)}%)` : ''} cards, ${Math.round(rate * 60).toLocaleString()} cards/min${total ? `, about ${fmtDur((total - n) / rate)} left` : ''}`);
+    }
   }
   writeFileSync(outFile, rows.map(x => JSON.stringify(x)).join('\n') + '\n');
   const ok = rows.filter(x => !x.error && x.reliable && !x.nonEnglish);
@@ -229,6 +262,6 @@ for (const ds of DATASETS) {
   const secs = (Date.now() - t0) / 1000;
   appendFileSync(join(OUT, 'run-log.jsonl'), JSON.stringify({ dataset: ds.name, version: SCORER_VERSION, startedAt, endedAt: new Date().toISOString(), cards: rows.length, words: totalWords,
     seconds: +secs.toFixed(1), msPerCard: +(1000 * secs / Math.max(1, rows.length)).toFixed(2), wordsPerSecond: Math.round(totalWords / Math.max(0.001, secs)), node: process.version, platform: process.platform }) + '\n');
-  console.log(`${new Date().toISOString().slice(11, 19)} ${ds.name}: ${rows.length} cards, ${totalWords.toLocaleString()} words, ${Math.round(totalWords / Math.max(0.001, secs))} words/s, median ${summary.datasets[ds.name].median?.toFixed(1)} (reliable ${ok.length}) in ${((Date.now() - t0) / 1000).toFixed(0)}s -> ${outFile}`);
+  say(`[${dsIndex}/${todo.length}] ${ds.name} done: ${rows.length} cards, ${totalWords.toLocaleString()} words, ${Math.round(totalWords / Math.max(0.001, secs))} words/s, median ${summary.datasets[ds.name].median?.toFixed(1)} (reliable ${ok.length}) in ${((Date.now() - t0) / 1000).toFixed(0)}s -> ${outFile}`);
 }
-console.log(`done. Results in ${OUT}`);
+say(`done. Results in ${OUT}; read notes.md there first.`);

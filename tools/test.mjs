@@ -140,5 +140,14 @@ const wppTells = scoreCard({ description: '[Appearance:{muscular,blue eyes,blond
 check('W++ commas are not missing-space typos', !(wppTells.checks.humanTells || []).some(t => t.id === 'missing_space_after'));
 check('default fields: personality not scored', scoreCard({ description: 'She bakes bread.', personality: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
 
+// 0.8.0: card score blends the separately scored parts; repetition is measured, not scored
+const { repeatsWithin, sharedBetween } = await import('../js/repetition.js');
+const descTxt = fx('plain_human.txt'), greetTxt = fx('giallo.txt');
+const blended = scoreCard({ description: descTxt, first_mes: greetTxt });
+check('card score lies between its part scores', blended.score >= Math.min(blended.parts.description.score, blended.parts.greeting.score) - 0.01 && blended.score <= Math.max(blended.parts.description.score, blended.parts.greeting.score) + 0.01, JSON.stringify([blended.score, blended.parts.description.score, blended.parts.greeting.score]));
+check('joint score kept alongside', typeof blended.joint.score === 'number');
+check('repeats inside a text are counted', repeatsWithin('She walks the long road home every night. '.repeat(10)).count > 0);
+check('different texts share nothing', sharedBetween(descTxt, 'Completely unrelated words about trains, stations and timetables. '.repeat(10)).count === 0);
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

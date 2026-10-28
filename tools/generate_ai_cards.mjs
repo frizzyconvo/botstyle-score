@@ -27,6 +27,8 @@
 //   --failures    list models with failed requests (<out>_errors.jsonl) or no valid cards, then exit.
 //   --more        add another round for each model even if its cards exist (same prompts and seeds, new
 //                 samples; ids end in |r2, |r3…). --round N fills a specific round instead.
+//   --no-score    don't score the new cards when the run finishes (by default it runs
+//                 score_all.mjs --only generated_v2 --force, unless another scoring run is active).
 // Each card records at (timestamp), elapsed_ms and out_words; failed requests go to <out>_errors.jsonl.
 //
 // Reads BASE_URL and API_KEY from .env (OpenRouter works). Seeds: JSONL with name / tagline /
@@ -337,3 +339,14 @@ async function worker() {
 }
 await Promise.all(Array.from({ length: CONC }, worker));
 console.log(`finished: ${n} written to ${OUT} (${bad} flagged invalid); reported cost $${spent.toFixed(3)}`);
+
+// Score the new cards straight away (BBBScorer + original formula), unless --no-score or nothing was written.
+// score_all refuses to start while another scoring run is active (exit code 3), so they never collide.
+const DATASET_FOR = { 'ai_cards_v2.jsonl': 'generated_v2', 'ai_cards.jsonl': 'generated_v1' };
+const dsName = DATASET_FOR[OUT.replace(/\\/g, '/').split('/').pop()];
+if (n > 0 && !args['no-score'] && dsName) {
+  console.log(`\nscoring ${dsName} with the current scorer…`);
+  const { spawnSync } = await import('child_process');
+  const r = spawnSync(process.execPath, ['tools/score_all.mjs', '--only', dsName, '--force'], { stdio: 'inherit' });
+  if (r.status === 3) console.log(`Not scored now: another scoring run is active. Run later: node tools/score_all.mjs --only ${dsName} --force`);
+} else if (n > 0 && !dsName) console.log(`(not scored automatically: ${OUT} isn't one of the scored datasets)`);

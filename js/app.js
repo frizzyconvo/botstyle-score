@@ -232,9 +232,12 @@ function renderResult(r) {
     ${r.emdash && r.emdash.points > 0 ? `<div class="note">Em-dashes: ${r.emdash.count} (${r.emdash.rate.toFixed(1)} per 1k words) → +${r.emdash.points.toFixed(1)}</div>` : ''}
     <div class="note">Scored ${st.proseWords} prose words of ${st.totalWords} (${st.structuredWords} in lists/W++/key-value lines, ${st.boilerplateWords} in boilerplate).
       ${st.proseWords < MIN_PROSE_WORDS && band.id !== 'na' ? ' <b>Short: low confidence.</b>' : ''}${st.nonEnglish ? ' <b>Doesn\'t look like English; the word lists are English-only.</b>' : ''}</div>`;
+  // The description and first message are always separate inputs; say so when one is missing.
+  const cc0 = state.card || {}, noDesc = !String(cc0.description || '').trim(), noGreet = !String(cc0.first_mes || '').trim();
+  if (noDesc || noGreet) L += `<div class="alert"><b>${noDesc && noGreet ? 'No description or first message.' : noDesc ? 'No description.' : 'No first message.'}</b> ${noDesc ? 'Every card should have a description; ' : ''}${noDesc && !noGreet ? 'this score is the first message alone.' : noGreet && !noDesc ? 'This score is the description alone. If the greeting is pasted into the description box, move it to the first-message box.' : ''}</div>`;
   const P = r.parts || {}, partTxt = [['Description', P.description], ['Greeting', P.greeting]].filter(([, p]) => p && p.proseWords >= 60)
     .map(([l, p]) => `${l} <b>${p.score.toFixed(1)}</b>${p.reliable ? '' : ' <span class="faint">(short)</span>'}`);
-  if (r.mixed) L += `<div class="alert"><b>Mixed card:</b> the ${r.mixed.higher} reads ${r.mixed.gap.toFixed(0)} points more AI-styled than the ${r.mixed.higher === 'greeting' ? 'description' : 'greeting'} (${partTxt.join(' · ')}). Often a hand-written ${r.mixed.higher === 'greeting' ? 'description with an AI-written greeting' : 'greeting with an AI-written description'}; the card score treats them as one text.</div>`;
+  if (r.mixed) L += `<div class="alert"><b>Mixed card:</b> the ${r.mixed.higher} reads ${r.mixed.gap.toFixed(0)} points more AI-styled than the ${r.mixed.higher === 'greeting' ? 'description' : 'greeting'} (${partTxt.join(' · ')}). Often a hand-written ${r.mixed.higher === 'greeting' ? 'description with an AI-written greeting' : 'greeting with an AI-written description'}. The card score blends the two by length.</div>`;
   else if (partTxt.length > 1) L += `<div class="note">Each part alone: ${partTxt.join(' · ')}.</div>`;
   if (r.pulp && band.id !== 'na') {
     const P = r.pulp;
@@ -265,6 +268,12 @@ function renderResult(r) {
   if (r.names.length) R += `<div class="sec"><h3>AI-favourite names</h3><span class="faint small">Not scored: characters can have these names too.</span><div>${r.names.map(x => `<span class="tag">${esc(x.item)}</span>`).join('')}</div></div>`;
   R += group('Human tells', r.checks.humanTells || [], 'Mistakes models almost never make.');
   R += group('Craft notes', r.checks.craftNotes || [], 'Card-writing issues anyone can introduce.');
+  // Repeated wording: a writing note, not scored. In our data human cards repeat themselves more than AI ones.
+  const RP = r.repetition || {}, rep = [];
+  const repLine = (label, x, cut) => { if (x && x.per1k >= cut && x.top.length) rep.push(`<li>${label}: ${x.count} repeat${x.count > 1 ? 's' : ''} (${x.per1k}/1k words), e.g. ${x.top.slice(0, 3).map(t => `“${esc(Array.isArray(t) ? t[0] : t)}”${Array.isArray(t) ? ' ×' + t[1] : ''}`).join(', ')}</li>`); };
+  repLine('Inside the description', RP.description, 15); repLine('Inside the first message', RP.greeting, 5); repLine('Description and first message share wording', RP.between, 8);
+  if (RP.altReuse && RP.altReuse.count) rep.push(`<li class="faint">Alternate greetings reuse ${RP.altReuse.count} phrase${RP.altReuse.count > 1 ? 's' : ''} from the first message (normal when greetings are reworked).</li>`);
+  if (rep.length) R += `<div class="sec"><h3>Repeated wording</h3><span class="faint small">Not scored. Repetition is a writing issue; in our data human cards repeat themselves more often than AI-written ones.</span><ul>${rep.join('')}</ul></div>`;
   if (r.texture && r.texture.paraCv !== null) {
     const lk = r.experimental.aiStyleLikelihood;
     R += `<div class="sec"><h3>Texture · experimental</h3><span class="small">Paragraph evenness: length CV ${r.texture.paraCv.toFixed(2)} over ${r.texture.paragraphs} paragraphs (2023 human cards ~0.67, AI-written ~0.32; lower = more even).${lk !== null ? ` AI-style likelihood (score + evenness): <b>${Math.round(lk * 100)}%</b>.` : ''} Not scored: careful writers can be even too.</span></div>`;

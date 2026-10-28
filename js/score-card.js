@@ -23,24 +23,25 @@ import { textureFeatures, aiStyleLikelihood } from './texture.js';
 import { detectGenre } from './genre.js';
 import { loadPulp, pulpScore } from './pulp.js';
 import { archetype } from './archetypes.js';
+import { cardRepetition } from './repetition.js';
 
 // Version of the scoring pipeline, shown as "BBBScorer v…" (package.json holds the app version, which
 // can be ahead of it for page-only changes). Bump it (and CHANGELOG.md) whenever a change can move
 // scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it, so
 // stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
-export const SCORER_VERSION = '0.7.0';
+export const SCORER_VERSION = '0.8.0';
 // Versions whose botstyle *numbers* are identical to this one, so references built with them still apply.
 // 0.7.0 re-anchored the scale to AI-written cards and made repeat damping length-independent, so older
 // references don't apply.
-export const SAME_SCORES_AS = ['0.7.0'];
+export const SAME_SCORES_AS = ['0.8.0'];
 // Card fields scored by default (scoreCard opts.fields overrides): what the page says it scores.
 export const DEFAULT_FIELDS = ['description', 'first_mes'];
 
-// Writing-style bands, tentative. Re-cut for scorer 0.7.0's card-anchored scale (tools/eval_cards.mjs, 5,313
-// human 2023 cards vs 1,061 AI-written cards): under 50 / 50-75 / 75+ puts human cards at 92 / 6 / 2% and AI
-// cards at 47 / 41 / 12%. (0.5.0-0.6.0 used 35 / 50 on the old fiction-anchored scale.) Ids stay original / mixed /
-// common for platforms.
-export const WRITING_STYLE_BANDS = { original: 50, common: 75 };
+// Writing-style bands, tentative. Set for scorer 0.8.0 (parts blended, card-anchored scale) on 5,313 human
+// 2023 cards vs 1,061 AI-written cards (tools/eval_cards.mjs): under 40 / 40-60 / 60+ puts human cards at
+// 93 / 5 / 2% and AI cards at 30 / 40 / 30%. (0.7.0: 50 / 75; 0.5.0-0.6.0: 35 / 50 on the old scale.)
+// Ids stay original / mixed / common for platforms.
+export const WRITING_STYLE_BANDS = { original: 40, common: 60 };
 export const BAND_LABELS = { original: 'Meatbag adjacent', mixed: 'Mixed signals', common: 'Might just be slop' };
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
@@ -97,6 +98,7 @@ function quietly(fn) {
  * @param {object} opts         { fields: DEFAULT_FIELDS, includeAltGreetings: false, includeExampleDialogue: false, lookupZipf: fn (typo check) }
  */
 // Mixed-card detection (see scoreCard): minimum prose words per part, and the gap in points.
+export const PART_MIN_WORDS = 60, PART_WEIGHT_CAP = 400;   // card score = blend of parts (see scoreCard)
 export const MIXED_MIN_WORDS = 150;
 export const MIXED_GAP = 25;   // ~6% of human 2023 cards and ~6% of AI cards trip it (eval_cards.mjs)
 function partScore(text) {
@@ -104,7 +106,8 @@ function partScore(text) {
   const p = preprocessCard(text), w = scoreWeighted(p.prose);
   if (!w.nWords) return { score: 0, low: 0, high: 0, proseWords: 0, reliable: false };
   const cm = quietly(() => scoreContrast(p.prose)), st = scoreStructures(p.prose, cm.matches || []), sc = computeBotstyleScore(w, st, 0);
-  return { score: +sc.score.toFixed(1), low: +sc.low.toFixed(1), high: +sc.high.toFixed(1), proseWords: p.stats.proseWords, reliable: sc.reliable };
+  return { score: +sc.score.toFixed(1), low: +sc.low.toFixed(1), high: +sc.high.toFixed(1), proseWords: p.stats.proseWords, reliable: sc.reliable,
+    rates: { words: +w.words.rate.toFixed(3), phrases: +w.phrases.rate.toFixed(3), structures: +st.rate.toFixed(3) }, emdash: st.emdash ? +st.emdash.points.toFixed(2) : 0 };
 }
 function partScores(definition, greetings) {
   return { description: partScore(definition), greeting: partScore(greetings.join('\n\n')) };
@@ -130,11 +133,26 @@ export function scoreCard(card, opts = {}) {
   // Mixed cards: the description and the greeting(s) scored on their own. A card counts as mixed when
   // both parts have enough prose and land MIXED_GAP or more points apart (e.g. a hand-written
   // description with an AI-written greeting). Scorer 0.7.0 reports this; the card score stays joint
-  // unless opts.mixedPolicy = 'higher'.
+  // unless opts.mixedPolicy = 'higher'. (Since 0.8.0 the card score is a blend of the parts, below.)
   const parts = partScores(definition, greetings);
+  const repetition = cardRepetition(definition, greetings[0] || '', c.alternate_greetings);
   const mixed = parts.description && parts.greeting && parts.description.proseWords >= MIXED_MIN_WORDS && parts.greeting.proseWords >= MIXED_MIN_WORDS
     && Math.abs(parts.description.score - parts.greeting.score) >= MIXED_GAP
     ? { higher: parts.greeting.score > parts.description.score ? 'greeting' : 'description', gap: +Math.abs(parts.description.score - parts.greeting.score).toFixed(1) } : null;
+  // Card score (scorer 0.8.0+): the description and the greeting(s) are scored separately and blended,
+  // each weighted by its prose words up to PART_WEIGHT_CAP, plus card-level chatbot-leftover points. A part
+  // needs PART_MIN_WORDS of prose to count; with none, the joint score is used. Scoring the parts apart caught
+  // nearly twice as many AI cards at a 2% false-alarm rate on human cards (eval_cards.mjs). opts.joint = true
+  // keeps the old one-text score.
+  const joint = { score: score.score, low: score.low, high: score.high };
+  if (!opts.joint) {
+    const ps = ['description', 'greeting'].map(k => parts[k]).filter(p => p && p.proseWords >= PART_MIN_WORDS);
+    if (ps.length) {
+      const w = ps.map(p => Math.min(PART_WEIGHT_CAP, p.proseWords)), W = w.reduce((a, b) => a + b, 0);
+      const blend = key => Math.min(100, ps.reduce((a, p, i) => a + p[key] * w[i], 0) / W + artifacts.points);
+      score.score = blend('score'); score.low = blend('low'); score.high = blend('high');
+    }
+  }
   if (mixed && opts.mixedPolicy === 'higher') {
     const hi = parts[mixed.higher];
     if (hi.score > score.score) { score.score = hi.score; score.low = Math.max(score.low, hi.low); score.high = Math.max(score.high, hi.high); }
@@ -155,7 +173,7 @@ export function scoreCard(card, opts = {}) {
   const likelihood = aiStyleLikelihood(score.score, texture, pre.stats.proseWords);
   const result = {
     version: SCORER_VERSION,
-    score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable, parts, mixed,
+    score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable, joint, parts, mixed, repetition,
     components: score.components, emdashPoints: score.emdashPoints, artifactPoints: score.artifactPoints,
     band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0),
     rates, stats: pre.stats, format, greeting, type, peers,

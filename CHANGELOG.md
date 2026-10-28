@@ -6,6 +6,22 @@ All notable changes to BB Botstyle Score. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.9.0] - 2026-10-28 · BBBScorer 0.8.0
+
+### Changed
+- **Description and first message scored separately**, then blended by length (each counts up to 400 prose words).
+  At a 2% false-alarm rate on human cards this catches 29% of AI cards instead of 15% (AUC 0.91, was 0.90).
+- **Bands re-cut:** under 40 / 40–60 / 60+ (human 2023 cards 93 / 5 / 2%, AI cards 30 / 40 / 30%).
+- Overnight scoring prints progress (dataset, cards done, %, time left) every 15 seconds and keeps a progress log;
+  a lock file stops two scoring runs at once.
+
+### Added
+- Warning when the description or first message is empty.
+- Repeated-wording read-out (inside the description, inside the greeting, between them; alternate greetings reusing
+  the first message are noted as normal). Not scored: human cards repeat themselves more than AI-written ones.
+- `generate_ai_cards.mjs` scores the new cards when it finishes (`--no-score` to skip), unless another scoring run
+  is active.
+
 ## [0.8.0] - 2026-10-28 · BBBScorer 0.7.0
 
 ### Changed
