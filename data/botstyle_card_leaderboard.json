@@ -1,0 +1,310 @@
+{
+ "note": "Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.",
+ "dir": "eval/scores/v0.4.0",
+ "version": "0.4.0",
+ "built": "2026-10-28",
+ "models": [
+  {
+   "model": "deepseek/deepseek-v3.2-exp",
+   "n": 6,
+   "median": 66.1,
+   "p25": 28,
+   "p75": 66.6,
+   "original": 0,
+   "common": 66.7,
+   "upstream": 40.1,
+   "byMode": {
+    "fresh": {
+     "n": 6,
+     "median": 66.1,
+     "p25": 28,
+     "p75": 66.6,
+     "original": 0,
+     "common": 66.7,
+     "upstream": 40.1
+    },
+    "antislop": {
+     "n": 8,
+     "median": 47.1,
+     "p25": 40.8,
+     "p75": 62.1,
+     "original": 0,
+     "common": 75,
+     "upstream": 36.3
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 47.4,
+     "p25": 21.7,
+     "p75": 67.5,
+     "original": 0,
+     "common": 66.7,
+     "upstream": 42.8
+    }
+   }
+  },
+  {
+   "model": "z-ai/glm-4.5",
+   "n": 7,
+   "median": 39.2,
+   "p25": 7.6,
+   "p75": 46.6,
+   "original": 28.6,
+   "common": 42.9,
+   "upstream": 22,
+   "byMode": {
+    "fresh": {
+     "n": 7,
+     "median": 39.2,
+     "p25": 7.6,
+     "p75": 46.6,
+     "original": 28.6,
+     "common": 42.9,
+     "upstream": 22
+    },
+    "antislop": {
+     "n": 8,
+     "median": 30.2,
+     "p25": 21.4,
+     "p75": 34.6,
+     "original": 25,
+     "common": 12.5,
+     "upstream": 13.9
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 34.7,
+     "p25": 15.6,
+     "p75": 47.6,
+     "original": 33.3,
+     "common": 33.3,
+     "upstream": 23.8
+    }
+   }
+  },
+  {
+   "model": "moonshotai/kimi-k2-0905",
+   "n": 7,
+   "median": 39.1,
+   "p25": 31.3,
+   "p75": 50.2,
+   "original": 0,
+   "common": 42.9,
+   "upstream": 18,
+   "byMode": {
+    "fresh": {
+     "n": 7,
+     "median": 39.1,
+     "p25": 31.3,
+     "p75": 50.2,
+     "original": 0,
+     "common": 42.9,
+     "upstream": 18
+    },
+    "antislop": {
+     "n": 8,
+     "median": 23.7,
+     "p25": 22.6,
+     "p75": 37,
+     "original": 12.5,
+     "common": 12.5,
+     "upstream": 4.7
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 25.1,
+     "p25": 24.3,
+     "p75": 68.5,
+     "original": 0,
+     "common": 33.3,
+     "upstream": 7.3
+    }
+   }
+  },
+  {
+   "model": "openai/gpt-5-mini",
+   "n": 112,
+   "median": 38.1,
+   "p25": 27.7,
+   "p75": 46.5,
+   "original": 8,
+   "common": 44.6,
+   "upstream": 11.2,
+   "byMode": {
+    "fresh": {
+     "n": 112,
+     "median": 38.1,
+     "p25": 27.7,
+     "p75": 46.5,
+     "original": 8,
+     "common": 44.6,
+     "upstream": 11.2
+    },
+    "antislop": {
+     "n": 8,
+     "median": 34.8,
+     "p25": 29.3,
+     "p75": 43.1,
+     "original": 12.5,
+     "common": 25,
+     "upstream": 9
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 23.9,
+     "p25": 20.5,
+     "p75": 31.8,
+     "original": 0,
+     "common": 0,
+     "upstream": 2.3
+    }
+   }
+  },
+  {
+   "model": "anthropic/claude-sonnet-4.5",
+   "n": 145,
+   "median": 33.4,
+   "p25": 22.8,
+   "p75": 46.2,
+   "original": 20,
+   "common": 36.6,
+   "upstream": 15.1,
+   "byMode": {
+    "fresh": {
+     "n": 145,
+     "median": 33.4,
+     "p25": 22.8,
+     "p75": 46.2,
+     "original": 20,
+     "common": 36.6,
+     "upstream": 15.1
+    },
+    "antislop": {
+     "n": 9,
+     "median": 41.3,
+     "p25": 14.4,
+     "p75": 51,
+     "original": 44.4,
+     "common": 55.6,
+     "upstream": 11.3
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 27.4,
+     "p25": 22.3,
+     "p75": 59.7,
+     "original": 0,
+     "common": 33.3,
+     "upstream": 9.1
+    }
+   }
+  },
+  {
+   "model": "meta-llama/llama-4-maverick",
+   "n": 5,
+   "median": 13.1,
+   "p25": 9.7,
+   "p75": 24.5,
+   "original": 60,
+   "common": 20,
+   "upstream": 32,
+   "byMode": {
+    "fresh": {
+     "n": 5,
+     "median": 13.1,
+     "p25": 9.7,
+     "p75": 24.5,
+     "original": 60,
+     "common": 20,
+     "upstream": 32
+    },
+    "antislop": {
+     "n": 6,
+     "median": 26.7,
+     "p25": 18.1,
+     "p75": 36.2,
+     "original": 33.3,
+     "common": 16.7,
+     "upstream": 35.4
+    },
+    "rewrite": {
+     "n": 3,
+     "median": 31.5,
+     "p25": 16.2,
+     "p75": 52.4,
+     "original": 33.3,
+     "common": 33.3,
+     "upstream": 18.1
+    }
+   }
+  }
+ ],
+ "references": [
+  {
+   "label": "Korshuk cards, Feb–Apr 2023",
+   "kind": "human",
+   "n": 488,
+   "median": 8.5,
+   "p25": 4.7,
+   "p75": 14.3,
+   "original": 87.3,
+   "common": 1.8,
+   "upstream": 2.4
+  },
+  {
+   "label": "Chub cards, before Jul 2023",
+   "kind": "human",
+   "n": 1633,
+   "median": 15.5,
+   "p25": 10.3,
+   "p75": 24.1,
+   "original": 64.5,
+   "common": 6.7,
+   "upstream": 5.4
+  },
+  {
+   "label": "Chub cards, 2025",
+   "kind": "human",
+   "n": 691,
+   "median": 23.6,
+   "p25": 14.3,
+   "p75": 34.8,
+   "original": 41.7,
+   "common": 15.9,
+   "upstream": 10.5
+  },
+  {
+   "label": "Perchance cards, 2024–25",
+   "kind": "human",
+   "n": 423,
+   "median": 27.3,
+   "p25": 16.1,
+   "p75": 38.7,
+   "original": 35.7,
+   "common": 22.7,
+   "upstream": 11
+  },
+  {
+   "label": "SPB AI personas (Kimi, GLM)",
+   "kind": "ai",
+   "n": 593,
+   "median": 31.5,
+   "p25": 26.4,
+   "p75": 37.5,
+   "original": 3.9,
+   "common": 18.9,
+   "upstream": 6.6
+  },
+  {
+   "label": "Anti-slop AI cards (character-card-skills)",
+   "kind": "ai",
+   "n": 6,
+   "median": 11,
+   "p25": 9.5,
+   "p75": 17.6,
+   "original": 100,
+   "common": 0,
+   "upstream": 1.2
+  }
+ ]
+}

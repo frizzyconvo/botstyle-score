@@ -25,7 +25,8 @@ import { textureFeatures, aiStyleLikelihood } from './texture.js';
 // at 20/40, ~87% of 2023 human cards are Original and 2-4% Common, while AI-written cards
 // (SPB) are 4% Original / 19% Common and AI stories 7% / 60%. The older 30/60 split put
 // 42% of AI cards in Original and almost nothing in Common. Change here if needed.
-// Version of the scoring pipeline. Bump it (and package.json, CHANGELOG.md) whenever a change can
+// Version of the scoring pipeline (package.json holds the app version, which can be ahead of it for
+// page-only changes). Bump it (and CHANGELOG.md) whenever a change can
 // move scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it,
 // so stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
 export const SCORER_VERSION = '0.4.0';
@@ -82,11 +83,13 @@ function quietly(fn) {
 
 /**
  * @param {object|string} card  { description, personality, scenario, first_mes, alternate_greetings, tags }
- * @param {object} opts         { includeAltGreetings: false, lookupZipf: fn (typo check) }
+ * @param {object} opts         { includeAltGreetings: false, includeExampleDialogue: false, lookupZipf: fn (typo check) }
  */
 export function scoreCard(card, opts = {}) {
   const c = typeof card === 'string' ? { description: card } : (card || {});
-  const definition = [c.description, c.personality, c.scenario].filter(Boolean).join('\n\n');
+  // opts.includeExampleDialogue: score the card's example dialogue too (off by default; the
+  // published scores and references use description + personality + scenario + greeting).
+  const definition = [c.description, c.personality, c.scenario, opts.includeExampleDialogue ? c.mes_example : ''].filter(Boolean).join('\n\n');
   const greetings = [c.first_mes].concat(opts.includeAltGreetings ? (c.alternate_greetings || []) : []).filter(Boolean);
   const text = [definition].concat(greetings).filter(Boolean).join('\n\n');
 

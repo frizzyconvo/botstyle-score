@@ -1,14 +1,20 @@
-# botstyle-score
+# BB Botstyle Score
 
-**This is a fork of slop-score adapted to character cards** (version in `package.json`, history in
-[CHANGELOG.md](CHANGELOG.md)). See [BOTSTYLE.md](BOTSTYLE.md) for what changed, the evaluation results and how to
-rebuild the lists; the original README follows.
+A rough automated read on how much a character card's description and greeting(s) lean on stock phrasings and words of
+AI models. It is not an AI detector, and it does not measure whether you used AI or how good a card is.
+
+A **pseudo-fork** of [slop-score](https://github.com/sam-paech/slop-score) by Sam Paech: it started from that code and
+keeps its MIT licence, but no longer tracks upstream and has moved well away from its intent (word lists, scoring,
+card handling and the leaderboard are rebuilt for character cards). Version in `package.json` (app) and
+`js/score-card.js` (`SCORER_VERSION`), history in [CHANGELOG.md](CHANGELOG.md), method and results in
+[BOTSTYLE.md](BOTSTYLE.md).
 
 **Run it locally:** install Node 18+, then double-click `start-local.cmd` (Windows) or run `npm start`, and open
-http://localhost:8787/. Paste a Chub or Botbooru link and press *Fetch card*, or paste/drop a card. Opening
-`slop-score.html` directly from disk doesn't work (browsers block its scripts there). Command line:
+http://localhost:8787/. Paste a Chub or Botbooru link, upload card PNG/JSON files, or type text. Command line:
 `node tools/score_url.mjs <link | card.json | card.png>`. Tests: `npm test`. Score every dataset (overnight,
-versioned, for regression checks): `score-all.cmd` or `npm run score-all`.
+versioned, for regression checks): `score-all.cmd` or `npm run score-all`; then `npm run leaderboard`.
+
+The original slop-score README follows for reference.
 
 ---
 

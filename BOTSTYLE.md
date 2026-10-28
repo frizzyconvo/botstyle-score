@@ -1,9 +1,10 @@
-# botstyle-score
+# BB Botstyle Score (botstyle-score)
 
-Version **0.4.0** (see [CHANGELOG.md](CHANGELOG.md)). Run it locally: double-click `start-local.cmd` (Windows) or
+App version **0.5.0**, scorer version **0.4.0** (see [CHANGELOG.md](CHANGELOG.md)). A pseudo-fork of
+slop-score: started from its code, no longer tracks upstream, and has a different purpose (character cards). Run it locally: double-click `start-local.cmd` (Windows) or
 `npm start`, open http://localhost:8787/, paste a Chub or Botbooru link and press Fetch card. Needs Node 18+.
 
-A fork of [sam-paech/slop-score](https://github.com/sam-paech/slop-score) adapted to score **character cards**
+A pseudo-fork of [sam-paech/slop-score](https://github.com/sam-paech/slop-score) rebuilt to score **character cards**
 (description + greeting) rather than long essays and stories. The page, file layout and leaderboard work as before;
 user text also gets a botstyle score, a prose/list/boilerplate breakdown, and two unscored checklists.
 
@@ -372,6 +373,40 @@ prose) drops only 29 words. After the overnight run, rebuild it from the cleanes
 ../card-datasets/jaicards-cards-js/jaicards_cards.jsonl --ai eval/ai_cards.jsonl eval/ai_cards_v2.jsonl
 ../card-datasets/spb-2602-ai-personas/data.jsonl --before 2023-07`, then `node tools/calibrate.mjs`, run
 `score_all`, compare with v0.4.0. `botstyle.js` applies `data/botstyle_card_drop.json` when it exists.
+
+## Leaderboard from our own card runs (`data/botstyle_card_leaderboard.json`)
+
+The page used to rank models by card-length chunks of upstream's story outputs. It now ranks them by
+character cards they wrote for this project (`tools/build_card_leaderboard.mjs`, run after `score_all`):
+plain requests only (run 1 + run 2 "fresh" mode), with anti-AI and rewrite results per model in the row's
+details, and real card sets as references. Bars show each set's interquartile range on the absolute 0–100
+scale with band zones; the line is the median. Sets under 20 cards are starred (as of v0.4.0 only GPT-5-mini
+and Claude Sonnet 4.5 have more than 100 cards; the run-2 models have 5–7). Rebuild with `npm run leaderboard`.
+
+## Recalibration to do once all human data is scored
+
+The overnight `score_all` run adds JanitorAI (188,834 cards) and Perchance. These settings were chosen on
+smaller or less clean human sets and should be revisited, in this order, each as a scorer version bump with
+a `compare_scores.mjs` regression report:
+
+1. **Human reference for the ⓘ percentiles** (`build_reference.py --scores eval/scores/v0.4.0`): add
+   JanitorAI before 2024-03 (currently Korshuk + early Chub only, 2,121 cards).
+2. **Card / genre calibration** (`card_calibrate.mjs`): rebuild the drop list from Korshuk + JanitorAI
+   before Jul 2023, check which classic slop words survive, then switch it on (expected: Genavros ~31 → ~23,
+   card AUC ~0.85 → ~0.93).
+3. **Calibration p90** (`calibrate.mjs`): rerun after any list change so 100 still means the sloppiest tenth
+   of AI fiction.
+4. **Bands** (20 / 40): re-cut on the new reference; 20 / 35 is the current candidate.
+5. **Format peers** (`build_peers.py`): add JanitorAI before Jul 2023 to the "same format" comparison.
+6. **Bonus-tag thresholds** (`bonus-tags.js`): set on 15.7k cards; recheck the top-few-percent cut-offs.
+7. **AI-favourite names** (`corroborate_names.py`): recheck "rare in human cards" against JanitorAI.
+8. **Texture model** (`texture.js`): refit the evenness + score logistic on the larger human set and the
+   roleplay-model cards; still unscored.
+9. **Em-dash threshold** (6 per 1k words): recheck the human p99 on JanitorAI.
+10. **Leaderboard and references**: rebuild after each of the above.
+
+The original slop-score number is kept alongside every score (`upstream` in score_all rows, "Stats for nerds"
+on the page), so each recalibration can also be compared against it.
 
 ## Grading: what the 0–100 means
 

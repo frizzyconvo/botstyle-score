@@ -116,7 +116,8 @@ check('reference percentiles present and ordered', r10.reference && r11.referenc
 
 const { SCORER_VERSION } = await import('../js/score-card.js');
 const pkgV = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8')).version;
-check('SCORER_VERSION matches package.json', SCORER_VERSION === pkgV, `${SCORER_VERSION} vs ${pkgV}`);
+const sv = v => v.split('.').map(Number), le = (a, b) => { a = sv(a); b = sv(b); for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] < b[i]; return true; };
+check('SCORER_VERSION not ahead of package.json (app version moves for UI changes too)', le(SCORER_VERSION, pkgV), `${SCORER_VERSION} vs ${pkgV}`);
 check('results carry the scorer version', r10.version === SCORER_VERSION);
 check('reference built with this scorer version', r10.reference.version === SCORER_VERSION, r10.reference.version);
 

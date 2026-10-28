@@ -8,7 +8,7 @@
 //   node tools/score_all.mjs --force         # rescore datasets already done for this version
 //
 // Output: eval/scores/v<SCORER_VERSION>/<dataset>.jsonl (one row per card, each with `version`) and
-// summary.json (n, median, bands, by year). Compare two versions with tools/compare_scores.mjs.
+// summary.json (n, median, bands, by year). Rows also carry `upstream`, the original slop-score formula. Compare two versions with tools/compare_scores.mjs.
 // Card datasets are read from ../card-datasets (see BOTSTYLE.md); missing ones are skipped.
 // The first run also flattens JanitorAI's 188,834 card files into one JSONL cache (slowest step).
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, renameSync, openSync, readSync, closeSync, writeSync } from 'fs';
@@ -17,12 +17,26 @@ import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { loadAll, scoreCard, SCORER_VERSION } from '../js/score-card.js';
 import { setPosTagger } from '../js/pos-tagger.js';
+import { loadSlopSets, computeSlopIndex } from '../js/metrics.js';
+import { wordsOnlyLower, alphaTokens } from '../js/utils.js';
+import { scoreText as scoreContrast } from '../js/contrast-detector.js';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const CARDS = process.env.BOTSTYLE_CARDS ? resolve(process.env.BOTSTYLE_CARDS) : resolve(ROOT, '..', 'card-datasets');
 const require = createRequire(import.meta.url);
 globalThis.fetch = async u => ({ ok: true, json: async () => JSON.parse(readFileSync(join(ROOT, u.replace(/^\.\//, '')), 'utf-8')) });
-await loadAll('./data/'); setPosTagger(require('wink-pos-tagger')());
+await loadAll('./data/'); await loadSlopSets(); setPosTagger(require('wink-pos-tagger')());
+// The original slop-score formula, for comparison (same normalisation as the upstream leaderboard).
+const LB = JSON.parse(readFileSync(join(ROOT, 'data', 'leaderboard_results.json'), 'utf-8')).results;
+const rng = v => { const mn = Math.min(...v), mx = Math.max(...v), r = mx - mn; return { min: mn - r * .1, max: mx + r * .1 }; };
+const UR = { w: rng(LB.map(r => r.metrics.slop_list_matches_per_1k_words || 0)), t: rng(LB.map(r => r.metrics.slop_trigram_matches_per_1k_words || 0)), c: rng(LB.map(r => r.metrics.not_x_but_y_per_1k_chars || 0)) };
+const nz = (v, r) => Math.max(0, Math.min(1, (v - r.min) / (r.max - r.min)));
+const quiet = fn => { const o = { ...console }; for (const k of ['log', 'group', 'groupEnd', 'warn', 'error']) console[k] = () => {}; try { return fn(); } finally { Object.assign(console, o); } };
+function upstreamScore(text) {
+  const toks = alphaTokens(wordsOnlyLower(text)); if (!toks.length) return null;
+  const s = computeSlopIndex(toks, false), c = quiet(() => scoreContrast(text)).rate_per_1k;
+  return +((nz(s.wordScore, UR.w) * .6 + nz(c, UR.c) * .25 + nz(s.trigramScore, UR.t) * .15) * 100).toFixed(2);
+}
 
 const argv = process.argv.slice(2);
 const opt = k => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : null);
@@ -125,7 +139,7 @@ for (const ds of DATASETS) {
     let r;
     try { r = scoreCard(c); } catch (e) { rows.push({ id: c.id, dataset: ds.name, version: SCORER_VERSION, error: e.message }); continue; }
     rows.push({ id: c.id, dataset: ds.name, label: typeof ds.label === 'function' ? ds.label(c) : ds.label, createdAt: c.createdAt, model: raw.model, mode: raw.mode,
-      version: r.version, score: +r.score.toFixed(2), low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,
+      version: r.version, score: +r.score.toFixed(2), upstream: upstreamScore(r.text), low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,
       proseWords: r.stats.proseWords, totalWords: r.stats.totalWords, format: r.format.format, greeting: r.greeting ? r.greeting.primary : null, type: r.type,
       comp: Object.fromEntries(Object.entries(r.components).map(([k, v]) => [k, +v.toFixed(3)])), emdashPoints: +r.emdashPoints.toFixed(2), artifactPoints: r.artifactPoints,
       paraCv: r.texture.paraCv === null ? null : +r.texture.paraCv.toFixed(3), aiStyleLikelihood: r.experimental.aiStyleLikelihood === null ? null : +r.experimental.aiStyleLikelihood.toFixed(3),

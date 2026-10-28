@@ -1,8 +1,27 @@
 # Changelog
 
-Versions follow `MAJOR.MINOR.PATCH`. A change to how scores are computed (lists, weights, calibration,
-bands) bumps MINOR and is noted here, so scores from different versions aren't compared by accident.
-`package.json` holds the current version.
+Two versions: the scorer version (`SCORER_VERSION` in js/score-card.js, carried by every score) moves only when
+scores or labels can change; the app version (`package.json`) also moves for page and tool changes. Both follow
+`MAJOR.MINOR.PATCH`.
+
+## 0.5.0 (2026-10-28) - app; scorer stays 0.4.0
+
+Page (BB Botstyle Score)
+- New page (`index.html`, `js/app.js`, `css/app.css`) in the Farina webcode look, chibi Farina icon.
+- Always-visible input bar: score a link, upload card PNG/JSON (several at once), or type/paste. Links and
+  files score immediately; a picker chooses which fields count (description, personality, scenario, first
+  message, example dialogue, each alternate greeting), and the score updates as boxes change.
+- "Your cards": every scored card is kept in this browser with its scorer version; aggregate median,
+  average and band counts; "I made this card" + AI-assistance slider (honour system); export JSON.
+- Optional public list (`PUBLIC_RUNS` in site-config.js + `tools/public-runs-worker.js`).
+- Leaderboard below the result (no more switching views), from our own scored card runs and reference sets,
+  on the absolute 0–100 scale with band zones; your card and your saved cards appear in it.
+- `slop-score.html` now forwards to `index.html`.
+
+Scorer and tools
+- `scoreCard(..., { includeExampleDialogue })` (off by default, so published scores don't change).
+- `score_all.mjs` rows carry `upstream`, the original slop-score formula.
+- `tools/build_card_leaderboard.mjs`, `data/upstream_norm.json`.
 
 ## 0.4.0 (2026-10-28)
 
