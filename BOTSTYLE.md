@@ -148,7 +148,7 @@ row stores its evidence.
 
 ## Datasets
 
-Counts are what's on disk in `C:\games\claudeslop`; "used" is what the numbers in this file come from. Card datasets live in
+Counts are what's on disk; "used" is what the numbers in this file come from. Card datasets live in
 `card-datasets/`; datasets marked "no" were moved to `_archive/` (with the three scrapers and antislop-vllm).
 
 | Dataset (folder) | On disk | What it is | Used for | Keep? |
