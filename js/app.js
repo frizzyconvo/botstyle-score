@@ -1,7 +1,7 @@
 // app.js - BB Botstyle Scorer page. Scores cards in the browser with js/score-card.js; nothing is
 // sent anywhere except card fetches (Chub/Botbooru) and, if switched on and chosen per card, the
 // public list (js/site-config.js PUBLIC_RUNS).
-import { scoreCard, loadAll, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, BAND_LABELS } from './score-card.js';
+import { scoreCard, loadAll, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, BAND_LABELS, BAND_TAGLINES } from './score-card.js';
 // The scorer version is part of the page title and the heading, so a tab, bookmark or screenshot says which scorer
 // made a score. Phones get the short name.
 const PHONE = window.matchMedia ? window.matchMedia('(max-width: 520px)') : { matches: false };
@@ -240,11 +240,11 @@ function renderResult(r) {
   const meter = (label, v, tip) => `<div class="meter"><div class="fill" style="width:${Math.min(100, v * 100)}%"></div><span>${label}</span><b>${(v * 100).toFixed(0)}</b><div class="tip">${tip}</div></div>`;
   const pop = `<span class="pop" tabindex="0" aria-label="What this number means">i<span class="pop-body">`
     + (ref && ref.human_2023 && band.id !== 'na' ? `Higher than <b>${Math.round(ref.human_2023.percentile)}%</b> of ${esc(ref.human_2023.label)} (${ref.human_2023.n.toLocaleString()}) and <b>${Math.round(ref.ai_cards.percentile)}%</b> of ${esc(ref.ai_cards.label)} (${ref.ai_cards.n.toLocaleString()}).${ref.version && !SAME_SCORES_AS.includes(ref.version) ? ` <i>These comparison cards were scored with BBBScorer v${esc(ref.version)}, not v${esc(SCORER_VERSION)}, so the percentages are approximate until they're rescored.</i>` : ''}<br><br>` : '')
-    + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favored words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Tentative bands</b> (still calibrating): ${BAND_LABELS.original} under ${WB.original} · ${BAND_LABELS.mixed} ${WB.original}–${WB.common} · ${BAND_LABELS.common} ${WB.common}+</span></span>`;
+    + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favored words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Tentative bands</b> (still calibrating): ${BAND_LABELS.original} <i>(${BAND_TAGLINES.original.toLowerCase()})</i> under ${WB.original} · ${BAND_LABELS.mixed} <i>(${BAND_TAGLINES.mixed.toLowerCase()})</i> ${WB.original}–${WB.common} · ${BAND_LABELS.common} <i>(${BAND_TAGLINES.common.toLowerCase()})</i> ${WB.common}+</span></span>`;
   const used = fieldList(state.fields, state.alts);
   const orig = nerdStats(r.text);
   let L = `<div class="score-hero"><div><div class="score-num">${r.score.toFixed(1)}</div><div class="score-sub">range ${r.low.toFixed(0)}–${r.high.toFixed(0)}</div>${orig ? `<div class="score-sub" title="Sam Paech's original slop-score formula on the same text (what Botbooru lists)">original slop score ${orig.upstream.toFixed(1)}</div>` : ''}</div>
-    <div class="score-meta"><span class="band ${band.id}">${esc(band.label || 'Low confidence')}</span>${band.id !== 'na' ? '<span class="tent" title="Band names and cut-offs are tentative while the scorer is calibrated">tentative</span>' : ''}${pop}
+    <div class="score-meta"><span class="band ${band.id}">${esc(band.label || 'Low confidence')}</span>${band.tagline ? `<span class="band-tag">${esc(band.tagline)}</span>` : ''}${band.id !== 'na' ? '<span class="tent" title="Band names and cut-offs are tentative while the scorer is calibrated">tentative</span>' : ''}${pop}
       <div class="score-cap">${esc(state.card.name || 'This card')} · ${esc(used.join(', ') || 'nothing selected')}</div>
       ${r.archetype ? `<div class="arch" title="${esc(r.archetype.blurb || '')}"><span class="arch-tag">${esc(r.archetype.label)}</span>${r.archetype.size ? `<span class="arch-size" title="${esc(r.archetype.size.note)}">${esc(r.archetype.size.label)}</span>` : ''}<span class="faint small"> archetype · experimental</span></div>` : ''}</div></div>
     ${meter('AI-favored words', r.components.words, `${r.rates.words.toFixed(0)} weighted hits per 1k prose words`)}
@@ -350,7 +350,7 @@ function renderMine() {
   const vers = [...new Set(list.map(x => x.version))];
   $('mineSummary').innerHTML = `<div class="stat"><b>${list.length}</b><span>cards</span></div><div class="stat"><b>${median(sc).toFixed(1)}</b><span>median score</span></div>`
     + `<div class="stat"><b>${(sc.reduce((a, b) => a + b, 0) / sc.length).toFixed(1)}</b><span>average</span></div>`
-    + `<div class="stat"><b>${bands('original')} · ${bands('mixed')} · ${bands('common')}</b><span>${esc(BAND_LABELS.original)} · mixed · ${esc(BAND_LABELS.common.toLowerCase())}</span></div>`
+    + `<div class="stat"><b>${bands('original')} · ${bands('mixed')} · ${bands('common')}</b><span>${esc(BAND_LABELS.original)} · ${esc(BAND_LABELS.mixed.toLowerCase())} · ${esc(BAND_LABELS.common.toLowerCase())}</span></div>`
     + (mineByCreator.length ? `<div class="stat"><b>${median(mineByCreator.map(x => x.score)).toFixed(1)}</b><span>median, cards you made (${mineByCreator.length})</span></div>` : '')
     + (vers.length > 1 ? `<div class="stat"><b>${vers.length}</b><span>BBBScorer versions mixed</span></div>` : '');
   $('mineList').innerHTML = [...list].reverse().map(x => `<div class="item"><span class="nm">${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>

@@ -120,15 +120,18 @@ card-field residue (`"first_mes": "…"`), unfilled placeholders ("[Insert name]
 
 Tentative, still being calibrated.
 
-| Score | Band | Human cards, 2023 | AI-written cards |
-|---|---|---|---|
-| under 40 | **Meatbag adjacent** | 94% | 35% |
-| 40–60 | **Mixed signals** | 4% | 38% |
-| 60 and up | **Might just be slop** | 2% | 28% |
-| (too short or not English) | **Low confidence** / no band | | |
+| Score | Band | Fun tagline | Human cards, 2023 | AI-written cards |
+|---|---|---|---|---|
+| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 35% |
+| 40–60 | **Mixed** | *Mixed signals* | 4% | 37% |
+| 60 and up | **Common** | *Might just be slop* | 2% | 28% |
+| (too short or not English) | **Low confidence** / no band | | | |
+
+The band names say how common the card's phrasing is in AI writing. The taglines are just for fun and shown next
+to them.
 
 The cut-offs keep false alarms on human cards low, so a low score doesn't clear anyone. Human cards: 108,129
-cards from 2023 (Korshuk, JanitorAI, Chub), median 12. AI-written cards: 1,237, median 49.
+cards from 2023 (Korshuk, JanitorAI, Chub), median 12. AI-written cards: 1,290, median 49.
 
 **Mixed card** (flag, not a band): the description and the first message both have 150+ words of prose and land
 25+ points apart, for example a hand-written description with an AI-written greeting. The card score stays a
@@ -282,7 +285,7 @@ RP chat replies, not to write cards, so ranking it here isn't fair yet.
 
 **Reference card sets:** real card sets scored with the same version.
 
-| Set | Cards | Median | Meatbag adjacent | Might just be slop |
+| Set | Cards | Median | Original-ish | Common |
 |---|---|---|---|---|
 | Korshuk cards, Feb–Apr 2023 | 360 | 7.5 | 97% | 1% |
 | JanitorAI cards, May–Jun 2023 | 9,145 | 11.6 | 95% | 2% |
@@ -319,9 +322,9 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 human (2023) vs 1,237 AI-written | 0.69 | 0.91 |
+| Character cards: 108,129 human (2023) vs 1,290 AI-written | 0.69 | 0.90 |
 
-On the cards, at a 2% false-alarm rate on human cards, BBBScorer flags 27% of AI-written cards and the original
+On the cards, at a 2% false-alarm rate on human cards, BBBScorer flags 28% of AI-written cards and the original
 slop score 8.5%.
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
@@ -348,6 +351,7 @@ and Chub, 2023) against AI personas (SPB-2602) and cards generated for this proj
 | **BBBScorer** | The BB Botstyle Scorer: this scoring pipeline. Its version is stored with every score; scores from different versions shouldn't be compared directly. |
 | **App version** | The page and tools version (`package.json`). Moves for any change, including ones that don't touch scores. |
 | **Original slop score** | Sam Paech's slop-score formula, unchanged, on the same text. |
+| **Original-ish / Mixed / Common** | The three bands (under 40, 40–60, 60+). Their fun taglines: meatbag adjacent, mixed signals, might just be slop. |
 | **Prose words** | Words left after lists, headers, W++/PList blocks and boilerplate are set aside. Only these are scored. |
 | **Boilerplate** | Instructions to the model, narrator rules, pasted jailbreaks. |
 | **W++ / PList / Ali:Chat** | Card-writing formats: W++ is `Trait("value" + "value")`; PList is `[Name's personality: a, b, c]`; Ali:Chat is example exchanges in the character's voice. |

@@ -6,6 +6,18 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.12.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores and cut-offs unchanged.
+
+### Changed
+- Band names are back to **Original-ish / Mixed / Common** (under 40 / 40–60 / 60+). The fun labels stay as
+  taglines next to them: *meatbag adjacent*, *mixed signals*, *might just be slop*. `scoreCard()` returns the
+  tagline as `band.tagline`.
+- Leaderboard and reference rebuilt with the new Gemini 2.5 Flash and Aion RP 8B cards (1,290 AI-written cards).
+- `tools/organize_eval.mjs` keeps Windows shortcuts to every doc (readme, documentation, changelog, dev notes and
+  log, the current run's notes, comparison and scorer manifest) in `docs/` on the local machine.
+
 ## [0.11.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.

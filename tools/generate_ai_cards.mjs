@@ -50,6 +50,10 @@
 //   thedrummer/rocinante-12b, thedrummer/unslopnemo-12b (trained to avoid slop),
 //   thedrummer/cydonia-24b-v4.1, thedrummer/skyfall-36b-v2, sao10k/l3.3-euryale-70b,
 //   gryphe/mythomax-l2-13b (the 2023 classic), mistralai/mistral-nemo (base of most 12B RP tunes)
+// Run 4 (planned 2026-10-28, dev/generate-cards.cmd): OpenRouter's most-used models in Oct 2026 and GPT-4o:
+//   deepseek/deepseek-v4.1-flash, deepseek/deepseek-chat-v3-0324, z-ai/glm-5.3-flash, openai/gpt-6-luna,
+//   google/gemini-3.8-flash, tencent/hy4-preview, openai/gpt-4o-2024-11-20; premium anthropic/claude-opus-5.5;
+//   plus two more plain-request rounds (--more --modes fresh) for the models with 10-14 plain cards.
 // Ids that OpenRouter doesn't serve fail with an HTTP error per card and the run continues.
 
 import { helpIfAsked } from './_help.mjs';

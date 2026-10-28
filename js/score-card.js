@@ -42,7 +42,9 @@ export const DEFAULT_FIELDS = ['description', 'first_mes'];
 // 93 / 5 / 2% and AI cards at 30 / 40 / 30%. (0.7.0: 50 / 75; 0.5.0-0.6.0: 35 / 50 on the old scale.)
 // Ids stay original / mixed / common for platforms.
 export const WRITING_STYLE_BANDS = { original: 40, common: 60 };
-export const BAND_LABELS = { original: 'Meatbag adjacent', mixed: 'Mixed signals', common: 'Might just be slop' };
+// Band names (descriptive), plus a just-for-fun tagline for each shown next to them on the page.
+export const BAND_LABELS = { original: 'Original-ish', mixed: 'Mixed', common: 'Common' };
+export const BAND_TAGLINES = { original: 'Meatbag adjacent', mixed: 'Mixed signals', common: 'Might just be slop' };
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
 
@@ -84,7 +86,7 @@ export function writingStyleBand(score, reliable, format, stats = {}, obviousTel
     return { id: 'na', label: stats.structuredWords > stats.proseWords ? 'Mostly W++/lists: too little prose to judge' : 'Too little prose to judge' };
   const B = WRITING_STYLE_BANDS;
   const id = score < B.original ? 'original' : score < B.common ? 'mixed' : 'common';
-  return { id, label: BAND_LABELS[id] + (reliable ? '' : ' (low confidence)'), tentative: true };
+  return { id, label: BAND_LABELS[id] + (reliable ? '' : ' (low confidence)'), tagline: BAND_TAGLINES[id], tentative: true };
 }
 
 function quietly(fn) {

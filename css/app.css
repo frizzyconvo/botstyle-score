@@ -273,3 +273,14 @@ html { scroll-behavior: smooth; }
   .axis-track .t100-long { display: none; }
   .bl-sub { white-space: normal; }
 }
+
+/* 0.12: band names with fun taglines */
+.band-tag { display: block; margin: 4px 0 0; font-size: 12.5px; font-style: italic; color: var(--dim); }
+.axis-track .z .zt { display: block; font-size: 9.5px; font-style: italic; text-transform: none; letter-spacing: .3px; opacity: .8; }
+.axis-legend { display: none; }
+@media (max-width: 520px) {
+  .axis-track .z { font-size: 0; }   /* zone names move to the legend line below the axis */
+  .axis-track .z .zt { display: none; }
+  .axis-legend { display: block; margin: -4px 0 14px; text-align: center; font-size: 11px; letter-spacing: .5px; color: var(--faint); }
+  .axis-legend .l1 { color: var(--good); } .axis-legend .l2 { color: var(--warn); } .axis-legend .l3 { color: var(--bad); }
+}

@@ -129,7 +129,7 @@ const fan = scoreCard({ description: 'The hero of the realm, a towering knight w
 check('genre: fantasy detected', fan.genre.primary === 'fantasy', JSON.stringify(fan.genre.scores));
 check('pulp score computed with genre words', fan.pulp && fan.pulp.score > 0 && fan.pulp.adjusted <= fan.score, JSON.stringify(fan.pulp));
 check('archetype label present', !!(fan.archetype && fan.archetype.label), JSON.stringify(fan.archetype));
-check('band labels are the tentative ones', ['Meatbag adjacent', 'Mixed signals', 'Might just be slop'].some(l => fan.band.label.startsWith(l)) && fan.band.tentative, fan.band.label);
+check('band labels are Original-ish / Mixed / Common, with a fun tagline', ['Original-ish', 'Mixed', 'Common'].some(l => fan.band.label.startsWith(l)) && fan.band.tentative && !!fan.band.tagline, fan.band.label);
 
 // 0.6.0: in-character dialogue counts; interview questions and list syntax don't
 const dlg = preprocessCard('A: "I... overthink everything. What if I say something stupid?" blushes\nQ: How does {{char}} rate herself?\n- "Took you long enough."');

@@ -8,7 +8,8 @@
 //   eval/old/           superseded: older runs (old/scores/), pre-versioning scores (old/unversioned-scores/),
 //                       stale backups (old/backups/)
 //
-// Also points docs/Latest scorer notes.lnk (Windows shortcut, not in git) at the current run's notes.md.
+// Also writes Windows shortcuts in docs/ (not in git) to every doc: README, BOTSTYLE, CHANGELOG, dev/CHATLOG,
+// dev/NOTES, and the current run's notes, comparison and SCORER.md.
 //
 //   node tools/organize_eval.mjs [--dry-run]
 // Refuses while a scoring run holds the lock or a generated-cards file changed in the last 3 minutes.
@@ -66,15 +67,26 @@ const KNOWN = ['ai-cards', 'inputs', 'experiments', 'scores', 'old', 'README.md'
 const leftovers = readdirSync(EVAL).filter(f => !KNOWN.includes(f));
 if (leftovers.length) console.log(`  not sorted (left in eval/): ${leftovers.join(', ')}`);
 
-// 5. docs/Latest scorer notes.lnk -> eval/scores/v<current>/notes.md (Windows only; gitignored)
-const notes = join(PATHS.scores, 'v' + current, 'notes.md');
+// 5. docs/: Windows shortcuts to every doc (public and dev-only) so they can all be opened from one folder.
+// Windows only (PowerShell); *.lnk is gitignored. Run-specific ones follow the current scorer version.
+export const DOC_SHORTCUTS = cur => [
+  ['Readme', 'README.md'], ['Documentation (BOTSTYLE)', 'BOTSTYLE.md'], ['Changelog', 'CHANGELOG.md'],
+  ['Dev chat log', 'dev/CHATLOG.md'], ['Dev notes', 'dev/NOTES.md'], ['Dev scripts readme', 'dev/README.md'],
+  ['Latest scorer notes', `eval/scores/v${cur}/notes.md`], ['Latest scorer comparison', `eval/scores/v${cur}`, 'compare'],
+  ['Latest scorer manifest (SCORER)', `eval/scores/v${cur}/SCORER.md`], ['Eval folder guide', 'eval/README.md'],
+  ['Upstream leftovers readme', 'upstream/README.md'],
+];
 if (!DRY && current && process.platform === 'win32') {
-  const lnk = join(ROOT, 'docs', 'Latest scorer notes.lnk');
-  try {
-    execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command',
-      `$s = (New-Object -ComObject WScript.Shell).CreateShortcut('${lnk.replace(/'/g, "''")}'); $s.TargetPath = '${notes.replace(/'/g, "''")}'; $s.Description = 'BBBScorer v${current} scoring-run notes'; $s.Save()`], { stdio: 'ignore' });
-    console.log(`  docs/Latest scorer notes.lnk -> eval/scores/v${current}/notes.md`);
-  } catch (e) { console.log(`  couldn't write the docs shortcut: ${e.message}`); }
+  const ps = [];
+  for (const [name, target, kind] of DOC_SHORTCUTS(current)) {
+    let t = join(ROOT, ...target.split('/'));
+    if (kind === 'compare') { const f = existsSync(t) ? readdirSync(t).filter(x => /^compare-v.*\.txt$/.test(x)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).pop() : null; if (!f) continue; t = join(t, f); }
+    const lnk = join(ROOT, 'docs', name + '.lnk').replace(/'/g, "''");
+    ps.push(`$s = $w.CreateShortcut('${lnk}'); $s.TargetPath = '${t.replace(/'/g, "''")}'; $s.Save()`);
+  }
+  try { execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', '$w = New-Object -ComObject WScript.Shell; ' + ps.join('; ')], { stdio: 'ignore' });
+    console.log(`  docs/: ${ps.length} shortcuts (latest scorer files -> eval/scores/v${current}/)`); }
+  catch (e) { console.log(`  couldn't write the docs shortcuts: ${e.message}`); }
 }
 
 // 6. README
@@ -89,7 +101,7 @@ const readme = `# eval/
 Local data for building and testing BBBScorer (not in git). Kept tidy by \`node tools/organize_eval.mjs\`, which
 the overnight scoring script runs first (last run ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC).
 
-**Start here:** \`scores/v${current}/notes.md\` (also linked from \`docs/Latest scorer notes.lnk\`).
+**Start here:** \`scores/v${current}/notes.md\` (also in \`docs/\` as "Latest scorer notes", with shortcuts to every other doc).
 
 | Folder | What's in it |
 |---|---|
