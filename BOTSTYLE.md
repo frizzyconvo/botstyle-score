@@ -313,6 +313,7 @@ original slop-score median, or number of cards (**# cards**).
 **Just for fun, not ranked:**
 - UnslopNemo and its base, Mistral Nemo. UnslopNemo was tuned to strip stock phrasing from RP chat replies, not to
   write cards, so ranking it here isn't fair.
+- Phi-4: a small general model trained mostly on synthetic, textbook-style data; people don't write cards with it.
 - Extra card sets of unknown origin (human, AI or both): Perchance cards (NSFW) and Someone's SillyTavern Archive
   (undated).
 - **Failed** models, shown with a hatched red background: most of their cards failed the format checks, so the

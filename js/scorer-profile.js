@@ -14,12 +14,15 @@
 //   texture         points for even paragraph lengths, minus points for very uneven ones (paragraph-length CV)
 //   pulpWeight      weight multiplier for genre words human genre cards use as often as AI (1 = unchanged)
 //   lengthBands     band cut-offs by prose length (data/botstyle_length_bands.json) instead of one 40 / 60 for all
+//   cardLists       points from words and phrases mined from AI-written character cards (data/botstyle_card_lists.json,
+//                   tools/mine_card_lists.mjs): weight × 100 × min(1, rate / p90), rate = summed weights of the items a card
+//                   uses per 1,000 prose words. Tested with models and characters held out (eval/experiments/remine_eval.md).
 //   patternsOff / patternsOn  sentence patterns switched off / on (ids from js/ai-structures.js), from rechecking every
 //                   pattern on character cards instead of the stories they were picked on
 export const DEFAULT_SCORER = '0.8.1';
 export const NEXT_SCORER = '0.9.0';
 export const PROFILES = {
-  '0.8.1': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [] },
+  '0.8.1': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },
   '0.9.0': {
     plistParens: true, maxRepeat: 2.5, stripRpAsterisks: true,
     // Tested and left off (2026-10-28 sample): half of the 2023 compact cards also use phrase-length W++ / PList entries,
@@ -29,6 +32,7 @@ export const PROFILES = {
     pulpWeight: 0.5, lengthBands: true,
     // These six were picked on stories; on character cards they don't separate (or lean human): 2026-10-28 recheck.
     patternsOff: ['found_herself', 'it_was_as_if', 'hung_heavy', 'felt_a_surge', 'unspoken', 'not_just_shes'], patternsOn: [],
+    cardLists: { weight: 0.3 },
   },
 };
 let current = DEFAULT_SCORER, overrides = {};

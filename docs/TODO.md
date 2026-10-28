@@ -23,6 +23,11 @@ In 0.9.0:
   over and over ("eternity" on a card about an eternal god) can't carry a card.
 - **RP asterisks.** Asterisks are removed before the sentence patterns run, so `"Miss me?" *she purrs.*` is read like
   `"Miss me?" she purrs.`
+- **Words and phrases mined from AI-written cards.** The scored lists come from stories. 0.9.0 adds a second list mined
+  from about 2,250 character cards written by 37 models for this project, with every model counted equally so models
+  the story lists never saw count as much as the ones they did ("fiercely loyal", "tilts her head", "leans forward",
+  "leather-bound", "patient", "ancient"). Checked by mining on half the models and half the characters and testing on
+  the other half: it catches 7–9 more AI cards in 100 there, and on a persona set it was never mined from 48% → 56%.
 - **Paragraph evenness.** AI-written cards keep paragraphs close to the same length; 0.9.0 adds a few points for very
   even paragraphs and takes a few off for very uneven ones.
 
@@ -31,12 +36,12 @@ length cut-offs and the other half tests them):
 
 | | 0.8.1 | 0.9.0 |
 |---|---|---|
-| Separation (AUC) | 0.862 | 0.885 |
+| Separation (AUC) | 0.862 | 0.885 (without the card-mined lists) |
 | 2023 cards landing in Common | 1.6% | 2.0% |
-| … under 150 / over 800 prose words | 0.2% / 3.9% | 2.3% / 2.3% |
-| AI-written cards in Common | 27% | 31% |
-| … short (under 250 words) / compact requests / in voice / long (800+) | 6% / 13% / 8% / 41% | 20% / 20% / 11% / 43% |
-| Short AI-written cards in Original-ish | 82% | 60% |
+| … under 150 / over 800 prose words | 0.2% / 3.9% | 2.0% / 2.0% |
+| AI persona set never used for mining, in Common | 37% | 46% |
+| Our generated cards in Common (the card-mined lists saw these, so read with care) | 25% | 41% |
+| … short (under 250 words) / compact requests / in voice | 6% / 13% / 8% | 37% / 28% / 20% |
 
 Two candidates were tested and left out of 0.9.0: points for phrase-length W++ / PList entries (half the 2023 compact
 cards write entries that way too, so it raised human compact cards as much as AI ones), and switching UnslopNemo's
@@ -52,9 +57,8 @@ clenched), zeugma, "-ing" sentence openers, trailing "-ing" clauses, three-adjec
 "quietly / deeply" adverbs (already covered by the word list) and sentence-length variety. Clipped fragments ("Not
 yet." "Mostly.") show promise in first-person greetings but need speech separated from narration first.
 
-Still open: re-mining the word lists from current models' character cards (holding some models out, since the current
-lists were built partly from the outputs of models on the leaderboard), the pulp read inside the score, a stricter
-human baseline, AI-themed characters, and comparing scores by percentile instead of points in the run notes.
+Still open: a bigger re-mining once the generated cards cover more characters (each round so far reused a few dozen
+prompts), a stricter human baseline, AI-themed characters, and comparing scores by percentile instead of points in the run notes.
 
 ## Linux version (or a setup that runs on Linux)
 

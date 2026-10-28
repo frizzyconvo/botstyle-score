@@ -12,4 +12,5 @@ export const FAILED = {
 export const JUST_FOR_FUN = {
   'thedrummer/unslopnemo-12b': 'tuned to strip stock phrasing from RP chat, not to write cards',
   'mistralai/mistral-nemo': 'base model of UnslopNemo',
+  'microsoft/phi-4': 'a small general model trained mostly on synthetic textbook-style data, not one people use for roleplay or card writing',
 };

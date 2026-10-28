@@ -156,6 +156,9 @@ check('default fields: scenario not scored', scoreCard({ description: 'She bakes
   check('0.9.0: compact-value points are off (tested, left out)', scoreCard({ description: wpp }).extraPoints.compactValues === 0);
   SP.setScorerProfile('0.9.0', { compactValues: { minValues: 6, from: 2.5, to: 5, max: 20 } });
   check('compact-value switch: long W++ values add points', scoreCard({ description: wpp, first_mes: 'Hey buddy, you made it! Come on in, grab a chair, I saved you the good one by the window.' }).extraPoints.compactValues > 0);
+  SP.setScorerProfile('0.9.0');
+  const ml = scoreCard({ description: 'Fiercely loyal and endlessly patient, she tilts her head and leans forward. Ancient leather-bound books, a faint smell of ink and dust. Her voice is a low rumble. Well, well, she must say, either way it is fascinating, precisely the practical sort of thing. '.repeat(2) });
+  check('0.9.0: card-mined words add points', ml.extraPoints.cardLists > 0 && ml.cardListHits.length > 3, JSON.stringify(ml.extraPoints));
   SP.setScorerProfile();
   check('profile back to 0.8.1', scoreCard('She bakes bread.').version === '0.8.1' && scoreCard({ description: wpp }).extraPoints.compactValues === 0);
 }

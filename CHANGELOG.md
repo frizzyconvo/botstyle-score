@@ -6,6 +6,24 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.20.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged. BBBScorer 0.9.0 (prepared, opt-in) gains a card-mined list.
+
+### Added
+- `tools/mine_card_lists.mjs`: mines words and two-word phrases AI-written character cards use far more than 2023 cards,
+  from the cards generated for this project, counting every model equally and filtering out words tied to one
+  character's premise. First list: 217 words and 31 phrases (`data/botstyle_card_lists.json`), 189 of them not in the
+  story-built lists.
+- BBBScorer 0.9.0 (opt-in): up to 30 extra points from that list. Mined on half the models and half the characters and
+  tested on the other half, it catches 7–9 more AI-written cards in 100 at the same false-positive rate; on an AI
+  persona set it never saw, 48% → 56%.
+
+### Changed
+- Leaderboard: Phi-4 moved to **Just for fun** (a small general model people don't write cards with).
+- Provisional 0.9.0 length cut-offs rebuilt with the card-mined list, from the half of the 2023 sample the list never
+  saw.
+
 ## [0.19.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged. BBBScorer 0.9.0 is prepared but not switched on.

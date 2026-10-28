@@ -10,7 +10,7 @@
 //
 // A plain string is accepted too (treated as description + greeting pasted together).
 
-import { loadBotstyle, scoreWeighted, computeBotstyleScore, peerPercentile, tallyNames, MIN_PROSE_WORDS, setWordFactors } from './botstyle.js';
+import { loadBotstyle, scoreWeighted, computeBotstyleScore, peerPercentile, tallyNames, MIN_PROSE_WORDS, setWordFactors, ngramTokens } from './botstyle.js';
 import { scorerProfile, scorerVersion, DEFAULT_SCORER, NEXT_SCORER } from './scorer-profile.js';
 import { preprocessCard } from './card-preprocess.js';
 import { scoreStructures } from './ai-structures.js';
@@ -52,12 +52,14 @@ export const BAND_TAGLINES = { original: 'Meatbag adjacent', mixed: 'Mixed signa
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
 let LENGTH_BANDS = null;   // data/botstyle_length_bands.json: band cut-offs by prose length (0.9.0 lengthBands)
+let CARD_LISTS = null;     // data/botstyle_card_lists.json: words and phrases mined from AI-written cards (0.9.0 cardLists)
 
 export async function loadAll(base = './data/') {
   // extra_words.txt (~0.6 MB compressed) only feeds the typo read-out, so it loads alongside the rest
   await Promise.all([loadBotstyle(base), loadCliches(base), loadPulp(base), loadExtraWords(base)]);
   try { const r = await fetch(base + 'botstyle_reference.json'); if (r.ok) REFERENCE = await r.json(); } catch { REFERENCE = null; }
   try { const r = await fetch(base + 'botstyle_length_bands.json'); if (r.ok) LENGTH_BANDS = await r.json(); } catch { LENGTH_BANDS = null; }
+  try { const r = await fetch(base + 'botstyle_card_lists.json'); if (r.ok) { const j = await r.json(); CARD_LISTS = { p90: j.p90, words: new Map(j.words.map(x => [x[0], x[1]])), bigrams: new Map(j.bigrams.map(x => [x[0], x[1]])) }; } } catch { CARD_LISTS = null; }
   setWordFactors(pulpWords());
 }
 
@@ -89,6 +91,17 @@ export function paragraphCv(prose) {
   const m = p.reduce((a, b) => a + b, 0) / p.length, sd = Math.sqrt(p.reduce((a, b) => a + (b - m) ** 2, 0) / p.length);
   return { paragraphs: p.length, cv: sd / m };
 }
+// 0.9.0 cardLists: each mined word or two-word phrase counts once per card (presence), weighted; per 1,000 prose words.
+export function cardListHits(prose) {
+  if (!CARD_LISTS) return { rate: 0, hits: [] };
+  const t = ngramTokens(String(prose || '')), seen = new Set(), hits = [];
+  for (let i = 0; i < t.length; i++) {
+    for (const [g, L] of [[t[i], CARD_LISTS.words], [i + 1 < t.length ? t[i] + ' ' + t[i + 1] : null, CARD_LISTS.bigrams]]) if (g && !seen.has(g) && L.has(g)) { seen.add(g); hits.push({ item: g, weight: L.get(g) }); }
+  }
+  const n = (String(prose || '').match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).length;
+  return { rate: 1000 * hits.reduce((a, h) => a + h.weight, 0) / Math.max(60, n), hits: hits.sort((a, b) => b.weight - a.weight) };
+}
+function cardListPoints(h) { const c = scorerProfile().cardLists; return c && CARD_LISTS ? c.weight * 100 * Math.min(1, h.rate / CARD_LISTS.p90) : 0; }
 function texturePoints(pc, proseWords) {
   const c = scorerProfile().texture;
   if (!c || pc.cv === null || pc.paragraphs < c.minParagraphs || proseWords < c.minWords) return 0;
@@ -198,8 +211,9 @@ export function scoreCard(card, opts = {}) {
   // 0.9.0 extra points (both 0 under 0.8.1): long W++ / PList trait values, and paragraph evenness (+) or
   // unevenness (−). Like em-dash and chatbot-leftover points, they sit on top of the word / phrase / pattern score.
   const compact = compactValueStats(definition), pCv = paragraphCv(pre.prose);
-  const extra = { compactValues: +compactPoints(compact).toFixed(2), texture: +texturePoints(pCv, pre.stats.proseWords).toFixed(2) };
-  const extraPts = extra.compactValues + extra.texture;
+  const cl = scorerProfile().cardLists ? cardListHits(pre.prose) : { rate: 0, hits: [] };
+  const extra = { compactValues: +compactPoints(compact).toFixed(2), texture: +texturePoints(pCv, pre.stats.proseWords).toFixed(2), cardLists: +cardListPoints(cl).toFixed(2) };
+  const extraPts = extra.compactValues + extra.texture + extra.cardLists;
   if (extraPts) for (const k of ['score', 'low', 'high']) score[k] = Math.max(0, Math.min(100, score[k] + extraPts));
   if (mixed && opts.mixedPolicy === 'higher') {
     const hi = parts[mixed.higher];
@@ -224,7 +238,7 @@ export function scoreCard(card, opts = {}) {
     score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable, joint, parts, mixed, repetition,
     components: score.components, emdashPoints: score.emdashPoints, artifactPoints: score.artifactPoints,
     band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0, bandCuts(pre.stats.proseWords)),
-    bandCuts: bandCuts(pre.stats.proseWords), extraPoints: extra, compactValues: compact, paragraphEvenness: pCv,
+    bandCuts: bandCuts(pre.stats.proseWords), extraPoints: extra, compactValues: compact, paragraphEvenness: pCv, cardListHits: cl.hits.slice(0, 20),
     rates, stats: pre.stats, format, greeting, type, peers,
     reference: referencePercentiles(score.score),
     genre, pulp, archetype: archetype({ format, greeting, genre, stats: pre.stats }),
