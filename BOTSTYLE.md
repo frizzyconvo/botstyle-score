@@ -318,7 +318,7 @@ Description + first message only, as the earlier scorers were run (`node tools/s
 |---|---|---|---|---|
 | Botbooru 75990 Genavros (hand-written) | 35 | 31.2 Mixed | higher than 92% / 47% | paragraph CV 0.35, 84% |
 | Botbooru 72660 Raquel (AI shitpost) | 18 / ~30 | 48.4 Common | 98% / 90% | CV 0.43, 90% |
-| Chub Farina (your card) | ~8 | 15.6 Original | 65% / 3% | CV 0.69, 12% |
+| Chub Farina (frizzy's card) | ~8 | 15.6 Original | 65% / 3% | CV 0.69, 12% |
 
 75990 is pushed up by dark-fantasy vocabulary (primal, predator, abyss, solitude, ember, maw) that AI fiction
 overuses relative to the Reddit stories the lists were weighted against: a genre confound. Farina's rise is
