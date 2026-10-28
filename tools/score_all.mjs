@@ -36,10 +36,36 @@ const rng = v => { const mn = Math.min(...v), mx = Math.max(...v), r = mx - mn; 
 const UR = { w: rng(LB.map(r => r.metrics.slop_list_matches_per_1k_words || 0)), t: rng(LB.map(r => r.metrics.slop_trigram_matches_per_1k_words || 0)), c: rng(LB.map(r => r.metrics.not_x_but_y_per_1k_chars || 0)) };
 const nz = (v, r) => Math.max(0, Math.min(1, (v - r.min) / (r.max - r.min)));
 const quiet = fn => { const o = { ...console }; for (const k of ['log', 'group', 'groupEnd', 'warn', 'error']) console[k] = () => {}; try { return fn(); } finally { Object.assign(console, o); } };
-function upstreamScore(text) {
+function upstreamParts(text) {
   const toks = alphaTokens(wordsOnlyLower(text)); if (!toks.length) return null;
   const s = computeSlopIndex(toks, false), c = quiet(() => scoreContrast(text)).rate_per_1k;
-  return +((nz(s.wordScore, UR.w) * .6 + nz(c, UR.c) * .25 + nz(s.trigramScore, UR.t) * .15) * 100).toFixed(2);
+  return { score: +((nz(s.wordScore, UR.w) * .6 + nz(c, UR.c) * .25 + nz(s.trigramScore, UR.t) * .15) * 100).toFixed(2),
+    words: +s.wordScore.toFixed(2), trigrams: +s.trigramScore.toFixed(2), contrast: +c.toFixed(3) };
+}
+const upstreamScore = text => { const u = upstreamParts(text); return u ? u.score : null; };
+
+// Disparity between BBBScorer and the original formula on the same text (points). Marked in every row and
+// summarised in notes.md, with likely reasons, so a run shows where the two disagree and why.
+const DISPARITY = { big: 30, veryBig: 50 };
+function disparity(r, up) {
+  if (!up) return null;
+  const d = +(r.score - up.score).toFixed(1), a = Math.abs(d);
+  if (a < DISPARITY.big) return { diff: d };
+  const why = [], st = r.stats, share = st.totalWords ? st.proseWords / st.totalWords : 1;
+  if (d > 0) {
+    if (r.components.phrases >= .5 || r.components.structures >= .5) why.push('AI phrases/structures the original lists lack');
+    if (share < .6) why.push(`only ${Math.round(share * 100)}% prose (original counts lists and boilerplate, diluting it)`);
+    if (up.words < 8) why.push(`few original slop-list words (${up.words}/1k)`);
+    if (r.emdashPoints > 0) why.push(`em-dash points +${r.emdashPoints.toFixed(0)}`);
+    if (r.artifactPoints > 0) why.push(`chatbot leftovers +${r.artifactPoints}`);
+  } else {
+    if (up.trigrams >= 1) why.push(`original trigram hits (${up.trigrams}/1k) that BBBScorer drops or weights low`);
+    if (up.words >= 20) why.push(`many original slop-list words (${up.words}/1k); BBBScorer weights by AI/human ratio`);
+    if (share < .6) why.push(`only ${Math.round(share * 100)}% prose scored by BBBScorer`);
+    if (r.pulp && r.pulp.score >= 15) why.push('genre vocabulary');
+  }
+  if (r.mixed) why.push(`mixed card (${r.mixed.higher} +${r.mixed.gap})`);
+  return { diff: d, flag: a >= DISPARITY.veryBig ? 'very_big' : 'big', dir: d > 0 ? 'bbb_higher' : 'orig_higher', why };
 }
 
 const argv = process.argv.slice(2);
@@ -126,6 +152,43 @@ const DATASETS = [
   { name: 'jaicards', label: 'human', rows: null },   // filled in below (needs the cache)
 ];
 
+// notes.md: per dataset, how BBBScorer and the original compare (spread, agreement, disparities, examples).
+const NOTES = join(OUT, 'notes.md');
+function writeNotes(name, rows) {
+  const ok = rows.filter(x => !x.error && x.reliable && !x.nonEnglish && x.upstream !== null);
+  if (!ok.length) return;
+  const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1) : '-'; };
+  const qs = a => [.1, .25, .5, .75, .9, .99].map(p => q(a, p)).join(' / ');
+  const B = ok.map(x => x.score), U = ok.map(x => x.upstream);
+  const rank = a => { const idx = a.map((v, i) => [v, i]).sort((x, y) => x[0] - y[0]); const r = Array(a.length); idx.forEach(([, i], k) => { r[i] = k; }); return r; };
+  const rb = rank(B), ru = rank(U), n = ok.length, mean = (n - 1) / 2;
+  const cov = rb.reduce((s, v, i) => s + (v - mean) * (ru[i] - mean), 0), sd = rb.reduce((s, v) => s + (v - mean) ** 2, 0);
+  const spearman = sd ? cov / sd : 0;
+  const flagged = ok.filter(x => x.disparity && x.disparity.flag), vb = flagged.filter(x => x.disparity.flag === 'very_big');
+  const up = flagged.filter(x => x.disparity.dir === 'bbb_higher'), down = flagged.filter(x => x.disparity.dir === 'orig_higher');
+  const reasons = list => { const c = {}; for (const x of list) for (const w of x.disparity.why.length ? x.disparity.why : ['no clear reason (check by hand)']) { const k = w.replace(/\d+(\.\d+)?/g, 'N'); c[k] = (c[k] || 0) + 1; } return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, v]) => `${v}× ${k}`).join('; ') || '-'; };
+  const ex = list => list.sort((a, b) => Math.abs(b.disparity.diff) - Math.abs(a.disparity.diff)).slice(0, 8)
+    .map(x => `  - ${x.disparity.flag === 'very_big' ? '**VERY BIG**' : 'big'} ${x.id}${x.name ? ` "${x.name}"` : ''}${x.model ? ` (${x.model})` : ''}: BBB ${x.score.toFixed(1)} vs original ${x.upstream.toFixed(1)} (${x.disparity.diff > 0 ? '+' : ''}${x.disparity.diff}); desc ${x.desc ?? '-'} / greet ${x.greet ?? '-'}; ${x.proseWords}/${x.totalWords} prose words, ${x.format}. ${x.disparity.why.join('; ') || 'no clear reason'}`).join('\n');
+  const spreadB = +q(B, .9) - +q(B, .1), spreadU = +q(U, .9) - +q(U, .1);
+  const warn = [];
+  if (spreadB < 20) warn.push(`BBBScorer spread is narrow here (p10–p90 ${spreadB.toFixed(0)} points)`);
+  if (spearman < .4) warn.push(`the two scores barely agree on order (Spearman ${spearman.toFixed(2)})`);
+  if (vb.length / n > .05) warn.push(`${(100 * vb.length / n).toFixed(1)}% of cards have a very big disparity`);
+  const mixed = ok.filter(x => x.mixed).length;
+  const md = `\n## ${name} (${new Date().toISOString().slice(0, 16)}, BBBScorer ${SCORER_VERSION})\n\n`
+    + `${n} reliable English cards of ${rows.length}. Text: description + first message for both scorers.\n\n`
+    + `| | p10 / p25 / p50 / p75 / p90 / p99 |\n|---|---|\n| BBBScorer | ${qs(B)} |\n| original | ${qs(U)} |\n\n`
+    + `- Agreement on order (Spearman): ${spearman.toFixed(2)}. Spread p10–p90: BBBScorer ${spreadB.toFixed(0)}, original ${spreadU.toFixed(0)} points.\n`
+    + `- Disparities (|BBB − original| ≥ ${DISPARITY.big} = big, ≥ ${DISPARITY.veryBig} = VERY BIG): ${flagged.length} (${(100 * flagged.length / n).toFixed(1)}%), of which ${vb.length} very big. `
+    + `BBB higher: ${up.length}; original higher: ${down.length}.\n`
+    + `- Mixed cards (description and greeting ${'≥'}25 apart): ${mixed} (${(100 * mixed / n).toFixed(1)}%).\n`
+    + (warn.length ? `- **Check:** ${warn.join('; ')}.\n` : '')
+    + `- Why BBB is higher: ${reasons(up)}\n- Why the original is higher: ${reasons(down)}\n`
+    + (up.length ? `\nBiggest "BBB higher":\n${ex(up)}\n` : '') + (down.length ? `\nBiggest "original higher":\n${ex(down)}\n` : '');
+  appendFileSync(NOTES, md);
+  console.log(`  notes: Spearman ${spearman.toFixed(2)}, ${flagged.length} disparities (${vb.length} very big)${warn.length ? ' — CHECK: ' + warn.join('; ') : ''}`);
+}
+
 const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
 const summary = existsSync(join(OUT, 'summary.json')) ? JSON.parse(readFileSync(join(OUT, 'summary.json'), 'utf-8')) : { version: SCORER_VERSION, datasets: {} };
 
@@ -142,8 +205,10 @@ for (const ds of DATASETS) {
     const c = card(raw); n++;
     let r;
     try { r = scoreCard(c); } catch (e) { rows.push({ id: c.id, dataset: ds.name, version: SCORER_VERSION, error: e.message }); continue; }
-    rows.push({ id: c.id, dataset: ds.name, label: typeof ds.label === 'function' ? ds.label(c) : ds.label, createdAt: c.createdAt, model: raw.model, mode: raw.mode,
-      version: r.version, score: +r.score.toFixed(2), upstream: upstreamScore(r.text), low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,
+    const up = upstreamParts(r.text), disp = disparity(r, up);
+    rows.push({ id: c.id, name: String(c.name || '').slice(0, 60), dataset: ds.name, label: typeof ds.label === 'function' ? ds.label(c) : ds.label, createdAt: c.createdAt, model: raw.model, mode: raw.mode, round: raw.round,
+      version: r.version, score: +r.score.toFixed(2), upstream: up ? up.score : null, upstreamParts: up, disparity: disp,
+      desc: r.parts.description ? r.parts.description.score : null, greet: r.parts.greeting ? r.parts.greeting.score : null, mixed: r.mixed, low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,
       proseWords: r.stats.proseWords, totalWords: r.stats.totalWords, format: r.format.format, greeting: r.greeting ? r.greeting.primary : null, type: r.type,
       comp: Object.fromEntries(Object.entries(r.components).map(([k, v]) => [k, +v.toFixed(3)])), emdashPoints: +r.emdashPoints.toFixed(2), artifactPoints: r.artifactPoints,
       paraCv: r.texture.paraCv === null ? null : +r.texture.paraCv.toFixed(3), aiStyleLikelihood: r.experimental.aiStyleLikelihood === null ? null : +r.experimental.aiStyleLikelihood.toFixed(3),
@@ -159,6 +224,7 @@ for (const ds of DATASETS) {
   summary.datasets[ds.name] = { n: rows.length, reliable: ok.length, errors: rows.filter(x => x.error).length, median: median(ok.map(x => x.score)), bands,
     byYear: Object.fromEntries(Object.entries(byYear).sort().map(([y, v]) => [y, { n: v.length, median: median(v) }])), limit: LIMIT || undefined, at: new Date().toISOString() };
   writeFileSync(join(OUT, 'summary.json'), JSON.stringify(summary, null, 1));
+  writeNotes(ds.name, rows);
   // performance log: one line per dataset run (eval/scores/v<version>/run-log.jsonl)
   const secs = (Date.now() - t0) / 1000;
   appendFileSync(join(OUT, 'run-log.jsonl'), JSON.stringify({ dataset: ds.name, version: SCORER_VERSION, startedAt, endedAt: new Date().toISOString(), cards: rows.length, words: totalWords,

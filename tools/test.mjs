@@ -62,7 +62,7 @@ check('scored items are not listed as clichés', !cl.phraseHits.some(h => /weigh
 // 6. score fixtures (ranges, not exact values)
 const sc = (t, g2 = '') => scoreCard({ description: t, first_mes: g2 });
 const rg = sc(fx('giallo.txt')), rv = sc(fx('vex.txt')), rh = sc(fx('plain_human.txt'));
-check('giallo scores in 40..80', rg.score >= 40 && rg.score <= 80, rg.score.toFixed(1));
+check('giallo scores in 60..100 (card-anchored scale)', rg.score >= 60 && rg.score <= 100, rg.score.toFixed(1));
 check('vex (slop-dense) scores >= 50', rv.score >= 50, rv.score.toFixed(1));
 check('plain human text scores < 20', rh.score < 20, rh.score.toFixed(1));
 check('plain human text band is Original', rh.band.id === 'original', rh.band.id);
@@ -72,7 +72,7 @@ check('names are tallied not scored', sc('Elara and Kael walked to the market wi
 const charCard = Array.from({ length: 12 }, (_, i) => `{{char}} likes thing number ${i}.`).join(' ') + ' She lives in a town.';
 check('{{char}} writes card tag', sc(charCard).tags.some(t => t.id === 'char_writes_card'));
 check('no {{char}} tag on prose card', !rh.tags.some(t => t.id === 'char_writes_card'));
-const longSlop = Array(16).fill(fx('vex.txt')).join('\n\n');
+const longSlop = Array(8).fill(fx('giallo.txt')).join('\n\n');
 check('no-one-knows tag needs 3000 tokens + Common', sc(longSlop).tags.some(t => t.id === 'no_one_knows') && !sc(Array(40).fill(fx('plain_human.txt')).join('\n\n')).tags.some(t => t.id === 'no_one_knows'));
 check('names list drops Sarah/Emily', !sc('Sarah and Emily went home with Elara.').names.some(n => /sarah|emily/.test(n.item)));
 

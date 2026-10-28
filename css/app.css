@@ -158,6 +158,10 @@ details.nerd summary:hover { color: var(--red-light); }
 .item .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item .sc { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--red-light); }
 .item .meta { font-size: 11.5px; color: var(--faint); white-space: nowrap; }
+.item .src-tag { display: inline-block; margin-right: 6px; padding: 0 5px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--faint); border: 1px solid currentColor; vertical-align: 1px; }
+.item.sub { margin-left: 18px; opacity: .8; }
+details.older { margin: 2px 0 6px 18px; }
+details.older > summary { cursor: pointer; padding: 2px 0; }
 .item .x { padding: 2px 8px; font-size: 12px; background: none; border: none; color: var(--faint); box-shadow: none; }
 .item .x:hover { color: var(--bad); transform: none; }
 

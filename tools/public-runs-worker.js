@@ -8,8 +8,9 @@
 // Workers & Pages -> Create -> Worker -> paste this file -> Settings -> Bindings -> add KV
 // namespace, variable name RUNS -> Deploy. Put the worker URL in js/site-config.js PUBLIC_RUNS.
 //
-// Stores only what the page sends: card name, link, score, band, scorer version, scored fields,
-// and the self-reported creator / AI-use answers. Never card text. Honour system: anyone can post;
+// Stores only what the page sends: card name, link, origin tag, score, band, scorer version, scored fields,
+// and the self-reported creator / AI-use answers. Never card text. Each entry gets a short id so it can be
+// deleted with tools/public_list.mjs. Honour system: anyone can post;
 // there's a size cap, a per-IP limit and a list cap, nothing more.
 
 const ALLOWED_ORIGIN = 'https://frizzyconvo.github.io';
@@ -34,6 +35,8 @@ export default {
     const str = (v, n) => String(v ?? '').slice(0, n);
     const link = str(d.link, 300);
     const run = {
+      id: crypto.randomUUID().slice(0, 8),
+      origin: ['chub', 'bb', 'json', 'png', 'text', 'link'].includes(d.origin) ? d.origin : 'text',
       name: str(d.name, 120) || 'Card', link: /^https:\/\/(?:www\.)?(?:chub\.ai|characterhub\.org|botbooru\.com)\//.test(link) ? link : null,
       score: Math.max(0, Math.min(100, Number(d.score) || 0)), band: ['original', 'mixed', 'common'].includes(d.band) ? d.band : 'na',
       version: str(d.version, 20), fields: Array.isArray(d.fields) ? d.fields.slice(0, 8).map(f => str(f, 40)) : [],

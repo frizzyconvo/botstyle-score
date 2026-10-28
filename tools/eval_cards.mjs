@@ -5,11 +5,10 @@
 //   node tools/eval_cards.mjs --shard 1/4                   # 2. score shard 1 of 4 -> eval/eval_parts/1.jsonl
 //   node tools/eval_cards.mjs --report                      # 3. compare variants -> eval/eval_cards.json
 //
-// Each card is scored as one text (description + first message, and description + personality +
-// scenario + first message as scorer 0.5.0 did), and as separate parts (description alone, first
-// message alone), with and without the provisional rp_reply_tells pattern. The report then compares:
-// joint text, the mean of the parts, a capped-weight mean (each part counts up to 400 prose words)
-// and the higher part, on AUC and the share of human / AI cards at 35+ and 50+.
+// Each card is scored with the current scorer: the joint score (description + first message) and the
+// two parts on their own. The report compares the joint score with 'mixed -> higher part' rules at
+// several gaps and minimum part lengths (AUC, share of human / AI cards at 35+ and 50+), shows how
+// often cards count as mixed, and prints score quantiles for setting band cut-offs.
 // Human: Korshuk, Chub before Jul 2023, JanitorAI before Mar 2024 (1 in --every). AI: SPB personas and
 // our generated cards (in-sample for the UnslopNemo phrases, which were picked on them). Cards whose
 // joint score is low-confidence or non-English are left out, as in the published numbers.
@@ -57,15 +56,8 @@ if (opt('--shard')) {
   let i = -1, m = 0, buf = [];
   for (const c of jsonl(SAMPLE)) {
     if (++i % n !== k - 1) continue;
-    const row = { set: c.set, src: c.src };
-    for (const rp of [false, true]) {
-      rp ? DISABLED_STRUCTURES.delete('rp_reply_tells') : DISABLED_STRUCTURES.add('rp_reply_tells');
-      const sfx = rp ? '_rp' : '';
-      row['df' + sfx] = S(scoreCard(c));
-      row['d' + sfx] = c.description ? S(scoreCard({ description: c.description })) : null;
-      row['g' + sfx] = c.first_mes ? S(scoreCard({ description: c.first_mes })) : null;
-      if (!rp) row.dpsf = S(scoreCard(c, { fields: ['description', 'personality', 'scenario', 'first_mes'] }));
-    }
+    const r = scoreCard(c);
+    const row = { set: c.set, src: c.src, df: S(r), d: r.parts.description, g: r.parts.greeting };
     buf.push(JSON.stringify(row)); m++;
     if (buf.length >= 200) { appendFileSync(out, buf.join('\n') + '\n'); buf = []; }
   }
@@ -82,21 +74,19 @@ if (args.includes('--report')) {
     return (sum - pos.length * (pos.length + 1) / 2) / (pos.length * neg.length); };
   const med = a => { const s = [...a].sort((x, y) => x - y); return s.length ? +s[s.length >> 1].toFixed(1) : null; };
   const pct = (a, f) => +(100 * a.filter(f).length / Math.max(1, a.length)).toFixed(1);
-  const MINW = 60;   // a part needs this many prose words to count on its own
-  const parts = (r, sfx) => [r['d' + sfx], r['g' + sfx]].filter(p => p && !p.ne && p.w >= MINW);
-  const V = {
-    'joint D+P+S+F (0.5.0)': r => r.dpsf.s,
-    'joint D+F': r => r.df.s,
-    'joint D+F +rp': r => r.df_rp.s,
-    'parts mean': r => { const p = parts(r, ''); return p.length ? p.reduce((a, x) => a + x.s, 0) / p.length : r.df.s; },
-    'parts mean +rp': r => { const p = parts(r, '_rp'); return p.length ? p.reduce((a, x) => a + x.s, 0) / p.length : r.df_rp.s; },
-    'parts capped-weight (400w)': r => { const p = parts(r, ''); if (!p.length) return r.df.s; const w = p.map(x => Math.min(400, x.w)); return p.reduce((a, x, i) => a + x.s * w[i], 0) / w.reduce((a, b) => a + b, 0); },
-    'parts capped-weight +rp': r => { const p = parts(r, '_rp'); if (!p.length) return r.df_rp.s; const w = p.map(x => Math.min(400, x.w)); return p.reduce((a, x, i) => a + x.s * w[i], 0) / w.reduce((a, b) => a + b, 0); },
-    'higher part': r => { const p = parts(r, ''); return p.length ? Math.max(...p.map(x => x.s)) : r.df.s; },
-  };
+  const ok = (p, mw) => p && p.proseWords >= mw;
+  const mixedHigher = (gap, mw) => r => (ok(r.d, mw) && ok(r.g, mw) && Math.abs(r.d.score - r.g.score) >= gap) ? Math.max(r.df.s, r.d.score, r.g.score) : r.df.s;
+  const V = { 'joint D+F': r => r.df.s };
+  for (const gap of [15, 20, 25, 30]) for (const mw of [80, 150]) V[`mixed->higher gap ${gap} min ${mw}w`] = mixedHigher(gap, mw);
   const keep = rows.filter(r => r.df && r.df.rel && !r.df.ne);
   const H = keep.filter(r => r.set === 'human'), A = keep.filter(r => r.set === 'ai');
   console.log(`${keep.length} reliable English cards (${H.length} human, ${A.length} AI) of ${rows.length}`);
+  const mixedShare = (set, gap, mw) => (100 * set.filter(r => ok(r.d, mw) && ok(r.g, mw) && Math.abs(r.d.score - r.g.score) >= gap).length / set.length).toFixed(1);
+  console.log(`mixed (gap 20, 80w): human ${mixedShare(H, 20, 80)}%, AI ${mixedShare(A, 20, 80)}%`);
+  const qs = a => [.5, .75, .9, .95, .98, .99].map(p => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1); }).join(' / ');
+  console.log('joint quantiles p50/p75/p90/p95/p98/p99  human:', qs(H.map(r => r.df.s)), '  AI:', qs(A.map(r => r.df.s)));
+  const aq = a => [.1, .25, .5, .75, .9].map(p => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1); }).join(' / ');
+  console.log('AI p10/p25/p50/p75/p90:', aq(A.map(r => r.df.s)));
   const res = [];
   for (const [name, f] of Object.entries(V)) {
     const hs = H.map(f), as = A.map(f), sp = A.filter(r => r.src === 'spb').map(f), ge = A.filter(r => r.src === 'generated').map(f);

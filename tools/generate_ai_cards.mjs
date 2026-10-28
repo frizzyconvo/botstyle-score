@@ -25,6 +25,8 @@
 //   --retry-invalid  move cards flagged invalid to <out>_invalid.jsonl and generate them again.
 //   --reparse     re-split / re-validate the existing cards with the current parser (no API calls).
 //   --failures    list models with failed requests (<out>_errors.jsonl) or no valid cards, then exit.
+//   --more        add another round for each model even if its cards exist (same prompts and seeds, new
+//                 samples; ids end in |r2, |r3…). --round N fills a specific round instead.
 // Each card records at (timestamp), elapsed_ms and out_words; failed requests go to <out>_errors.jsonl.
 //
 // Reads BASE_URL and API_KEY from .env (OpenRouter works). Seeds: JSONL with name / tagline /
@@ -264,11 +266,19 @@ if (args['retry-invalid'] && existsSync(OUT) && !DRY) {
   }
 }
 const done = new Set(existsSync(OUT) ? readFileSync(OUT, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l).id) : []);
+// Rounds: round 1 ids have no suffix; later rounds end in |r2, |r3… --more adds the next round for each model
+// (one past the highest it already has); --round N fills round N. Same prompts and seeds, new samples.
+const roundOf = id => { const m = /\|r(\d+)$/.exec(id); return m ? +m[1] : 1; };
+const lastRound = model => Math.max(0, ...[...done].filter(id => id.startsWith(model + '|')).map(roundOf));
 const jobs = [];
-for (const model of (models.length ? models : ['(dry-run)'])) for (const p of plan) {
-  const id = [model, p.mode, p.variant, p.format, p.k].join('|');
-  if (!done.has(id)) jobs.push({ id, model, ...p });
+for (const model of (models.length ? models : ['(dry-run)'])) {
+  const round = args.round ? Number(args.round) : args.more ? Math.max(1, lastRound(model) + 1) : 1;
+  for (const p of plan) {
+    const id = [model, p.mode, p.variant, p.format, p.k].join('|') + (round > 1 ? `|r${round}` : '');
+    if (!done.has(id)) jobs.push({ id, model, round, ...p });
+  }
 }
+if (args.more || args.round) console.log('rounds: ' + [...new Set(jobs.map(j => `${j.model} r${j.round}`))].join(', '));
 
 console.log(`${plan.length} prompts × ${models.length || 1} model(s) = ${jobs.length} cards to generate (skipping ${done.size} already in ${OUT})`);
 const byMode = {};
@@ -308,7 +318,7 @@ async function worker() {
       cost = cost || null;
       if (cost) spent += cost;
       appendFileSync(OUT, JSON.stringify({
-        id: j.id, createdAt: 'generated', model: j.model, mode: j.mode, variant: j.variant, style_requested: j.format, k: j.k,
+        id: j.id, round: j.round || 1, createdAt: 'generated', model: j.model, mode: j.mode, variant: j.variant, style_requested: j.format, k: j.k,
         seed_id: j.seed.id, seed_name: j.seed.name || j.seed.card_name, prompt: j.prompt,
         description: parts.description, first_mes: parts.first_mes, preamble: parts.preamble, postscript: parts.postscript,
         raw: res.text, finish_reason: res.finish, usage: res.usage, cost, provider: res.provider, gen_id: res.gen_id,

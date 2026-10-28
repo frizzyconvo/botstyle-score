@@ -125,7 +125,7 @@ function fromText() {
   const parsed = parseCardText(raw);
   const card = parsed.kind === 'json' ? parsed.card : { name: 'Pasted text', description: raw, first_mes: greet };
   if (parsed.kind === 'json' && greet && !card.first_mes) card.first_mes = greet;
-  setCard(card, { source: 'text', key: 'text:' + hash(raw + '\u0000' + greet) });
+  setCard(card, { source: 'text', json: parsed.kind === 'json', key: 'text:' + hash(raw + '\u0000' + greet) });
 }
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
 
@@ -166,9 +166,16 @@ function runScore(card, fields, alts) {
 }
 function fieldList(fields, alts) { return FIELDS.filter(([k]) => fields[k] && (!state.card || String(state.card[k] || '').trim())).map(([, l]) => l).concat(alts.size ? [`${alts.size} alt greeting${alts.size > 1 ? 's' : ''}`] : []); }
 
+// Where a scored card came from, as a short tag: chub / bb (Botbooru) / json / png / text.
+function originOf(meta = {}) {
+  if (meta.source === 'link') return /botbooru\.com/i.test(meta.link || '') ? 'bb' : /chub\.ai|characterhub\.org/i.test(meta.link || '') ? 'chub' : 'link';
+  if (meta.source === 'file') return /\.png$/i.test(meta.file || '') ? 'png' : 'json';
+  return meta.json ? 'json' : 'text';
+}
+const ORIGIN_LABEL = { chub: 'Chub', bb: 'Botbooru', json: 'JSON', png: 'PNG', text: 'text', link: 'link' };
 function entryFor(card, meta, r, fields, alts) {
   const prev = store.all().find(x => x.key === meta.key) || {};
-  return { key: meta.key, name: card.name || meta.file || 'Card', link: meta.link || null, source: meta.source, score: +r.score.toFixed(1), band: r.band.id,
+  return { key: meta.key, name: card.name || meta.file || 'Card', link: meta.link || null, source: meta.source, origin: originOf(meta), score: +r.score.toFixed(1), band: r.band.id,
     reliable: r.reliable, proseWords: r.stats.proseWords, version: r.version, fields: fieldList(fields, alts), at: new Date().toISOString(),
     creator: prev.creator || false, aiUse: prev.aiUse ?? null, shared: prev.shared || false };
 }
@@ -205,16 +212,6 @@ function nerdStats(text) {
 }
 
 // ---------------------------------------------------------------- result
-// The ticked parts scored one at a time (description, first message, alternate greetings together),
-// shown next to the card score. Read-out only.
-function partScores() {
-  if (!state.card) return [];
-  const c = state.card, out = [];
-  const one = (label, text) => { if (!String(text || '').trim()) return; const r = scoreCard({ description: text }, { lookupZipf }); if (r.stats.proseWords >= 60) out.push({ label, score: r.score, reliable: r.reliable }); };
-  for (const [k, label] of FIELDS) if (state.fields[k]) one(label, c[k]);
-  if (state.alts.size) one('Alternate greetings', [...state.alts].map(i => c.alternate_greetings[i]).join('\n\n'));
-  return out;
-}
 const pct = x => Math.round(x * 100);
 function renderResult(r) {
   const el = $('result'); el.hidden = false;
@@ -222,9 +219,10 @@ function renderResult(r) {
   const meter = (label, v, tip) => `<div class="meter"><div class="fill" style="width:${Math.min(100, v * 100)}%"></div><span>${label}</span><b>${(v * 100).toFixed(0)}</b><div class="tip">${tip}</div></div>`;
   const pop = `<span class="pop" tabindex="0" aria-label="What this number means">i<span class="pop-body">`
     + (ref && ref.human_2023 && band.id !== 'na' ? `Higher than <b>${Math.round(ref.human_2023.percentile)}%</b> of ${esc(ref.human_2023.label)} (${ref.human_2023.n.toLocaleString()}) and <b>${Math.round(ref.ai_cards.percentile)}%</b> of ${esc(ref.ai_cards.label)} (${ref.ai_cards.n.toLocaleString()}).<br><br>` : '')
-    + `100 = as AI-styled as the most AI-styled tenth of card-length AI fiction. ${pct(W.words)}% AI-favoured words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 25 each. Range = ±1 standard error.<br><br><b>Tentative bands</b> (still calibrating): ${BAND_LABELS.original} under ${WB.original} · ${BAND_LABELS.mixed} ${WB.original}–${WB.common} · ${BAND_LABELS.common} ${WB.common}+</span></span>`;
+    + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favoured words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Tentative bands</b> (still calibrating): ${BAND_LABELS.original} under ${WB.original} · ${BAND_LABELS.mixed} ${WB.original}–${WB.common} · ${BAND_LABELS.common} ${WB.common}+</span></span>`;
   const used = fieldList(state.fields, state.alts);
-  let L = `<div class="score-hero"><div><div class="score-num">${r.score.toFixed(1)}</div><div class="score-sub">range ${r.low.toFixed(0)}–${r.high.toFixed(0)}</div></div>
+  const orig = nerdStats(r.text);
+  let L = `<div class="score-hero"><div><div class="score-num">${r.score.toFixed(1)}</div><div class="score-sub">range ${r.low.toFixed(0)}–${r.high.toFixed(0)}</div>${orig ? `<div class="score-sub" title="Sam Paech's original slop-score formula on the same text (what Botbooru lists)">original slop score ${orig.upstream.toFixed(1)}</div>` : ''}</div>
     <div class="score-meta"><span class="band ${band.id}">${esc(band.label || 'Low confidence')}</span>${band.id !== 'na' ? '<span class="tent" title="Band names and cut-offs are tentative while the scorer is calibrated">tentative</span>' : ''}${pop}
       <div class="score-cap">${esc(state.card.name || 'This card')} · ${esc(used.join(', ') || 'nothing selected')}</div>
       ${r.archetype ? `<div class="arch" title="${esc(r.archetype.blurb || '')}"><span class="arch-tag">${esc(r.archetype.label)}</span>${r.archetype.size ? `<span class="arch-size" title="${esc(r.archetype.size.note)}">${esc(r.archetype.size.label)}</span>` : ''}<span class="faint small"> archetype · experimental</span></div>` : ''}</div></div>
@@ -234,9 +232,10 @@ function renderResult(r) {
     ${r.emdash && r.emdash.points > 0 ? `<div class="note">Em-dashes: ${r.emdash.count} (${r.emdash.rate.toFixed(1)} per 1k words) → +${r.emdash.points.toFixed(1)}</div>` : ''}
     <div class="note">Scored ${st.proseWords} prose words of ${st.totalWords} (${st.structuredWords} in lists/W++/key-value lines, ${st.boilerplateWords} in boilerplate).
       ${st.proseWords < MIN_PROSE_WORDS && band.id !== 'na' ? ' <b>Short: low confidence.</b>' : ''}${st.nonEnglish ? ' <b>Doesn\'t look like English; the word lists are English-only.</b>' : ''}</div>`;
-  const parts = partScores();
-  if (parts.length > 1) L += `<div class="note">Each part alone: ${parts.map(p => `${esc(p.label)} <b>${p.score.toFixed(1)}</b>${p.reliable ? '' : ' <span class="faint">(short)</span>'}`).join(' · ')}.
-    <span class="faint">The card score above treats them as one text, so a long description can hide an AI-styled greeting (or the reverse).</span></div>`;
+  const P = r.parts || {}, partTxt = [['Description', P.description], ['Greeting', P.greeting]].filter(([, p]) => p && p.proseWords >= 60)
+    .map(([l, p]) => `${l} <b>${p.score.toFixed(1)}</b>${p.reliable ? '' : ' <span class="faint">(short)</span>'}`);
+  if (r.mixed) L += `<div class="alert"><b>Mixed card:</b> the ${r.mixed.higher} reads ${r.mixed.gap.toFixed(0)} points more AI-styled than the ${r.mixed.higher === 'greeting' ? 'description' : 'greeting'} (${partTxt.join(' · ')}). Often a hand-written ${r.mixed.higher === 'greeting' ? 'description with an AI-written greeting' : 'greeting with an AI-written description'}; the card score treats them as one text.</div>`;
+  else if (partTxt.length > 1) L += `<div class="note">Each part alone: ${partTxt.join(' · ')}.</div>`;
   if (r.pulp && band.id !== 'na') {
     const P = r.pulp;
     L += `<div class="sec pulp${P.flag ? ' ' + P.flag : ''}"><h3>Pulp read · experimental</h3>${P.flag ? `<div class="pulp-flag">${esc(P.flagLabel)}</div>` : ''}
@@ -349,8 +348,12 @@ async function loadPublic() {
   try {
     const list = await getJson(PUBLIC_RUNS.replace(/\/$/, '') + '/runs');
     $('public').hidden = false;
-    $('publicList').innerHTML = (list.runs || []).slice(-300).reverse().map(x => `<div class="item"><span class="nm">${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-      <span class="sc">${(+x.score).toFixed(1)}</span><span class="meta"><span class="band ${esc(x.band)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[x.band] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · by creator, AI ${aiLabel(x.aiUse)}` : ''}</span><span></span></div>`).join('') || '<span class="faint small">Nothing shared yet.</span>';
+    // Newest first; earlier entries for the same link sit in a fold under the newest one.
+    const runs = (list.runs || []).slice(-500).reverse(), groups = [], byLink = new Map();
+    for (const x of runs) { const k = x.link ? x.link.replace(/[?#].*$/, '').replace(/\/$/, '') : null; if (k && byLink.has(k)) byLink.get(k).older.push(x); else { const g = { top: x, older: [] }; groups.push(g); if (k) byLink.set(k, g); } }
+    const row = (x, sub = false) => `<div class="item${sub ? ' sub' : ''}"><span class="nm">${x.origin ? `<span class="src-tag">${esc(ORIGIN_LABEL[x.origin] || x.origin)}</span>` : ''}${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
+      <span class="sc">${(+x.score).toFixed(1)}</span><span class="meta"><span class="band ${esc(x.band)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[x.band] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · by creator, AI ${aiLabel(x.aiUse)}` : ''}${sub && x.at ? ` · ${esc(String(x.at).slice(0, 10))}` : ''}</span><span></span></div>`;
+    $('publicList').innerHTML = groups.slice(0, 300).map(g => row(g.top) + (g.older.length ? `<details class="older"><summary class="faint small">${g.older.length} earlier ${g.older.length > 1 ? 'entries' : 'entry'} for this link</summary>${g.older.map(x => row(x, true)).join('')}</details>` : '')).join('') || '<span class="faint small">Nothing shared yet.</span>';
   } catch { $('publicList').innerHTML = '<span class="faint small">The public list is unreachable right now.</span>'; }
 }
 async function share(key, btn) {
@@ -358,7 +361,7 @@ async function share(key, btn) {
   btn.disabled = true; btn.textContent = 'Sharing…';
   try {
     const r = await fetch(PUBLIC_RUNS.replace(/\/$/, '') + '/runs', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: e.name, link: e.link, score: e.score, band: e.band, version: e.version, fields: e.fields, creator: !!e.creator, aiUse: e.creator ? e.aiUse : null }) });
+      body: JSON.stringify({ name: e.name, link: e.link, origin: e.origin || 'text', score: e.score, band: e.band, version: e.version, fields: e.fields, creator: !!e.creator, aiUse: e.creator ? e.aiUse : null }) });
     if (!r.ok) throw new Error(await r.text());
     store.patch(key, { shared: true }); btn.textContent = 'Shared'; loadPublic();
   } catch (err) { btn.disabled = false; btn.textContent = 'Share to public list'; error('Could not share: ' + (err.message || err)); }

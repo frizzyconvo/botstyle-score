@@ -34,11 +34,11 @@ Every tool takes `--help`. Local-only helper scripts go in `dev/` (not committed
 
 ## How the score is put together
 
-* Normalising: upstream stretches scores between the averages of its 23 leaderboard models, so a single three-word phrase could cost a human writer about 13 points. BBBScorer compares rates with the 90th percentile of 700-word chunks of AI fiction, and one hit now costs about 3 points.
+* Normalising: upstream stretches scores between the averages of its 23 leaderboard models, so a single three-word phrase could cost a human writer about 13 points. BBBScorer compares rates with the 90th percentile of AI-written character cards, and repeats are damped by density, so a card's length doesn't move its score.
 * Third part of the score: upstream’s 15% was three-word phrases. Here it’s sentence structures: “not X but Y” plus 27 patterns (“a flicker of”, “the air was thick”, “a mix of X and Y”…). Each pattern was kept only if it separated human from AI text in both test sets.
-* Extras: em-dashes add up to 6 points. Clear chatbot leftovers (preambles, sign-offs, refusals, chat-template tokens) add 25 each, up to 50.
+* Extras: em-dashes add up to 10 points. Clear chatbot leftovers (preambles, sign-offs, refusals, chat-template tokens) add 40 each, up to 80.
 * Read-outs: there’s an uncertainty range and a low-confidence warning under 150 words of prose. Human tells, craft notes, AI-favourite names, card format, genre, pulp score, archetype and texture are shown but not scored.
-* Bands: the 35/50 bands were set from about 118k human cards and 1,005 AI cards.
+* Bands: 50 / 75, set on 5,313 human 2023 cards and 1,061 AI-written cards. Mixed cards (description and greeting far apart) are flagged.
 
 ## Results on the shared test sets
 

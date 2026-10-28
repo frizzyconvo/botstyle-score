@@ -20,8 +20,9 @@
 // Reddit stories: p95 5.7); AI cards sit around 10. Above 6/1k it adds up to
 // EMDASH_POINTS.max points on top of the score, reached at 16/1k.
 
+import { repeatWeight } from './botstyle.js';
 export const CONTRAST_WEIGHT = 2.0;   // per not-x-but-y match
-export const EMDASH_POINTS = { free: 6, full: 16, max: 6 };
+export const EMDASH_POINTS = { free: 6, full: 16, max: 10 };   // max was 6 before scorer 0.7.0 (narrower scale)
 
 // dedupeContrast: skip matches already found by the not-x-but-y detector (same sentence).
 const P = (id, label, rx, w, example, provisional = false, dedupeContrast = false) => ({ id, label, rx, w, example, provisional, dedupeContrast });
@@ -91,12 +92,12 @@ export function scoreStructures(prose, contrastMatches = []) {
       m = m.filter(x => !sents.some(sn => sn.includes(x.slice(0, 25))));
     }
     if (!m || !m.length) continue;
-    s += p.w * (1 + Math.log(m.length)); v += p.w * p.w * m.length;
+    s += p.w * repeatWeight(m.length, nWords); v += p.w * p.w * m.length;
     hits.push({ id: p.id, label: p.label, count: m.length, weight: p.w, examples: m.slice(0, 3), provisional: p.provisional });
   }
   const cc = (contrastMatches || []).length;
   if (cc) {
-    s += CONTRAST_WEIGHT * (1 + Math.log(cc)); v += CONTRAST_WEIGHT ** 2 * cc;
+    s += CONTRAST_WEIGHT * repeatWeight(cc, nWords); v += CONTRAST_WEIGHT ** 2 * cc;
     hits.push({ id: 'not_x_but_y', label: 'Not-x-but-y contrast', count: cc, weight: CONTRAST_WEIGHT, examples: contrastMatches.slice(0, 3).map(m => m.match_text || m.sentence || '') });
   }
   hits.sort((a, b) => b.weight * b.count - a.weight * a.count);

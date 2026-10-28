@@ -10,7 +10,7 @@ export const TAG_THRESHOLDS = {
   cardForAnts: { maxProseWords: 120, minBoilerShare: 0.3 },   // 0.4%  instructions with a sliver of character
   userPuppeteer: { minUserActions: 2 },                       // 3.1%  writes what {{user}} does / says / feels
   wallOfText: { paragraphWords: 500 },                        // 1.8%  one paragraph this long or longer
-  noOneKnows: { tokens: 3000, minScore: 40 },                 // 0.2%  3000+ permanent tokens AND a Common score
+  noOneKnows: { tokens: 3000, minScore: 75 },                 // 0.2%  3000+ permanent tokens AND a Common score
   charWritesCard: { minSentences: 10, minShare: 0.5 },        // 3.5%  most description sentences start with {{char}}
   usualSuspects: { minNames: 2 },                             // 0.2%  AI-favourite names (Elara, Kael, Thorne…)
 };

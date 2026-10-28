@@ -8,7 +8,10 @@
 //    the lists were built ("couldn't help but feel" -> "could help feel").
 //    Upstream matched stopword-free trigrams against the full token stream, so
 //    many entries could never fire.
-//  * Repeats have diminishing returns: an item seen k times counts w * (1 + ln k).
+//  * Repeats have diminishing returns, judged by density rather than raw count (repeatWeight): an item
+//    seen k times in a 700-word text counts w * (1 + ln k), and a text twice as long needs twice the hits
+//    for the same weight. (Before scorer 0.7.0 it was w * (1 + ln k) at any length, which pushed long
+//    cards down: the same text pasted 16 times scored about half.)
 //  * Bigrams are scored too; a bigram inside a matched trigram is not double counted.
 //  * Rates are normalised against card-sized (~700 word) chunks of AI fiction
 //    (data/botstyle_calibration.json), not whole-corpus leaderboard averages, and the
@@ -74,6 +77,14 @@ export function getCalibration() { return calibration; }
  * Weighted slop hits over prose text.
  * Returns per-1k-word rates plus the raw hit list and a standard error for each rate.
  */
+// Count-equivalent of k hits in an n-word text, damped by density: per 700 words, x hits count x up to 1
+// and 1 + ln x above that. Length-invariant: repeating a text leaves its rate unchanged.
+export const REF_WORDS = 700;
+export function repeatWeight(k, nWords) {
+  const n = Math.max(1, nWords), x = k * REF_WORDS / n;
+  return (x <= 1 ? x : 1 + Math.log(x)) * n / REF_WORDS;
+}
+
 export function scoreWeighted(proseText) {
   if (!lists) throw new Error('call loadBotstyle() first');
   const toks = ngramTokens(proseText);
@@ -93,13 +104,13 @@ export function scoreWeighted(proseText) {
   }
   for (const t of toks) if (lists.words.has(t)) wd.set(t, (wd.get(t) || 0) + 1);
 
-  // Sum of w*(1+ln k) and its Poisson-style variance (sum of w^2 * k), per 1k words.
+  // Sum of w * repeatWeight(k) and its Poisson-style variance (sum of w^2 * k), per 1k words.
   const agg = (hits, map) => {
     let s = 0, v = 0;
     const rows = [];
     for (const [g, k] of hits) {
       const w = map.get(g);
-      s += w * (1 + Math.log(k)); v += w * w * k;
+      s += w * repeatWeight(k, nWords); v += w * w * k;
       rows.push({ item: g, count: k, weight: w });
     }
     rows.sort((a, b) => b.weight * b.count - a.weight * a.count);
@@ -117,12 +128,14 @@ export function scoreWeighted(proseText) {
   };
 }
 
-// Normalise a rate to 0..1 against card-sized AI chunks: 0 = no hits, 1 = the
-// sloppiest-decile AI chunk (p90). Falls back to fixed constants if the
-// calibration file is missing.
+// Normalise a rate to 0..1: 0 = no hits, 1 = the p90 of the anchor set. Since scorer 0.7.0 the anchor is
+// AI-written character cards (calibration.cards, tools/calibrate_cards.mjs): 1 = as AI-styled as the most
+// AI-styled tenth of AI cards. Before that it was 700-word chunks of AI fiction (calibration.words etc.),
+// which card descriptions rarely approach, so card scores bunched in the bottom third of the scale.
+// Falls back to fixed constants if the calibration file is missing.
 const FALLBACK = { words: { p90: 408 }, phrases: { p90: 75 }, structures: { p90: 9 } };
 export function normRate(metric, v) {
-  const c = (calibration && calibration[metric]) || FALLBACK[metric];
+  const c = (calibration && calibration.cards && calibration.cards[metric]) || (calibration && calibration[metric]) || FALLBACK[metric];
   return Math.max(0, Math.min(1, v / c.p90));
 }
 

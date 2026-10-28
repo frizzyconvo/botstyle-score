@@ -25,12 +25,16 @@ Current version: see `SCORER_VERSION` in `js/score-card.js`. Changes are listed 
 | AI-favoured phrases | 25% | two- and three-word phrases, same weighting |
 | Sentence structures | 15% | "not X but Y" and 27 other patterns such as "a flicker of…", "the air was thick…", "a mix of X and Y" |
 
-Each part is a rate per 1,000 prose words, scaled so 100 matches the most AI-styled tenth of 700-word AI
-fiction samples. A repeated item counts with diminishing weight (w × (1 + ln k)). On top of that:
+Each part is a rate per 1,000 prose words, scaled so 100 matches the most AI-styled tenth of AI-written
+character cards (description + first message). Repeats count with diminishing weight, judged by density: an
+item seen k times in 700 words counts w × (1 + ln k), and a card twice as long needs twice the hits for the same
+weight, so length alone doesn't move the score. On top of that:
 
-- **Em-dashes:** above 6 per 1,000 words add up to 6 points.
-- **Obvious chatbot leftovers** add 25 each, up to 50: "Certainly! Here is…", "I hope this helps!", a refusal
+- **Em-dashes:** above 6 per 1,000 words add up to 10 points.
+- **Obvious chatbot leftovers** add 40 each, up to 80: "Certainly! Here is…", "I hope this helps!", a refusal
   left in the card, chat-template tokens.
+
+The original slop-score number (Sam Paech's formula on the same text) is shown under the score for comparison.
 
 Every result also says where the score sits among human cards from 2023 and AI-written cards (the ⓘ next to the
 score). That comparison is more meaningful than the number on its own.
@@ -39,19 +43,20 @@ score). That comparison is more meaningful than the number on its own.
 
 | Score | Label |
 |---|---|
-| under 35 | Meatbag adjacent |
-| 35–50 | Mixed signals |
-| 50 and up | Might just be slop |
+| under 50 | Meatbag adjacent |
+| 50–75 | Mixed signals |
+| 75 and up | Might just be slop |
 
-The cut-offs are deliberately wide to keep false alarms on human cards low. On a sample of 5,313 human cards
-from 2023 and 1,061 AI-written cards, 6% of human cards and 41% of AI cards score 35 or more, and 2% vs 10% score
-50 or more (AUC 0.90).
+The cut-offs keep false alarms on human cards low. On a sample of 5,313 human cards from 2023 and 1,061
+AI-written cards, human cards split 93 / 5 / 2% across the three bands and AI cards 46 / 42 / 12% (AUC 0.89).
+Human cards have a median of 16 and AI cards 52.
 
 ## Known limits
 
-- **Mixed cards.** The description and first message are scored as one text, so a long hand-written or list-heavy
-  description can hide an AI-styled greeting, and the reverse. The page shows each part's own score next to the
-  card score.
+- **Mixed cards.** The description and first message are also scored on their own. When both have 150+ words of
+  prose and land 25+ points apart, the card is flagged as mixed (for example a hand-written description with an
+  AI-written greeting). The card score still treats them as one text: using the higher part instead raised false
+  alarms on human cards, because short greetings are noisy.
 - **Genre vocabulary.** Dark fantasy, horror and action cards use words AI fiction also overuses ("primal",
   "abyss", "ember"). The experimental pulp read shows how much of a score comes from them.
 - **In-voice cards** (first-person monologues, interview formats) and some roleplay fine-tunes score lower than
@@ -72,7 +77,7 @@ and greeting voice, genre, pulp share, archetype, paragraph evenness, and the or
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 5,313 human (2023) vs 1,061 AI-written | 0.60* | 0.90 |
+| Character cards: 5,313 human (2023) vs 1,061 AI-written | 0.60* | 0.89 |
 
 \* From an earlier, smaller card test (2,476 human vs 860 AI cards).
 

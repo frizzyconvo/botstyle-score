@@ -6,6 +6,32 @@ All notable changes to BB Botstyle Score. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.8.0] - 2026-10-28 · BBBScorer 0.7.0
+
+### Changed
+- **Scale anchored to AI-written cards.** 100 now means "as AI-styled as the most AI-styled tenth of AI-written
+  character cards" instead of 700-word AI fiction chunks, which card descriptions rarely approach. Scores use the
+  whole 0–100 range: human 2023 cards median 16, AI-written cards median 52 (previously about 11 and 32).
+- **Length no longer lowers scores.** Repeats are damped by density instead of raw count, so the same text pasted
+  twice scores the same. Long descriptions were being pushed down.
+- **Bands re-cut for the new scale:** under 50 / 50–75 / 75+ (human 2023 cards 93 / 5 / 2%, AI cards 46 / 42 / 12%).
+- Em-dash points up to 10 (was 6) and chatbot leftovers 40 each, up to 80 (was 25 / 50), to match the wider scale.
+
+### Added
+- **Mixed-card flag:** description and first message are scored on their own; when both have 150+ prose words and
+  land 25+ points apart, the card is flagged (e.g. hand-written description, AI-written greeting).
+- Original slop score shown under the score range.
+- Public list: an origin tag on each entry (Chub, Botbooru, JSON, PNG, text); earlier entries for the same link fold
+  under the newest; each new entry gets an id. `public_list.mjs list` and `delete` (by number, id or link; saves a
+  copy first). Needs the public-list worker redeployed.
+- `generate_ai_cards.mjs --more` (next round on top of existing cards) and `--round N`.
+- Overnight scoring writes both scores per card, per-part scores, the mixed flag, and a disparity mark (30+ points
+  "big", 50+ "very big") with likely reasons; `notes.md` summarises each dataset.
+- `tools/calibrate_cards.mjs` (card anchor).
+
+### Fixed
+- `mine_structures.py` read data from fixed absolute paths.
+
 ## [0.7.0] - 2026-10-28 · BBBScorer 0.6.0
 
 ### Changed
@@ -15,7 +41,6 @@ All notable changes to BB Botstyle Score. Two version numbers:
 - **In-character dialogue counts as prose:** speech after a label (`A: "…"`) or in a bullet is scored. Interview
   questions (`Q: …`) still aren't.
 - Field picker starts with only Description and First message ticked, for links, uploads and pasted JSON.
-- Reference percentiles, band shares and the leaderboard need rebuilding with 0.6.0 scores (overnight rescore).
 
 ### Added
 - Each part's own score (description, first message, alternate greetings) shown next to the card score, so an

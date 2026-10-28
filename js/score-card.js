@@ -28,18 +28,19 @@ import { archetype } from './archetypes.js';
 // can be ahead of it for page-only changes). Bump it (and CHANGELOG.md) whenever a change can move
 // scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it, so
 // stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
-export const SCORER_VERSION = '0.6.0';
+export const SCORER_VERSION = '0.7.0';
 // Versions whose botstyle *numbers* are identical to this one, so references built with them still apply.
-// 0.6.0 changed the default fields and counts in-character dialogue, so older references don't.
-export const SAME_SCORES_AS = ['0.6.0'];
+// 0.7.0 re-anchored the scale to AI-written cards and made repeat damping length-independent, so older
+// references don't apply.
+export const SAME_SCORES_AS = ['0.7.0'];
 // Card fields scored by default (scoreCard opts.fields overrides): what the page says it scores.
 export const DEFAULT_FIELDS = ['description', 'first_mes'];
 
-// Writing-style bands, tentative while the tool is being tested. Set to keep false positives on
-// human cards low (dev notes): on 118k human 2023 cards, 35/50 puts 96% in the lowest band and 1%
-// in the highest; on 1k AI-written cards 60% / 9%. The earlier 20/40 flagged more AI but also more
-// humans (87% / 3%). Ids stay original / mixed / common for platforms.
-export const WRITING_STYLE_BANDS = { original: 35, common: 50 };
+// Writing-style bands, tentative. Re-cut for scorer 0.7.0's card-anchored scale (tools/eval_cards.mjs, 5,313
+// human 2023 cards vs 1,061 AI-written cards): under 50 / 50-75 / 75+ puts human cards at 92 / 6 / 2% and AI
+// cards at 47 / 41 / 12%. (0.5.0-0.6.0 used 35 / 50 on the old fiction-anchored scale.) Ids stay original / mixed /
+// common for platforms.
+export const WRITING_STYLE_BANDS = { original: 50, common: 75 };
 export const BAND_LABELS = { original: 'Meatbag adjacent', mixed: 'Mixed signals', common: 'Might just be slop' };
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
@@ -95,6 +96,20 @@ function quietly(fn) {
  * @param {object|string} card  { description, personality, scenario, first_mes, alternate_greetings, tags }
  * @param {object} opts         { fields: DEFAULT_FIELDS, includeAltGreetings: false, includeExampleDialogue: false, lookupZipf: fn (typo check) }
  */
+// Mixed-card detection (see scoreCard): minimum prose words per part, and the gap in points.
+export const MIXED_MIN_WORDS = 150;
+export const MIXED_GAP = 25;   // ~6% of human 2023 cards and ~6% of AI cards trip it (eval_cards.mjs)
+function partScore(text) {
+  if (!String(text || '').trim()) return null;
+  const p = preprocessCard(text), w = scoreWeighted(p.prose);
+  if (!w.nWords) return { score: 0, low: 0, high: 0, proseWords: 0, reliable: false };
+  const cm = quietly(() => scoreContrast(p.prose)), st = scoreStructures(p.prose, cm.matches || []), sc = computeBotstyleScore(w, st, 0);
+  return { score: +sc.score.toFixed(1), low: +sc.low.toFixed(1), high: +sc.high.toFixed(1), proseWords: p.stats.proseWords, reliable: sc.reliable };
+}
+function partScores(definition, greetings) {
+  return { description: partScore(definition), greeting: partScore(greetings.join('\n\n')) };
+}
+
 export function scoreCard(card, opts = {}) {
   const c = typeof card === 'string' ? { description: card } : (card || {});
   // Which card fields count. Default: description + first message, as the page says. Personality,
@@ -112,6 +127,18 @@ export function scoreCard(card, opts = {}) {
   const st = scoreStructures(pre.prose, contrast.matches || []);
   const artifacts = findArtifacts([preprocessCard(definition).nonBoilerplate].concat(greetings.map(g => preprocessCard(g).nonBoilerplate)));
   const score = computeBotstyleScore(w, st, artifacts.points);
+  // Mixed cards: the description and the greeting(s) scored on their own. A card counts as mixed when
+  // both parts have enough prose and land MIXED_GAP or more points apart (e.g. a hand-written
+  // description with an AI-written greeting). Scorer 0.7.0 reports this; the card score stays joint
+  // unless opts.mixedPolicy = 'higher'.
+  const parts = partScores(definition, greetings);
+  const mixed = parts.description && parts.greeting && parts.description.proseWords >= MIXED_MIN_WORDS && parts.greeting.proseWords >= MIXED_MIN_WORDS
+    && Math.abs(parts.description.score - parts.greeting.score) >= MIXED_GAP
+    ? { higher: parts.greeting.score > parts.description.score ? 'greeting' : 'description', gap: +Math.abs(parts.description.score - parts.greeting.score).toFixed(1) } : null;
+  if (mixed && opts.mixedPolicy === 'higher') {
+    const hi = parts[mixed.higher];
+    if (hi.score > score.score) { score.score = hi.score; score.low = Math.max(score.low, hi.low); score.high = Math.max(score.high, hi.high); }
+  }
 
   const defPre = preprocessCard(definition);
   const format = descriptionFormat(definition || text, (definition ? defPre : pre).stats);
@@ -128,7 +155,7 @@ export function scoreCard(card, opts = {}) {
   const likelihood = aiStyleLikelihood(score.score, texture, pre.stats.proseWords);
   const result = {
     version: SCORER_VERSION,
-    score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable,
+    score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable, parts, mixed,
     components: score.components, emdashPoints: score.emdashPoints, artifactPoints: score.artifactPoints,
     band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0),
     rates, stats: pre.stats, format, greeting, type, peers,

@@ -170,5 +170,35 @@
       "structures": 10.128571428571428,
       "emdash": 4.285714285714286
     }
+  },
+  "cards": {
+    "_about": "Percentiles of raw component rates over 1061 reliable English AI-written cards (description + first message; spb 593, generated 468). Built by tools/calibrate_cards.mjs. The scorer normalises against these p90s.",
+    "words": {
+      "n": 1061,
+      "p10": 84.474,
+      "p25": 115.752,
+      "p50": 157.406,
+      "p75": 208.33,
+      "p90": 257.625,
+      "p99": 337.541
+    },
+    "phrases": {
+      "n": 1061,
+      "p10": 0,
+      "p25": 0,
+      "p50": 5.052,
+      "p75": 11.11,
+      "p90": 20.124,
+      "p99": 44.096
+    },
+    "structures": {
+      "n": 1061,
+      "p10": 0,
+      "p25": 0,
+      "p50": 0.776,
+      "p75": 3.593,
+      "p90": 6.852,
+      "p99": 18.799
+    }
   }
 }

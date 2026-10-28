@@ -2,25 +2,28 @@
 """Mine candidate AI sentence structures (see js/ai-structures.js).
 Compares document-hit rates of each regex in human vs AI text on three sets:
 SlopReview stories, Gutenberg antislop-DPO pairs (600 words), and cards (2023 JanitorAI/Chub vs SPB-2602).
-Paths below point at the eval copies; edit them to your layout. Writes mine_results.json."""
+Data paths are relative to the repo's parent folder (set BOTSTYLE_DATA to change it). Writes mine_results.json."""
+import json, os, random, re
+D = os.environ.get('BOTSTYLE_DATA', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
+P = lambda *a: os.path.join(D, *a)
 random.seed(3)
 W = re.compile(r"[A-Za-z]+(?:'[A-Za-z]+)?")
 def first(t, n=700):
     ws = list(W.finditer(t)); return t[:ws[n-1].end()] if len(ws) >= n else t
 sets = {}
-sr = [json.loads(l) for l in open('/home/claude/work/data/slop_dataset_ensemble_predictions.jsonl')]
+sr = [json.loads(l) for l in open(P('slopreview-slopdataset', 'slop_dataset_ensemble_predictions.jsonl'))]
 sets['SlopReview'] = ([first(r['text']) for r in sr if r['source'] != 'AI'], [first(r['text']) for r in sr if r['source'] == 'AI'])
-gu = [json.loads(l) for l in open('/home/claude/work/data/gutenberg_eval.jsonl')]
+gu = [json.loads(l) for l in open(P('botstyle-score', 'eval', 'gutenberg_eval_600w.jsonl'))]
 sets['Gutenberg'] = ([r['text'] for r in gu if r['source'] == 'Human'], [r['text'] for r in gu if r['source'] == 'AI'])
 hc = []
-for l in open('/home/claude/work/jai/jaicards.jsonl'):
+for l in open(P('card-datasets', 'jaicards-cards-js', 'jaicards_cards.jsonl')):
     r = json.loads(l)
     if (r['createdAt'] or '') < '2023-07-15': hc.append(r['description'] + '\n\n' + r['first_mes'])
 hc = random.sample(hc, 3000)
-for l in open('/home/claude/work/data/raincandy_cards.jsonl'):
+for l in open(P('card-datasets', 'raincandy-chub-ai-cards', 'raincandy_cards.jsonl')):
     r = json.loads(l)
     if str(r['createdAt']) < '2023-07': hc.append((r['description'] or '') + '\n\n' + (r['first_mes'] or ''))
-spb = [json.loads(l)['description'] for l in open('/home/claude/work/data/spb_cards.jsonl')]
+spb = [json.loads(l)['persona_text'] for l in open(P('card-datasets', 'spb-2602-ai-personas', 'data.jsonl'))]
 sets['Cards(2023 vs SPB)'] = ([first(t) for t in hc if len(W.findall(t)) >= 150], [first(t) for t in spb])
 I = re.I
 C = {

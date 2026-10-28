@@ -12,7 +12,7 @@
 // speak for {{user}}"). Humans paste those constantly; card-preprocess.js tallies
 // them as boilerplate.
 
-export const ARTIFACT_POINTS = { strong: 25, cap: 50 };   // notes score nothing
+export const ARTIFACT_POINTS = { strong: 40, cap: 80 };   // scorer 0.7.0: was 25 / 50 on the old, narrower scale   // notes score nothing
 
 import { stripExampleDialogue } from './human-tells.js';
 
