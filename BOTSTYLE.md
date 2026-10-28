@@ -209,14 +209,14 @@ cards, so a tag means "this card is unusual", not "this card is bad".
 
 | Tag | When it appears | Share of real cards |
 |---|---|---|
-| **Copyedit-proof** | Lots of typos and grammar slips (6+ human tells, 25+ per 1,000 words). Human, and proud of it. | 3.4% |
+| **Copyedit-proof** | Lots of typos and grammar slips (6+ human tells, 25+ per 1,000 words). Bruh, autocorrect predates deep learning, ya know. | 3.4% |
 | **Clichemonger** | Lots of clichés that humans and models both lean on (3+, 4+ per 1,000 words). | 1.7% |
 | **A card for ants** | Mostly boilerplate and rules (30%+), with 120 words or fewer of actual character. | 0.4% |
 | **User puppeteer** | Writes what {{user}} does, says or feels in 2+ places; models copy this. | 3.1% |
 | **Wall of text** | At least one paragraph of 500+ words. | 1.8% |
 | **No one knows you're a chatbot on the internet** | A very long card (3,000+ permanent tokens) that also scores 60+. | 0.2% |
 | **{{char}} writes card** | Most description sentences (10+, over half) start with {{char}}. | 3.5% |
-| **The usual suspects** | Uses 2+ names models are famously fond of (Elara, Kael, Thorne…). | 0.2% |
+| **Of course that's your name** | Uses 2+ names models are famously fond of (Elara, Kael, Thorne…). | 0.2% |
 
 ## Archetypes
 
