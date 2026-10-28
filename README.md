@@ -56,7 +56,7 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 | `data/` | Word and phrase lists, calibration, the leaderboard and the reference distributions the page grades against. |
 | `tools/` | Building lists, scoring datasets, building the leaderboard and reference, generating AI test cards, tests, the local server and the Cloudflare Workers (card proxy, public list). Every tool takes `--help`. |
 | `tests/` | Test fixtures for `npm test`. |
-| `docs/` | Background notes (e.g. Foreverse's card-writing rubric). |
+| `docs/` | Background notes (e.g. Foreverse's card-writing rubric) and the to-do list (`docs/TODO.md`). |
 | `upstream/` | Leftovers from slop-score kept for reference: its model outputs, benchmark and leaderboard scripts. |
 | `vendor/` | Bundled browser libraries (msgpack, part-of-speech tagger). |
 | `eval/`, `dev/` | Local only, not in git: datasets, scoring runs and dev scripts. |
@@ -76,6 +76,8 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 - **Compare with the previous run:** `node tools/compare_scores.mjs --previous`.
 - **Tidy `eval/`:** `node tools/organize_eval.mjs` (the current run stays in `eval/scores/`, older ones move to
   `eval/old/`).
+- **Linux:** the scorer, tools, tests and local server run on Linux; the multi-step batch scripts are Windows-only
+  for now (see `docs/TODO.md`).
 - **Hosting:** see `js/site-config.js` for the card proxy and the optional public list (Cloudflare Workers in
   `tools/`).
 

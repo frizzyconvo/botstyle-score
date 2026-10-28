@@ -6,6 +6,21 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.16.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- 230 more AI-written cards behind the leaderboard and the page's reference (1,520 in all): seven new models
+  (DeepSeek V4.1 Flash, DeepSeek V3 0324, GLM 5.3 Flash, GPT-6 Luna, Gemini 3.8 Flash, Hy4 preview, GPT-4o),
+  Claude Opus 5.5, and two more rounds for eight models whose medians rested on 10–14 cards.
+- `docs/TODO.md`, starting with what a Linux setup needs. The scorer, tools, tests and local server already run on
+  Linux; the multi-step batch scripts don't yet.
+
+### Changed
+- Headline numbers updated from the larger AI set: AI-written cards median 47, bands 39 / 34 / 28%, AUC 0.89, 27% of
+  AI cards flagged at a 2% false-positive rate (original slop score on the same cards: AUC 0.70, 11%).
+
 ## [0.15.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.

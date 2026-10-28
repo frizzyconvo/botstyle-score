@@ -138,8 +138,8 @@ Tentative, still being calibrated.
 
 | Score | Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
 |---|---|---|---|---|
-| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 35% |
-| 40–60 | **Mixed** | *Mixed signals* | 4% | 37% |
+| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 39% |
+| 40–60 | **Mixed** | *Mixed signals* | 4% | 34% |
 | 60 and up | **Common** | *Might just be slop* | 2% | 28% |
 | (too short or not English) | **Low confidence** / no band | | | |
 
@@ -147,7 +147,7 @@ The band names say how common the card's phrasing is in AI writing. The taglines
 to them.
 
 The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,129
-(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 1,290, median 49.
+(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 1,520, median 47.
 
 **The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
 AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
@@ -345,10 +345,10 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 from 2023 (mostly human) vs 1,290 AI-written | 0.69 | 0.90 |
+| Character cards: 108,129 from 2023 (mostly human) vs 1,520 AI-written | 0.70 | 0.89 |
 
-On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 28% of AI-written cards and the original
-slop score 8.5%.
+On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 27% of AI-written cards and the original
+slop score 11%.
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
@@ -373,7 +373,7 @@ Checked against the upstream code (`slop-score.html`, `data/leaderboard_results.
 | **Per format / per part** | One formula for everything | One set of lists, weights and calibration for every format and for both the description and the greeting. Format only picks the peer group shown in the read-out ("vs 2023 cards in the same format") |
 
 **Results on the shared test sets** (AUC, original → BBBScorer): SlopReview 0.930 → 0.977 (humans flagged above 25:
-9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.69 → 0.90.
+9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.70 → 0.89.
 
 ## Data and references
 
