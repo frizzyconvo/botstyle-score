@@ -1,10 +1,42 @@
 # Changelog
 
-All notable changes to BB Botstyle Score. Two version numbers:
+All notable changes to BB Botstyle Scorer. Two version numbers:
 
 - **App** (`package.json`): moves for any page or tool change.
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
+
+## [0.11.0] - 2026-10-28 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- ⓘ next to a scored card's format: every format a description can be read as, what each means, which one the card
+  got and its mix of prose, lists, compact blocks and boilerplate.
+- BOTSTYLE.md is now the full documentation: every band, format, greeting layout, tag, archetype, read-out,
+  leaderboard term and sentence pattern, plus a glossary. README.md is a plain readme.
+- Footer credit: made by frizzy_conversation_93532 (Botbooru profile).
+- `compare_scores.mjs --previous`: the current scoring run against the one before it, saved in the run's folder.
+
+### Changed
+- Title reads "BB Botstyle Scorer v0.8.1" in the heading and the tab ("BBBScorer v0.8.1" on phones). The heading
+  didn't show the version before.
+- One set of format names everywhere (page, leaderboard, scoring-run notes, docs): Free prose, Formatted prose,
+  Lists, Compact, In voice, Structured + prose, Boilerplate + prose, Boilerplate. The leaderboard's request styles
+  use the same names plus the Lazy prompt ("sections" and "plain prose" are gone).
+- Leaderboard: each model's style range and lazy-prompt median sit on a second line under its name. The
+  lazy-prompt sort is gone: most models have only one or two lazy-prompt cards, so it ranked noise.
+- Leaderboard, reference and "How it works" numbers rebuilt from the BBBScorer 0.8.1 run over every dataset
+  (108,129 human cards from 2023, 1,237 AI-written cards). "How it works" now reads its numbers from the reference
+  file, so they follow each rebuild.
+- American spelling throughout (favored, honor, normalize…).
+- Upstream slop-score leftovers (model outputs, benchmark and leaderboard scripts) moved to `upstream/`.
+- Local `eval/` layout: `ai-cards/`, `inputs/`, `experiments/`, `scores/` (current run only) and `old/` (earlier runs,
+  pre-versioning scores, stale backups).
+
+### Fixed
+- Phones: the header buttons no longer overflow the panel, and the leaderboard axis labels no longer overlap.
+- Info popovers used a serif font.
 
 ## [0.10.1] - 2026-10-28 · BBBScorer 0.8.1
 
@@ -18,7 +50,7 @@ All notable changes to BB Botstyle Score. Two version numbers:
 Scores unchanged.
 
 ### Added
-- Page title includes the scorer version ("BB Botstyle Score · BBBScorer v…"); a test checks it on every bump.
+- Page title includes the scorer version ("BB Botstyle Scorer · BBBScorer v…"); a test checks it on every bump.
 - Leaderboard: original slop-score median on every row; sort by BBBScorer, the lazy "make me a bot" prompt,
   original score or card count (remembered in the browser); each model shows its lazy-prompt score and the
   lowest-to-highest range across the other request styles.
@@ -69,7 +101,7 @@ Scores unchanged.
   copy first). Needs the public-list worker redeployed.
 - `generate_ai_cards.mjs --more` (next round on top of existing cards) and `--round N`.
 - Overnight scoring writes both scores per card, per-part scores, the mixed flag, and a disparity mark (30+ points
-  "big", 50+ "very big") with likely reasons; `notes.md` summarises each dataset.
+  "big", 50+ "very big") with likely reasons; `notes.md` summarizes each dataset.
 - `tools/calibrate_cards.mjs` (card anchor).
 
 ### Fixed
@@ -162,4 +194,4 @@ Scores identical to 0.4.0; bands and labels changed.
 
 First character-card version of slop-score: word and phrase lists weighted by AI vs human fiction, sentence
 structures, em-dash and chatbot-leftover points, prose-only card preprocessing, human tells and craft notes,
-shared clichés, AI-favourite names, description formats, bonus tags, card import (JSON / PNG / links).
+shared clichés, AI-favorite names, description formats, bonus tags, card import (JSON / PNG / links).

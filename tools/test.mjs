@@ -106,7 +106,7 @@ for (const [k, card] of Object.entries(edge)) {
   if (k !== 'huge') check(`edge ${k}: no writing-style label`, r && r.band.id === 'na', r && r.band.label);
 }
 check('edge: japanese flagged non-English', scoreCard(edge.japanese).stats.nonEnglish === true);
-check('edge: chatbot preamble labelled even when short', scoreCard({ description: 'Certainly! Here is a character description for Mira:\n\nMira is a baker in a small town. She wakes at four.\n\nI hope this helps!' }).band.id === 'common');
+check('edge: chatbot preamble labeled even when short', scoreCard({ description: 'Certainly! Here is a character description for Mira:\n\nMira is a baker in a small town. She wakes at four.\n\nI hope this helps!' }).band.id === 'common');
 const tx = scoreCard({ description: ['She runs the night ferry and hates fog.', 'Her brother owes money to half the docks, and she pays it off one crossing at a time, mostly without telling him.', 'Cats.', 'Nobody remembers when she last slept a full night, least of all her, though the harbourmaster swears it was the winter the bridge froze and the whole town walked across to the island for a dare.'].join('\n\n') });
 check('texture: paragraph CV computed', tx.texture.paragraphs === 3 || tx.texture.paragraphs === 4, JSON.stringify(tx.texture));
 check('texture: likelihood null under 150 prose words', tx.experimental.aiStyleLikelihood === null);
@@ -153,8 +153,10 @@ const semi = preprocessCard('Enjoys seaweed noodles and dueling; 176cm tall with
 check('semicolon trait list is structured, not prose', semi.stats.proseWords === 0, semi.stats.proseWords);
 const semiProse = preprocessCard('She keeps the lighthouse; it keeps her. The keeper before her drowned; nobody says how. She counts ships at dawn and again at dusk, and writes the numbers in a ledger nobody reads.');
 check('prose with a few semicolons stays prose', semiProse.stats.proseWords > 20);
-const htmlTitle = (readFileSync(new URL('../index.html', import.meta.url), 'utf-8').match(/<title>([^<]*)<\/title>/) || [])[1] || '';
-check('page title names the scorer version (update index.html <title> when bumping)', htmlTitle.includes('BBBScorer v' + SCORER_VERSION), htmlTitle);
+const html = readFileSync(new URL('../index.html', import.meta.url), 'utf-8');
+const htmlTitle = (html.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+check('page title names the scorer version (update index.html <title> when bumping)', htmlTitle === 'BB Botstyle Scorer v' + SCORER_VERSION, htmlTitle);
+check('heading shows the scorer version (index.html .title-ver)', html.includes(`<span class="title-ver">v${SCORER_VERSION}</span>`));
 
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

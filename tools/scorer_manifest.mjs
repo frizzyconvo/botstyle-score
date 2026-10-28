@@ -16,7 +16,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 
 import { join } from 'path';
 import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
-import { ROOT, PATHS } from './_paths.mjs';
+import { ROOT, PATHS, runDir, runDirs } from './_paths.mjs';
 
 const args = process.argv.slice(2), opt = k => (args.includes(k) ? args[args.indexOf(k) + 1] : null);
 const git = (...a) => execFileSync('git', a, { cwd: ROOT, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 256 << 20 }).trim();
@@ -61,7 +61,7 @@ function manifest(ref) {   // ref = null -> working tree
     emdash: m(st, /EMDASH_POINTS = (\{[^}]*\})/), artifacts: m(ar, /ARTIFACT_POINTS = (\{[^}]*\})/), contrastWeight: m(st, /CONTRAST_WEIGHT = ([0-9.]+)/),
     cardScore: /PART_WEIGHT_CAP/.test(sc) ? `blend of separately scored description and greeting, weighted by prose words (${m(sc, /PART_MIN_WORDS = (\d+)/)}–${m(sc, /PART_WEIGHT_CAP = (\d+)/)})` : 'one text (description + greeting joined)',
     mixed: /MIXED_GAP/.test(sc) ? `flag when both parts ≥ ${m(sc, /MIXED_MIN_WORDS = (\d+)/)} prose words and ≥ ${m(sc, /MIXED_GAP = (\d+)/)} points apart` : 'none',
-    dialogue: /subkind: speech \? 'dialogue'|subkind === 'dialogue'|'dialogue'/.test(read('js/card-preprocess.js') || '') ? 'in-character dialogue counted as prose' : 'labelled/bulleted dialogue lines dropped as lists',
+    dialogue: /subkind: speech \? 'dialogue'|subkind === 'dialogue'|'dialogue'/.test(read('js/card-preprocess.js') || '') ? 'in-character dialogue counted as prose' : 'labeled/bulleted dialogue lines dropped as lists',
     structures: { contrast: 'not-x-but-y', patterns: patterns.map(p => ({ ...p, off: disabled.includes(p.id) })) },
     lists: ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_names.json', 'botstyle_pulp_words.json', 'botstyle_card_drop.json', 'botstyle_calibration.json', 'botstyle_reference.json'].map(listInfo).filter(Boolean),
     changelog,
@@ -85,13 +85,13 @@ function toMd(x) {
 
 function writeFor(version, ref) {
   const x = manifest(ref); if (!x.version) { console.log(`  ${version}: could not read the scorer at ${ref}`); return; }
-  const dir = join(PATHS.scores, 'v' + x.version); mkdirSync(dir, { recursive: true });
+  const dir = runDir(x.version); mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'SCORER.md'), toMd(x)); writeFileSync(join(dir, 'scorer.json'), JSON.stringify(x, null, 1));
   console.log(`  v${x.version}: ${join(dir, 'SCORER.md')} (${ref || 'working tree'})`);
 }
 
 if (args.includes('--all')) {
   const cur = manifest(null).version;
-  for (const d of readdirSync(PATHS.scores).filter(d => /^v\d/.test(d))) { const v = d.slice(1); if (v === cur) writeFor(v, null); else { const r = refFor(v); if (r) writeFor(v, r); else console.log(`  ${v}: no commit found`); } }
+  for (const { version: v } of runDirs()) { if (v === cur) writeFor(v, null); else { const r = refFor(v); if (r) writeFor(v, r); else console.log(`  ${v}: no commit found`); } }
 } else if (opt('--version')) { const r = refFor(opt('--version')); if (r) writeFor(opt('--version'), r); else console.log('No commit found for that version.'); }
 else writeFor(null, null);

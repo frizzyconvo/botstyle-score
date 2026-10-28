@@ -172,7 +172,7 @@
     }
   },
   "cards": {
-    "_about": "Percentiles of raw component rates over 1061 reliable English AI-written cards (description + first message; spb 593, generated 468). Built by tools/calibrate_cards.mjs. The scorer normalises against these p90s.",
+    "_about": "Percentiles of raw component rates over 1061 reliable English AI-written cards (description + first message; spb 593, generated 468). Built by tools/calibrate_cards.mjs. The scorer normalizes against these p90s.",
     "words": {
       "n": 1061,
       "p10": 84.474,

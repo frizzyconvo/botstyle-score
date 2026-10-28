@@ -2,7 +2,7 @@
 """
 Rebuild botstyle-score's word / bigram / trigram slop lists with per-entry weights.
 
-AI side:    creative-writing outputs (prompt_index < 150) from results/*.json
+AI side:    creative-writing outputs (prompt_index < 150) from upstream/results/*.json
             -- 22 current models answering Reddit WritingPrompts.
 Human side: human_writing_profile.json from slop-forensics
             -- n-gram counts from human Reddit WritingPrompts stories.
@@ -33,7 +33,7 @@ some such no nor not only own same so than too very s t can will just don should
 MIN_PROMPTS = {1: 25, 2: 15, 3: 10}
 MAX_TOP_PROMPT_SHARE = 0.25
 
-# Fragments left by contractions/abbreviations under some tokenisers ("i'm" -> "m").
+# Fragments left by contractions/abbreviations under some tokenizers ("i'm" -> "m").
 FRAGMENTS = set("m re ve ll d won didn wasn couldn wouldn shouldn isn aren hasn haven hadn weren doesn ain".split())
 
 TOK = re.compile(r"[a-z']+")
@@ -45,7 +45,7 @@ fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seve
 hundred thousand million billion""".split())
 
 def split_clitic(t):
-    """Mirror how the human profile was tokenised: couldn't -> could, i'm -> i, it's -> it.
+    """Mirror how the human profile was tokenized: couldn't -> could, i'm -> i, it's -> it.
     Must stay in sync with ngramTokens() in js/botstyle.js."""
     if t.endswith("n't"):
         return t[:-3]
@@ -63,11 +63,11 @@ CAP_TOKEN = re.compile(r"[A-Za-z]+")
 
 def load_ai(results_dir, creative_max_index=150):
     """Per-model counters of content uni/bi/tri-grams plus token and character totals.
-    Also counts, per lowercase word, how often it appears capitalised mid-sentence
+    Also counts, per lowercase word, how often it appears capitalized mid-sentence
     (to spot names like Elara or Thorne)."""
     per_model = {}
     global CAPS
-    CAPS = defaultdict(lambda: [0, 0])   # word -> [capitalised mid-sentence, lowercase]
+    CAPS = defaultdict(lambda: [0, 0])   # word -> [capitalized mid-sentence, lowercase]
     for f in sorted(glob.glob(os.path.join(results_dir, "*.json"))):
         d = json.load(open(f, encoding="utf-8"))
         v = next(iter(d.values()))
@@ -148,7 +148,7 @@ def build(ai_rate, models, count, human, k, min_models, min_count, min_ratio, ca
     for g, r in ai_rate.items():
         toks = g.split()
         if "'" in g or any(t in FRAGMENTS or len(t) < 2 for t in toks) or (len(toks) > 1 and any(t in NUMBERS for t in toks)):
-            continue  # human profile tokenised contractions differently; not comparable
+            continue  # human profile tokenized contractions differently; not comparable
         if models[g] < min_models or count[g] < min_count:
             continue
         h = human.get(g)
@@ -165,14 +165,14 @@ def build(ai_rate, models, count, human, k, min_models, min_count, min_ratio, ca
 PER_CHAR = False
 HUMAN_CHARS = None
 CAPS = None
-NAME_CAP_SHARE = 0.9      # capitalised mid-sentence this often -> treat as a name
+NAME_CAP_SHARE = 0.9      # capitalized mid-sentence this often -> treat as a name
 JUNK = {"formica"}        # brand / topical leftovers not caught by the prompt-spread filter
 NOT_NAMES = set("monday tuesday wednesday thursday friday saturday sunday january february march april may june july august september october november december".split())
 
 def main():
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ap = argparse.ArgumentParser()
-    ap.add_argument("--results", default=os.path.join(here, "results"))
+    ap.add_argument("--results", default=os.path.join(here, "upstream", "results"))
     # auto-antislop's copy of the human profile carries total_chars, which lets phrase
     # ratios use exact denominators instead of a median anchor.
     default_human = os.path.join(here, "..", "auto-antislop", "data", "human_writing_profile.json")

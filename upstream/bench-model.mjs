@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 
-import { helpIfAsked } from './tools/_help.mjs';
+import { helpIfAsked } from '../tools/_help.mjs';
 helpIfAsked(import.meta.url);
 import { config } from 'dotenv';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
@@ -322,7 +322,7 @@ async function main() {
 
   const modelId = args.model;
   const promptsPath = args.prompts;
-  const resultsPath = args.results || `results/${safeModelId(modelId)}.json`;
+  const resultsPath = args.results || `upstream/results/${safeModelId(modelId)}.json`;
   const workers = parseInt(args.workers);
   const timeout = parseFloat(args.timeout) * 1000; // Convert to ms
   const maxTokens = parseInt(args['max-tokens']);

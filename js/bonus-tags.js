@@ -12,7 +12,7 @@ export const TAG_THRESHOLDS = {
   wallOfText: { paragraphWords: 500 },                        // 1.8%  one paragraph this long or longer
   noOneKnows: { tokens: 3000, minScore: 60 },                 // 0.2%  3000+ permanent tokens AND a Common score
   charWritesCard: { minSentences: 10, minShare: 0.5 },        // 3.5%  most description sentences start with {{char}}
-  usualSuspects: { minNames: 2 },                             // 0.2%  AI-favourite names (Elara, Kael, Thorne…)
+  usualSuspects: { minNames: 2 },                             // 0.2%  AI-favorite names (Elara, Kael, Thorne…)
 };
 
 export const TAG_INFO = {
@@ -21,7 +21,7 @@ export const TAG_INFO = {
   card_for_ants: ['A card for ants', 'Mostly boilerplate and rules, with a sliver of actual character.'],
   user_puppeteer: ['User puppeteer', 'Writes what {{user}} does, says or feels; models copy this.'],
   wall_of_text: ['Wall of text', 'At least one paragraph is enormous.'],
-  no_one_knows: ['No one knows you\'re a chatbot on the internet', 'A very long card (3,000+ permanent tokens) written in heavily AI-flavoured prose.'],
+  no_one_knows: ['No one knows you\'re a chatbot on the internet', 'A very long card (3,000+ permanent tokens) written in heavily AI-flavored prose.'],
   char_writes_card: ['{{char}} writes card', 'Most description sentences start with {{char}}: "{{char}} is… {{char}} likes… {{char}} has…"'],
   usual_suspects: ['The usual suspects', 'Uses several names models are famously fond of.'],
 };

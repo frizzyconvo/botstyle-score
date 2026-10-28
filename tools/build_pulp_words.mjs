@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// build_pulp_words.mjs - Genre ("pulp") vocabulary among the scored AI-favoured words
+// build_pulp_words.mjs - Genre ("pulp") vocabulary among the scored AI-favored words
 // (data/botstyle_pulp_words.json), for the experimental pulp score in js/pulp.js.
 //
 // A scored word counts as pulp vocabulary when, in share of cards using it (prose only):

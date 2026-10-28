@@ -27,8 +27,8 @@ const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? 
 const summary = a => ({ median: q(a, .5), p25: q(a, .25), p75: q(a, .75), n: a.length });
 
 const models = {};
-for (const f of readdirSync(new URL('results/', root)).filter(f => f.endsWith('.json'))) {
-  const d = JSON.parse(readFileSync(new URL('results/' + f, root), 'utf-8'));
+for (const f of readdirSync(new URL('upstream/results/', root)).filter(f => f.endsWith('.json'))) {
+  const d = JSON.parse(readFileSync(new URL('upstream/results/' + f, root), 'utf-8'));
   const key = Object.keys(d)[0], v = d[key];
   const scores = [];
   for (const s of v.samples || []) {

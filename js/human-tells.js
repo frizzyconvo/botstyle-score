@@ -65,7 +65,7 @@ function collect(text, rx, max = 4) {
   return { count: n, examples: out };
 }
 // Remove spoken dialogue so narration-only checks don't fire on how characters talk.
-// Dialogue becomes a capitalised placeholder so "…" he murmured doesn't look like a
+// Dialogue becomes a capitalized placeholder so "…" he murmured doesn't look like a
 // lowercase sentence start once the quote is gone.
 function narrationOnly(t) {
   return t.replace(/"[^"\n]*"|“[^”\n]*”/g, ' "Q" ');
@@ -112,13 +112,13 @@ export function checkCard(text, opts = {}) {
   add(humanTells, 'missing_apostrophe', 'Contractions without apostrophes', { count: noApos.length, examples: [...new Set(noApos)].slice(0, 6) });
   add(humanTells, 'common_misspelling', 'Common misspellings', { count: [...seenMiss.values()].reduce((a, b) => a + b, 0), examples: miss.slice(0, 8) });
 
-  // Unknown lowercase words (likely typos). Needs the wordfreq lookup; capitalised
-  // words are skipped (names, places), as is anything also used capitalised in the card.
+  // Unknown lowercase words (likely typos). Needs the wordfreq lookup; capitalized
+  // words are skipped (names, places), as is anything also used capitalized in the card.
   if (opts.lookupZipf) {
-    const capitalised = new Set((text.match(/\b[A-Z][a-z]+\b/g) || []).map(w => w.toLowerCase()));
+    const capitalized = new Set((text.match(/\b[A-Z][a-z]+\b/g) || []).map(w => w.toLowerCase()));
     const unk = new Map();
     for (const w of text.replace(/\{\{[^}]*\}\}/g, ' ').match(/\b[a-z]{3,}\b/g) || []) {
-      if (capitalised.has(w) || COMMON_MISSPELLINGS.has(w) || NO_APOSTROPHE.has(w) || (opts.knownWords && opts.knownWords.has(w))) continue;
+      if (capitalized.has(w) || COMMON_MISSPELLINGS.has(w) || NO_APOSTROPHE.has(w) || (opts.knownWords && opts.knownWords.has(w))) continue;
       const z = opts.lookupZipf(w);
       if (!z) unk.set(w, (unk.get(w) || 0) + 1);
     }
@@ -168,7 +168,7 @@ export function checkCard(text, opts = {}) {
   add(craftNotes, 'gendered_user', 'Gendered pronoun right after {{user}}', collect(text, /\{\{user\}\}(?:'s)?\s+(?:\w+\s+){0,6}?(?:he|she|his|hers|him|himself|herself)\b(?=[^"”]*$|[^"”]*["“])/gim), 'Locks the user\'s gender; drop it if the card is meant for anyone.');
   add(craftNotes, 'jailbreak_in_card', 'Jailbreak / permission lines in the card', collect(text, /\b(?:never|not|don't|do not|won't|will not)\b[^.\n]{0,50}\b(?:speak|talk|act)\w*\b[^.\n]{0,30}\bfor\s+(?:\{\{user\}\}|user|you)(?!\w)|\b(?:nsfw|explicit content)\b[^.\n]{0,40}\b(?:allowed|permitted|encouraged)\b/gi), 'Usually better in the system prompt or left to the user\'s preset.');
 
-  // Runs of 3+ sentences that all begin with {{char}} or the same capitalised name.
+  // Runs of 3+ sentences that all begin with {{char}} or the same capitalized name.
   const sentences = narr.replace(/\n+/g, ' ').split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
   let run = 1, runs = 0, runEx = [];
   const first = s => (s.match(/^[*_]*(\{\{char\}\}|[A-Z][a-z]+)/) || [])[1];

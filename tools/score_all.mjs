@@ -25,6 +25,7 @@ import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { loadAll, scoreCard, SCORER_VERSION } from '../js/score-card.js';
 import { setPosTagger } from '../js/pos-tagger.js';
+import { formatLabel } from '../js/card-style.js';
 import { loadSlopSets, computeSlopIndex } from '../js/metrics.js';
 import { wordsOnlyLower, alphaTokens } from '../js/utils.js';
 import { scoreText as scoreContrast } from '../js/contrast-detector.js';
@@ -34,7 +35,7 @@ const CARDS = process.env.BOTSTYLE_CARDS ? resolve(process.env.BOTSTYLE_CARDS) :
 const require = createRequire(import.meta.url);
 globalThis.fetch = async u => ({ ok: true, json: async () => JSON.parse(readFileSync(join(ROOT, u.replace(/^\.\//, '')), 'utf-8')) });
 await loadAll('./data/'); await loadSlopSets(); setPosTagger(require('wink-pos-tagger')());
-// The original slop-score formula, for comparison (same normalisation as the upstream leaderboard).
+// The original slop-score formula, for comparison (same normalization as the upstream leaderboard).
 const LB = JSON.parse(readFileSync(join(ROOT, 'data', 'leaderboard_results.json'), 'utf-8')).results;
 const rng = v => { const mn = Math.min(...v), mx = Math.max(...v), r = mx - mn; return { min: mn - r * .1, max: mx + r * .1 }; };
 const UR = { w: rng(LB.map(r => r.metrics.slop_list_matches_per_1k_words || 0)), t: rng(LB.map(r => r.metrics.slop_trigram_matches_per_1k_words || 0)), c: rng(LB.map(r => r.metrics.not_x_but_y_per_1k_chars || 0)) };
@@ -49,7 +50,7 @@ function upstreamParts(text) {
 const upstreamScore = text => { const u = upstreamParts(text); return u ? u.score : null; };
 
 // Disparity between BBBScorer and the original formula on the same text (points). Marked in every row and
-// summarised in notes.md, with likely reasons, so a run shows where the two disagree and why.
+// summarized in notes.md, with likely reasons, so a run shows where the two disagree and why.
 const DISPARITY = { big: 30, veryBig: 50 };
 function disparity(r, up) {
   if (!up) return null;
@@ -191,7 +192,7 @@ function writeNotes(name, rows) {
   const up = flagged.filter(x => x.disparity.dir === 'bbb_higher'), down = flagged.filter(x => x.disparity.dir === 'orig_higher');
   const reasons = list => { const c = {}; for (const x of list) for (const w of x.disparity.why.length ? x.disparity.why : ['no clear reason (check by hand)']) { const k = w.replace(/\d+(\.\d+)?/g, 'N'); c[k] = (c[k] || 0) + 1; } return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, v]) => `${v}× ${k}`).join('; ') || '-'; };
   const ex = list => list.sort((a, b) => Math.abs(b.disparity.diff) - Math.abs(a.disparity.diff)).slice(0, 8)
-    .map(x => `  - ${x.disparity.flag === 'very_big' ? '**VERY BIG**' : 'big'} ${x.id}${x.name ? ` "${x.name}"` : ''}${x.model ? ` (${x.model})` : ''}: BBB ${x.score.toFixed(1)} vs original ${x.upstream.toFixed(1)} (${x.disparity.diff > 0 ? '+' : ''}${x.disparity.diff}); desc ${x.desc ?? '-'} / greet ${x.greet ?? '-'}; ${x.proseWords}/${x.totalWords} prose words, ${x.format}. ${x.disparity.why.join('; ') || 'no clear reason'}`).join('\n');
+    .map(x => `  - ${x.disparity.flag === 'very_big' ? '**VERY BIG**' : 'big'} ${x.id}${x.name ? ` "${x.name}"` : ''}${x.model ? ` (${x.model})` : ''}: BBB ${x.score.toFixed(1)} vs original ${x.upstream.toFixed(1)} (${x.disparity.diff > 0 ? '+' : ''}${x.disparity.diff}); desc ${x.desc ?? '-'} / greet ${x.greet ?? '-'}; ${x.proseWords}/${x.totalWords} prose words, ${formatLabel(x.format).toLowerCase()}. ${x.disparity.why.join('; ') || 'no clear reason'}`).join('\n');
   const spreadB = +q(B, .9) - +q(B, .1), spreadU = +q(U, .9) - +q(U, .1);
   const warn = [];
   if (spreadB < 20) warn.push(`BBBScorer spread is narrow here (p10–p90 ${spreadB.toFixed(0)} points)`);

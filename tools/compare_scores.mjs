@@ -1,18 +1,30 @@
 #!/usr/bin/env node
 // compare_scores.mjs - Regression check between two scorer versions' outputs from score_all.mjs.
-//   node tools/compare_scores.mjs eval/scores/v0.4.0 eval/scores/v0.5.0 [--top 10]
+//   node tools/compare_scores.mjs eval/old/scores/v0.7.0 eval/scores/v0.8.1 [--top 10]
+//   node tools/compare_scores.mjs --previous      # current run vs the run before it; also saved as
+//                                                   eval/scores/v<current>/compare-v<previous>.txt
 // Per dataset: cards matched by id, median before/after, mean absolute change, share whose band changed,
 // and the biggest movers. Nothing changes on disk.
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
-import { readFileSync, readdirSync, existsSync } from 'fs';
+import { readFileSync, readdirSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
-const [A, B] = process.argv.slice(2).filter(a => !a.startsWith('--'));
+import { runDirs } from './_paths.mjs';
+import { SCORER_VERSION } from '../js/score-card.js';
+let [A, B] = process.argv.slice(2).filter(a => !a.startsWith('--') && !/^\d+$/.test(a));
+let SAVE = null;
+if (process.argv.includes('--previous')) {
+  const runs = runDirs(), i = runs.findIndex(r => r.version === SCORER_VERSION);
+  if (i < 1) { console.error(`no earlier run to compare BBBScorer v${SCORER_VERSION} with`); process.exit(2); }
+  [A, B] = [runs[i - 1].dir, runs[i].dir]; SAVE = join(B, `compare-v${runs[i - 1].version}.txt`);
+  const lines = []; const log = console.log; console.log = (...x) => { lines.push(x.join(' ')); log(...x); };
+  process.on('exit', () => { writeFileSync(SAVE, lines.join('\n') + '\n'); log(`\nSaved to ${SAVE}`); });
+}
 const TOP = Number(process.argv.includes('--top') ? process.argv[process.argv.indexOf('--top') + 1] : 10);
 if (!A || !B) { console.error('usage: node tools/compare_scores.mjs <old dir> <new dir> [--top 10]'); process.exit(2); }
 const load = p => new Map(readFileSync(p, 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l)).filter(r => !r.error).map(r => [r.id, r]));
 const med = a => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
-for (const f of readdirSync(B).filter(f => f.endsWith('.jsonl')).sort()) {
+for (const f of readdirSync(B).filter(f => f.endsWith('.jsonl') && f !== 'run-log.jsonl').sort()) {
   if (!existsSync(join(A, f))) { console.log(`${f}: new in ${B}`); continue; }
   const a = load(join(A, f)), b = load(join(B, f));
   const pairs = [...b.values()].filter(r => a.has(r.id)).map(r => [a.get(r.id), r]);

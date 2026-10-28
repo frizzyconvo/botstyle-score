@@ -2,7 +2,7 @@
 // texture_features.mjs - Experimental: whole-text "texture" features that don't depend on
 // word lists (burstiness, paragraph evenness, vocabulary spread, punctuation habits), plus a
 // variant botstyle score that also reads sentence-like list items. For testing alternative
-// signals against labelled sets; nothing here feeds the page score.
+// signals against labeled sets; nothing here feeds the page score.
 // Usage: node tools/texture_features.mjs <cards.jsonl> <out.jsonl> [--label human|ai] [--field persona_text]
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);

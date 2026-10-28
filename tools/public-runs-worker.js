@@ -1,4 +1,4 @@
-// public-runs-worker.js - Optional public list of scored cards for BB Botstyle Score.
+// public-runs-worker.js - Optional public list of scored cards for BB Botstyle Scorer.
 //
 // Cloudflare Workers free plan: 100,000 requests/day; Workers KV free: 100,000 reads and 1,000
 // writes per day, 1 GB stored. Each shared card is one write, each page view one read.
@@ -10,7 +10,7 @@
 //
 // Stores only what the page sends: card name, link, origin tag, score, band, scorer version, scored fields,
 // and the self-reported creator / AI-use answers. Never card text. Each entry gets a short id so it can be
-// deleted with tools/public_list.mjs. Honour system: anyone can post;
+// deleted with tools/public_list.mjs. Honor system: anyone can post;
 // there's a size cap, a per-IP limit and a list cap, nothing more.
 
 const ALLOWED_ORIGIN = 'https://frizzyconvo.github.io';

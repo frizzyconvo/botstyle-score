@@ -31,7 +31,7 @@ for (const l of readFileSync(src, 'utf-8').split('\n')) {
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(3); };
 const P = a => ({ n: a.length, p10: q(a, .1), p25: q(a, .25), p50: q(a, .5), p75: q(a, .75), p90: q(a, .9), p99: q(a, .99) });
 const file = join(ROOT, 'data', 'botstyle_calibration.json'), cal = JSON.parse(readFileSync(file, 'utf-8'));
-cal.cards = { _about: `Percentiles of raw component rates over ${R.words.length} reliable English AI-written cards (description + first message; ${Object.entries(by).map(([k, n]) => `${k} ${n}`).join(', ')}). Built by tools/calibrate_cards.mjs. The scorer normalises against these p90s.`,
+cal.cards = { _about: `Percentiles of raw component rates over ${R.words.length} reliable English AI-written cards (description + first message; ${Object.entries(by).map(([k, n]) => `${k} ${n}`).join(', ')}). Built by tools/calibrate_cards.mjs. The scorer normalizes against these p90s.`,
   words: P(R.words), phrases: P(R.phrases), structures: P(R.structures) };
 writeFileSync(file, JSON.stringify(cal, null, 2));
 console.log(JSON.stringify(cal.cards, null, 1));

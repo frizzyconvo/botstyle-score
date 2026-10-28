@@ -13,7 +13,7 @@
 //    for the same weight. (Before scorer 0.7.0 it was w * (1 + ln k) at any length, which pushed long
 //    cards down: the same text pasted 16 times scored about half.)
 //  * Bigrams are scored too; a bigram inside a matched trigram is not double counted.
-//  * Rates are normalised against card-sized (~700 word) chunks of AI fiction
+//  * Rates are normalized against card-sized (~700 word) chunks of AI fiction
 //    (data/botstyle_calibration.json), not whole-corpus leaderboard averages, and the
 //    score carries a confidence band from the hit counts.
 
@@ -35,7 +35,7 @@ export const BOTSTYLE_WEIGHTS = { words: 0.60, phrases: 0.25, structures: 0.15 }
 export const MIN_PROSE_WORDS = 150;   // below this the score is reported as unreliable
 
 let lists = null;        // { words: Map, bigrams: Map, trigrams: Map }
-let names = null;        // AI-favourite names (Elara, Thorne…): tallied, not scored
+let names = null;        // AI-favorite names (Elara, Thorne…): tallied, not scored
 let peers = null;        // per style family: percentiles of each component on 2023 cards
 let calibration = null;  // { words: {p50,p90,...}, phrases: {...}, structures: {...}, emdash: {...} }
 
@@ -128,7 +128,7 @@ export function scoreWeighted(proseText) {
   };
 }
 
-// Normalise a rate to 0..1: 0 = no hits, 1 = the p90 of the anchor set. Since scorer 0.7.0 the anchor is
+// Normalize a rate to 0..1: 0 = no hits, 1 = the p90 of the anchor set. Since scorer 0.7.0 the anchor is
 // AI-written character cards (calibration.cards, tools/calibrate_cards.mjs): 1 = as AI-styled as the most
 // AI-styled tenth of AI cards. Before that it was 700-word chunks of AI fiction (calibration.words etc.),
 // which card descriptions rarely approach, so card scores bunched in the bottom third of the scale.
@@ -146,7 +146,7 @@ export function normRate(metric, v) {
  * @param {number} artifactPoints  points from findArtifacts() (js/ai-artifacts.js)
  *
  * Em-dash overuse and obvious AI tells add points on top; everything else is a
- * normalised rate (0..1 per component, 1 = sloppiest 10% of card-sized AI chunks).
+ * normalized rate (0..1 per component, 1 = sloppiest 10% of card-sized AI chunks).
  */
 export function computeBotstyleScore(w, st, artifactPoints = 0) {
   const K = BOTSTYLE_WEIGHTS;
@@ -195,7 +195,7 @@ export function peerPercentile(family, metric, value) {
 export function getPeers() { return peers; }
 
 /**
- * AI-favourite names (Elara, Kael, Thorne, Silas…) found in the prose. Not scored:
+ * AI-favorite names (Elara, Kael, Thorne, Silas…) found in the prose. Not scored:
  * canon and original characters can legitimately have these names.
  */
 export function tallyNames(proseText) {

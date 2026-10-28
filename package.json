@@ -1,8 +1,8 @@
 {
   "name": "botstyle-score",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "private": true,
-  "description": "BB Botstyle Score: a character-card pseudo-fork of slop-score that reads how much a card leans on stock AI phrasing",
+  "description": "BB Botstyle Scorer: a character-card pseudo-fork of slop-score that reads how much a card leans on stock AI phrasing",
   "license": "MIT",
   "type": "module",
   "dependencies": {

@@ -1,8 +1,8 @@
-// pulp.js - Experimental pulp score (unscored). Some AI-favoured words are also everyday vocabulary
+// pulp.js - Experimental pulp score (unscored). Some AI-favored words are also everyday vocabulary
 // of human genre cards (fantasy, horror, action, romance): hero, realm, primal, aura, crimson...
 // data/botstyle_pulp_words.json (tools/build_pulp_words.mjs) lists the scored words that human
 // genre cards use at least as often as AI cards. The pulp score is the share of the card's
-// AI-favoured word weight that comes from those words; the genre-adjusted score is the botstyle
+// AI-favored word weight that comes from those words; the genre-adjusted score is the botstyle
 // score recomputed without them. Neither changes the botstyle score or the band.
 import { computeBotstyleScore } from './botstyle.js';
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// generate_ai_cards.mjs - Build a labelled AI side for evaluation: character cards written
+// generate_ai_cards.mjs - Build a labeled AI side for evaluation: character cards written
 // by several models, in each description format, in three ways:
 //
 //   fresh      from the *concept* of a real human card (name + creator note + tags only)
@@ -13,7 +13,7 @@
 // Usage:
 //   node tools/generate_ai_cards.mjs --models "m1,m2" [--seeds eval/inputs/seeds_jai_2023h1.jsonl]
 //        [--modes fresh,antislop,rewrite] [--formats free_prose,default] [--per-style 1]
-//        [--out eval/generated/ai_cards_v2.jsonl] [--concurrency 3] [--max-tokens 6000]
+//        [--out eval/ai-cards/ai_cards_v2.jsonl] [--concurrency 3] [--max-tokens 6000]
 //        [--reasoning low] [--temperature 0.8] [--max-usd 2] [--dry-run] [--retry-invalid] [--no-retry]
 //
 //   --per-style   cards per (model, mode, format). Keep it at 1 until the prompts are settled.
@@ -39,9 +39,9 @@
 // substitutions). Score only valid lines.
 
 // ---------------------------------------------------------------- models (OpenRouter ids)
-// Run 1 (eval/ai_cards.jsonl, old prompts, 20 per style, Oct 2026):
+// Run 1 (eval/ai-cards/ai_cards.jsonl, old prompts, 20 per style, Oct 2026):
 //   anthropic/claude-sonnet-4.5, openai/gpt-5-mini
-// Run 2 (eval/ai_cards_v2.jsonl, v2 prompts, 1 per cell, Oct 2026):
+// Run 2 (eval/ai-cards/ai_cards_v2.jsonl, v2 prompts, 1 per cell, Oct 2026):
 //   openai/gpt-5-mini, anthropic/claude-sonnet-4.5, deepseek/deepseek-v3.2-exp,
 //   moonshotai/kimi-k2-0905, z-ai/glm-4.5, meta-llama/llama-4-maverick
 // Run 3 (planned, same file): community roleplay fine-tunes, the scorer's biggest blind spot
@@ -97,12 +97,12 @@ const FORMATS = {
 const ANTISLOP_FORMATS = ['free_prose', 'formatted_prose', 'default'];
 
 // ---------------------------------------------------------------- anti-slop instructions
-// Three strengths of "don't sound like AI", modelled on what people paste into prompts:
+// Three strengths of "don't sound like AI", modeled on what people paste into prompts:
 //   simple   one line, what most people type
 //   generic  a general humanizer list (the kind in avoid-ai-writing, blader/humanizer, "de-slop"
 //            prompt stacks): punctuation, contrast frames, rule of three, filler, sign-offs
 //   rp       a roleplay-specific ban list (Sukino's banned tokens, character-card-skills §7,
-//            SloppySeconds): stock beats, purple atmosphere, AI-favourite names, user puppeting
+//            SloppySeconds): stock beats, purple atmosphere, AI-favorite names, user puppeting
 // Written for this tool, not copied from those sources.
 const ANTISLOP = {
   simple: 'Make it sound like a real person wrote it, not an AI.',
@@ -115,7 +115,7 @@ const ANTISLOP = {
   rp: `Anti-slop rules for roleplay writing:
 - Banned stock phrases: "barely above a whisper", "a shiver down her spine", "eyes sparkling with mischief", "a smirk playing on her lips", "the air was thick with", "ozone", "a mix of X and Y", "practiced ease", "a hint of", "a testament to", "maybe, just maybe", "for what felt like an eternity", "knuckles white", "breath hitched", "ministrations".
 - No "not X, but Y" constructions and no em dashes.
-- Don't use model-favourite names (Elara, Lyra, Kael, Seraphina, Aria, Silas, Vance, Thorne, Voss, Elias). If the character has a name, keep it.
+- Don't use model-favorite names (Elara, Lyra, Kael, Seraphina, Aria, Silas, Vance, Thorne, Voss, Elias). If the character has a name, keep it.
 - Concrete, specific details instead of mood words. Let the character sound like a person, with quirks and loose ends, not a polished summary.
 - Never write {{user}}'s actions, words or feelings. End the greeting on something the character does, not "What will you do?".`,
 };

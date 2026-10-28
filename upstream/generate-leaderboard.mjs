@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// generate-leaderboard.mjs - Generate leaderboard from results/*.json
+// generate-leaderboard.mjs - Generate leaderboard from upstream/results/*.json (upstream slop-score tool, kept for reference; run from the repo root)
 
-import { helpIfAsked } from './tools/_help.mjs';
+import { helpIfAsked } from '../tools/_help.mjs';
 helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, readdirSync } from 'fs';
 import { join } from 'path';
@@ -17,9 +17,9 @@ import {
   mergePossessives,
   humanBigramFreq,
   humanTrigramFreq
-} from './js/metrics.js';
-import { wordsOnlyLower, alphaTokens, countItems } from './js/utils.js';
-import { extractContrastMatches } from './js/contrast-detector.js';
+} from '../js/metrics.js';
+import { wordsOnlyLower, alphaTokens, countItems } from '../js/utils.js';
+import { extractContrastMatches } from '../js/contrast-detector.js';
 
 // Patch global fetch to support local file paths for Node.js
 const originalFetch = global.fetch;
@@ -460,7 +460,7 @@ async function main() {
     console.log('\nNo existing leaderboard found, will create new one');
   }
 
-  const resultsDir = './results';
+  const resultsDir = './upstream/results';   // run from the repo root: node upstream/generate-leaderboard.mjs
   const files = readdirSync(resultsDir).filter(f => f.endsWith('.json'));
 
   console.log(`\nFound ${files.length} result files in ${resultsDir}/`);

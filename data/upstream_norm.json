@@ -1,5 +1,5 @@
 {
- "note": "Normalisation of the original slop-score formula (from data/leaderboard_results.json, as upstream does it).",
+ "note": "Normalization of the original slop-score formula (from data/leaderboard_results.json, as upstream does it).",
  "words": {
   "min": 2.1215,
   "max": 43.9248

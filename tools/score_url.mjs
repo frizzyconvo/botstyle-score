@@ -54,5 +54,5 @@ for (const src of inputs) {
   if (r.reference) console.log('  ' + Object.values(r.reference).map(g => `higher than ${Math.round(g.percentile)}% of ${g.label}`).join('; '));
   if (r.experimental && r.experimental.aiStyleLikelihood !== null) console.log(`  texture: paragraph CV ${r.texture.paraCv.toFixed(2)}, AI-style likelihood ${Math.round(r.experimental.aiStyleLikelihood * 100)}% (experimental)`);
   if (r.tags.length) console.log('  tags: ' + r.tags.map(t => `${t.label} (${t.detail})`).join('; '));
-  if (r.names.length) console.log('  AI-favourite names: ' + r.names.map(n => n.item).join(', '));
+  if (r.names.length) console.log('  AI-favorite names: ' + r.names.map(n => n.item).join(', '));
 }

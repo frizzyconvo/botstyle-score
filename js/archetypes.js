@@ -3,15 +3,15 @@
 // something. One archetype per card, plus an optional length badge.
 const GENRE_ADJ = { fantasy: 'High-fantasy', horror: 'Gothic', scifi: 'Sci-fi', romance: 'Romantic', modern: 'Slice-of-life', action: 'Swashbuckling', general: '' };
 const BLURB = {
-  novelist: 'Writes the card like a book: prose description, narrated greeting.',
-  roleplayer: 'Classic roleplay card: second-person greeting with *asterisk* actions.',
-  storyteller: 'Prose all the way down, greeting and all.',
-  dossier: 'Sections and headers, like a character file.',
-  minimalist: 'Token-saver format (W++, PList, JSON): every token earns its keep.',
-  listmaker: 'Bullet points and key-value lines.',
-  method: 'Written in the character\'s own voice.',
-  hybrid: 'Mixes structured blocks with prose.',
-  rules: 'Comes with a rulebook: instructions plus character writing.',
+  novelist: 'Free-prose description with a narrated, novel-style greeting.',
+  roleplayer: 'Free-prose description with a second-person greeting and *asterisk* actions.',
+  storyteller: 'Free prose all the way down, greeting and all.',
+  dossier: 'Formatted prose: sections and headers, like a character file.',
+  minimalist: 'Compact format (W++, PList, JSON): every token earns its keep.',
+  listmaker: 'Lists: bullet points and key-value lines.',
+  method: 'In voice: written in the character\'s own voice.',
+  hybrid: 'Structured + prose: compact or list blocks mixed with prose.',
+  rules: 'Boilerplate + prose: comes with a rulebook.',
 };
 const NOUN = { novelist: 'novelist', roleplayer: 'roleplayer', storyteller: 'storyteller', dossier: 'dossier-keeper', minimalist: 'minimalist', listmaker: 'list-maker',
   method: 'method actor', hybrid: 'tinkerer', rules: 'rules-lawyer' };

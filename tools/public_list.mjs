@@ -75,7 +75,7 @@ if (cmd === 'status') {
   if (!DRY && !args.includes('--yes')) {
     const rl = createInterface({ input: process.stdin, output: process.stdout });
     const a = await rl.question('Empty the public list without keeping a copy? Type "clear" to confirm: '); rl.close();
-    if (a.trim() !== 'clear') { console.log('Cancelled.'); process.exit(0); }
+    if (a.trim() !== 'clear') { console.log('Canceled.'); process.exit(0); }
   }
   saveLocal(getRuns(), 'before-clear'); putJson('runs', []); console.log('Public list emptied (a copy was saved first).');
 } else if (cmd === 'list') {
@@ -94,7 +94,7 @@ if (cmd === 'status') {
   if (!DRY && !args.includes('--yes')) {
     const rl = createInterface({ input: process.stdin, output: process.stdout });
     const a = await rl.question(`Delete ${gone.length} entr${gone.length > 1 ? 'ies' : 'y'}? Type "yes": `); rl.close();
-    if (a.trim().toLowerCase() !== 'yes') { console.log('Cancelled.'); process.exit(0); }
+    if (a.trim().toLowerCase() !== 'yes') { console.log('Canceled.'); process.exit(0); }
   }
   saveLocal(runs, 'before-delete');
   putJson('runs', runs.filter((_, i) => !hit[i])); console.log(`Deleted ${gone.length}. ${runs.length - gone.length} left.`);

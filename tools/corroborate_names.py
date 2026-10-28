@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Keep only AI-favourite names that independent data confirms.
+"""Keep only AI-favorite names that independent data confirms.
 
-build_lists.py finds candidate names in the leaderboard models' outputs (upstream's results/),
+build_lists.py finds candidate names in the leaderboard models' outputs (upstream/results/),
 so on their own they could be quirks of those 22 models or of the prompts. A name is kept when,
 in at least one set NOT used to build the lists, AI text uses it far more than human text:
   - SlopReview: 22 other models' stories vs Reddit WritingPrompts

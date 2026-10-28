@@ -8,7 +8,7 @@ of included third-party components.
 The following components are licensed under the MIT License:
 
 - Slop Score computation and dependencies (human writing profile, slop lists in data/)
-- Results datasets in results/
+- Results datasets in upstream/results/
 - JavaScript code in js/ (excluding wordfreq.js)
 - All code in project root (./) including leaderboard generation and website
 - slop-score.html and related HTML files

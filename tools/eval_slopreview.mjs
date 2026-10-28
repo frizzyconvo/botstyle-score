@@ -5,7 +5,7 @@
 // Usage: node tools/eval_slopreview.mjs <ensemble_predictions.jsonl> [--no-pos] [--out file.jsonl]
 //
 // Replicates slop-score.html exactly: slop-word rate, slop-trigram rate and
-// not-x-but-y rate, min-max normalised against data/leaderboard_results.json,
+// not-x-but-y rate, min-max normalized against data/leaderboard_results.json,
 // combined 60/25/15. Uses wink-pos-tagger locally so stage-2 contrast patterns
 // run the same way they do in the browser (pass --no-pos to mimic the Node
 // leaderboard script, which never loads the tagger).
@@ -33,7 +33,7 @@ global.fetch = async (url) => {
 
 const quiet = () => { const o = { ...console }; for (const k of ['log', 'group', 'groupEnd', 'warn', 'error']) console[k] = () => {}; return () => Object.assign(console, o); };
 
-// --- upstream normalisation (slop-score.html loadLeaderboard / computeSlopScore) ---
+// --- upstream normalization (slop-score.html loadLeaderboard / computeSlopScore) ---
 const lb = JSON.parse(readFileSync(new URL('../data/leaderboard_results.json', import.meta.url))).results;
 const range = (vals) => { const mn = Math.min(...vals), mx = Math.max(...vals), r = mx - mn; return { min: mn - r * 0.1, max: mx + r * 0.1 }; };
 const R = {

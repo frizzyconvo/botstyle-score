@@ -3,7 +3,7 @@
 // Foreverse's character-card-skills notes that modern AI cards avoid the slop vocabulary and
 // that what gives them away is texture: evenly distributed detail, no idle lines, perfect
 // structure. Of the texture measures tested (tools/texture_features.mjs), the one
-// that held up on every labelled set is paragraph evenness: AI text keeps paragraphs close to
+// that held up on every labeled set is paragraph evenness: AI text keeps paragraphs close to
 // the same length.
 //   paragraph-length CV, 2023 human cards vs AI cards: median 0.67 vs 0.32 (AUC 0.89),
 //   Gutenberg 0.69 vs 0.38 (0.86), SlopReview 0.60 vs 0.44 (0.77); inside one format too
@@ -31,7 +31,7 @@ function mattr(toks, w = 100) {
 }
 
 // Fitted on 2,121 human cards (Chub before Jul 2023 + Korshuk) vs 836 AI cards (first
-// generated run + SPB), class-balanced, inputs standardised..
+// generated run + SPB), class-balanced, inputs standardized..
 const MODEL = { mu: [2.8812, 0.6030], sd: [0.7723, 0.3204], w: [1.8525, -1.9886], b: -1.3380 };
 export const TEXTURE_REFERENCE = {
   paraCv: { human: 0.67, ai: 0.32 }, sentCv: { human: 0.54, ai: 0.50 }, mattr: { human: 0.73, ai: 0.80 }, wordLen: { human: 4.57, ai: 4.97 },

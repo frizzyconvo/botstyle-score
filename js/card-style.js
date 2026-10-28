@@ -143,24 +143,43 @@ export function cardStyle({ description = '', personality = '', scenario = '', f
 }
 
 // ---- description format (what the score is read against) ------------------------
-// boilerplate        mostly instructions / narrator rules, little prose -> score is n/a
-//                    unless there's an obvious AI tell
-// compact            token-saver formats: W++, PList, JSON/YAML/XML key-values
-// lists              Markdown bullet lists and "Label: value" lines
-// formatted_prose    prose under section headers ("**Appearance:**" + paragraph)
-// free_prose         prose with no headers
-// in_voice           written in the character's voice, or Ali:Chat / interview style
-// hybrids            structured+prose (compact or lists + prose), boilerplate+prose
-export const DESCRIPTION_FORMATS = {
-  boilerplate: 'Boilerplate / instructions',
-  compact: 'Compact (W++, PList, JSON)',
-  lists: 'Lists (Markdown bullets, key-value lines)',
-  formatted_prose: 'Formatted prose (headers + paragraphs)',
-  free_prose: 'Free prose',
-  in_voice: "In the character's voice / interview",
-  'structured+prose': 'Hybrid: compact or lists + prose',
-  'boilerplate+prose': 'Hybrid: boilerplate + prose',
+// One set of names for formats everywhere: the page, the leaderboard's request styles, scoring-run notes and
+// BOTSTYLE.md all use these ids and labels. Ids are stored in scores, so they don't change; labels can.
+export const FORMAT_INFO = {
+  free_prose:          ['Free prose', 'Paragraphs of prose with no headers or lists.'],
+  formatted_prose:     ['Formatted prose', 'Prose paragraphs under section headers ("**Appearance:**" + a paragraph).'],
+  lists:               ['Lists', 'Markdown bullet lists and "Label: value" lines.'],
+  compact:             ['Compact', 'Token-saver formats: W++, PList, JSON / YAML / XML key-values.'],
+  in_voice:            ['In voice', "Written in the character's own voice: a first-person monologue, Ali:Chat or an interview."],
+  'structured+prose':  ['Structured + prose', 'Compact or list blocks alongside a real share of prose.'],
+  'boilerplate+prose': ['Boilerplate + prose', 'Instructions or narrator rules alongside a real share of prose.'],
+  boilerplate:         ['Boilerplate', 'Mostly instructions, narrator rules or pasted jailbreaks, with little character prose.'],
 };
+export const DESCRIPTION_FORMATS = Object.fromEntries(Object.entries(FORMAT_INFO).map(([k, [label]]) => [k, label]));
+export const formatLabel = id => (FORMAT_INFO[id] || [id])[0];
+
+// Request styles used to generate the AI cards on the leaderboard (tools/generate_ai_cards.mjs). Each asks for
+// one of the formats above, except the lazy prompt, which leaves the format to the model.
+export const REQUEST_STYLES = {
+  default:         ['Lazy prompt', '"make me a character bot for X, description and first message"'],
+  free_prose:      ['Free prose', FORMAT_INFO.free_prose[1]],
+  formatted_prose: ['Formatted prose', FORMAT_INFO.formatted_prose[1]],
+  lists:           ['Lists', FORMAT_INFO.lists[1]],
+  compact:         ['Compact', 'W++ or PList.'],
+  first_person:    ['In voice: first person', 'Description written as the character speaking.'],
+  interview:       ['In voice: interview', 'Ali:Chat-style Q&A exchanges.'],
+};
+export const requestStyleLabel = id => (REQUEST_STYLES[id] || [id])[0];
+
+// Greeting (first message) layout and voice.
+export const GREETING_FORMATS = {
+  'markdown+quotes': ['Asterisks + quotes', '*Actions in asterisks*, "speech in quotes".'],
+  markdown:          ['Asterisks', '*Actions in asterisks*, speech unquoted.'],
+  novel:             ['Novel style', 'Plain narration with "quoted speech", like a book.'],
+  mixed:             ['Mixed', 'Some asterisk actions and some quoted speech, not paired up.'],
+  plain:             ['Plain', 'No asterisks or quotes.'],
+};
+export const GREETING_POV = { second_person: 'second person ("you")', first_person: 'first person ("I")', third_person: 'third person ("she / he / they")', unclear: 'unclear point of view' };
 export const STYLE_FAMILIES = DESCRIPTION_FORMATS;   // old name
 
 /**

@@ -1,4 +1,4 @@
-/* BB Botstyle Score - page styles, in the look of the Farina card webcode: warm dark panels,
+/* BB Botstyle Scorer - page styles, in the look of the Farina card webcode: warm dark panels,
    cream borders, rose titles, lilac tags, left-border list items. html[data-theme] = dark | light. */
 :root, html[data-theme="dark"] {
   --bg: #120d09;
@@ -114,7 +114,7 @@ input[type=checkbox], input[type=range] { accent-color: var(--red-light); }
 .pop { position: static; display: inline-grid; place-items: center; width: 19px; height: 19px; margin-left: 6px; border-radius: 50%; font: 800 11px/1 Georgia, serif;
   color: var(--purple-light); border: 1px solid color-mix(in srgb, var(--purple-light) 50%, transparent); background: var(--purple-tint); cursor: help; vertical-align: middle; outline: none; }
 .pop-body { display: none; position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 30; padding: 12px 14px; border-radius: 10px; background: var(--panel);
-  background-color: color-mix(in srgb, var(--bg) 92%, var(--purple) 8%); border: 1px solid var(--border); box-shadow: var(--shadow); font: 400 13px/1.55 inherit; color: var(--text); text-align: left; }
+  background-color: color-mix(in srgb, var(--bg) 92%, var(--purple) 8%); border: 1px solid var(--border); box-shadow: var(--shadow); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 13px; font-weight: 400; line-height: 1.55; letter-spacing: normal; text-transform: none; color: var(--text); text-align: left; }
 .pop:hover .pop-body, .pop:focus .pop-body { display: block; }
 .meter { position: relative; display: flex; justify-content: space-between; gap: 10px; padding: 7px 12px; margin: 6px 0; border-radius: 8px; background: var(--track);
   font-size: 13.5px; cursor: help; }
@@ -249,3 +249,27 @@ html { scroll-behavior: smooth; }
 .board-sort { margin: 0 0 8px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .board-sort .sort-btn { padding: 2px 8px; font-size: 11.5px; }
 .board-sort .sort-btn.on { color: var(--red-light); border-color: currentColor; }
+
+/* 0.11: title with version (short name on phones), two-line leaderboard labels, format ⓘ, phone header */
+.title .t-short { display: none; }
+.title-ver { font-size: .55em; font-weight: 700; letter-spacing: .5px; color: var(--dim); text-shadow: none; vertical-align: .15em; white-space: nowrap; }
+.bl { display: flex; flex-direction: column; justify-content: center; min-width: 0; line-height: 1.3; }
+.bl-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bl-sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-style: normal; color: var(--faint); font-variant-numeric: tabular-nums; }
+.bl-sub .nw { white-space: nowrap; }
+.sec { position: relative; }
+.fmt-list { margin: 6px 0 8px 16px; padding: 0; }
+.fmt-list li { margin: 0 0 4px; }
+.fmt-list li.on b { color: var(--red-light); }
+@media (max-width: 520px) {
+  .title .t-long { display: none; }
+  .title .t-short { display: inline; }
+  .hero-tools { width: 100%; flex-wrap: wrap; }
+  .hero-tools > * { flex: 1 1 auto; padding-left: 10px; padding-right: 10px; }
+  .hero-tools #themeBtn { flex: 0 0 auto; }
+  .hero-tools #themeBtn .btn-txt { display: none; }
+  .axis-row, .brow { grid-template-columns: 112px minmax(0, 1fr) 52px; gap: 0 8px; }
+  .axis-row { margin-bottom: 18px; }
+  .axis-track .t100-long { display: none; }
+  .bl-sub { white-space: normal; }
+}

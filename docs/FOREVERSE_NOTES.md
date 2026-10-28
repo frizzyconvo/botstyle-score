@@ -6,7 +6,7 @@ CC BY 4.0 content). Much of it is in Chinese; this is what matters for botstyle-
 ## What's in it
 
 - **Two authoring skills** (Chinese and English) with a method: positioning on four axes, 47 genre
-  guides, five opening paradigms, nine "liveliness" techniques, lorebook patterns, anti-AI-flavour rules.
+  guides, five opening paradigms, nine "liveliness" techniques, lorebook patterns, anti-AI-flavor rules.
 - **Two rule-based scorers** (`tools/score_card.py` zh, `tools/score_card_en.py` en) for their own
   `card.md` format. They grade craft and completeness, not authorship.
 - **18 example cards** (6 English) written by a model following the skill.

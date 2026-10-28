@@ -3,11 +3,12 @@ human_writing_samples
 .claude
 wordfreq_python
 experiments
-.env_to_delete/
-
 .env
+_to_delete/
+
 # local data: scored datasets and generated cards stay on disk, not in git
 eval/
-_to_delete/
 # local dev scripts and notes (overnight runs, model lists)
 dev/
+# Windows shortcut to the latest scoring-run notes (points into eval/, which is local)
+docs/*.lnk

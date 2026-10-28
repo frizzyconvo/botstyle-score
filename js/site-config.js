@@ -8,7 +8,7 @@
 // Chub links work without it. Running locally (npm start) uses the built-in proxy regardless.
 export const CARD_PROXY = 'https://bb-card-proxy.frizzyconvo.workers.dev/?url=';
 
-// PUBLIC_RUNS: optional public list of scored cards (opt-in per card, honour system). Deploy
+// PUBLIC_RUNS: optional public list of scored cards (opt-in per card, honor system). Deploy
 // tools/public-runs-worker.js as a Cloudflare Worker with a KV namespace bound as RUNS and put its
 // URL here, e.g. 'https://bb-runs.yourname.workers.dev'. Empty = no public list, nothing leaves
 // the browser.

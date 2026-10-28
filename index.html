@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BB Botstyle Score · BBBScorer v0.8.1</title>
+<title>BB Botstyle Scorer v0.8.1</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="A rough automated read on how much a character card's description and greetings lean on stock AI phrasing.">
 <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
@@ -25,14 +25,14 @@
   <header class="panel hero">
     <img class="hero-icon" src="assets/icon-256.png" alt="" width="128" height="128">
     <div class="hero-text">
-      <h1 class="title">BB Botstyle Score</h1>
+      <h1 class="title"><span class="t-long">BB Botstyle Scorer</span><span class="t-short">BBBScorer</span> <span class="title-ver">v0.8.1</span></h1>
       <p class="lede">A rough automated read on how much a character card's description and greeting(s) lean on stock phrasings and words of AI models. <em>It is not an AI detector, and it does not measure whether you used AI or how good your card is.</em></p>
       <p class="aside">But yes, you might just be the equivalent of a pulpy fantasy writer or steamy romance novelist.</p>
     </div>
     <div class="hero-tools">
       <a class="ghost btn-like" href="#board">Leaderboard ↓</a>
       <button id="howBtn" class="ghost" type="button">How it works</button>
-      <button id="themeBtn" class="ghost icon-btn" type="button" aria-label="Switch light/dark theme" title="Light / dark"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20V2z"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Theme</span></button>
+      <button id="themeBtn" class="ghost icon-btn" type="button" aria-label="Switch light/dark theme" title="Light / dark"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20V2z"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="btn-txt">Theme</span></button>
     </div>
   </header>
 
@@ -82,7 +82,7 @@
   <section id="board" class="panel">
     <h2 class="section">Leaderboard</h2>
     <p class="faint small" id="boardNote"></p>
-    <div class="axis-row"><div></div><div class="axis-track"><span class="z z1">Meatbag adjacent</span><span class="z z2">Mixed</span><span class="z z3">Might just be slop</span><span class="t0">0</span><span class="t100">100 = most AI-styled</span></div><div></div></div>
+    <div class="axis-row"><div></div><div class="axis-track"><span class="z z1">Meatbag adjacent</span><span class="z z2">Mixed</span><span class="z z3">Might just be slop</span><span class="t0">0</span><span class="t100">100<span class="t100-long"> = most AI-styled</span></span></div><div></div></div>
     <div id="boardRows"></div>
   </section>
 
@@ -90,8 +90,9 @@
     A pseudo-fork of <a href="https://github.com/sam-paech/slop-score" target="_blank" rel="noopener">slop-score</a> by Sam Paech, rebuilt for character cards.
     Word frequencies: <a href="https://github.com/rspeer/wordfreq" target="_blank" rel="noopener">wordfreq</a>.
     Chibi Farina: Fire Emblem Heroes art (Intelligent Systems / Nintendo).
-    Source, issues and contact: <a href="https://github.com/frizzyconvo/botstyle-score" target="_blank" rel="noopener">GitHub</a>.
-    <span id="verLine"></span>
+    Source and issues: <a href="https://github.com/frizzyconvo/botstyle-score" target="_blank" rel="noopener">GitHub</a>.
+    <span id="verLine"></span><br>
+    Made by <a href="https://botbooru.com/profile/78685" target="_blank" rel="noopener">frizzy_conversation_93532</a>.
   </footer>
 </main>
 
@@ -101,24 +102,24 @@
     <h3>What it measures</h3>
     <p>Words, phrases and sentence habits that AI models use far more than human fiction writers ("a testament to", "the air was thick with", "a flicker of…", not-x-but-y). Each word and phrase is weighted by how much more often AI fiction uses it than human fiction. Only prose is scored: W++/PList blocks, key-value lists and pasted instructions are set aside.</p>
     <h3>The score</h3>
-    <p>60% AI-favoured words, 25% AI-favoured phrases, 15% sentence structures, plus up to 10 points for heavy em-dash use and 40 per obvious chatbot leftover ("Certainly! Here is…", "I hope this helps!"). Each part is scaled so 100 means "as AI-styled as the most AI-styled tenth of AI-written character cards". The ⓘ next to a result says where it sits among real human and AI-written cards (with how many cards that comparison uses).</p>
-    <p><b>Bands (tentative):</b> <i>Meatbag adjacent</i> under 40, <i>Mixed signals</i> 40–60, <i>Might just be slop</i> 60+. They're set to keep false alarms down: on a sample of 5,313 human cards from 2023, 93% land in the bottom band and 2% in the top. AI-written cards (1,061) split roughly 30 / 40 / 30, so a low score doesn't clear anyone either.</p>
+    <p>60% AI-favored words, 25% AI-favored phrases, 15% sentence structures, plus up to 10 points for heavy em-dash use and 40 per obvious chatbot leftover ("Certainly! Here is…", "I hope this helps!"). Each part is scaled so 100 means "as AI-styled as the most AI-styled tenth of AI-written character cards". The ⓘ next to a result says where it sits among real human and AI-written cards (with how many cards that comparison uses).</p>
+    <p><b>Bands (tentative):</b> <i>Meatbag adjacent</i> under 40, <i>Mixed signals</i> 40–60, <i>Might just be slop</i> 60+. They're set to keep false alarms down. Human cards from 2023 (<span id="howHumanN">108,129</span>: Korshuk, JanitorAI, Chub) split <span id="howHumanSplit">94 / 4 / 2</span>% across the three bands, median <span id="howHumanMed">12</span>. AI-written cards (<span id="howAiN">1,237</span>) split <span id="howAiSplit">35 / 38 / 28</span>%, median <span id="howAiMed">49</span>, so a low score doesn't clear anyone either. Separation (AUC): <span id="howAuc">0.91</span>; at a 2% false-alarm rate on human cards it flags <span id="howCaught">27%</span> of AI cards. Numbers from the BBBScorer <span id="howRefVer">v0.8.1</span> run.</p>
     <p><b>Description and first message:</b> scored separately, then blended by length (each counts up to 400 words), so a long description can't hide the greeting. When both have 150+ words of prose and land 25+ points apart, the card is flagged as mixed, for example a hand-written description with an AI-written greeting.</p>
     <h3>Not an AI detector</h3>
     <p>It measures a house style, not authorship. A human who writes in that style scores high (pulp fantasy and romance share a lot of it), and a model told to avoid it can score low. It also says nothing about whether a card is good.</p>
     <h3>The leaderboard</h3>
-    <p><b>Models:</b> character cards each model wrote for us from the same requests: the name, creator note and tags of real 2023 human cards, asked for in seven formats (W++/PList, lists, sections, plain prose, first person, interview, and a lazy "make me a bot"). Only those plain requests are ranked. UnslopNemo and its base, Mistral Nemo, sit in a separate pending group: UnslopNemo was tuned to strip stock phrasing from RP chat replies, not to write cards, so ranking it here isn't fair yet; the report for each model also shows cards written with "don't sound like AI" instructions and rewrites of human cards. Bars show the middle half of each model's cards, the line marks the median. Small samples are marked.</p>
+    <p><b>Models:</b> character cards each model wrote for us from the same requests: the name, creator note and tags of real 2023 human cards, asked for in seven request styles: the five formats (free prose, formatted prose, lists, compact, and in voice as both first person and interview) plus a lazy prompt that leaves the format to the model ("make me a character bot for X"). Only those plain requests are ranked. UnslopNemo and its base, Mistral Nemo, sit in a separate pending group: UnslopNemo was tuned to strip stock phrasing from RP chat replies, not to write cards, so ranking it here isn't fair yet; the report for each model also shows cards written with "don't sound like AI" instructions and rewrites of human cards. Bars show the middle half of each model's cards, the line marks the median. Under each model: the range of its medians across request styles, and its lazy-prompt median. Small samples are marked.</p>
     <p><b>References:</b> real card sets scored with the same version: early 2023 human cards (Korshuk, JanitorAI, Chub), later Chub and Perchance cards (a mix of human and AI-assisted writing), and AI-written persona sets.</p>
     <h3>Pulp read (experimental)</h3>
-    <p>Pulpy fantasy, horror and romance writing shares a lot of vocabulary with AI models ("ancient", "shadows", "crimson"). The pulp read shows how much of a card's AI-favoured word weight is genre vocabulary that human genre cards use about as often, and what the score would be without it. A card can read as pulp rather than AI-styled, or as both. It isn't part of the score yet.</p>
-    <h3>Genre and archetype (experimental)</h3>
-    <p>A rough genre read from keywords and tags, and a just-for-fun archetype tag combining the card's format, greeting voice and genre ("Gothic novelist", "Sci-fi dossier"), plus a badge for very long or very short cards.</p>
+    <p>Pulpy fantasy, horror and romance writing shares a lot of vocabulary with AI models ("ancient", "shadows", "crimson"). The pulp read shows how much of a card's AI-favored word weight is genre vocabulary that human genre cards use about as often, and what the score would be without it. A card can read as pulp rather than AI-styled, or as both. It isn't part of the score yet.</p>
+    <h3>Format, genre and archetype</h3>
+    <p>Every card gets a description format: free prose, formatted prose, lists, compact, in voice, structured + prose, boilerplate + prose, or boilerplate. The ⓘ next to it lists them all. Format isn't scored. Genre (experimental) is a rough read from keywords and tags, and the just-for-fun archetype combines format, greeting voice and genre ("Gothic novelist", "Sci-fi dossier-keeper"), plus a badge for very long or very short cards. Every tag and label is listed in BOTSTYLE.md.</p>
     <h3>Texture (experimental)</h3>
     <p>AI text tends to keep paragraphs close to the same length. The report shows that evenness and a likelihood combining it with the score. It isn't part of the score: careful human writers can be even too.</p>
     <h3>Your cards and privacy</h3>
     <p>Cards are scored in your browser. "Your cards" is stored in this browser only. Nothing is sent anywhere unless you press "Share to public list" (when that list is switched on), which sends the card's name, link, score, version and what you tick. The public list never receives or keeps card text.</p>
     <h3>Versions</h3>
-    <p>Every score carries the BBBScorer version, so results can be compared after the word lists or calibration change. Details, data and code: BOTSTYLE.md in the repository.</p>
+    <p>Every score carries the BBBScorer version, so results can be compared after the word lists or calibration change. Details, every tag and label, data and code: <a href="https://github.com/frizzyconvo/botstyle-score/blob/main/BOTSTYLE.md" target="_blank" rel="noopener">BOTSTYLE.md</a>.</p>
   </div>
 </dialog>
 
