@@ -6,6 +6,21 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.26.0] - 2026-10-29 · BBBScorer 0.8.1
+
+Scores unchanged.
+
+### Added
+- **Mood** read-out (experimental, unscored): the one or two feelings a card's wording leans on more than 2023 cards do,
+  from Empath's emotion word lists ("Melancholy · Tender"; "Even-keeled" when nothing stands out).
+- **Signature words** read-out (experimental, unscored): the card's rarest real words compared with 22,577 cards from
+  2023, and how unusual its vocabulary is as a percentile. AI-written cards score higher on it than human ones.
+- `tools/build_card_words.mjs` builds both reference files; Empath is credited in `NOTICE.md`.
+
+### Changed
+- Genre read: a matching card tag now counts twice as much, so the read agrees with a card's genre tags 88% of the
+  time instead of 45%.
+
 ## [0.25.0] - 2026-10-29 · BBBScorer 0.8.1
 
 Scores unchanged. The prepared next scorer is now **BBBScorer 0.9.1**.

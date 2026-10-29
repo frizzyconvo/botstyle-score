@@ -8,6 +8,7 @@ The project is MIT-licensed (see [LICENSE](LICENSE)). These bundled parts keep t
 | `js/wordfreq.js` (JavaScript port of wordfreq) | [wordfreq](https://github.com/rspeer/wordfreq) by Robyn Speer | [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) |
 | `data/large_en.msgpack.gz` (word frequencies) | wordfreq | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
 | `data/extra_words.txt` (rare real words for the typo check) | derived from [word-list](https://github.com/sindresorhus/word-list) by Sindre Sorhus | MIT |
+| `data/botstyle_mood.json` (emotion word lists for the mood read) | [Empath](https://github.com/Ejhfast/empath-client) by Ethan Fast et al. (2016), built from Wattpad fiction | MIT |
 | `vendor/msgpack.min.js` | [@msgpack/msgpack](https://github.com/msgpack/msgpack-javascript) | ISC |
 | `vendor/wink-pos-tagger.bundle.js` (part-of-speech tagger and its lexicon) | [wink-pos-tagger](https://github.com/winkjs/wink-pos-tagger) by GRAYPE Systems | MIT |
 

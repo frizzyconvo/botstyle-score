@@ -243,5 +243,21 @@ check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zB
   check('provenance csv parses quotes and newlines', rows.length === 2 && rows[0].notes === 'says "60%", AI' && rows[1].notes === 'two\nlines' && rows[1].provenance === 'human' && rows[0].file === 'a.json', JSON.stringify(rows));
 }
 
+// fun vocabulary reads: mood picks feelings above 2023 cards; signature words skip names and need real words
+{
+  const { setMoodData, moodRead } = await import('../js/mood.js');
+  setMoodData(JSON.parse(readFileSync(new URL('../data/botstyle_mood.json', import.meta.url), 'utf-8')));
+  const sad = Array(6).fill('She was sad and lonely, full of grief and sorrow, mourning in misery and despair, heartbroken and gloomy.').join(' ');
+  const m = moodRead(sad);
+  check('mood: a grief-heavy text reads melancholy', m && /Melancholy|Aching/.test(m.label), m && m.label);
+  check('mood: under 100 words gives no read', moodRead('She smiled.') === null);
+  const { signatureRead, candidateWords } = await import('../js/signature.js');
+  const cw = JSON.parse(readFileSync(new URL('../data/botstyle_card_words.json', import.meta.url), 'utf-8'));
+  check('signature: names (never lowercase) are left out', !candidateWords('Elara walked. Elara smiled at the quiet harbor.').includes('elara') && candidateWords('the quiet harbor').includes('harbor'));
+  const M2 = await import('../js/metrics.js'); await M2.loadWordfreq();
+  const sg = signatureRead(fx('plain_human.txt') + ' ' + fx('giallo.txt'), cw, M2.lookupZipf);
+  check('signature: rarest words and a percentile', sg && sg.words.length === 6 && sg.percentile !== null && sg.words[0].cards <= sg.words[5].cards, JSON.stringify(sg && sg.words));
+}
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

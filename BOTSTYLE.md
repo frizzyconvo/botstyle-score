@@ -292,6 +292,14 @@ explain themselves on hover or tap.
   16% for older models and 3–6% of 2023 cards), so it points at older bots, and people use some of it too. Items from
   Wikipedia's "Signs of AI writing" guide that are as common in 2023 cards as in any model we tested ("Furthermore,",
   "Overall,", "plays a crucial role") are listed greyed and don't count. Checks in [docs/LISTS.md](docs/LISTS.md).
+- **Mood** (experimental, just for fun): the one or two feelings a card's wording leans on more than 2023 cards do, from
+  Empath's emotion word lists (Wattpad-built, MIT): Melancholy, Tender, Uneasy, Hopeful, Sultry, Shy and 16 more. A mood
+  shows when its rate is at the 80th percentile of 2023 cards or above, with 2+ words; otherwise "Even-keeled". It reads
+  words, not scenes.
+- **Signature words** (experimental): the card's six rarest real words compared with 22,577 cards from 2023 (a word must
+  be lowercase in the card at least once and known to the English frequency list, so names and typos are left out), and
+  **unusual vocabulary**: the share of its words that fewer than 1 in 200 of those cards use, as a percentile. Unusual is
+  not original: AI-written cards score higher on it than human cards (AUC 0.71), because models reach for rarer words.
 - **Sexual content:** explicit or suggestive wording and NSFW-type tags, read from every field and greeting whatever is
   ticked for scoring. A word list: it can miss implied content, and it filters the usual false alarms ("Sex: Female",
   "sexual orientation", "Dick" as a name, "naked blade", "no NSFW" rules).

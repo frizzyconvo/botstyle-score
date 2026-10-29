@@ -31,6 +31,8 @@ Four kinds of source, kept apart so each can be redone or replaced on its own te
 | RP slop | 2 | TheDrummer's UnslopNemo target list, unchanged | Unscored |
 | Pulp words | 1 | Our card sets: scored words human genre cards use as often as AI cards | Unscored read-out |
 | Old-school AI items | 3 + 1 | Wikipedia's "Signs of AI writing" guide plus stock character-sheet lines, each checked against 2023 cards and our generated cards; only those older models use 2.5×+ as often as 2023 cards count | Unscored read-out |
+| Mood words | 2 | Empath's emotion categories (Fast et al. 2016, MIT), as published; only the 2023-card percentiles are ours | Unscored read-out |
+| Card word frequencies | 1 | How many of 22,577 cards from 2023 use each word (`tools/build_card_words.mjs`) | Signature words read-out |
 | Sexual-content words | 1 | Written for this tool; checked by hand against JanitorAI cards with and without the NSFW flag | Unscored read-out |
 | Scale anchor, reference, format peers, length cut-offs | 1 | Our scoring runs over the card sets (length cut-offs: provisional, from a sample) | Calibration |
 | Original slop-score lists | 2 | sam-paech/slop-score, unchanged | The original score only |
@@ -88,6 +90,8 @@ Entries of two letters or fewer ("wi" from Wi-Fi, "ai") and the junk set in `JUN
 | Extra dictionary (typo check) | `data/extra_words.txt` | | from the word-list package (MIT) | Rare real words the typo check shouldn't flag |
 | Original slop-score lists | `data/slop_list*.json` | | upstream, unchanged | The original slop score only |
 | Old-school AI items | `js/old-school.js` (in code) | 5 checked groups, 2 listed groups | hand-written regexes, checked on the 0.9.0 evaluation sample (see below) | Old-school AI read-out |
+| Mood words | `data/botstyle_mood.json` | 22 moods | `tools/build_card_words.mjs --empath <categories.tsv>` | Mood read-out |
+| Card word frequencies | `data/botstyle_card_words.json` | 31,682 words (used by 3+ cards) | `tools/build_card_words.mjs` | Signature words and unusual vocabulary |
 | Sexual-content words | `js/nsfw.js` (in code) | explicit and suggestive lists, plus context filters | hand-written | Sexual-content read-out |
 
 **Old-school AI check** (2026-10-28, cards with 150+ words; in-sample, since the items were picked on the same cards).
@@ -117,6 +121,7 @@ Newest first. Scorer versions in brackets.
 
 | Date | List | Change | Why |
 |---|---|---|---|
+| 2026-10-29 (app 0.26.0) | Mood words, card word frequencies | First added, as unscored read-outs. Empath's topic words were also tried in the genre read and left out: better ranking inside one genre, worse at picking the single genre | Requested: fun read-outs in place of archetypes |
 | 2026-10-28 (app 0.23.0) | Old-school AI items, sexual-content words | First added, as unscored read-outs | Requested: a read for older (ChatGPT-era) bots the fiction-built lists miss, and a sexual-content read |
 | 2026-10-28 (0.9.1, prepared) | Card-mined lists | First built: 217 words, 31 two-word phrases from 2,258 generated cards (162 and 27 not in the story lists) | The story lists come from 22 models' stories; card writing has its own habits ("fiercely loyal", "tilts her head", "leather-bound") |
 | 2026-10-28 (0.9.0, prepared) | Sentence structures | found_herself, it_was_as_if, hung_heavy, felt_a_surge, unspoken, not_just_shes off | Rechecked on cards: no separation, or they lean human |

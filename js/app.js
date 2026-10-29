@@ -20,6 +20,8 @@ import { BOTSTYLE_WEIGHTS, MIN_PROSE_WORDS } from './botstyle.js';
 import { FORMAT_INFO, formatLabel, requestStyleLabel, GREETING_FORMATS, GREETING_POV } from './card-style.js';
 import { detectNsfw } from './nsfw.js';
 import { oldSchoolTells } from './old-school.js';
+import { signatureRead } from './signature.js';
+import { setMoodData, moodRead } from './mood.js';
 import { EMDASH_POINTS } from './ai-structures.js';
 import { CARD_PROXY, PUBLIC_RUNS } from './site-config.js';
 import { originalParts, explainDifference, disparity, DISPARITY } from './compare-original.js';
@@ -78,6 +80,9 @@ async function init() {
     await initPosTagger().catch(() => {});
     await Promise.all([loadWordfreq(), loadSlopSets(), loadAll('./data/')]);
     state.ready = true; status('Ready. Paste a link, upload a card, or type text.');
+    // the fun vocabulary reads load after the rest and are simply left out if their data can't be fetched
+    getJson('data/botstyle_card_words.json').then(d => { state.cardWords = d; if (state.result) renderResult(state.result); }).catch(() => {});
+    getJson('data/botstyle_mood.json').then(d => { setMoodData(d); if (state.result) renderResult(state.result); }).catch(() => {});
   } catch (e) { status(''); error('Could not load the scoring data: ' + (e.message || e)); }
   loadPublic();
 }
@@ -332,6 +337,14 @@ function renderResult(r) {
     + (g && g.primary !== 'none' ? `<span class="k">Greeting</span><span>${hint(gl[0].toLowerCase(), `<b>${esc(gl[0])}</b>: ${esc(gl[1])}`)}, ${hint(GREETING_POV[g.pov] || g.pov, esc(POV_TIP[g.pov] || ''))}, ${hint(g.tense + ' tense', esc(TENSE_TIP[g.tense] || ''))}${g.endsWithQuestion ? ', ends on a question' : ''}</span>` : '')
     + (r.genre ? `<span class="k">Genre read</span><span>${hint(r.genre.label, `<b>${esc(r.genre.label)}</b>: ${esc(GENRE_TIP[r.genre.primary] || '')} Read from genre words per 1,000 prose words, plus the card's tags.`)}${r.genre.secondary ? ` + ${hint(r.genre.secondaryLabel, `<b>${esc(r.genre.secondaryLabel)}</b>: ${esc(GENRE_TIP[r.genre.secondary] || '')}`)}` : ''} ${EXP}</span>` : '')
     + (r.type && r.type !== 'single_character' ? `<span class="k">Type</span><span>${esc(r.type.replace('_', ' / '))}</span>` : '') + '</div></div>';
+  // Mood and signature words: just for fun (js/mood.js, js/signature.js), on the scored text.
+  const MD = moodRead(r.text);
+  if (MD) R += `<div class="sec"><h3>Mood ${EXP}${UNS}</h3><div class="small"><b>${esc(MD.label)}</b>${MD.top.length ? ': ' + MD.top.map(x => `${hint(x.label.toLowerCase(), `More ${esc(x.label.toLowerCase())} wording than ${x.percentile}% of 2023 cards: ${x.words.map(esc).join(', ')}`)}`).join(', ') : ''}.</div>`
+    + `<span class="faint small">Which feelings the wording leans on more than 2023 cards do, from Empath's emotion word lists. Just for fun: it reads words, not scenes.</span></div>`;
+  const SG = signatureRead(r.text, state.cardWords, lookupZipf);
+  if (SG) R += `<div class="sec"><h3>Signature words ${EXP}${UNS}</h3><div>${SG.words.map(w => `<span class="tag" title="${w.cards < 3 ? 'fewer than 3' : w.cards.toLocaleString()} of ${SG.n.toLocaleString()} 2023 cards use it">${esc(w.word)}</span>`).join('')}</div>`
+    + `<div class="small">Unusual vocabulary: <b>${Math.round(SG.unusualShare * 100)}%</b> of its words are used by fewer than 1 in 200 2023 cards${SG.percentile !== null ? `, more than ${SG.percentile}% of 2023 cards` : ''}.</div>`
+    + `<span class="faint small">The card's rarest real words compared with ${SG.n.toLocaleString()} 2023 cards (names and typos left out). Unusual isn't the same as original: AI-written cards tend to use more rare words than human ones, not fewer.</span></div>`;
   // Old-school AI: the register of ChatGPT-era and 2024-era models (js/old-school.js), on the scored text.
   const OS = oldSchoolTells(r.text);
   if (OS.level !== 'none') R += `<div class="sec"><h3>Old-school AI ${EXP}${UNS}</h3><div class="small"><b>${OS.level === 'strong' ? 'Reads like an older model' : 'A few older-model habits'}</b>${OS.items ? `: ${OS.items} different checked item${OS.items > 1 ? 's' : ''} (${OS.per1k} per 1k words)` : ''}.</div>`
