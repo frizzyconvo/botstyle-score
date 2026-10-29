@@ -6,6 +6,16 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.25.0] - 2026-10-29 · BBBScorer 0.8.1
+
+Scores unchanged. The prepared next scorer is now **BBBScorer 0.9.1**.
+
+### Changed
+- 0.9.1 is 0.9.0 plus the words and phrases mined from AI-written cards. Those lists were added to 0.9.0 after its first
+  full run had started, so two different sets of rules shared one number; adding them moves scores, so the number moves
+  too. 0.9.0 stays defined, without the mined lists, to describe that first run. `--scorer 0.9.1` scores into
+  `eval/scores/v0.9.1/`.
+
 ## [0.24.0] - 2026-10-28 · BBBScorer 0.8.1
 
 Scores unchanged.

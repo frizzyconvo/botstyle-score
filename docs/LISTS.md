@@ -21,7 +21,7 @@ Four kinds of source, kept apart so each can be redone or replaced on its own te
 | List or pattern set | Kind | Source | Used how |
 |---|---|---|---|
 | AI-favored words, two- and three-word phrases | 1 | AI side: upstream slop-score's outputs from 22 models (creative prompts). Human side: Nitral-AI's slop-forensics profile of Reddit WritingPrompts stories | Scored |
-| Card-mined words and phrases (0.9.0) | 1 | Our generated character cards (37 models, every model counted equally) against half of a 2023 card sample; items tied to one character's premise filtered out | Scored in 0.9.0 (extra points) |
+| Card-mined words and phrases (0.9.1) | 1 | Our generated character cards (37 models, every model counted equally) against half of a 2023 card sample; items tied to one character's premise filtered out | Scored in 0.9.0 (extra points) |
 | Sentence patterns marked "candidate" | 1 + 4 | Regex candidates written for this project (`tools/mine_structures.py`), some suggested by CharGen's phrase examples; kept only if they separated human from AI text on SlopReview **and** Gutenberg | Scored |
 | Sentence patterns marked "SloppySeconds" | 4 | pixelnull's SloppySeconds community list; kept only if they passed the same test | Scored |
 | Sentence patterns marked "cards" | 1 | Written for character cards; backed by AI card sets only (provisional weights) | Scored |
@@ -54,8 +54,8 @@ Paths are relative to the repo; the card sets and test sets sit in a folder next
 | Sentence-pattern candidates | `python3 tools/mine_structures.py` (writes `mine_results.json`; weights are copied into `js/ai-structures.js` by hand) |
 | Scale anchor | `node tools/calibrate_cards.mjs` |
 | Reference percentiles | `npm run reference` |
-| Length cut-offs (BBBScorer 0.9.0) | `node tools/build_length_bands.mjs` |
-| Card-mined words and phrases (BBBScorer 0.9.0) | `node tools/mine_card_lists.mjs --human-every 2` (generated cards in `eval/ai-cards/`, human cards from the evaluation sample) |
+| Length cut-offs (BBBScorer 0.9.0 and 0.9.1) | `node tools/build_length_bands.mjs` |
+| Card-mined words and phrases (BBBScorer 0.9.1) | `node tools/mine_card_lists.mjs --human-every 2` (generated cards in `eval/ai-cards/`, human cards from the evaluation sample) |
 | Format peers | `python3 tools/build_peers.py <scores.jsonl>... --before 2023-07` |
 
 ## Scored
@@ -118,7 +118,7 @@ Newest first. Scorer versions in brackets.
 | Date | List | Change | Why |
 |---|---|---|---|
 | 2026-10-28 (app 0.23.0) | Old-school AI items, sexual-content words | First added, as unscored read-outs | Requested: a read for older (ChatGPT-era) bots the fiction-built lists miss, and a sexual-content read |
-| 2026-10-28 (0.9.0, prepared) | Card-mined lists | First built: 217 words, 31 two-word phrases from 2,258 generated cards (162 and 27 not in the story lists) | The story lists come from 22 models' stories; card writing has its own habits ("fiercely loyal", "tilts her head", "leather-bound") |
+| 2026-10-28 (0.9.1, prepared) | Card-mined lists | First built: 217 words, 31 two-word phrases from 2,258 generated cards (162 and 27 not in the story lists) | The story lists come from 22 models' stories; card writing has its own habits ("fiercely loyal", "tilts her head", "leather-bound") |
 | 2026-10-28 (0.9.0, prepared) | Sentence structures | found_herself, it_was_as_if, hung_heavy, felt_a_surge, unspoken, not_just_shes off | Rechecked on cards: no separation, or they lean human |
 | 2026-10-28 (0.9.0, prepared) | Pulp words | Count at half weight in the score (were read-out only) | Raised AUC on cards (0.862 → 0.866 on its own) |
 | 2026-10-28 (0.9.0, prepared) | Length cut-offs | First built, provisional, from a sample | Same false-positive rate at every card length |

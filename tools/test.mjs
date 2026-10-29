@@ -140,7 +140,7 @@ const wppTells = scoreCard({ description: '[Appearance:{muscular,blue eyes,blond
 check('W++ commas are not missing-space typos', !(wppTells.checks.humanTells || []).some(t => t.id === 'missing_space_after'));
 check('default fields: personality not scored', scoreCard({ description: 'She bakes bread.', personality: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
 check('default fields: scenario not scored', scoreCard({ description: 'She bakes bread.', scenario: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
-// BBBScorer 0.9.0 is prepared but opt-in: the default stays 0.8.1, and 0.9.0 changes only what it says it changes
+// BBBScorer 0.9.1 is prepared but opt-in: the default stays 0.8.1, and 0.9.1 changes only what it says it changes
 {
   const SP = await import('../js/scorer-profile.js');
   check('default scorer is 0.8.1', SP.scorerVersion() === '0.8.1' && scoreCard('She bakes bread.').version === '0.8.1');
@@ -148,17 +148,17 @@ check('default fields: scenario not scored', scoreCard({ description: 'She bakes
   check('SCORER_VERSION matches the default profile', SCORER_VERSION === SP.DEFAULT_SCORER);
   const plist = '([Name: Mira; voice: low and melodic, like wind through the rings of a distant planet; backstory: born from the quiet wish of an ancient comet, she drifts between planets and rooftops offering company and perspective; goals: to help others feel seen, to remind people that they are part of something vast and beautiful])';
   const before = scoreCard({ description: plist }).stats.proseWords;
-  SP.setScorerProfile('0.9.0');
+  SP.setScorerProfile('0.9.1');
   const after = scoreCard({ description: plist }).stats.proseWords;
-  check('0.9.0: PList wrapped in parentheses is not prose', before > 20 && after === 0, `${before} -> ${after}`);
-  check('0.9.0: personality still not scored', scoreCard({ description: 'She bakes bread.', personality: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
+  check('0.9.1: PList wrapped in parentheses is not prose', before > 20 && after === 0, `${before} -> ${after}`);
+  check('0.9.1: personality still not scored', scoreCard({ description: 'She bakes bread.', personality: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
   const wpp = '[character("Brett"){ personality("A little insecure beneath his sunny confidence" + "Tries to be helpful even when lost" + "Wants everyone to like him" + "Eagerly agrees with every suggestion" + "Looks for the silver lining" + "Calls people dude and buddy") }]';
-  check('0.9.0: compact-value points are off (tested, left out)', scoreCard({ description: wpp }).extraPoints.compactValues === 0);
-  SP.setScorerProfile('0.9.0', { compactValues: { minValues: 6, from: 2.5, to: 5, max: 20 } });
+  check('0.9.1: compact-value points are off (tested, left out)', scoreCard({ description: wpp }).extraPoints.compactValues === 0);
+  SP.setScorerProfile('0.9.1', { compactValues: { minValues: 6, from: 2.5, to: 5, max: 20 } });
   check('compact-value switch: long W++ values add points', scoreCard({ description: wpp, first_mes: 'Hey buddy, you made it! Come on in, grab a chair, I saved you the good one by the window.' }).extraPoints.compactValues > 0);
-  SP.setScorerProfile('0.9.0');
+  SP.setScorerProfile('0.9.1');
   const ml = scoreCard({ description: 'Fiercely loyal and endlessly patient, she tilts her head and leans forward. Ancient leather-bound books, a faint smell of ink and dust. Her voice is a low rumble. Well, well, she must say, either way it is fascinating, precisely the practical sort of thing. '.repeat(2) });
-  check('0.9.0: card-mined words add points', ml.extraPoints.cardLists > 0 && ml.cardListHits.length > 3, JSON.stringify(ml.extraPoints));
+  check('0.9.1: card-mined words add points', ml.extraPoints.cardLists > 0 && ml.cardListHits.length > 3, JSON.stringify(ml.extraPoints));
   SP.setScorerProfile();
   check('profile back to 0.8.1', scoreCard('She bakes bread.').version === '0.8.1' && scoreCard({ description: wpp }).extraPoints.compactValues === 0);
 }

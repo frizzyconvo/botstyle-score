@@ -4,16 +4,17 @@ Open work, and a short summary of where scoring changes stand.
 
 ## Scoring: next version and what's been tried
 
-**BBBScorer 0.9.0 is prepared but not switched on.** The page and every stored score still use 0.8.1. The changes sit
+**BBBScorer 0.9.1 is prepared but not switched on.** (0.9.1 is 0.9.0 plus the words and phrases mined from AI-written
+cards; adding them moved scores, so the number moved too.) The page and every stored score still use 0.8.1. The changes sit
 behind switches in `js/scorer-profile.js` and are used only when a tool asks for them
-(`node tools/score_all.mjs --scorer 0.9.0`). Before it goes live: a full rescore with 0.9.0, the length cut-offs
+(`node tools/score_all.mjs --scorer 0.9.1`). Before it goes live: a full rescore with 0.9.1, the length cut-offs
 rebuilt from that run (`node tools/build_length_bands.mjs`), the scale anchor checked, and the reference and
 leaderboard rebuilt.
 
-In 0.9.0:
+In 0.9.1:
 - **Cut-offs by length.** One 40 / 60 cut-off for every card treats short and long cards differently: a human card
   under 150 prose words almost never reaches 60, while 3–4% of very long ones do, and short AI-written cards almost all
-  land in Original-ish. 0.9.0 cuts each length range at the same points of 2023 cards of that length.
+  land in Original-ish. 0.9.1 cuts each length range at the same points of 2023 cards of that length.
 - **Genre words count half.** Words that human fantasy, horror, action and romance cards use as often as AI cards
   ("realm", "crimson", "primal") count at half weight.
 - **Six sentence patterns off.** They were picked on stories; on character cards they don't separate human from AI
@@ -23,18 +24,18 @@ In 0.9.0:
   over and over ("eternity" on a card about an eternal god) can't carry a card.
 - **RP asterisks.** Asterisks are removed before the sentence patterns run, so `"Miss me?" *she purrs.*` is read like
   `"Miss me?" she purrs.`
-- **Words and phrases mined from AI-written cards.** The scored lists come from stories. 0.9.0 adds a second list mined
+- **Words and phrases mined from AI-written cards.** The scored lists come from stories. 0.9.1 adds a second list mined
   from about 2,250 character cards written by 37 models for this project, with every model counted equally so models
   the story lists never saw count as much as the ones they did ("fiercely loyal", "tilts her head", "leans forward",
   "leather-bound", "patient", "ancient"). Checked by mining on half the models and half the characters and testing on
   the other half: it catches 7–9 more AI cards in 100 there, and on a persona set it was never mined from 48% → 56%.
-- **Paragraph evenness.** AI-written cards keep paragraphs close to the same length; 0.9.0 adds a few points for very
+- **Paragraph evenness.** AI-written cards keep paragraphs close to the same length; 0.9.1 adds a few points for very
   even paragraphs and takes a few off for very uneven ones.
 
-**How 0.9.0 does on a sample** (23.5k cards from 2023, mostly human; 2.9k AI-written; half the 2023 cards set the
+**How 0.9.1 does on a sample** (23.5k cards from 2023, mostly human; 2.9k AI-written; half the 2023 cards set the
 length cut-offs and the other half tests them):
 
-| | 0.8.1 | 0.9.0 |
+| | 0.8.1 | 0.9.1 |
 |---|---|---|
 | Separation (AUC) | 0.862 | 0.885 (without the card-mined lists) |
 | 2023 cards landing in Common | 1.6% | 2.0% |
@@ -43,7 +44,7 @@ length cut-offs and the other half tests them):
 | Our generated cards in Common (the card-mined lists saw these, so read with care) | 25% | 41% |
 | … short (under 250 words) / compact requests / in voice | 6% / 13% / 8% | 37% / 28% / 20% |
 
-Two candidates were tested and left out of 0.9.0: points for phrase-length W++ / PList entries (half the 2023 compact
+Two candidates were tested and left out of 0.9.1: points for phrase-length W++ / PList entries (half the 2023 compact
 cards write entries that way too, so it raised human compact cards as much as AI ones), and switching UnslopNemo's
 RP-reply tells back on (no gain). Down-weighting genre ("pulp") words by half and switching off six sentence patterns
 that don't separate on cards (they were picked on stories) went in.

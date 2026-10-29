@@ -1,14 +1,14 @@
 {
  "scorerName": "BBBScorer",
  "note": "Built by tools/build_card_leaderboard.mjs from scored generated cards and card datasets.",
- "dir": "eval/scores/v0.8.1",
+ "dir": "eval\\scores\\v0.8.1",
  "version": "0.8.1",
  "bands": {
   "original": 40,
   "common": 60
  },
  "scorer": "0.8.1",
- "built": "2026-10-28",
+ "built": "2026-10-29",
  "models": [
   {
    "model": "google/gemma-3-4b-it",

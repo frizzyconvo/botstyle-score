@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// build_length_bands.mjs - Band cut-offs by prose length (BBBScorer 0.9.0, lengthBands).
+// build_length_bands.mjs - Band cut-offs by prose length (BBBScorer 0.9.x, lengthBands).
 //
 // With one 40 / 60 cut-off for every card, the false-positive rate depends on length: short cards have few chances to
 // hit anything, so a human card under 150 prose words almost never reaches 60, while 3-4% of very long ones do. Here
@@ -7,7 +7,7 @@
 // below the 94th percentile, Common from the 98th (the overall 40 / 60 sit at about those points). Cut-offs never
 // fall as length grows.
 //
-//   node tools/build_length_bands.mjs [eval/scores/v0.9.0]      # from a complete scoring run (the human 2023 sets)
+//   node tools/build_length_bands.mjs [eval/scores/v0.9.1]      # from a complete scoring run (the human 2023 sets)
 //   node tools/build_length_bands.mjs --rows <file.json> --key <score field> [--note "..."]   # from an experiment
 //
 // Writes data/botstyle_length_bands.json.
@@ -43,7 +43,7 @@ if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || proce
     source = `scoring run ${dir.replace(/\\/g, '/')}`;
   }
   const bins = lengthBands(rows);
-  const out = { about: 'Band cut-offs by prose length for BBBScorer 0.9.0 (tools/build_length_bands.mjs): Original-ish below the 94th percentile of 2023 cards (mostly human) of that length, Common from the 98th.', source, note: opt('--note', ''), built: new Date().toISOString().slice(0, 10), points: POINTS, bins };
+  const out = { about: 'Band cut-offs by prose length for BBBScorer 0.9.x (tools/build_length_bands.mjs): Original-ish below the 94th percentile of 2023 cards (mostly human) of that length, Common from the 98th.', source, note: opt('--note', ''), built: new Date().toISOString().slice(0, 10), points: POINTS, bins };
   writeFileSync('data/botstyle_length_bands.json', JSON.stringify(out, null, 1) + '\n');
   for (const b of bins) console.log(`${b.from}–${b.to ?? '∞'} prose words: Original-ish under ${b.original}, Common from ${b.common} (n=${b.n})`);
 }

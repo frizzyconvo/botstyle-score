@@ -56,8 +56,8 @@ for (const src of [EVAL, join(EVAL, 'legacy', 'unversioned-scores')]) for (const
 rmEmpty(join(EVAL, 'legacy', 'unversioned-scores')); rmEmpty(join(EVAL, 'legacy'));
 // 4. superseded runs -> old/scores/; loose comparison files -> the newer run's folder
 if (existsSync(PATHS.scores)) {
-  // Only runs OLDER than the live scorer are superseded. A newer one (a prepared, opt-in scorer such as 0.9.0) stays:
-  // moving it made the next `score-all.cmd --scorer 0.9.0` start again from nothing.
+  // Only runs OLDER than the live scorer are superseded. A newer one (a prepared, opt-in scorer such as 0.9.1) stays:
+  // moving it made the next `score-all.cmd --scorer 0.9.x` start again from nothing.
   const older = v => { const a = v.split('.').map(Number), b = String(current).split('.').map(Number);
     for (let i = 0; i < Math.max(a.length, b.length); i++) if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) < (b[i] || 0); return false; };
   for (const d of readdirSync(PATHS.scores).filter(d => /^v\d/.test(d) && current && older(d.slice(1)))) move(join(PATHS.scores, d), PATHS.oldScores);

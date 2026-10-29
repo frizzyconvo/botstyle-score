@@ -8,7 +8,7 @@ Every doc in the repository and what it's for.
 | [BOTSTYLE.md](../BOTSTYLE.md) | The full documentation and glossary: every part of the score, band, format, tag and label, how it was tested, data and credits. |
 | [CHANGELOG.md](../CHANGELOG.md) | What changed in every app and BBBScorer version. |
 | [docs/LISTS.md](LISTS.md) | Every word and pattern list: where it comes from, whether it's scored, how to rebuild it, and its history. |
-| [docs/TODO.md](TODO.md) | Open work, and where the next scorer version (0.9.0) stands. |
+| [docs/TODO.md](TODO.md) | Open work, and where the next scorer version (0.9.1) stands. |
 | [docs/FOREVERSE_NOTES.md](FOREVERSE_NOTES.md) | English summary of Foreverse's character-card-skills (card-writing rubric, blind human-vs-AI test). |
 | [upstream/README.md](../upstream/README.md) | What is kept from slop-score in `upstream/` and which tools still read it. |
 | [upstream/WORDFREQ_PORT.md](../upstream/WORDFREQ_PORT.md) | Notes on upstream's JavaScript port of wordfreq. |

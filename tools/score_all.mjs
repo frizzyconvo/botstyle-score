@@ -10,7 +10,7 @@
 //   node tools/score_all.mjs --only korshuk,perchance
 //   node tools/score_all.mjs --limit 200     # quick trial: first 200 cards per dataset (-> _trial/)
 //   node tools/score_all.mjs --force         # rescore everything from scratch for this version (same: --rescore)
-//   node tools/score_all.mjs --scorer 0.9.0  # score with the prepared next scorer version (eval/scores/v0.9.0/)
+//   node tools/score_all.mjs --scorer 0.9.1  # score with the prepared next scorer version (eval/scores/v0.9.1/)
 //   node tools/score_all.mjs --only generated_v2   # score only that dataset's new cards (what generate_ai_cards.mjs
 //                                            # runs after a generation round; --new is accepted and is the default)
 //   node tools/score_all.mjs --add "C:\cards\pack.zip\books\*.png" --name jammy_books [--label ai|human|mixed|unknown]
@@ -71,11 +71,11 @@ const upstreamScore = text => { const u = upstreamParts(text); return u ? u.scor
 // Disparity marks and reasons: js/compare-original.js (shared with the page).
 const argv = process.argv.slice(2);
 const opt = k => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : null);
-// --scorer 0.9.0: score with the prepared next version (its own folder, eval/scores/v0.9.0/). Default: 0.8.1.
+// --scorer 0.9.1: score with the prepared next version (its own folder, eval/scores/v0.9.1/). Default: 0.8.1.
 if (opt('--scorer')) setScorerProfile(opt('--scorer'));
 const SCORER_VERSION = scorerVersion();
 // Fingerprint of what decides the scores besides the code version: the profile's switches and every scored data file.
-// A prepared version can change (0.9.0 gained card-mined lists after its first run started), so rows carry `fp` and
+// A prepared version can change (0.9.0's lists changed while its first run was going: now 0.9.1), so rows carry `fp` and
 // rows from another fingerprint are scored again instead of being kept.
 const FP = (() => { const h = createHash('sha1'); h.update(JSON.stringify(scorerProfile()));
   for (const f of ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_calibration.json', 'botstyle_pulp_words.json', 'botstyle_card_lists.json', 'botstyle_length_bands.json', 'botstyle_card_drop.json']) {

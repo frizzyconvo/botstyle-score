@@ -1,7 +1,9 @@
 // scorer-profile.js - Which BBBScorer version's rules are active.
 //
-// The page, the tools and every stored score use the default (0.8.1). BBBScorer 0.9.0 is prepared but not
-// switched on: tools can opt in (score_all.mjs --scorer 0.9.0, dev experiments) to test it before the rescore.
+// The page, the tools and every stored score use the default (0.8.1). BBBScorer 0.9.1 is prepared but not
+// switched on: tools can opt in (score_all.mjs --scorer 0.9.1, dev experiments) to test it before the rescore.
+// 0.9.0 is kept only to describe its one full run (eval/old/scores/v0.9.0): 0.9.1 = 0.9.0 + the card-mined lists, which
+// were added after that run had started. Any change to a prepared profile that moves scores gets a new number.
 // Each switch below is one change from dev notes (rescore ideas); 0.8.1 has them all off.
 //
 //   plistParens     a PList wrapped in parentheses or braces, "([Name: …; personality: …])", is a PList, not prose
@@ -20,10 +22,22 @@
 //   patternsOff / patternsOn  sentence patterns switched off / on (ids from js/ai-structures.js), from rechecking every
 //                   pattern on character cards instead of the stories they were picked on
 export const DEFAULT_SCORER = '0.8.1';
-export const NEXT_SCORER = '0.9.0';
+export const NEXT_SCORER = '0.9.1';
 export const PROFILES = {
   '0.8.1': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },
   '0.9.0': {
+    plistParens: true, maxRepeat: 2.5, stripRpAsterisks: true,
+    // Tested and left off (2026-10-28 sample): half of the 2023 compact cards also use phrase-length W++ / PList entries,
+    // so the points raised human compact cards as much as AI ones (AUC 0.857 -> 0.839). Kept as a switch for later data.
+    compactValues: null,   // e.g. { minValues: 6, from: 2.5, to: 5, max: 20 }: points ramp from mean 2.5 to 5 words per value
+    texture: { minParagraphs: 3, minWords: 150, pivot: 0.6, perUnit: 30, min: -12, max: 20 },   // points = perUnit × (pivot − CV)
+    pulpWeight: 0.5, lengthBands: true,
+    // These six were picked on stories; on character cards they don't separate (or lean human): 2026-10-28 recheck.
+    patternsOff: ['found_herself', 'it_was_as_if', 'hung_heavy', 'felt_a_surge', 'unspoken', 'not_just_shes'], patternsOn: [],
+    cardLists: null,   // (its first run also used the provisional length bands from before 2026-10-28 19:53)
+  },
+  '0.9.1': {
+    // 0.9.0 + card-mined lists
     plistParens: true, maxRepeat: 2.5, stripRpAsterisks: true,
     // Tested and left off (2026-10-28 sample): half of the 2023 compact cards also use phrase-length W++ / PList entries,
     // so the points raised human compact cards as much as AI ones (AUC 0.857 -> 0.839). Kept as a switch for later data.

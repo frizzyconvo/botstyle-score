@@ -31,7 +31,7 @@ import { cardRepetition } from './repetition.js';
 // scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it, so
 // stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
 // The default stays here as a literal (tools/scorer_manifest.mjs reads it from the source); it must equal DEFAULT_SCORER in
-// scorer-profile.js (a test checks). 0.9.0 is prepared there and only used when a tool opts in.
+// scorer-profile.js (a test checks). 0.9.1 is prepared there and only used when a tool opts in.
 export const SCORER_VERSION = '0.8.1';
 export { NEXT_SCORER };
 // Versions whose botstyle *numbers* are identical to this one, so references built with them still apply.
