@@ -3,7 +3,7 @@
 How BBBScorer (the BB Botstyle Scorer) works, what every number, band, tag and label on the page means, and how it
 was tested. The quick start is in [README.md](README.md); version history is in [CHANGELOG.md](CHANGELOG.md).
 
-Numbers below are from the **BBBScorer v0.8.1** scoring run.
+Numbers below are from the **BBBScorer v0.8.2** scoring run (0.8.2 has 0.8.1's scores, with four bands instead of three).
 
 **Contents:** [What it is](#what-it-is) · [What gets scored](#what-gets-scored) · [The score](#the-score) ·
 [Bands](#bands) · [Formats](#formats) · [Greeting](#greeting) · [Tags](#tags) · [Archetypes](#archetypes) ·
@@ -139,20 +139,25 @@ card-field residue (`"first_mes": "…"`), unfilled placeholders ("[Insert name]
 
 | Score | Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
 |---|---|---|---|---|
-| under 40 | **Original-ish** | *Meatbag adjacent* | 94% | 43% |
-| 40–60 | **Mixed** | *Mixed signals* | 4% | 28% |
-| 60 and up | **Common** | *Might just be slop* | 2% | 29% |
+| under 40 | **Original-ish** | *Meatbag adjacent* | 94.2% | 43.7% |
+| 40–60 | **Mixed** | *Mixed signals* | 3.7% | 27.3% |
+| 60–80 | **Familiar** | *Rings a bell* | 1.5% | 20.1% |
+| 80 and up | **Common** | *Might just be slop* | 0.5% | 8.9% |
 | (too short or not English) | **Low confidence** / no band | | | |
 
 The band names say how common the card's phrasing is in AI writing. The taglines are just for fun and shown next
-to them.
+to them. Familiar and Common split what used to be one "Common" band (60 and up), so a card at 62 and a card at
+95 no longer get the same label.
+
+**"Too short to tell" stamp:** a card with under 250 prose words gets a small stamp on the corner of its band
+tag. Short cards give few chances for a hit, so their low scores say little (see [Limits](#limits)).
 
 The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,129
-(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 2,855, median 45.
+(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 3,209, median 44.5.
 
 **The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
 AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
-up ChatGPT-, Claude- and Bing-written cards from 2023 among them. Some of its 2% in Common are real AI cards, so
+up ChatGPT-, Claude- and Bing-written cards from 2023 among them. Some of its 2% in Familiar or Common are real AI cards, so
 the false-positive rate on human writing is somewhat lower than these numbers suggest.
 
 **Mixed card** (flag, not a band): the description and the first message both have 150+ words of prose and land
@@ -344,7 +349,7 @@ original slop-score median, or number of cards (**# cards**).
 
 **Reference card sets:** real card sets scored with the same version.
 
-| Set | Cards | Median | Original-ish | Common |
+| Set | Cards | Median | Original-ish | Familiar or Common |
 |---|---|---|---|---|
 | Korshuk cards, Feb–Apr 2023 | 360 | 7.5 | 97% | 1% |
 | JanitorAI cards, May–Jun 2023 | 9,145 | 11.6 | 95% | 2% |
@@ -375,7 +380,7 @@ the same link sit in a fold under the newest one.
 - **Short and compact cards read low.** W++, PLists and lists are set aside, so a compact card is scored mostly on
   its greeting, and short prose gives few chances for a hit. AI-written cards with under 150 prose words have a
   median of about 14 (9 in 10 land in Original-ish); with 150–250 words, about 23. The band cut-offs are the same
-  at every length, so human cards that short almost never reach Common either (0.1%, against 3–4% of very long
+  at every length, so human cards that short almost never reach Familiar either (0.1%, against 3–4% of very long
   human cards). Treat a low score on a bite-sized card as "not enough to go on".
 - **Repetition isn't an AI sign on cards** (see [Other read-outs](#other-read-outs-unscored)).
 - **English only.** The word lists are English; other languages get no band.
@@ -386,13 +391,13 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 from 2023 (mostly human) vs 2,855 AI-written | 0.75 | 0.86 |
+| Character cards: 108,129 from 2023 (mostly human) vs 3,209 AI-written | 0.76 | 0.86 |
 
 On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 29% of AI-written cards and the original
 slop score 20%.
 
 **Cards of known provenance** (18 so far: creator-stated, plus a few suspected). All 4 hand-written cards land in
-Original-ish (7–23). All 9 cards their creators say were written with ChatGPT or DeepSeek land in Mixed or Common (48–78).
+Original-ish (7–23). All 9 cards their creators say were written with ChatGPT or DeepSeek land in Mixed, Familiar or Common (48–78).
 Of the 4 partly AI-written cards, the AI-edited one scores 50 (Mixed), but the two whose creators give 60% AI score 20 and
 31 and the 30% one 7: much of their AI-written profiles is lists and key-value lines, which aren't scored, and their
 hand-written greetings score low. Too few cards for rates yet; the set is growing.
@@ -469,7 +474,7 @@ the pulp word-list builder and the phrase checker.
 | **BBBScorer** | The BB Botstyle Scorer: this scoring pipeline. Its version is stored with every score; scores from different versions shouldn't be compared directly. |
 | **App version** | The page and tools version (`package.json`). Moves for any change, including ones that don't touch scores. |
 | **Original slop score** | Sam Paech's slop-score formula, unchanged, on the same text. |
-| **Original-ish / Mixed / Common** | The three bands (under 40, 40–60, 60+). Their fun taglines: meatbag adjacent, mixed signals, might just be slop. |
+| **Original-ish / Mixed / Familiar / Common** | The four bands (under 40, 40–60, 60–80, 80+). Their fun taglines: meatbag adjacent, mixed signals, rings a bell, might just be slop. |
 | **Prose words** | Words left after lists, headers, W++/PList blocks and boilerplate are set aside. Only these are scored. |
 | **Boilerplate** | Instructions to the model, narrator rules, pasted jailbreaks. |
 | **W++ / PList / Ali:Chat** | Card-writing formats: W++ is `Trait("value" + "value")`; PList is `[Name's personality: a, b, c]`; Ali:Chat is example exchanges in the character's voice. |
@@ -479,7 +484,7 @@ the pulp word-list builder and the phrase checker.
 | **Percentile ("pct")** | Share of the comparison cards scoring lower. |
 | **Request style** | How a leaderboard card was asked for (lazy prompt or one of the formats). |
 | **Reference set** | Real cards scored with the same version, for comparison. |
-| **False positive** | A human-written card scored as AI-styled (here: landing in Common). The false-positive rate is the share of human cards that do. |
+| **False positive** | A human-written card scored as AI-styled (here: landing in Familiar or Common). The false-positive rate is the share of human cards that do. |
 | **AUC** | Chance that a random AI-written card scores higher than a random human card (0.5 = coin flip, 1 = always). |
 | **Disparity** | In scoring-run notes: BBBScorer and the original slop score 30+ ("big") or 50+ ("very big") points apart on one card. |
 

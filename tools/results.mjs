@@ -47,13 +47,13 @@ console.log(`Not scored yet: ${unscored} valid generated card(s)${unscored ? ' (
 
 // 2. Datasets in the run
 const rowsBy = {};
-console.log(`${pad('Dataset', 22)}${lpad('cards', 8)}${lpad('median', 8)}${lpad('<' + WB.original, 6)}${lpad(WB.common + '+', 6)}${lpad('orig', 7)}`);
+console.log(`${pad('Dataset', 22)}${lpad('cards', 8)}${lpad('median', 8)}${lpad('<' + WB.original, 6)}${lpad(WB.familiar + '+', 6)}${lpad('orig', 7)}`);
 for (const f of (existsSync(RUN) ? readdirSync(RUN) : []).filter(f => f.endsWith('.jsonl') && f !== 'run-log.jsonl').sort()) {
   const p = join(RUN, f), name = f.replace(/\.jsonl$/, '');
   if (QUICK && statSync(p).size > 20e6) { console.log(`${pad(name, 22)}  (skipped by --quick, ${(statSync(p).size / 1e6).toFixed(0)} MB)`); continue; }
   const rows = parse(p).filter(ok); rowsBy[name] = rows;
   const v = rows.map(r => r.score), share = t => rows.length ? Math.round(100 * v.filter(t).length / rows.length) + '%' : '–';
-  console.log(`${pad(name, 22)}${lpad(rows.length.toLocaleString('en-US'), 8)}${lpad(f1(q(v, .5)), 8)}${lpad(share(x => x < WB.original), 6)}${lpad(share(x => x >= WB.common), 6)}${lpad(f1(q(rows.map(r => r.upstream), .5)), 7)}`);
+  console.log(`${pad(name, 22)}${lpad(rows.length.toLocaleString('en-US'), 8)}${lpad(f1(q(v, .5)), 8)}${lpad(share(x => x < WB.original), 6)}${lpad(share(x => x >= WB.familiar), 6)}${lpad(f1(q(rows.map(r => r.upstream), .5)), 7)}`);
 }
 
 // 3. AI models

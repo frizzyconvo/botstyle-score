@@ -44,7 +44,7 @@ const models = Object.entries(by).map(([m, rs]) => {
   const s = rs.map(r => r.score), u = rs.map(r => r.upstream), c = cost[m] || [];
   return { m, n: rs.length, bbb: q(s, .5), b25: q(s, .25), b75: q(s, .75), orig: q(u, .5), o25: q(u, .25), o75: q(u, .75),
     resid: mean(rs.map(r => r.score - (a + b * r.upstream))), rho: spearman(s, u), cost: c.length ? mean(c) : NaN,
-    lo: 100 * s.filter(x => x < WB.original).length / s.length, hi: 100 * s.filter(x => x >= WB.common).length / s.length, under10: 100 * s.filter(x => x < 10).length / s.length, over90: 100 * s.filter(x => x >= 90).length / s.length };
+    lo: 100 * s.filter(x => x < WB.original).length / s.length, hi: 100 * s.filter(x => x >= WB.familiar).length / s.length, under10: 100 * s.filter(x => x < 10).length / s.length, over90: 100 * s.filter(x => x >= 90).length / s.length };
 }).sort((x, y) => y.bbb - x.bbb);
 const rankAgree = spearman(models.map(x => x.bbb), models.map(x => x.orig));
 // per request style

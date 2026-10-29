@@ -280,7 +280,7 @@ for (const ds of DATASETS) {
   if (ds.name === 'jaicards') { const c = await jaicardsCache(); if (!c) { console.log('jaicards: not found, skipped'); continue; } ds.rows = () => jsonlStream(c); }
   if (ds.need && !existsSync(ds.need)) { console.log(`${ds.name}: ${ds.need} not found, skipped`); continue; }
   if (ds.extra && !sourceKind(ds.source)) { console.log(`${ds.name}: ${ds.source} not found, skipped`); continue; }
-  const t0 = Date.now(), startedAt = new Date().toISOString(); const rows = []; let n = 0, totalWords = 0;   // rows are small (no card text)
+  const t0 = Date.now(), startedAt = new Date().toISOString(); let rows = []; let n = 0, totalWords = 0;   // rows are small (no card text)
   const total = ds.name === 'jaicards' ? countLines(join(CARDS, 'jaicards-cards-js', 'jaicards_cards.jsonl')) : ds.need ? countLines(ds.need) : null;
   say(`[${dsIndex}/${todo.length}] ${ds.name}: scoring${kept ? ` new cards only (${kept.length.toLocaleString()} already scored)` : total ? ` ${total.toLocaleString()} cards` : ''}…`);
   let lastSay = Date.now(), flushed = 0; const stillThere = new Set();   // ids still valid in the source
@@ -315,7 +315,7 @@ for (const ds of DATASETS) {
   if (kept) {
     const gone = kept.filter(x => !stillThere.has(x.id)).length;   // cards since marked invalid or removed from the source
     if (!scoredNow && !gone && resumeFrom === outFile && kept.length === read.length) { say(`[${dsIndex}/${todo.length}] ${ds.name}: no new cards (${kept.length.toLocaleString()} already scored)`); continue; }
-    rows.unshift(...kept.filter(x => stillThere.has(x.id)));
+    rows = kept.filter(x => stillThere.has(x.id)).concat(rows);   // not unshift(...): spreading 100k+ rows overflows the stack
     if (gone) say(`  dropped ${gone} row(s) whose cards are no longer valid in the source`);
   }
   writeFileSync(outFile, rows.map(x => JSON.stringify(x)).join('\n') + '\n');

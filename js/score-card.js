@@ -32,12 +32,12 @@ import { cardRepetition } from './repetition.js';
 // stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
 // The default stays here as a literal (tools/scorer_manifest.mjs reads it from the source); it must equal DEFAULT_SCORER in
 // scorer-profile.js (a test checks). 0.9.1 is prepared there and only used when a tool opts in.
-export const SCORER_VERSION = '0.8.1';
+export const SCORER_VERSION = '0.8.2';
 export { NEXT_SCORER };
 // Versions whose botstyle *numbers* are identical to this one, so references built with them still apply.
 // 0.7.0 re-anchored the scale to AI-written cards and made repeat damping length-independent, so older
 // references don't apply.
-export const SAME_SCORES_AS = ['0.8.1'];
+export const SAME_SCORES_AS = ['0.8.1', '0.8.2'];
 // Card fields scored by default (scoreCard opts.fields overrides): what the page says it scores.
 export const DEFAULT_FIELDS = ['description', 'first_mes'];
 
@@ -45,10 +45,13 @@ export const DEFAULT_FIELDS = ['description', 'first_mes'];
 // 2023 cards vs 1,061 AI-written cards (tools/eval_cards.mjs): under 40 / 40-60 / 60+ puts human cards at
 // 93 / 5 / 2% and AI cards at 30 / 40 / 30%. (0.7.0: 50 / 75; 0.5.0-0.6.0: 35 / 50 on the old scale.)
 // Ids stay original / mixed / common for platforms.
-export const WRITING_STYLE_BANDS = { original: 40, common: 60 };
+// 0.8.2: four bands. Familiar is the old Common (60+, 2% of 2023 cards); Common is now the top 0.5% of 2023 cards (80+).
+export const WRITING_STYLE_BANDS = { original: 40, familiar: 60, common: 80 };
+// Under this many prose words the band carries a "too short to tell" stamp (about a quarter of cards).
+export const SHORT_STAMP_WORDS = 250;
 // Band names (descriptive), plus a just-for-fun tagline for each shown next to them on the page.
-export const BAND_LABELS = { original: 'Original-ish', mixed: 'Mixed', common: 'Common' };
-export const BAND_TAGLINES = { original: 'Meatbag adjacent', mixed: 'Mixed signals', common: 'Might just be slop' };
+export const BAND_LABELS = { original: 'Original-ish', mixed: 'Mixed', familiar: 'Familiar', common: 'Common' };
+export const BAND_TAGLINES = { original: 'Meatbag adjacent', mixed: 'Mixed signals', familiar: 'Rings a bell', common: 'Might just be slop' };
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
 let LENGTH_BANDS = null;   // data/botstyle_length_bands.json: band cut-offs by prose length (0.9.0 lengthBands)
@@ -63,11 +66,12 @@ export async function loadAll(base = './data/') {
   setWordFactors(pulpWords());
 }
 
-// 0.9.0 lengthBands: the cut-offs for a card with this many prose words. Same 40 / 60 everywhere otherwise.
+// 0.9.x lengthBands: the cut-offs for a card with this many prose words. Same 40 / 60 / 80 everywhere otherwise.
+// The length-bands file gives the Original-ish and Familiar cut-offs (its `common` key); the top band stays at 80+.
 export function bandCuts(proseWords) {
   if (!scorerProfile().lengthBands || !LENGTH_BANDS || !LENGTH_BANDS.bins) return { ...WRITING_STYLE_BANDS, byLength: false };
   const b = LENGTH_BANDS.bins.find(x => proseWords >= x.from && (x.to === null || proseWords < x.to)) || LENGTH_BANDS.bins[LENGTH_BANDS.bins.length - 1];
-  return { original: b.original, common: b.common, byLength: true, from: b.from, to: b.to };
+  return { original: b.original, familiar: b.common, common: Math.max(WRITING_STYLE_BANDS.common, b.common + 10), byLength: true, from: b.from, to: b.to };
 }
 
 // 0.9.0 compactValues: trait values inside W++ ("a" + "b") and PList ([x: a, b; y: c]) blocks. AI-written blocks use
@@ -138,8 +142,9 @@ export function writingStyleBand(score, reliable, format, stats = {}, obviousTel
   if (!obviousTell && stats.proseWords !== undefined && stats.proseWords < MIN_JUDGE_WORDS)
     return { id: 'na', label: stats.structuredWords > stats.proseWords ? 'Mostly W++/lists: too little prose to judge' : 'Too little prose to judge' };
   const B = cuts || WRITING_STYLE_BANDS;
-  const id = score < B.original ? 'original' : score < B.common ? 'mixed' : 'common';
-  return { id, label: BAND_LABELS[id] + (reliable ? '' : ' (low confidence)'), tagline: BAND_TAGLINES[id], tentative: true };
+  const id = score < B.original ? 'original' : score < B.familiar ? 'mixed' : score < B.common ? 'familiar' : 'common';
+  return { id, label: BAND_LABELS[id] + (reliable ? '' : ' (low confidence)'), tagline: BAND_TAGLINES[id],
+    short: stats.proseWords !== undefined && stats.proseWords < SHORT_STAMP_WORDS };
 }
 
 function quietly(fn) {

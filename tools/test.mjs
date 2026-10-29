@@ -129,7 +129,7 @@ const fan = scoreCard({ description: 'The hero of the realm, a towering knight w
 check('genre: fantasy detected', fan.genre.primary === 'fantasy', JSON.stringify(fan.genre.scores));
 check('pulp score computed with genre words', fan.pulp && fan.pulp.score > 0 && fan.pulp.adjusted <= fan.score, JSON.stringify(fan.pulp));
 check('archetype label present', !!(fan.archetype && fan.archetype.label), JSON.stringify(fan.archetype));
-check('band labels are Original-ish / Mixed / Common, with a fun tagline', ['Original-ish', 'Mixed', 'Common'].some(l => fan.band.label.startsWith(l)) && fan.band.tentative && !!fan.band.tagline, fan.band.label);
+check('band labels are Original-ish / Mixed / Familiar / Common, with a fun tagline', ['Original-ish', 'Mixed', 'Familiar', 'Common'].some(l => fan.band.label.startsWith(l)) && !!fan.band.tagline, fan.band.label);
 
 // 0.6.0: in-character dialogue counts; interview questions and list syntax don't
 const dlg = preprocessCard('A: "I... overthink everything. What if I say something stupid?" blushes\nQ: How does {{char}} rate herself?\n- "Took you long enough."');
@@ -143,7 +143,7 @@ check('default fields: scenario not scored', scoreCard({ description: 'She bakes
 // BBBScorer 0.9.1 is prepared but opt-in: the default stays 0.8.1, and 0.9.1 changes only what it says it changes
 {
   const SP = await import('../js/scorer-profile.js');
-  check('default scorer is 0.8.1', SP.scorerVersion() === '0.8.1' && scoreCard('She bakes bread.').version === '0.8.1');
+  check('default scorer is 0.8.2', SP.scorerVersion() === '0.8.2' && scoreCard('She bakes bread.').version === '0.8.2');
   const { SCORER_VERSION } = await import('../js/score-card.js');
   check('SCORER_VERSION matches the default profile', SCORER_VERSION === SP.DEFAULT_SCORER);
   const plist = '([Name: Mira; voice: low and melodic, like wind through the rings of a distant planet; backstory: born from the quiet wish of an ancient comet, she drifts between planets and rooftops offering company and perspective; goals: to help others feel seen, to remind people that they are part of something vast and beautiful])';
@@ -160,7 +160,7 @@ check('default fields: scenario not scored', scoreCard({ description: 'She bakes
   const ml = scoreCard({ description: 'Fiercely loyal and endlessly patient, she tilts her head and leans forward. Ancient leather-bound books, a faint smell of ink and dust. Her voice is a low rumble. Well, well, she must say, either way it is fascinating, precisely the practical sort of thing. '.repeat(2) });
   check('0.9.1: card-mined words add points', ml.extraPoints.cardLists > 0 && ml.cardListHits.length > 3, JSON.stringify(ml.extraPoints));
   SP.setScorerProfile();
-  check('profile back to 0.8.1', scoreCard('She bakes bread.').version === '0.8.1' && scoreCard({ description: wpp }).extraPoints.compactValues === 0);
+  check('profile back to 0.8.2', scoreCard('She bakes bread.').version === '0.8.2' && scoreCard({ description: wpp }).extraPoints.compactValues === 0);
 }
 
 // 0.8.0: card score blends the separately scored parts; repetition is measured, not scored
@@ -257,6 +257,14 @@ check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zB
   const M2 = await import('../js/metrics.js'); await M2.loadWordfreq();
   const sg = signatureRead(fx('plain_human.txt') + ' ' + fx('giallo.txt'), cw, M2.lookupZipf);
   check('signature: rarest words and a percentile', sg && sg.words.length === 6 && sg.percentile !== null && sg.words[0].cards <= sg.words[5].cards, JSON.stringify(sg && sg.words));
+}
+
+// four bands (0.8.2) and the "too short to tell" stamp
+{
+  const { writingStyleBand, WRITING_STYLE_BANDS: B } = await import('../js/score-card.js');
+  const ids = [10, 45, 65, 85].map(v => writingStyleBand(v, true, 'free_prose', { proseWords: 400 }).id).join();
+  check('four bands: original / mixed / familiar / common', ids === 'original,mixed,familiar,common' && B.familiar === 60 && B.common === 80, ids);
+  check('short cards get the stamp, long ones not', writingStyleBand(30, true, 'free_prose', { proseWords: 120 }).short === true && !writingStyleBand(30, true, 'free_prose', { proseWords: 600 }).short);
 }
 
 console.log(`${passes} passed, ${fails} failed`);

@@ -24,7 +24,7 @@ const dir = process.argv[2] || pageRunDir();
 const load = n => existsSync(join(dir, n + '.jsonl')) ? readFileSync(join(dir, n + '.jsonl'), 'utf-8').split('\n').filter(Boolean).map(JSON.parse).filter(r => !r.error && r.reliable && !r.nonEnglish) : [];
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1) : null; };
 const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, median: q(v, .5), p25: q(v, .25), p75: q(v, .75),
-  original: +(100 * v.filter(x => x < WB.original).length / Math.max(1, v.length)).toFixed(1), common: +(100 * v.filter(x => x >= WB.common).length / Math.max(1, v.length)).toFixed(1),
+  original: +(100 * v.filter(x => x < WB.original).length / Math.max(1, v.length)).toFixed(1), familiar: +(100 * v.filter(x => x >= WB.familiar && x < WB.common).length / Math.max(1, v.length)).toFixed(1), common: +(100 * v.filter(x => x >= WB.common).length / Math.max(1, v.length)).toFixed(1),
   pulp: q(rows.map(r => r.pulp).filter(x => x !== null && x !== undefined), .5),
   upstream: q(rows.map(r => r.upstream).filter(x => x !== null && x !== undefined), .5) }; };
 // Cards made at a non-default temperature / min_p (ids with |t… or |mp…) are sampler tests, not leaderboard cards.

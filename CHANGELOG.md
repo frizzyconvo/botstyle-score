@@ -6,6 +6,26 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.27.0] - 2026-10-29 · BBBScorer 0.8.2
+
+Scores unchanged; band labels change, so the scorer number moves to 0.8.2. Saved and public cards show the new bands.
+
+### Added
+- A fourth band: **Familiar** (60–80, *rings a bell*) between Mixed and Common. **Common** is now 80 and up. Of the 2023
+  cards (mostly human), 1.5% land in Familiar and 0.5% in Common; of AI-written cards, 20.1% and 8.9%.
+- A **"too short to tell"** stamp on the band tag of cards with under 250 words of prose, whose low scores say little.
+
+### Changed
+- How It Works, the score bar, the leaderboard, the reference numbers, Your cards and the run tools show four bands.
+- The public list accepts the Familiar band (the public-list worker needs redeploying).
+- Mood read: sexual words that Empath files under other feelings ("moan", "orgasm", "arouse") count only toward Sultry,
+  so explicit cards no longer read as Cozy.
+- The genre read keeps keyword matching only; adding Empath's categories didn't make it agree more with card tags or
+  Goodreads genres.
+
+### Fixed
+- `score_all` crashed at the end of a run that resumed a very large dataset (JanitorAI), after scoring every card.
+
 ## [0.26.0] - 2026-10-29 · BBBScorer 0.8.1
 
 Scores unchanged.

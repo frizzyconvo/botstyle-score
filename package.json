@@ -1,6 +1,6 @@
 {
   "name": "botstyle-score",
-  "version": "0.26.0",
+  "version": "0.27.0",
   "private": true,
   "description": "BB Botstyle Scorer: a character-card pseudo-fork of slop-score that reads how much a card leans on stock AI phrasing",
   "license": "MIT",

@@ -11,7 +11,7 @@
   --red: #b55555; --red-light: #d98a8a; --red-glow: rgba(181,85,85,.28);
   --purple: #9483d4; --purple-light: #cfc3f5; --purple-tint: rgba(148,131,212,.14);
   --gold: #d9b56a; --link: #eba792;
-  --good: #8fcf9b; --warn: #d9b56a; --bad: #e07d7d;
+  --good: #8fcf9b; --warn: #d9b56a; --bad: #e07d7d; --familiar: #e39a6f;
   --track: rgba(255,255,255,.07); --shadow: 0 8px 32px rgba(0,0,0,.45);
   --field: rgba(20,14,9,.7);
 }
@@ -26,7 +26,7 @@ html[data-theme="light"] {
   --red: #a64444; --red-light: #a94a4a; --red-glow: rgba(169,74,74,.18);
   --purple: #6f5cb8; --purple-light: #5a48a6; --purple-tint: rgba(111,92,184,.10);
   --gold: #a87b1e; --link: #b4502f;
-  --good: #2f8a4a; --warn: #a87b1e; --bad: #b8444f;
+  --good: #2f8a4a; --warn: #a87b1e; --bad: #b8444f; --familiar: #b8642e;
   --track: rgba(80,55,30,.09); --shadow: 0 8px 28px rgba(80,55,30,.14);
   --field: rgba(255,255,255,.85);
 }
@@ -108,6 +108,7 @@ input[type=checkbox], input[type=range] { accent-color: var(--red-light); }
 .band { display: inline-block; padding: 3px 10px; border-radius: 5px; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; border: 1px solid currentColor; }
 .band.original { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
 .band.mixed { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.band.familiar { color: var(--familiar); background: color-mix(in srgb, var(--familiar) 14%, transparent); }
 .band.common { color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); }
 .band.na { color: var(--faint); background: var(--inner); }
 .score-cap { margin-top: 6px; font-size: 13px; color: var(--dim); }
@@ -175,9 +176,9 @@ html { scroll-behavior: smooth; }
 
 /* leaderboard */
 .axis-row { display: grid; grid-template-columns: 250px minmax(0, 1fr) 56px; gap: 0 10px; padding: 0 10px 0 13px; margin: 4px 0 20px; }
-.axis-track { position: relative; display: grid; grid-template-columns: var(--band1, 40%) calc(var(--band2, 60%) - var(--band1, 40%)) calc(100% - var(--band2, 60%)); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--faint); }
+.axis-track { position: relative; display: grid; grid-template-columns: var(--band1, 40%) calc(var(--band2, 60%) - var(--band1, 40%)) calc(var(--band3, 80%) - var(--band2, 60%)) calc(100% - var(--band3, 80%)); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--faint); }
 .axis-track .z { text-align: center; border-bottom: 2px solid; padding-bottom: 2px; }
-.axis-track .z1 { color: var(--good); } .axis-track .z2 { color: var(--warn); } .axis-track .z3 { color: var(--bad); }
+.axis-track .z1 { color: var(--good); } .axis-track .z2 { color: var(--warn); } .axis-track .z3 { color: var(--familiar); } .axis-track .z4 { color: var(--bad); }
 .axis-track .t0, .axis-track .t100 { position: absolute; top: 100%; margin-top: 3px; font-size: 10px; letter-spacing: .5px; }
 .axis-track .t0 { left: 0; } .axis-track .t100 { right: 0; }
 .brow { display: grid; grid-template-columns: 250px minmax(0, 1fr) 56px; gap: 0 10px; align-items: center; padding: 7px 10px; margin: 5px 0; border-radius: 0 6px 6px 0;
@@ -190,7 +191,7 @@ html { scroll-behavior: smooth; }
 .bl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
 .bl .n { color: var(--faint); font-size: 11px; font-style: normal; margin-left: 4px; }
 .track { position: relative; height: 14px; border-radius: 4px; overflow: hidden;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--good) 13%, transparent) 0 var(--band1, 40%), color-mix(in srgb, var(--warn) 13%, transparent) var(--band1, 40%) var(--band2, 60%), color-mix(in srgb, var(--bad) 11%, transparent) var(--band2, 60%) 100%); }
+  background: linear-gradient(90deg, color-mix(in srgb, var(--good) 13%, transparent) 0 var(--band1, 40%), color-mix(in srgb, var(--warn) 13%, transparent) var(--band1, 40%) var(--band2, 60%), color-mix(in srgb, var(--familiar) 12%, transparent) var(--band2, 60%) var(--band3, 80%), color-mix(in srgb, var(--bad) 13%, transparent) var(--band3, 80%) 100%); }
 .iqr { position: absolute; top: 3px; bottom: 3px; border-radius: 3px; background: color-mix(in srgb, var(--purple) 70%, transparent); }
 .brow.ref .iqr { background: color-mix(in srgb, var(--faint) 70%, transparent); }
 .brow.you .iqr { background: var(--gold); }
@@ -290,7 +291,7 @@ html { scroll-behavior: smooth; }
   .axis-track .z { font-size: 0; }   /* zone names move to the legend line below the axis */
   .axis-track .z .zt { display: none; }
   .axis-legend { display: block; margin: -4px 0 14px; text-align: center; font-size: 11px; letter-spacing: .5px; color: var(--faint); }
-  .axis-legend .l1 { color: var(--good); } .axis-legend .l2 { color: var(--warn); } .axis-legend .l3 { color: var(--bad); }
+  .axis-legend .l1 { color: var(--good); } .axis-legend .l2 { color: var(--warn); } .axis-legend .l3 { color: var(--familiar); } .axis-legend .l4 { color: var(--bad); }
 }
 
 /* 0.14: BBBScorer vs original comparison */
@@ -342,3 +343,9 @@ details.nerd summary .stag { letter-spacing: 1px; }
 .pop-body.placed { position: fixed; right: auto; max-height: calc(100vh - 24px); overflow: auto; }
 /* BBBScorer vs original: the numbers go on their own line under the heading */
 details.cmp summary .cmp-vals { display: block; margin-top: 2px; }
+
+/* "too short to tell": a stamp across the corner of the band tag */
+.band.stamped { position: relative; overflow: visible; margin-right: 26px; }
+.band .stamp { position: absolute; left: calc(100% - 18px); top: -13px; transform: rotate(12deg); padding: 1px 4px; text-align: center; border: 1.5px solid var(--dim);
+  border-radius: 3px; background: var(--panel); color: var(--dim); font: 800 8.5px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .8px;
+  white-space: nowrap; opacity: .92; pointer-events: auto; cursor: help; box-shadow: 0 1px 3px rgba(0,0,0,.15); }

@@ -39,15 +39,16 @@ const quantiles = v => { const s = [...v].sort((a, b) => a - b); return Array.fr
 // Headline numbers for the page and docs ("How it works", bands, AUC): band split and median per group, how well
 // the score separates the two groups (AUC), and how many AI cards score above the human 98th percentile.
 const med = s => s[Math.floor((s.length - 1) / 2)];
-const bandSplit = v => { const n = v.length || 1; const lo = v.filter(x => x < WB.original).length, hi = v.filter(x => x >= WB.common).length;
-  return [lo, n - lo - hi, hi].map(x => Math.round(100 * x / n)); };
+// four bands (0.8.2): Original-ish, Mixed, Familiar, Common; one decimal, since Common is about 0.5% of 2023 cards
+const bandSplit = v => { const n = v.length || 1; const c = [WB.original, WB.familiar, WB.common, Infinity].map((hi, i, a) => v.filter(x => x >= (i ? a[i - 1] : -Infinity) && x < hi).length);
+  return c.map(x => +(100 * x / n).toFixed(1)); };
 function auc(neg, pos) { // Mann-Whitney U / (n0 n1), ties count half
   const all = [...neg.map(x => [x, 0]), ...pos.map(x => [x, 1])].sort((a, b) => a[0] - b[0]);
   let r = 0, i = 0; while (i < all.length) { let j = i; while (j + 1 < all.length && all[j + 1][0] === all[i][0]) j++; const avg = (i + j + 2) / 2; for (let k = i; k <= j; k++) if (all[k][1]) r += avg; i = j + 1; }
   return (r - pos.length * (pos.length + 1) / 2) / (neg.length * pos.length); }
 const hs = human.map(r => r.score).sort((a, b) => a - b), as = ai.map(r => r.score).sort((a, b) => a - b);
 const fp2 = hs[Math.min(hs.length - 1, Math.floor(0.98 * hs.length))];
-const summary = { bands: [WB.original, WB.common],
+const summary = { bands: [WB.original, WB.familiar, WB.common],
   human: { n: hs.length, median: +med(hs).toFixed(1), split: bandSplit(hs) },
   ai: { n: as.length, median: +med(as).toFixed(1), split: bandSplit(as) },
   auc: +auc(hs, as).toFixed(3), at2pct: { threshold: +fp2.toFixed(1), aiCaught: Math.round(100 * as.filter(x => x > fp2).length / as.length) } };

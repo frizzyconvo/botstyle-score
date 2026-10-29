@@ -41,7 +41,10 @@ if (existsSync(EMPATH)) {
     pride: 'Proud', shame: 'Sheepish', optimism: 'Hopeful', zest: 'Zesty', suffering: 'Aching', disgust: 'Grossed out', surprise: 'Startled',
     contentment: 'Cozy', trust: 'Trusting', cheerfulness: 'Cheery', timidity: 'Shy', sympathy: 'Caring', irritability: 'Grumpy', envy: 'Envious', confusion: 'Bewildered' };
   const mood = { about: 'Mood read: Empath emotion lists (MIT, Fast et al. 2016) and 21 quantiles of each rate per 1,000 words over 2023 cards. tools/build_card_words.mjs', moods: {}, q: {} };
-  for (const [id, label] of Object.entries(MOODS)) if (cats[id]) mood.moods[id] = { label, words: cats[id] };
+  // Sexual words Empath files under other feelings ("moan", "orgasm" and "arouse" under contentment) stay only in Sultry,
+  // so explicit cards don't read as Cozy.
+  const SEXUAL = new Set(['moan', 'moans', 'moaning', 'moaned', 'orgasm', 'orgasms', 'arouse', 'aroused', 'arousal']);
+  for (const [id, label] of Object.entries(MOODS)) if (cats[id]) mood.moods[id] = { label, words: id === 'lust' ? cats[id] : cats[id].filter(w => !SEXUAL.has(w)) };
   setMoodData(mood);
   const per = Object.fromEntries(Object.keys(mood.moods).map(k => [k, []]));
   for (const t of cards) { const { rates } = moodRates(t); for (const k in per) per[k].push(rates[k].rate); }

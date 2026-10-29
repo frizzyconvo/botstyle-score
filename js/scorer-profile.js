@@ -1,6 +1,6 @@
 // scorer-profile.js - Which BBBScorer version's rules are active.
 //
-// The page, the tools and every stored score use the default (0.8.1). BBBScorer 0.9.1 is prepared but not
+// The page, the tools and every stored score use the default (0.8.2: 0.8.1's scores, four bands). BBBScorer 0.9.1 is prepared but not
 // switched on: tools can opt in (score_all.mjs --scorer 0.9.1, dev experiments) to test it before the rescore.
 // 0.9.0 is kept only to describe its one full run (eval/old/scores/v0.9.0): 0.9.1 = 0.9.0 + the card-mined lists, which
 // were added after that run had started. Any change to a prepared profile that moves scores gets a new number.
@@ -21,10 +21,11 @@
 //                   uses per 1,000 prose words. Tested with models and characters held out (eval/experiments/remine_eval.md).
 //   patternsOff / patternsOn  sentence patterns switched off / on (ids from js/ai-structures.js), from rechecking every
 //                   pattern on character cards instead of the stories they were picked on
-export const DEFAULT_SCORER = '0.8.1';
+export const DEFAULT_SCORER = '0.8.2';
 export const NEXT_SCORER = '0.9.1';
 export const PROFILES = {
   '0.8.1': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },
+  '0.8.2': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },   // same rules as 0.8.1; only the bands changed (four bands)
   '0.9.0': {
     plistParens: true, maxRepeat: 2.5, stripRpAsterisks: true,
     // Tested and left off (2026-10-28 sample): half of the 2023 compact cards also use phrase-length W++ / PList entries,

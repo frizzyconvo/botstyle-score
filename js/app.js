@@ -1,7 +1,7 @@
 // app.js - BB Botstyle Scorer page. Scores cards in the browser with js/score-card.js; nothing is
 // sent anywhere except card fetches (Chub/Botbooru) and, if switched on and chosen per card, the
 // public list (js/site-config.js PUBLIC_RUNS).
-import { scoreCard, loadAll, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, BAND_LABELS, BAND_TAGLINES } from './score-card.js';
+import { scoreCard, loadAll, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, BAND_LABELS, BAND_TAGLINES, SHORT_STAMP_WORDS } from './score-card.js';
 // The scorer version is part of the page title and the heading, so a tab, bookmark or screenshot says which scorer
 // made a score. Phones get the short name.
 const PHONE = window.matchMedia ? window.matchMedia('(max-width: 520px)') : { matches: false };
@@ -9,7 +9,9 @@ const setTitle = () => { document.title = `${PHONE.matches ? 'BBBScorer' : 'BB B
 setTitle(); if (PHONE.addEventListener) PHONE.addEventListener('change', setTitle);
 for (const el of document.querySelectorAll('.title-ver')) el.textContent = 'v' + SCORER_VERSION;
 // Band zones on the leaderboard axis follow the scorer's cut-offs (css/app.css reads these).
-document.documentElement.style.setProperty('--band1', WB.original + '%'); document.documentElement.style.setProperty('--band2', WB.common + '%');
+document.documentElement.style.setProperty('--band1', WB.original + '%'); document.documentElement.style.setProperty('--band2', WB.familiar + '%'); document.documentElement.style.setProperty('--band3', WB.common + '%');
+// Band from a stored score: saved and shared cards from before 0.8.2 stored three-band ids, so lists re-derive the band.
+const bandOfScore = (v, stored) => stored === 'na' ? 'na' : v < WB.original ? 'original' : v < WB.familiar ? 'mixed' : v < WB.common ? 'familiar' : 'common';
 import { parseCardText, parseCardPng } from './card-import.js';
 import { fetchCard, CARD_SOURCES } from './card-fetch.js';
 import { initPosTagger } from './pos-tagger.js';
@@ -281,7 +283,7 @@ function renderResult(r) {
   const meter = (label, v, tip) => `<div class="meter"><div class="fill" style="width:${Math.min(100, v * 100)}%"></div><span>${label}</span><b>${(v * 100).toFixed(0)}</b><div class="tip">${tip}</div></div>`;
   const pop = `<span class="pop" tabindex="0" aria-label="What this number means">i<span class="pop-body">`
     + (ref && ref.human_2023 && band.id !== 'na' ? `Higher than <b>${Math.round(ref.human_2023.percentile)}%</b> of ${esc(ref.human_2023.label)} (${ref.human_2023.n.toLocaleString()}) and <b>${Math.round(ref.ai_cards.percentile)}%</b> of ${esc(ref.ai_cards.label)} (${ref.ai_cards.n.toLocaleString()}).${ref.version && !SAME_SCORES_AS.includes(ref.version) ? ` <i>These comparison cards were scored with BBBScorer v${esc(ref.version)}, not v${esc(SCORER_VERSION)}, so the percentages are approximate until they're rescored.</i>` : ''}<br><br>` : '')
-    + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favored words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Bands:</b> ${BAND_LABELS.original} <i>(${BAND_TAGLINES.original.toLowerCase()})</i> under ${WB.original} · ${BAND_LABELS.mixed} <i>(${BAND_TAGLINES.mixed.toLowerCase()})</i> ${WB.original}–${WB.common} · ${BAND_LABELS.common} <i>(${BAND_TAGLINES.common.toLowerCase()})</i> ${WB.common}+</span></span>`;
+    + `100 = as AI-styled as the most AI-styled tenth of AI-written character cards. ${pct(W.words)}% AI-favored words, ${pct(W.phrases)}% phrases, ${pct(W.structures)}% sentence structures, prose only; em-dash overuse adds up to ${EMDASH_POINTS.max}, obvious chatbot leftovers 40 each. Range = ±1 standard error.<br><br><b>Bands:</b> ${BAND_LABELS.original} <i>(${BAND_TAGLINES.original.toLowerCase()})</i> under ${WB.original} · ${BAND_LABELS.mixed} <i>(${BAND_TAGLINES.mixed.toLowerCase()})</i> ${WB.original}–${WB.familiar} · ${BAND_LABELS.familiar} <i>(${BAND_TAGLINES.familiar.toLowerCase()})</i> ${WB.familiar}–${WB.common} · ${BAND_LABELS.common} <i>(${BAND_TAGLINES.common.toLowerCase()})</i> ${WB.common}+. Under ${SHORT_STAMP_WORDS} words of prose the band is stamped "too short to tell".</span></span>`;
   const used = fieldList(state.fields, state.alts);
   const orig = nerdStats(r.text);
   const short = band.id !== 'na' && st.totalWords < 350, starMark = short ? '<span class="star score-star" title="Bite-sized card: the score rests on few words, so treat it as rough">*</span>' : '';
@@ -294,7 +296,7 @@ function renderResult(r) {
     <div class="scored-line"><span class="k">Scored</span>${scoredF.join('') || '<span class="faint">nothing selected</span>'}</div>
     ${leftOut.length ? `<div class="scored-line faint small"><span class="k">Left out</span>${esc(leftOut.join(', '))} <span class="faint">(tick them above to include)</span></div>` : ''}</div>`;
   let L = `<div class="score-hero"><div><div class="score-num">${r.score.toFixed(1)}${starMark}</div><div class="score-sub">range ${r.low.toFixed(0)}–${r.high.toFixed(0)}</div>${orig ? `<div class="score-sub" title="Sam Paech's original slop-score formula on the same text (what Botbooru lists)">original slop score ${orig.upstream.toFixed(1)}</div>` : ''}</div>
-    <div class="score-meta"><span class="band ${band.id}">${esc(band.label || 'Low confidence')}</span>${band.tagline ? `<span class="band-tag">${esc(band.tagline)}</span>` : ''}${pop}
+    <div class="score-meta"><span class="band ${band.id}${band.short ? ' stamped' : ''}">${esc((band.label || 'Low confidence').replace(' (low confidence)', ''))}${band.short ? '<span class="stamp" title="Under ' + SHORT_STAMP_WORDS + ' words of prose: too few to go on. A short AI-written card usually scores low too.">too short<br>to tell</span>' : ''}</span>${band.tagline ? `<span class="band-tag">${esc(band.tagline)}</span>` : ''}${pop}
       ${r.archetype && r.archetype.size ? `<div class="arch"><span class="arch-size" title="${esc(r.archetype.size.note)}">${esc(r.archetype.size.label)}</span></div>` : ''}</div></div>
     ${meter('AI-favored words', r.components.words, `${r.rates.words.toFixed(0)} weighted hits per 1k prose words`)}
     ${meter('AI-favored phrases', r.components.phrases, `${r.rates.phrases.toFixed(1)} weighted bigram/trigram hits per 1k prose words`)}
@@ -459,16 +461,16 @@ const median = a => { const s = [...a].sort((x, y) => x - y); return s.length ? 
 function renderMine() {
   const list = store.all();
   $('mine').hidden = !list.length; if (!list.length) return;
-  const sc = list.map(x => x.score), bandOf = v => v < WB.original ? 'original' : v >= WB.common ? 'common' : 'mixed', bands = b => list.filter(x => bandOf(x.score) === b).length;
+  const sc = list.map(x => x.score), bands = b => list.filter(x => bandOfScore(x.score, x.band) === b).length;
   const mineByCreator = list.filter(x => x.creator);
   const vers = [...new Set(list.map(x => x.version))];
   $('mineSummary').innerHTML = `<div class="stat"><b>${list.length}</b><span>cards</span></div><div class="stat"><b>${median(sc).toFixed(1)}</b><span>median score</span></div>`
     + `<div class="stat"><b>${(sc.reduce((a, b) => a + b, 0) / sc.length).toFixed(1)}</b><span>average</span></div>`
-    + `<div class="stat"><b>${bands('original')} · ${bands('mixed')} · ${bands('common')}</b><span>${esc(BAND_LABELS.original)} · ${esc(BAND_LABELS.mixed.toLowerCase())} · ${esc(BAND_LABELS.common.toLowerCase())}</span></div>`
+    + `<div class="stat"><b>${bands('original')} · ${bands('mixed')} · ${bands('familiar')} · ${bands('common')}</b><span>${esc(BAND_LABELS.original)} · ${esc(BAND_LABELS.mixed.toLowerCase())} · ${esc(BAND_LABELS.familiar.toLowerCase())} · ${esc(BAND_LABELS.common.toLowerCase())}</span></div>`
     + (mineByCreator.length ? `<div class="stat"><b>${median(mineByCreator.map(x => x.score)).toFixed(1)}</b><span>median, cards you made (${mineByCreator.length})</span></div>` : '')
     + (vers.length > 1 ? `<div class="stat"><b>${vers.length}</b><span>BBBScorer versions mixed</span></div>` : '');
   $('mineList').innerHTML = [...list].reverse().map(x => `<div class="item"><span class="nm">${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}</span><span class="meta"><span class="band ${x.band}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[x.band] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse)}` : ''}</span>
+    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}</span><span class="meta"><span class="band ${bandOfScore(x.score, x.band)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(x.score, x.band)] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse)}` : ''}</span>
     <button class="x" type="button" data-key="${esc(x.key)}" title="Remove">✕</button></div>`).join('');
   $('mineList').querySelectorAll('button.x').forEach(b => b.addEventListener('click', () => { store.remove(b.dataset.key); renderMine(); renderBoard(); }));
 }
@@ -499,16 +501,16 @@ function renderBoard() {
   const styleInline = m => { const S = m.styles; if (!S || !(S.min && S.max) && !S.lazy) return '';
     return `<span class="bl-sub" title="Range: lowest to highest median across the request styles (lazy prompt aside). Lazy: the lazy-prompt median.">${S.min && S.max ? `<span class="nw">styles ${S.min.median.toFixed(0)}–${S.max.median.toFixed(0)}</span>` : ''}${S.min && S.max && S.lazy ? ' · ' : ''}${S.lazy ? `<span class="nw">lazy ${S.lazy.median.toFixed(0)}</span>` : ''}</span>`; };
   h += `<div class="group-label">AI models · cards written for this test</div>` + sorted(B.models.filter(big)).map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m))).join('');
+    `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m))).join('');
   // Card sets: dates (if any) go on a second line under the name.
-  const setDetail = r => `${r.n.toLocaleString()} cards${r.sub ? ` · ${esc(r.sub)}` : ''} · ${r.original}% ${BAND_LABELS.original}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`;
+  const setDetail = r => `${r.n.toLocaleString()} cards${r.sub ? ` · ${esc(r.sub)}` : ''} · ${r.original}% ${BAND_LABELS.original}, ${r.familiar ?? 0}% ${BAND_LABELS.familiar}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`;
   const setRow = (cls, r) => row(cls, r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1), setDetail(r), r.upstream, r.sub ? `<span class="bl-sub">${esc(r.sub)}</span>` : '');
   h += `<div class="group-label">Reference card sets</div>` + sorted(B.references).map(r => setRow('ref', r)).join('');
   // Just for fun, not ranked: models not made for writing cards, extra card sets of unknown origin, and failed models
   // (most of their cards failed the format checks, so what's left isn't a fair sample). Older data files call it "pending".
   const fun = B.fun || (B.pending || []).map(m => ({ kind: 'model', ...m }));
   const funModel = (cls, m, extra) => row(cls, m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)} · ${esc(m.why || '')}${m.failedShare != null ? ` (${m.failedShare}% of ${m.generated} generated cards failed)` : ''} · ${modeTxt(m)} · ${m.n} usable plain-request cards · ${m.original}% ${BAND_LABELS.original}, ${m.common}% ${BAND_LABELS.common}<br>${styleTxt(m)}`, m.upstream, extra);
+    `${esc(m.model)} · ${esc(m.why || '')}${m.failedShare != null ? ` (${m.failedShare}% of ${m.generated} generated cards failed)` : ''} · ${modeTxt(m)} · ${m.n} usable plain-request cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}<br>${styleTxt(m)}`, m.upstream, extra);
   const funRow = x => x.kind === 'set' ? setRow('ref fun', x)
     : x.kind === 'failed' ? funModel('failed', x, `<span class="bl-sub"><span class="fail-chip">failed</span>${x.failedShare != null ? ` ${x.failedShare}% of its cards` : ''}</span>`)
     : funModel('fun', x, styleInline(x));
@@ -532,7 +534,7 @@ async function loadPublic() {
     const runs = (list.runs || []).slice(-500).reverse(), groups = [], byLink = new Map();
     for (const x of runs) { const k = x.link ? x.link.replace(/[?#].*$/, '').replace(/\/$/, '') : null; if (k && byLink.has(k)) byLink.get(k).older.push(x); else { const g = { top: x, older: [] }; groups.push(g); if (k) byLink.set(k, g); } }
     const row = (x, sub = false) => `<div class="item${sub ? ' sub' : ''}"><span class="nm">${x.origin ? `<span class="src-tag">${esc(ORIGIN_LABEL[x.origin] || x.origin)}</span>` : ''}${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-      <span class="sc">${(+x.score).toFixed(1)}</span><span class="meta"><span class="band ${esc(x.band)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[x.band] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · by creator, AI ${aiLabel(x.aiUse)}` : ''}${sub && x.at ? ` · ${esc(String(x.at).slice(0, 10))}` : ''}</span><span></span></div>`;
+      <span class="sc">${(+x.score).toFixed(1)}</span><span class="meta"><span class="band ${esc(bandOfScore(+x.score, x.band))}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(+x.score, x.band)] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · by creator, AI ${aiLabel(x.aiUse)}` : ''}${sub && x.at ? ` · ${esc(String(x.at).slice(0, 10))}` : ''}</span><span></span></div>`;
     $('publicList').innerHTML = groups.slice(0, 300).map(g => row(g.top) + (g.older.length ? `<details class="older"><summary class="faint small">${g.older.length} earlier ${g.older.length > 1 ? 'entries' : 'entry'} for this link</summary>${g.older.map(x => row(x, true)).join('')}</details>` : '')).join('') || '<span class="faint small">Nothing shared yet.</span>';
   } catch { $('publicList').innerHTML = '<span class="faint small">The public list is unreachable right now.</span>'; }
 }

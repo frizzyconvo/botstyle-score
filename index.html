@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BB Botstyle Scorer v0.8.1</title>
+<title>BB Botstyle Scorer v0.8.2</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="A rough automated read on how much a character card's description and greetings lean on stock AI phrasing.">
 <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
@@ -25,7 +25,7 @@
   <header class="panel hero">
     <img class="hero-icon" src="assets/icon-256.png" alt="" width="128" height="128">
     <div class="hero-text">
-      <h1 class="title"><span class="t-long">BB Botstyle Scorer</span><span class="t-short">BBBScorer</span> <span class="title-ver">v0.8.1</span></h1>
+      <h1 class="title"><span class="t-long">BB Botstyle Scorer</span><span class="t-short">BBBScorer</span> <span class="title-ver">v0.8.2</span></h1>
       <p class="lede">A rough automated read on how much a character card's description and greeting(s) lean on stock phrasings and words of AI models. <em>It is not an AI detector, and it does not measure whether you used AI or how good your card is.</em></p>
       <p class="aside">But yes, you might just be the equivalent of a pulpy fantasy writer or steamy romance novelist.</p>
     </div>
@@ -82,8 +82,8 @@
   <section id="board" class="panel">
     <h2 class="section">Leaderboard</h2>
     <p class="faint small" id="boardNote"></p>
-    <div class="axis-row"><div></div><div class="axis-track"><span class="z z1" title="Meatbag adjacent">Original-ish<i class="zt">meatbag adjacent</i></span><span class="z z2" title="Mixed signals">Mixed<i class="zt">mixed signals</i></span><span class="z z3" title="Might just be slop">Common<i class="zt">might just be slop</i></span><span class="t0">0</span><span class="t100">100<span class="t100-long"> = most AI-styled</span></span></div><div></div></div>
-    <div class="axis-legend"><span class="l1">Original-ish</span> · <span class="l2">Mixed</span> · <span class="l3">Common</span></div>
+    <div class="axis-row"><div></div><div class="axis-track"><span class="z z1" title="Meatbag adjacent">Original-ish<i class="zt">meatbag adjacent</i></span><span class="z z2" title="Mixed signals">Mixed<i class="zt">mixed signals</i></span><span class="z z3" title="Rings a bell">Familiar<i class="zt">rings a bell</i></span><span class="z z4" title="Might just be slop">Common<i class="zt">might just be slop</i></span><span class="t0">0</span><span class="t100">100<span class="t100-long"> = most AI-styled</span></span></div><div></div></div>
+    <div class="axis-legend"><span class="l1">Original-ish</span> · <span class="l2">Mixed</span> · <span class="l3">Familiar</span> · <span class="l4">Common</span></div>
     <div id="boardRows"></div>
   </section>
 
@@ -104,7 +104,7 @@
     <p>Words, phrases and sentence habits that AI models use far more than human fiction writers ("a testament to", "the air was thick with", "a flicker of…", not-x-but-y). Each word and phrase is weighted by how much more often AI fiction uses it than human fiction. Only prose is scored: W++/PList blocks, key-value lists and pasted instructions are set aside.</p>
     <h3>The score</h3>
     <p>60% AI-favored words, 25% AI-favored phrases, 15% sentence structures, plus up to 10 points for heavy em-dash use and 40 per obvious chatbot leftover ("Certainly! Here is…", "I hope this helps!"). Each part is scaled so 100 means "as AI-styled as the most AI-styled tenth of AI-written character cards". The ⓘ next to a result says where it sits among real human and AI-written cards (with how many cards that comparison uses).</p>
-    <p><b>Bands:</b> <b>Original-ish</b> under 40, <b>Mixed</b> 40–60, <b>Common</b> 60+ (how common the card's phrasing is in AI writing). Each has a just-for-fun tagline: <i>meatbag adjacent</i>, <i>mixed signals</i>, <i>might just be slop</i>. They're set to keep false positives down. Cards from 2023 (<span id="howHumanN">108,129</span>: Korshuk, JanitorAI, Chub; mostly human, though some AI-written cards from that year are in there) split <span id="howHumanSplit">94 / 4 / 2</span>% across the three bands, median <span id="howHumanMed">12</span>. AI-written cards (<span id="howAiN">2,855</span>) split <span id="howAiSplit">43 / 28 / 29</span>%, median <span id="howAiMed">45</span>, so a low score doesn't clear anyone either. Separation (AUC): <span id="howAuc">0.86</span>; at a 2% false-positive rate on those 2023 cards it flags <span id="howCaught">29%</span> of AI cards. Numbers from the BBBScorer <span id="howRefVer">v0.8.1</span> run.</p>
+    <p><b>Bands:</b> <b>Original-ish</b> under 40, <b>Mixed</b> 40–60, <b>Familiar</b> 60–80, <b>Common</b> 80+ (how common the card's phrasing is in AI writing). Each has a just-for-fun tagline: <i>meatbag adjacent</i>, <i>mixed signals</i>, <i>rings a bell</i>, <i>might just be slop</i>. They're set to keep false positives down: about 2 in 100 cards from 2023 reach Familiar or Common, and about 1 in 200 reach Common. With under 250 words of prose the band gets a <i>too short to tell</i> stamp: short AI-written cards usually score low too. Cards from 2023 (<span id="howHumanN">108,129</span>: Korshuk, JanitorAI, Chub; mostly human, though some AI-written cards from that year are in there) split <span id="howHumanSplit">94 / 4 / 1.5 / 0.5</span>% across the four bands, median <span id="howHumanMed">12</span>. AI-written cards (<span id="howAiN">3,209</span>) split <span id="howAiSplit">44 / 27 / 20 / 9</span>%, median <span id="howAiMed">45</span>, so a low score doesn't clear anyone either. Separation (AUC): <span id="howAuc">0.86</span>; at a 2% false-positive rate on those 2023 cards it flags <span id="howCaught">29%</span> of AI cards. Numbers from the BBBScorer <span id="howRefVer">v0.8.2</span> run.</p>
     <p><b>Description and first message:</b> scored separately, then blended by length (each counts up to 400 words), so a long description can't hide the greeting. When both have 150+ words of prose and land 25+ points apart, the card is flagged as mixed, for example a hand-written description with an AI-written greeting.</p>
     <h3>Not an AI detector</h3>
     <p>It measures a house style, not authorship. A human who writes in that style scores high (pulp fantasy and romance share a lot of it), and a model told to avoid it can score low. It also says nothing about whether a card is good.</p>

@@ -5,7 +5,7 @@ Open work, and a short summary of where scoring changes stand.
 ## Scoring: next version and what's been tried
 
 **BBBScorer 0.9.1 is prepared but not switched on.** (0.9.1 is 0.9.0 plus the words and phrases mined from AI-written
-cards; adding them moved scores, so the number moved too.) The page and every stored score still use 0.8.1. The changes sit
+cards; adding them moved scores, so the number moved too.) The page and every stored score still use 0.8.2 (0.8.1's scores with four bands). The changes sit
 behind switches in `js/scorer-profile.js` and are used only when a tool asks for them
 (`node tools/score_all.mjs --scorer 0.9.1`). Before it goes live: a full rescore with 0.9.1, the length cut-offs
 rebuilt from that run (`node tools/build_length_bands.mjs`), the scale anchor checked, and the reference and
@@ -32,7 +32,7 @@ In 0.9.1:
 - **Paragraph evenness.** AI-written cards keep paragraphs close to the same length; 0.9.1 adds a few points for very
   even paragraphs and takes a few off for very uneven ones.
 
-**How 0.9.1 does on a sample** (23.5k cards from 2023, mostly human; 2.9k AI-written; half the 2023 cards set the
+**How 0.9.1 does on a sample** ("Common" here is the old 60+ band, now Familiar and Common together) (23.5k cards from 2023, mostly human; 2.9k AI-written; half the 2023 cards set the
 length cut-offs and the other half tests them):
 
 | | 0.8.1 | 0.9.1 |
@@ -57,6 +57,12 @@ human from AI writing on cards: "not X. not Y. just Z.", "as if" similes, RP bod
 clenched), zeugma, "-ing" sentence openers, trailing "-ing" clauses, three-adjective lists, repeated sentence openers,
 "quietly / deeply" adverbs (already covered by the word list) and sentence-length variety. Clipped fragments ("Not
 yet." "Mostly.") show promise in first-person greetings but need speech separated from narration first.
+
+**Band cut-offs: decide after the next data.** 0.8.2 splits the old Common band into Familiar (60–80) and Common
+(80+) and stamps cards under 250 prose words "too short to tell". Whether to keep one cut-off for every length (with
+the stamp as the warning) or switch to 0.9.1's cut-offs by length is decided after re-mining, more generated cards and
+more supplied examples. 0.9.1's top band is placed at max(80, the length range's 60-equivalent + 10) for now; check it
+on the full 0.9.1 run.
 
 Still open: a bigger re-mining once the generated cards cover more characters (each round so far reused a few dozen
 prompts), a stricter human baseline, AI-themed characters, and comparing scores by percentile instead of points in the run notes.
@@ -94,6 +100,10 @@ the convenience layer around them: the double-click batch scripts, the doc short
 
 ## Read-outs and labels
 
+- **Compare a card with the whole 2023 set:** the signature-words read compares single words, which mostly picks up
+  names and topic words. A topic model (NMF or LDA over 2023 cards, a small JSON in the browser) could say how
+  typical a card's mix of topics is; nearest-neighbor search (TF-IDF or MinHash) or a small embedding model would
+  need a much bigger index or model download. Not started.
 - **Old-school AI:** check it against cards from GPT-3.5 Turbo and GPT-4 (the models early-2023 AI cards most likely
   came from). It was tuned on 2024-era open models; Wikipedia's essay transitions ("Furthermore,", "Overall,") turned up
   only in 2023 cards, so they're listed but not counted until then.

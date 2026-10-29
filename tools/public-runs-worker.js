@@ -38,7 +38,7 @@ export default {
       id: crypto.randomUUID().slice(0, 8),
       origin: ['chub', 'bb', 'json', 'png', 'text', 'link'].includes(d.origin) ? d.origin : 'text',
       name: str(d.name, 120) || 'Card', link: /^https:\/\/(?:www\.)?(?:chub\.ai|characterhub\.org|botbooru\.com)\//.test(link) ? link : null,
-      score: Math.max(0, Math.min(100, Number(d.score) || 0)), band: ['original', 'mixed', 'common'].includes(d.band) ? d.band : 'na',
+      score: Math.max(0, Math.min(100, Number(d.score) || 0)), band: ['original', 'mixed', 'familiar', 'common'].includes(d.band) ? d.band : 'na',
       version: str(d.version, 20), fields: Array.isArray(d.fields) ? d.fields.slice(0, 8).map(f => str(f, 40)) : [],
       creator: !!d.creator, aiUse: d.creator && d.aiUse !== null && d.aiUse !== undefined ? Math.max(0, Math.min(100, Math.round(Number(d.aiUse) / 10) * 10)) : null,
       at: new Date().toISOString(),
