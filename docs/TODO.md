@@ -114,4 +114,4 @@ the convenience layer around them: the double-click batch scripts, the doc short
   point of view, size); hidden on the page until then.
 - **Contemporary cards:** AI-written romance and modern-setting cards rarely reach Common (the scored lists lean fantasy).
 - **Provenance set:** grow the set of cards with creator-stated (or confidently suspected) authorship, especially
-  partly AI-written ones, and note which parts AI wrote. It's the only test of AI-assisted cards; 18 cards so far.
+  partly AI-written ones, and note which parts AI wrote. It's the only test of AI-assisted cards; 25 cards so far.
