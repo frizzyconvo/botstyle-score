@@ -465,6 +465,13 @@ Checked against the upstream code (upstream's `slop-score.html` page and `data/l
   got human vs AI backwards. That test is part of why BBBScorer calls itself not an AI detector.
 - The ARB paper (arXiv 2607.29539): its finding that detectors fail on human text an AI has reworded led to the
   generator's rewrite mode.
+- AIStoryHub's Corpus of AI Clichés (MIT): 758 words, phrases, names and patterns, with the studies behind them
+  (Kobak et al., GPTZero's vocabulary study, Liang et al., Juzek & Ward, Wikipedia's "Signs of AI writing", Paech's
+  EQ-Bench lists). Checked against cards; most entries are essay and marketing tells that cards don't use, and a dozen
+  are candidates for the next word lists. Its sentence patterns come as descriptions; we wrote regexes for 52 of them. Its formatting entries led to the
+  strongest find: AI-written cards use `**bold**` labels and headings far more than 2023 cards in the same layout.
+  Details and the full source list: [docs/LISTS.md](docs/LISTS.md#outside-lists-checked-against-cards-not-used-in-scoring).
+- conorbronsdon/avoid-ai-writing (MIT): its detector, run on cards as a comparison (AUC 0.75 against BBBScorer's 0.86).
 - From upstream: the wordfreq port and the local part-of-speech tagger.
 
 **Tooling upstream doesn't have**: versioned scoring runs that resume where they stopped, with regression checks

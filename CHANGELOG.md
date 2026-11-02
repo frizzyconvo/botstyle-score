@@ -6,6 +6,16 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.28.2] - 2026-11-02 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Added
+- docs/LISTS.md: "Outside lists checked against cards". AIStoryHub's Corpus of AI Clichés (with the studies it cites)
+  and conorbronsdon/avoid-ai-writing's detector, tested on 2023 and AI-written cards: what separates on cards, what
+  leans human, and what never occurs. Both are credited in BOTSTYLE.md.
+- docs/TODO.md: bold used as labels and headings is a candidate signal for the next scorer.
+
 ## [0.28.1] - 2026-11-02 · BBBScorer 0.8.2
 
 Scores unchanged.

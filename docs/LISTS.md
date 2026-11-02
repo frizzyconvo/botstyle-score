@@ -77,6 +77,69 @@ uses, ratio 5+ (top 600); three-word phrases 5+ models, 10+ uses, ratio 5+ (312 
 phrases are dropped. Character names (capitalized mid-sentence 90%+ of the time) move to the unscored names list.
 Entries of two letters or fewer ("wi" from Wi-Fi, "ai") and the junk set in `JUNK` ("formica") are dropped.
 
+## Outside lists checked against cards (not used in scoring)
+
+Lists that came out after ours, tested the same way: how often each item shows up in 2023 cards (mostly human) against
+AI-written cards (the 0.9.x evaluation sample: 22,577 2023 cards and 2,821 AI cards with 100+ words). None of their
+items are copied into a scored list; candidates go into the next re-mining, where they get the usual held-out test.
+
+**AIStoryHub's Corpus of AI Clichés** (v1.7, 2026-07-15, MIT; github.com/AIStoryHub/AIStoryHub_LLM_Cliche_Corpus).
+758 entries (words and phrases, names, sentence patterns, rhetorical moves, formatting tells, chatbot tells), each with
+a 0–100 strength score and a red / orange / yellow tier. Entries with a measured source carry it. The corpus itself
+is partly compiled with AI help, so we cite the studies below as they appear in it, "via AIStoryHub", without having
+checked each one:
+
+| Source, as cited via AIStoryHub | Entries |
+|---|---|
+| EQ-Bench slop-score trigram list (Paech 2025), the same upstream as ours | 48 |
+| Wikipedia, "Signs of AI writing" / WikiProject AI Cleanup (2026) | 26 |
+| antislop-sampler over-representation list (Paech) | 22 |
+| Kobak et al. 2024 and 2025 (arXiv 2406.07016; *Science Advances*): word-frequency excess in 14M PubMed abstracts | 21 |
+| GPTZero AI Vocabulary study (2025, 3.3M documents) | 8 |
+| Liang et al. 2024 (arXiv 2403.07183) | 8 |
+| Juzek & Ward 2024 (arXiv 2412.11385); Juzek 2026 (arXiv 2605.25358) | 9 |
+| Ward et al. 2025 (arXiv 2508.01930) | 3 |
+| Zhang et al. 2025, model fingerprints (arXiv 2502.12150) | 2 |
+| Yakura et al. 2024 (arXiv 2409.01754) | 1 |
+| seehuhn.de (2026, a 100-prompt name test) | 5 |
+| Writing blogs and guides (blakestockton.com, alstonantony, useaiwriter.com, oliviacal, Momentic, a romance-genre blog) | 23 |
+| Ported from conorbronsdon/avoid-ai-writing (MIT) | 7 entries + its regexes |
+| No source (tiered by AIStoryHub's own judgment) | the rest |
+
+What held up on cards:
+- **Words, phrases and names** (581 entries that can be matched as text): 384 barely occur on cards (under 0.2% of
+  either set: marketing, business, email and academic vocabulary). 34 lean AI (3× or more, in 1%+ of AI cards); 22 of
+  those are already in our lists. 12 are new candidates ("the intersection of", curate, orchestrate, "more importantly",
+  timeless, "piercing blue eyes", Chen and five more). 14 red-tier entries lean *human* on cards (charming, "when it
+  comes to", enhance, immersive, utilize, showcase, unlock…), so the corpus can't be used wholesale.
+- **Sentence patterns, rhetorical moves, formatting tells** (113 entries, published as descriptions for checking by
+  an LLM). We wrote regexes or simple counts for 52 of them. The ones that separate on cards are rare: "Here's the
+  thing / kicker / truth" (0.3% of AI cards, 13×), "One thing was certain" (0.4%, 9×), unfilled placeholders like
+  "[Your Name]" (0.4%, 7×), anti-synthesis closers like "an unspoken understanding" (0.7%, 6×; already a pattern of
+  ours), "Let's be honest" / "Let me be clear" (0.3%, 4×). Several lean human on cards: "not only … but also",
+  "Little did she know", "a young woman named", anaphora and texts that stop mid-sentence. Essay and marketing
+  shapes ("In today's…", "Whether you're a…", "Stop X. Start Y.", "The result:") almost never occur on cards. The
+  rest (aphorism stacking, silver-lining reflex, symmetric development, elegant variation, frictionless thesis,
+  hallucinated references, register shifts) need a reader or an LLM and weren't attempted.
+- **Formatting:** bold is the clearest signal in either outside list. Three or more `**bold**` spans: 46% of AI cards
+  against 1.6% of 2023 cards, and on Chub 2.3% of 2023 cards against 12% of 2025 cards. It follows the layout (models
+  writing free prose rarely bold anything), so the fair comparison is within one format: formatted prose 3.3% of 2023
+  cards vs 81% of AI cards, lists 2.5% vs 59%, structured + prose 2.2% vs 67%, free prose 1.1% vs 3.5%. Our requests
+  ask for "sections" or "markdown bullet lists" and never mention bold: models choose `**Appearance:**` where people
+  wrote `Appearance:` or a `#` heading. AIStoryHub's "bolded-term bullet" entry (`- **Term:** …`) is the narrow
+  version (7.4% vs 0.16%). A candidate for the next scorer. Curly quotes
+  look strong (23% vs 0.7%) but depend on the model (most of OpenAI, Google and DeepSeek output; almost none from
+  Claude or Llama) and on where a card was typed (7.6% of Chub's 2023 cards already), so they're not used.
+- **Chatbot leftovers** missing from our check (citation markup such as `oaicite`, `utm_source=chatgpt.com`,
+  "Regenerate response"): 0 to 4 cards among about 195,000.
+
+**conorbronsdon/avoid-ai-writing** (MIT; github.com/conorbronsdon/avoid-ai-writing): a separate project, a rewriting
+skill with a regex and stylometric detector (`detector/patterns.js`). Run unchanged on the same cards, its overall score
+separates them with an AUC of 0.75 (BBBScorer 0.86). Its strongest card signals are bold phrases anywhere, headings and
+list labels included (43% of AI cards vs 1.3%; BBBScorer doesn't count bold, see the bolded-term bullets above), em
+dashes (46% vs 7%; counted), uniform paragraphs (5.9% vs 0.8%; added in 0.9.1) and "genuine" / "genuinely" (30% vs 7%;
+in our lists). Its transition and filler lists lean human on cards.
+
 ## Unscored (tallied and shown)
 
 | List | File | Entries | Built by | Shown as |

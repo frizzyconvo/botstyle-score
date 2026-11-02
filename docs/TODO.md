@@ -113,5 +113,8 @@ the convenience layer around them: the double-click batch scripts, the doc short
 - **Archetypes:** being redone from the axes that carry information and don't overlap (description format, greeting
   point of view, size); hidden on the page until then.
 - **Contemporary cards:** AI-written romance and modern-setting cards rarely reach Common (the scored lists lean fantasy).
+- **Bold as labels and headings** (`**Appearance:**`): in formatted-prose cards, 81% of AI-written ones use three or
+  more bold spans against 3.3% of 2023 cards (lists: 59% vs 2.5%). Lines like these aren't scored now, so this would
+  be the scorer's first formatting signal; test it in the next version, within each format. Smaller candidates from AIStoryHub's corpus are listed in docs/LISTS.md.
 - **Provenance set:** grow the set of cards with creator-stated (or confidently suspected) authorship, especially
   partly AI-written ones, and note which parts AI wrote. It's the only test of AI-assisted cards; 25 cards so far.
