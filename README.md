@@ -61,11 +61,12 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 | `docs/` | The docs index (`docs/README.md`), the list manifest (`docs/LISTS.md`), the to-do list (`docs/TODO.md`) and background notes (Foreverse's card-writing rubric). |
 | `upstream/` | Leftovers from slop-score kept for reference: its model outputs, prompts, benchmark and leaderboard scripts. |
 | `vendor/` | Bundled browser libraries (msgpack, part-of-speech tagger). |
+| `.github/` | GitHub Actions: tests on every push and pull request (`workflows/test.yml`), monthly Dependabot checks (`dependabot.yml`). |
 | `eval/`, `dev/` | Local only, not in git: datasets, scoring runs and dev scripts. |
 
 ## Development
 
-- **Tests:** `npm test`.
+- **Tests:** `npm test`. GitHub runs them on every push and pull request (Node 22).
 - **Doc shortcuts** (Windows): `npm run shortcuts` puts a shortcut to every doc, local-only ones included, in `docs/`.
 - **Score every dataset** with the current scorer (versioned, resumable, about 45 minutes):
   `npm run score-all`. Cards already scored by that scorer version are never scored again: datasets that already have a

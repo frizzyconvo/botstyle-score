@@ -51,7 +51,7 @@ function manifest(ref) {   // ref = null -> working tree
     // version heading from when app and scorer versions matched ("## 0.4.0 (date)")
     const hit = parts.find(p => new RegExp(`BBBScorer ${v}\\b`).test(p.split('\n')[0])) || parts.find(p => new RegExp(`^## \\[?${v}\\]?[ (]`).test(p) && !/scorer stays/i.test(p.split('\n')[0]));
     return hit ? hit.trim() : null; })();
-  const commit = ref ? tryGit('log', '-1', '--format=%h %ad %s', '--date=format:%Y-%m-%d %H:%M', ref) : `${tryGit('log', '-1', '--format=%h', 'HEAD')} + working tree${tryGit('status', '--porcelain', 'js', 'data') ? ' (uncommitted changes in js/ or data/)' : ''}`;
+  const commit = ref ? tryGit('log', '-1', '--format=%h %ad %s', '--date=format:%Y-%m-%d %H:%M', ref) : `${tryGit('log', '-1', '--format=%h', 'HEAD')} + working tree${tryGit('status', '--porcelain', '--untracked-files=no', 'js', 'data') ? ' (uncommitted changes in js/ or data/)' : ''}`;
   return {
     version, commit, sameScoresAs: m(sc, /SAME_SCORES_AS = (\[[^\]]*\])/),
     defaultFields: m(sc, /DEFAULT_FIELDS = (\[[^\]]*\])/) || "['description', 'personality', 'scenario', 'first_mes'] (always; no field option)",
@@ -88,7 +88,9 @@ function toMd(x) {
 const PROFILE = opt('--scorer') ? (await import('../js/scorer-profile.js')).PROFILES[opt('--scorer')] : null;
 function writeFor(version, ref) {
   const x = manifest(ref);
-  if (PROFILE && !ref) { x.version = opt('--scorer'); x.profile = PROFILE; x.bands = PROFILE.lengthBands ? 'by prose length (data/botstyle_length_bands.json)' : x.bands; }
+  if (PROFILE && !ref) { x.version = opt('--scorer'); x.profile = PROFILE; x.bands = PROFILE.lengthBands ? 'by prose length (data/botstyle_length_bands.json)' : x.bands;
+    const off = new Set(PROFILE.patternsOff || []), on = new Set(PROFILE.patternsOn || []);   // the profile's switches, not the code defaults
+    if (x.structures) for (const p of x.structures.patterns) p.off = on.has(p.id) ? false : off.has(p.id) ? true : p.off; }
   if (!x.version) { console.log(`  ${version}: could not read the scorer at ${ref}`); return; }
   const dir = runDir(x.version); mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'SCORER.md'), toMd(x)); writeFileSync(join(dir, 'scorer.json'), JSON.stringify(x, null, 1));

@@ -6,6 +6,18 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.27.1] - 2026-11-02 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Changed
+- README lists the `.github/` folder (tests on every push and pull request, monthly Dependabot checks).
+
+### Fixed
+- The scorer manifest (`SCORER.md` in each scoring run) showed a prepared version's sentence patterns as on when that
+  version switches them off (0.9.1 turns six off), and reported "uncommitted changes" when the only new files in `js/` or
+  `data/` were untracked.
+
 ## [0.27.0] - 2026-10-29 · BBBScorer 0.8.2
 
 Scores unchanged; band labels change, so the scorer number moves to 0.8.2. Saved and public cards show the new bands.
