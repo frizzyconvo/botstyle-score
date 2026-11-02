@@ -57,7 +57,7 @@ Paths are relative to the repo; the card sets and test sets sit in a folder next
 | Scale anchor | `node tools/calibrate_cards.mjs` |
 | Reference percentiles | `npm run reference` |
 | Length cut-offs (BBBScorer 0.9.0 and 0.9.1) | `node tools/build_length_bands.mjs` |
-| Card-mined words and phrases (BBBScorer 0.9.1) | `node tools/mine_card_lists.mjs --human-every 2` (generated cards in `eval/ai-cards/`, human cards from the evaluation sample) |
+| Card-mined words and phrases (BBBScorer 0.9.1) | `node tools/mine_card_lists.mjs --human-every 2` (generated plain, short and anti-AI cards in `eval/ai-cards/`, human cards from the evaluation sample) |
 | Format peers | `python3 tools/build_peers.py <scores.jsonl>... --before 2023-07` |
 
 ## Scored

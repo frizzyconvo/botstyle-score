@@ -448,7 +448,8 @@ Checked against the upstream code (upstream's `slop-score.html` page and `data/l
 - SPB-2602 (marcodsn): Kimi and GLM personas.
 - Foreverse's character-card-skills example cards: AI cards written to avoid AI flavor, used as hard cases.
 - Cards generated for this project by Claude, GPT, Gemini, Gemma, DeepSeek, Kimi, GLM, Llama, Mistral, TheDrummer,
-  Sao10k, Anthracite, Nous, MythoMax and others. The generator also has a rewrite mode: human cards an AI has reworded.
+  Sao10k, Anthracite, Nous, MythoMax and others. The generator also has a rewrite mode (human cards an AI has reworded)
+  and a short mode (the plain request plus a length limit, for AI cards at the lengths most human cards have).
   Requests are built from SFW 2023 cards (no characters described as children, no real people); later rounds rotate
   through about 750 of them so no single character dominates.
 

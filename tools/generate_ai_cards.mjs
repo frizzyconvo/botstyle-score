@@ -5,18 +5,20 @@
 //   fresh      from the *concept* of a real human card (name + creator note + tags only)
 //   antislop   the same concept, plus instructions not to sound like AI (three strengths)
 //   rewrite    the whole human card, handed to the model to polish / improve / expand
+//   short      the fresh request plus a length limit (two wordings), for AI cards at the lengths most human cards have
 //
-// Seeds are paired: every model gets the same seed for the same (format, k), fresh and
-// antislop share seeds, and rewrites keep the human original next to them, so comparisons
+// Seeds are paired: every model gets the same seed for the same (format, k), fresh,
+// antislop and short share seeds, and rewrites keep the human original next to them, so comparisons
 // can hold the character fixed.
 //
 // Usage:
 //   node tools/generate_ai_cards.mjs --models "m1,m2" [--seeds eval/inputs/seeds_jai_2023h1.jsonl]
-//        [--modes fresh,antislop,rewrite] [--formats free_prose,default] [--per-style 1]
+//        [--modes fresh,antislop,rewrite,short] [--formats free_prose,default] [--per-style 1]
 //        [--out eval/ai-cards/ai_cards_v2.jsonl] [--concurrency 3] [--max-tokens 6000]
 //        [--reasoning low] [--temperature 0.8] [--max-usd 2] [--dry-run] [--retry-invalid] [--no-retry]
 //
-//   --per-style   cards per (model, mode, format). Keep it at 1 until the prompts are settled.
+//   --per-style   cards per (model, mode, format): N different seeds (characters) per cell, k = 0..N-1. The format's
+//                 phrasings rotate with k too. With --rotate-seeds each round draws N new characters per cell.
 //   --dry-run     list the jobs and print one prompt per mode; no API calls.
 //   --max-usd     stop starting new jobs once OpenRouter's reported cost passes this.
 //   --reasoning   OpenRouter reasoning effort for thinking models (low keeps cost and the
@@ -116,6 +118,17 @@ const FORMATS = {
 };
 // antislop runs on the formats most AI-assisted cards use, to keep the matrix small
 const ANTISLOP_FORMATS = ['free_prose', 'formatted_prose', 'default'];
+
+// ---------------------------------------------------------------- short requests
+// Plain requests mostly come back at 300-900 words of prose from the stronger models (Gemini 3.8 Flash, GLM-5.3 Flash,
+// Claude: 0-2% under 250), so short AI cards came almost only from small models and list formats, while about a quarter
+// of 2023 cards are under 250 prose words. Two wordings: a number, and the way people usually say it. Not on by default
+// (--modes ...,short). Same seed as the fresh card of the same format, k and round, so length is the only change.
+const SHORT_FORMATS = ['free_prose', 'formatted_prose', 'default'];
+const SHORT = {
+  words: 'Keep it short: the description under 150 words and the first message under 80.',
+  casual: 'Nothing long, I just want a short simple bot.',
+};
 
 // ---------------------------------------------------------------- anti-slop instructions
 // Three strengths of "don't sound like AI", modeled on what people paste into prompts:
@@ -269,6 +282,7 @@ const rotPool = (existsSync(WIDE) ? readFileSync(WIDE, 'utf-8').split('\n').filt
 const pickRot = key => pickFrom(rotPool.length ? rotPool : seeds, key);
 
 const MODES = list(args.modes || 'fresh,antislop,rewrite');
+for (const m of MODES) if (!['fresh', 'antislop', 'rewrite', 'short'].includes(m)) { console.error(`unknown mode ${m}; known: fresh, antislop, rewrite, short`); process.exit(1); }
 const FMT = args.formats ? list(args.formats) : Object.keys(FORMATS);
 for (const f of FMT) if (!FORMATS[f]) { console.error(`unknown format ${f}; known: ${Object.keys(FORMATS).join(', ')}`); process.exit(1); }
 const plan = [];   // { mode, variant, format, k, seed, prompt }
@@ -280,6 +294,10 @@ for (let k = 0; k < PER; k++) {
   if (MODES.includes('antislop')) for (const f of FMT.filter(x => ANTISLOP_FORMATS.includes(x))) for (const [v, rules] of Object.entries(ANTISLOP)) {
     const seed = pick(`concept|${f}|${k}`);   // same seed as the fresh card of this format
     plan.push({ mode: 'antislop', variant: v, format: f, k, seed, prompt: fill(FORMATS[f][k % FORMATS[f].length], seed) + '\n\n' + rules + FORMAT_SUFFIX });
+  }
+  if (MODES.includes('short')) for (const f of FMT.filter(x => SHORT_FORMATS.includes(x))) for (const [v, rule] of Object.entries(SHORT)) {
+    const seed = pick(`concept|${f}|${k}`);   // same seed as the fresh card of this format
+    plan.push({ mode: 'short', variant: v, format: f, k, seed, prompt: fill(FORMATS[f][k % FORMATS[f].length], seed) + '\n\n' + rule + FORMAT_SUFFIX });
   }
   if (MODES.includes('rewrite')) for (const [v, req] of Object.entries(REWRITE)) {
     const seed = pick(`rewrite|${k}`);        // the three rewrite kinds share the human original
@@ -338,7 +356,7 @@ for (const model of (models.length ? models : ['(dry-run)'])) {
     if (round > 1 && (p.mode === 'rewrite' || args['rotate-seeds'])) {
       const seed = pickRot(`${p.mode === 'rewrite' ? 'rewrite' : 'concept|' + p.format}|${p.k}|r${round}`);
       const prompt = p.mode === 'rewrite' ? REWRITE[p.variant] + '\n\n' + cardText(seed) + FORMAT_SUFFIX
-        : fill(FORMATS[p.format][p.k % FORMATS[p.format].length], seed) + (p.mode === 'antislop' ? '\n\n' + ANTISLOP[p.variant] : '') + FORMAT_SUFFIX;
+        : fill(FORMATS[p.format][p.k % FORMATS[p.format].length], seed) + (p.mode === 'antislop' ? '\n\n' + ANTISLOP[p.variant] : p.mode === 'short' ? '\n\n' + SHORT[p.variant] : '') + FORMAT_SUFFIX;
       job = { ...p, seed, prompt };
     }
     if (!done.has(id)) jobs.push({ id, model, round, ...job });

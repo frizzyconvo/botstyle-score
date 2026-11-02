@@ -34,7 +34,7 @@ export function loadAiCards() {
   const bad = (() => { try { return new Set(JSON.parse(readFileSync(join(ROOT, 'eval/ai-cards/ai_cards_invalid_ids.json'), 'utf-8'))); } catch { return new Set(); } })();
   const v1 = readJsonl(join(ROOT, 'eval/ai-cards/ai_cards.jsonl')).filter(c => c.valid !== false && !bad.has(c.id)).map(c => ({ ...c, mode: c.mode || 'fresh', seed: c.seed_name }));
   const v2 = readJsonl(join(ROOT, 'eval/ai-cards/ai_cards_v2.jsonl')).filter(c => c.valid).map(c => ({ ...c, seed: c.seed_id || c.seed_name }));
-  return [...v1, ...v2].filter(c => (c.mode === 'fresh' || c.mode === 'antislop') && !nonDefault(c.id) && !FAILED[c.model]);
+  return [...v1, ...v2].filter(c => (c.mode === 'fresh' || c.mode === 'antislop' || c.mode === 'short') && !nonDefault(c.id) && !FAILED[c.model]);
 }
 // One card -> sets of items (words, two- and three-word phrases, the same tokens the scorer uses) + name-like casing.
 export function cardItems(c) {

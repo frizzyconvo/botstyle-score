@@ -6,6 +6,22 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.28.0] - 2026-11-02 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Added
+- A `short` mode in the card generator (`tools/generate_ai_cards.mjs --modes ...,short`): the plain request for free
+  prose, formatted prose or the lazy prompt, plus a length limit in one of two wordings ("under 150 words" and "nothing
+  long, a short simple bot"). It uses the same character as the plain card, so length is the only change. Plain
+  requests to the stronger models almost never come back under 250 words of prose, while about a quarter of 2023 cards
+  are that short.
+- The generator rejects unknown `--modes` names.
+
+### Changed
+- `--per-style N` is documented as N different characters per request cell (it rotates the request phrasings too).
+- Re-mining the card lists (`tools/mine_card_lists.mjs`) also reads short-request cards.
+
 ## [0.27.1] - 2026-11-02 · BBBScorer 0.8.2
 
 Scores unchanged.
