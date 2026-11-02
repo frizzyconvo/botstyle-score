@@ -9,7 +9,7 @@
   "engines": { "node": ">=18" },
   "type": "module",
   "dependencies": {
-    "@msgpack/msgpack": "^3.1.2",
+    "@msgpack/msgpack": "^3.1.3",
     "dotenv": "^17.2.3",
     "wink-pos-tagger": "^2.2.2"
   },
