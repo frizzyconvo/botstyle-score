@@ -57,6 +57,8 @@ for (const [m, rows] of Object.entries(models)) {
   else out.models.push(entry);
 }
 out.models.sort((a, b) => b.median - a.median);
+const DUPES = (() => { try { return new Set(readFileSync('eval/dedupe/matches.jsonl', 'utf-8').split('\n').filter(Boolean).map(l => JSON.parse(l).id)); } catch { return new Set(); } })();
+const fresh = name => load(name).filter(r => !DUPES.has(r.id));
 // [label, dates (shown on a second line; '' = none), rows]
 const refs = [
   ['Korshuk cards', 'Feb–Apr 2023', load('korshuk')],
@@ -64,6 +66,12 @@ const refs = [
   ['JanitorAI cards', 'Jul 2023–Feb 2024', load('jaicards').filter(r => String(r.createdAt || '') >= '2023-07')],
   ['Chub cards', 'before Jul 2023', load('raincandy_chub').filter(r => String(r.createdAt || '') < '2023-07')],
   ['Chub cards', '2025', load('raincandy_chub').filter(r => String(r.createdAt || '').startsWith('2025'))],
+  // Early-2023 collections (converted with tools/convert_cards.mjs; cards also found in an earlier set, per
+  // tools/dedupe_cards.mjs's eval/dedupe/matches.jsonl, are left out so no card counts twice)
+  ['Pygmalion Discord cards', 'to Apr 2023', fresh('pygmalion_discord')],
+  ["Roko's Basilisk Archive", 'Feb–Jul 2023', fresh('rokos_basilisk')],
+  ['VenusAI Discord cards', '2023', fresh('venusai')],
+  ['Chub archive (mega.nz)', 'to Jul 2023', fresh('chub_mega')],
   ['Perchance cards (SFW)', '2024–25', load('perchance')],
   ['SPB AI personas (Kimi, GLM)', '', load('spb_ai')],
   ['Foreverse (anti-slop AI cards)', '', load('foreverse_ai')],
@@ -71,7 +79,7 @@ const refs = [
 for (const [label, sub, rows] of refs) if (rows.length >= 5) out.references.push({ label, sub, kind: /\bAI\b/.test(label) ? 'ai' : 'human', ...stats(rows) });
 // Extra card sets scored with score_all --add: origin unknown (human, AI or both), so just for fun.
 const extraSets = [
-  ['Perchance cards (NSFW)', '2024–25', 'perchance-aicc-nsfw'],
+  ['Perchance cards (NSFW)', '2024–25', 'perchance_aicc_nsfw'],
   ["Someone's SillyTavern Archive", 'undated', 'cardnsfwjammy'],
 ];
 for (const [label, sub, name] of extraSets) { const rows = load(name); if (rows.length >= 5) out.fun.push({ kind: 'set', label, sub, ...stats(rows) }); }

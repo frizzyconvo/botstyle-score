@@ -10,7 +10,5 @@ export const FAILED = {
   'aion-labs/aion-rp-llama-3.1-8b': 'about 40% of its cards fail the format checks (no headers or no greeting)',
 };
 export const JUST_FOR_FUN = {
-  'thedrummer/unslopnemo-12b': 'tuned to strip stock phrasing from RP chat, not to write cards',
-  'mistralai/mistral-nemo': 'base model of UnslopNemo',
   'microsoft/phi-4': 'a small general model trained mostly on synthetic textbook-style data, not one people use for roleplay or card writing',
 };

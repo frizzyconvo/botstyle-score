@@ -6,6 +6,26 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.30.0] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Added
+- Four early-2023 card collections on the leaderboard as reference sets: the Pygmalion Discord server's cards (to
+  April 2023, median 7.5), Roko's Basilisk Archive (10.9), the VenusAI Discord server's cards (13.7) and a Chub
+  archive sorted by creator (to July 2023, 14.8). A card already in an earlier set counts once.
+- BOTSTYLE.md: the early-2023 collections as a second human test side (AUC 0.84, 1.7% at 60+), and CharacterHub.com
+  profiles as a description-only comparison.
+- `npm run results` marks description-only datasets (CharacterHub.com) and sizes its name column to the longest name.
+
+### Changed
+- Mistral Nemo and UnslopNemo are ranked on the leaderboard (they were under "Just for fun"). Phi-4 stays there.
+- Reference and leaderboard rebuilt with card generation round 5 and new DeepSeek cards: AI-written cards 4,175
+  (were 3,209), median 43.2; AUC 0.856 (was 0.862), 28% caught at a 2% false-positive rate (was 29%); the original
+  slop score 0.767 and 21%. The new cards include many hard ones on purpose (short requests, anti-AI rules, light rewrites).
+- The extra datasets made from the converted collections are named after them (pygmalion_discord, rokos_basilisk,
+  venusai, chub_mega, cardnsfwjammy, perchance_aicc_nsfw).
+
 ## [0.29.1] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged.

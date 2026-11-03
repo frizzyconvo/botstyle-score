@@ -139,10 +139,10 @@ card-field residue (`"first_mes": "…"`), unfilled placeholders ("[Insert name]
 
 | Score | Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
 |---|---|---|---|---|
-| under 40 | **Original-ish** | *Meatbag adjacent* | 94.2% | 43.7% |
-| 40–60 | **Mixed** | *Mixed signals* | 3.7% | 27.3% |
-| 60–80 | **Familiar** | *Rings a bell* | 1.5% | 20.1% |
-| 80 and up | **Common** | *Might just be slop* | 0.5% | 8.9% |
+| under 40 | **Original-ish** | *Meatbag adjacent* | 94.2% | 45.6% |
+| 40–60 | **Mixed** | *Mixed signals* | 3.7% | 26.3% |
+| 60–80 | **Familiar** | *Rings a bell* | 1.5% | 19.0% |
+| 80 and up | **Common** | *Might just be slop* | 0.5% | 9.1% |
 | (too short or not English) | **Low confidence** / no band | | | |
 
 The band names say how common the card's phrasing is in AI writing. The taglines are just for fun and shown next
@@ -153,7 +153,7 @@ to them. Familiar and Common split what used to be one "Common" band (60 and up)
 tag. Short cards give few chances for a hit, so their low scores say little (see [Limits](#limits)).
 
 The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,129
-(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 3,209, median 44.5.
+(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 4,175, median 43.2.
 
 **The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
 AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
@@ -338,8 +338,6 @@ cards** leaves those models out; card sets always show). Sort by BBBScorer media
 original slop-score median, or number of cards (**# cards**).
 
 **Just for fun, not ranked:**
-- UnslopNemo and its base, Mistral Nemo. UnslopNemo was tuned to strip stock phrasing from RP chat replies, not to
-  write cards, so ranking it here isn't fair.
 - Phi-4: a small general model trained mostly on synthetic, textbook-style data; people don't write cards with it.
 - Extra card sets of unknown origin (human, AI or both): Perchance cards (NSFW) and Someone's SillyTavern Archive
   (undated).
@@ -347,7 +345,8 @@ original slop-score median, or number of cards (**# cards**).
   usable rest isn't a fair sample. MythoMax (ignores the output format), Hermes 3 70B (loops until cut off) and
   Aion RP (about 40% of its cards fail). The card generator skips them unless told otherwise.
 
-**Reference card sets:** real card sets scored with the same version.
+**Reference card sets:** real card sets scored with the same version. Cards found in an earlier set (same text, or
+nearly) are counted once.
 
 | Set | Cards | Median | Original-ish | Familiar or Common |
 |---|---|---|---|---|
@@ -356,6 +355,10 @@ original slop-score median, or number of cards (**# cards**).
 | JanitorAI cards, Jul 2023–Feb 2024 | 97,042 | 12.2 | 94% | 2% |
 | Chub cards, before Jul 2023 | 1,582 | 18.2 | 88% | 3% |
 | Chub cards, 2025 | 680 | 33.5 | 61% | 15% |
+| Pygmalion Discord cards, to Apr 2023 | 412 | 7.5 | 97% | 1% |
+| Roko's Basilisk Archive, Feb–Jul 2023 | 229 | 10.9 | 98% | 1% |
+| VenusAI Discord cards, 2023 | 1,452 | 13.7 | 92% | 3% |
+| Chub archive (mega.nz), to Jul 2023 | 3,071 | 14.8 | 93% | 1% |
 | Perchance cards (SFW), 2024–25 (human and AI-assisted) | 424 | 36.5 | 55% | 20% |
 | SPB-2602 AI personas (Kimi, GLM) | 593 | 55.1 | 14% | 37% |
 | Foreverse anti-slop AI cards | 6 | 21.1 | 100% | 0% |
@@ -391,10 +394,16 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 from 2023 (mostly human) vs 3,209 AI-written | 0.76 | 0.86 |
+| Character cards: 108,129 from 2023 (mostly human) vs 4,175 AI-written | 0.77 | 0.86 |
 
-On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 29% of AI-written cards and the original
-slop score 20%.
+On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 28% of AI-written cards and the original
+slop score 21%. The AI side now includes many hard cards on purpose: short requests, "don't sound like AI" rules and
+light rewrites of human cards.
+
+**Early-2023 card collections as a second human side** (Pygmalion Discord to April 2023, Roko's Basilisk Archive,
+VenusAI Discord, a Chub archive to July 2023; 5,164 cards with enough prose, copies of other sets left out): AUC 0.84
+against the same AI cards, and 1.7% of them reach 60 (JanitorAI 2023: 2.0%). By length, 0.7-0.9% of their cards
+under 400 prose words reach 60, against 2.7% at 400-800 words and 5.2% over 800 (231 cards).
 
 **Cards of known provenance** (25 so far: creator-stated, plus a few suspected). All 4 hand-written cards land in
 Original-ish (7–23). All 9 cards their creators say were written with ChatGPT or DeepSeek land in Mixed, Familiar or Common (48–78).
@@ -440,7 +449,7 @@ Checked against the upstream code (upstream's `slop-score.html` page and `data/l
 | **Per format / per part** | One formula for everything | One set of lists, weights and calibration for every format and for both the description and the greeting. Format only picks the peer group shown in the read-out ("vs 2023 cards in the same format") |
 
 **Results on the shared test sets** (AUC, original → BBBScorer): SlopReview 0.930 → 0.977 (humans flagged above 25:
-9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.75 → 0.86.
+9.9% → 2.6%); Gutenberg antislop-DPO 0.973 → 0.996 (2.5% → 0.1%); character cards 0.77 → 0.86.
 
 ## Data and references
 
@@ -461,6 +470,11 @@ Checked against the upstream code (upstream's `slop-score.html` page and `data/l
 - raincandy-u Chub cards: dated 2023–2026, so they show the change over time. The 2023 ones are also generation
   seeds.
 - Perchance: a modern mixed set, not treated as human.
+- Early-2023 collections gathered by the project owner, converted to text and screened before use: the Pygmalion
+  Discord server's cards (to April 2023), Roko's Basilisk Archive (February and July 2023), the VenusAI Discord
+  server's cards, and a Chub archive sorted by creator (July 2023). The second human side for testing; none of their
+  cards were used to build or weight any list.
+- CharacterHub.com profiles: no greetings, so they're compared with card descriptions only.
 
 **AI cards**
 - SPB-2602 (marcodsn): Kimi and GLM personas.
