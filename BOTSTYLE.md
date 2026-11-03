@@ -405,10 +405,12 @@ VenusAI Discord, a Chub archive to July 2023; 5,164 cards with enough prose, cop
 against the same AI cards, and 1.7% of them reach 60 (JanitorAI 2023: 2.0%). By length, 0.7-0.9% of their cards
 under 400 prose words reach 60, against 2.7% at 400-800 words and 5.2% over 800 (231 cards).
 
-**Cards of known provenance** (49 so far: creator-stated, plus some suspected). Four of the 5 hand-written cards land
+**Cards of known provenance** (52 so far: creator-stated, plus some suspected). Four of the 5 hand-written cards land
 in Original-ish (7–23); the fifth, a dark-fantasy card whose creator says long roleplay with AI has shaped their
 writing, scores 46 (Mixed). All 11 cards their creators say were written with ChatGPT or DeepSeek land in Mixed,
-Familiar or Common (45–78), and a card its creator calls "AI slapped together" scores 81 (Common).
+Familiar or Common (45–78), and a card its creator calls "AI slapped together" scores 81 (Common). Recent Claude models are harder: a whole card
+by Claude Opus 4.6 scores 22 (Original-ish), and one by Claude Sonnet 4.5 scores 53, with its AI-written greeting (28)
+far below its description (77), so it is flagged as a mixed card.
 Of the 4 partly AI-written cards, the AI-edited one scores 50 (Mixed), but the two whose creators give 60% AI score 20 and
 31 and the 30% one 7: much of their AI-written profiles is lists and key-value lines, which aren't scored, and their
 hand-written greetings score low. Seven cards from one creator who says every card is written by AI from their idea,
