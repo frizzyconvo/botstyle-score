@@ -6,6 +6,14 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.32.4] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Changed
+- BOTSTYLE.md: the provenance set is 45 cards; one more card confirmed as written with ChatGPT, and a card with an
+  AI-written description that the mixed-card flag catches.
+
 ## [0.32.3] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged.
