@@ -289,9 +289,16 @@ export function splitZipPath(p) {
   const m = String(p).match(/^(.*?\.(?:zip|charx|7z|rar))(?:[\\/](.*))?$/i);
   return m && existsSync(m[1]) && statSync(m[1]).isFile() ? { zip: m[1], inner: m[2] || '', kind: extname(m[1]).toLowerCase().slice(1) } : null;
 }
+/** "C:\x\historical-2023\chub_mega.*.jsonl": a folder and a file pattern (no subfolders) -> { dir, rx }, or null. */
+export function splitDirGlob(p) {
+  const m = String(p).match(/^(.*)[\\/]([^\\/]*[*?][^\\/]*)$/);
+  if (!m || /[*?]/.test(m[1]) || !existsSync(m[1]) || !statSync(m[1]).isDirectory()) return null;
+  return { dir: m[1], rx: globRx(m[2]) };
+}
 /** What kind of source a path is (for messages), or null if it can't be read. */
 export function sourceKind(p) {
   const z = splitZipPath(p); if (z) return z.kind === 'charx' ? 'card file' : z.kind;
+  if (splitDirGlob(p)) return 'files matching a pattern';
   if (!existsSync(p)) return null;
   if (statSync(p).isDirectory()) return hasPerchance(p) ? 'perchance' : 'cards folder';
   return CARD_EXT.has(extOf(p)) || extOf(p).endsWith('.zst') ? 'card file' : null;
@@ -304,6 +311,11 @@ export function* readCards(p, opts = {}) {
     const rx = innerRx(z.inner);
     const files = (function* () { for (const f of sevenZipFiles(z.zip, opts, '')) { const rel = f.rel.replace(/^\/+/, ''); if (!rx || rx.test(rel)) yield { ...f, rel }; } })();
     yield* walk(files, opts, 1); return;
+  }
+  const g = splitDirGlob(p);
+  if (g) {
+    const files = (function* () { for (const f of dirFiles(g.dir, g.dir)) if (!f.rel.includes('/') && g.rx.test(f.rel)) yield f; })();
+    yield* walk(files, opts); return;
   }
   if (!existsSync(p)) throw new Error(`not found: ${p}`);
   if (statSync(p).isDirectory()) { if (hasPerchance(p)) yield* perchanceDir(p); else yield* walk(dirFiles(p, p), opts); return; }

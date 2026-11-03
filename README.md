@@ -81,7 +81,8 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
   with a row in its `provenance.csv` (provenance human / ai / mixed, confidence confirmed / suspected, AI share, which
   parts AI wrote, evidence). `npm run score-all -- --only provenance` scores them; see `tools/_provenance.mjs`.
 - **Score cards at any path** (a folder of cards, a Perchance characters folder, a .zip / .7z / .rar, optionally
-  with a folder or pattern inside it, or one card / .json / .jsonl / .jsonl.zst file): `npm run score-path -- "<path>" --name <short name>`
+  with a folder or pattern inside it, a folder plus a file pattern like `converted/pack.*.jsonl`, or one card /
+  .json / .jsonl / .jsonl.zst file): `npm run score-path -- "<path>" --name <short name>`
   (`--label ai|human|mixed|unknown`). Only scores are written, to `eval/scores/v<version>/<name>.jsonl` with a section
   in that run's `notes.md`; the path is remembered so later full runs score it again (`--extras` lists them).
 - **Card formats read** (by content, not file extension): PNG / WebP / JPEG cards (chara or ccv3 chunks, compressed

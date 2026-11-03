@@ -6,6 +6,14 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.29.1] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Added
+- Scoring any path also takes a folder plus a file pattern (for example `historical-2023/chub_mega.*.jsonl`), so the SFW,
+  NSFW and untagged files the converter writes for one collection can be scored as one dataset without moving them.
+
 ## [0.29.0] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged: samples of 2,152 stored rows (Korshuk, raincandy Chub, JanitorAI, generated) rescore identically,
