@@ -267,5 +267,69 @@ check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zB
   check('short cards get the stamp, long ones not', writingStyleBand(30, true, 'free_prose', { proseWords: 120 }).short === true && !writingStyleBand(30, true, 'free_prose', { proseWords: 600 }).short);
 }
 
+// card formats for the converter and score_all --add: PNG chunks (tEXt / zTXt / iTXt, base64 or raw, after IEND),
+// V1 / V2 / V3, Pygmalion, Agnai, Chub API, Character.AI, Perchance export, CharacterHub.com, arrays, JSONL, .zst,
+// sidecar details.txt, plain avatars skipped with a reason
+{
+  const { mkdtempSync, writeFileSync: wf, mkdirSync: md, rmSync } = await import('fs');
+  const { join } = await import('path');
+  const { tmpdir } = await import('os');
+  const { readCards } = await import('./_card_sources.mjs');
+  const { toIso, decodePayload } = await import('./_card_parse.mjs');
+  const crcT = (() => { const t = new Int32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c; } return t; })();
+  const crc = b => { let c = -1; for (const x of b) c = crcT[(c ^ x) & 255] ^ (c >>> 8); return (c ^ -1) >>> 0; };
+  const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type, 'latin1'), data]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([len, td, c]); };
+  const png = (extra = [], after = null) => Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', Buffer.from([0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0])), ...extra, chunk('IDAT', zlib.deflateSync(Buffer.alloc(5))), chunk('IEND', Buffer.alloc(0)), ...(after ? [after] : [])]);
+  const b64 = o => Buffer.from(JSON.stringify(o)).toString('base64');
+  const desc = w => `${w} is a lighthouse keeper on a cold northern coast who counts the ships and keeps a log of every storm.`;
+  const dir = mkdtempSync(join(tmpdir(), 'botstyle-fmt-'));
+  try {
+    const W = (n, b) => { md(join(dir, n, '..'), { recursive: true }); wf(join(dir, n), b); };
+    W('a/v1.png', png([chunk('tEXt', Buffer.concat([Buffer.from('chara\0'), Buffer.from(b64({ name: 'Ann', description: desc('Ann'), first_mes: 'Hello.', create_date: '2023-5-1 @14h 30m 12s 345ms' }))]))]));
+    W('a/v3.png', png([chunk('tEXt', Buffer.concat([Buffer.from('chara\0'), Buffer.from(b64({ name: 'Old', description: 'old v2 copy' }))])), chunk('tEXt', Buffer.concat([Buffer.from('ccv3\0'), Buffer.from(b64({ spec: 'chara_card_v3', data: { name: 'Bea', description: desc('Bea'), first_mes: 'Hi.', tags: ['NSFW', 'female'], creation_date: 1690000000 } }))]))]));
+    W('a/ztxt.png', png([chunk('zTXt', Buffer.concat([Buffer.from('chara\0\0'), zlib.deflateSync(Buffer.from(b64({ name: 'Cal', description: desc('Cal') })))]))]));
+    W('a/itxt.png', png([chunk('iTXt', Buffer.concat([Buffer.from('chara\0\x01\0\0\0'), zlib.deflateSync(Buffer.from(JSON.stringify({ spec: 'chara_card_v2', data: { name: 'Dee', description: desc('Dee'), first_mes: 'Yo.' } })))]))]));
+    W('a/trail.png', png([], Buffer.from('\n' + b64({ name: 'Eve', description: desc('Eve') }))));
+    W('a/avatar.png', png());
+    W('pyg/Elizabeth/Eli.json', Buffer.from(JSON.stringify({ char_name: 'Eli', char_persona: desc('Eli'), char_greeting: '*waves*', world_scenario: 'a pier' })));
+    W('pyg/Elizabeth/Eli.card.png', png());
+    W('pyg/Elizabeth/details.txt', Buffer.from('by Ares arenoso\ntags: roleplay, video game, female'));
+    W('b/agnai.json', Buffer.from(JSON.stringify({ kind: 'character', name: 'Fay', persona: { kind: 'wpp', attributes: { personality: ['shy', 'kind'], job: ['keeper'] } }, greeting: 'Oh.', scenario: '' })));
+    W('b/chub.json', Buffer.from(JSON.stringify({ node: { name: 'Gus', topics: ['SFW', 'male'], definition: { name: 'Gus', personality: desc('Gus'), first_message: 'Hey.', description: 'creator note' } } })));
+    W('b/cai.json', Buffer.from(JSON.stringify({ character: { name: 'Hal', title: 'a keeper', greeting: 'Evening.', definition: desc('Hal') } })));
+    W('b/perchance.json', Buffer.from(JSON.stringify({ addCharacter: { name: 'Ivy', roleInstruction: desc('Ivy') + '\n\nExample dialogue:\nIvy: hi', initialMessages: [{ author: 'ai', content: 'Welcome.' }] } })));
+    W('b/array.json', Buffer.from(JSON.stringify([{ name: 'Jo', description: desc('Jo') }, { name: 'Kit', description: desc('Kit') }])));
+    W('b/dupe.json', Buffer.from(JSON.stringify({ name: 'Jo', description: desc('Jo') })));
+    W('b/hub.jsonl', Buffer.from([{ slug: 'lee-1', created: '2023-02-01T00:00:00Z', is_nsfw: false, tags: ['oc'], info: { name: 'Lee', description: desc('Lee'), backstory: 'Born at sea.' } }, { slug: 'mo-2', info: { name: 'Mo', description: '' } }].map(x => JSON.stringify(x)).join('\n')));
+    if (typeof zlib.zstdCompressSync === 'function') W('b/packed.jsonl.zst', zlib.zstdCompressSync(Buffer.from(JSON.stringify({ name: 'Nia', description: desc('Nia') }) + '\n')));
+    W('b/notes.txt', Buffer.from('just a readme'));
+    const skips = [];
+    const cards = [...readCards(dir, { onSkip: (id, why) => skips.push(id + ': ' + why) })];
+    const by = Object.fromEntries(cards.map(c => [c.name, c]));
+    const want = ['Ann', 'Bea', 'Cal', 'Dee', 'Eve', 'Eli', 'Fay', 'Gus', 'Hal', 'Ivy', 'Jo', 'Kit', 'Lee', ...(typeof zlib.zstdCompressSync === 'function' ? ['Nia'] : [])];
+    check('card formats: every test card found', want.every(n => by[n]), want.filter(n => !by[n]).join() + ' | ' + cards.map(c => c.name).join());
+    check('card formats: ccv3 preferred over chara, spec v3, unix date', by.Bea && by.Bea.spec === 'v3' && by.Bea.createdAt.startsWith('2023-07') && by.Bea.tags.includes('NSFW'), by.Bea && JSON.stringify([by.Bea.spec, by.Bea.createdAt]));
+    check('card formats: TavernAI date string', by.Ann && by.Ann.createdAt === '2023-05-01T14:30:12.000Z', by.Ann && by.Ann.createdAt);
+    check('card formats: Pygmalion JSON + details.txt tags and creator', by.Eli && by.Eli.spec === 'pygmalion' && by.Eli.tags.includes('video game') && by.Eli.creator === 'Ares arenoso' && by.Eli.tagSource === 'sidecar' && by.Eli.scenario === 'a pier', by.Eli && JSON.stringify(by.Eli.tags));
+    check('card formats: Agnai persona, Chub API, Character.AI', by.Fay && /shy, kind/.test(by.Fay.description) && by.Gus && by.Gus.spec === 'chub_api' && by.Gus.description.startsWith('Gus is') && by.Gus.creator_notes === 'creator note' && by.Hal && by.Hal.first_mes === 'Evening.');
+    check('card formats: Perchance export cuts example dialogue', by.Ivy && !/Example dialogue/.test(by.Ivy.description) && by.Ivy.first_mes === 'Welcome.');
+    check('card formats: CharacterHub.com profile (backstory appended, slug id, flag)', by.Lee && /Born at sea/.test(by.Lee.description) && by.Lee.id === 'b/hub.jsonl#lee-1' && by.Lee.nsfwFlag === false);
+    check('card formats: avatar-only PNGs skipped with a reason', skips.some(s => /avatar\.png: no card data \(image only\)/.test(s)) && skips.some(s => /Eli\.card\.png/.test(s)), skips.join(' | '));
+    check('card formats: base64 of base64 and URL-safe base64', decodePayload(Buffer.from(b64({ a: 1 })).toString('base64')).a === 1 && decodePayload(b64({ a: '~~~?' }).replace(/\+/g, '-').replace(/\//g, '_')).a === '~~~?');
+    check('dates: seconds, ms, ISO; junk is null', toIso(1690000000).startsWith('2023') && toIso(1690000000000).startsWith('2023') && toIso('2024-01-02') === '2024-01-02T00:00:00.000Z' && toIso('soon') === null);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}
+
+// a long unbroken run (an embedded image) must not make scoring hang; sentence spans stay the same
+{
+  const { sentenceSpans } = await import('../js/utils.js');
+  const t = 'One. Two! Three ' + 'Q'.repeat(200000), t0 = Date.now(), sp = sentenceSpans(t);
+  check('sentence spans: a long unterminated tail is fast and stays one span', Date.now() - t0 < 1000 && sp.length === 3 && sp[1][1] === 9 && sp[2][0] === 9 && sp[2][1] === t.length, JSON.stringify(sp));
+  // base64-like (letters, digits, + and /), the shape of an embedded image; this took minutes before the fix
+  let blob = '', x = 7; for (let i = 0; i < 300000; i++) { x = (x * 1103515245 + 12345) & 0x7fffffff; blob += 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'[x % 64]; }
+  const t1 = Date.now(); scoreCard({ description: 'She keeps the lighthouse. <img src="data:image/png;base64,' + blob + '">', first_mes: 'Hello.' });
+  check('scoring a card with a 300,000-character embedded image takes under 10 s', Date.now() - t1 < 10000, Date.now() - t1);
+}
+
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

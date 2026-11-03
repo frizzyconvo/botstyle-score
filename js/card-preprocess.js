@@ -43,7 +43,7 @@ function isInstructionParagraph(s) {
 
 const STRUCTURED_LINE = [
   // W++ / Ali-style: Character("X") { Personality("a" + "b") }
-  { id: 'wpp', rx: /\w+\s*\(\s*["'][^"']*["']\s*(?:\+\s*["'][^"']*["']\s*)*\)|^\s*[\[{]\s*\w+\s*\(/ },
+  { id: 'wpp', rx: /(?<!\w)\w+\s*\(\s*["'][^"']*["']\s*(?:\+\s*["'][^"']*["']\s*)*\)|^\s*[\[{]\s*\w+\s*\(/ },
   // PList: [Name's personality: a, b, c; appearance: x, y]
   { id: 'plist', rx: /^\s*\[[^\]]{0,600}:[^\]]*,[^\]]*\]\s*$/ },
   // 0.9.0: the same wrapped in parentheses or braces, "([Name: …; personality: …])" (plistParens)

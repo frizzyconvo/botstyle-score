@@ -406,6 +406,17 @@ creator reports. Their prose is plain and modern, with none of the stock vocabul
 away from house style scores like a person, the same as the anti-slop cards above. Too few cards for rates yet; the set
 is growing.
 
+**Human writing from before AI tools** (a check on false positives outside the card sets the lists were built on):
+- Fanfiction excerpts (first 600 words), scored as a description-only card. FicWad stories from 2005 to 2021: 0% of
+  G to PG-13 stories and 0.1% of R / NC-17 stories reach 60 (BBBScorer 0.8.2; medians 6.8 and 8.3). PaperDemon
+  (mostly 2000s): 0.2%. FicWad stories from 2023 on: 5.6%, median 11.9. Prepared 0.9.1: 0% / 0.2% / 0.5%, and 7.0% for 2023 on.
+- CharacterHub.com character profiles (a site where writers keep profiles of their characters; no greetings), with
+  enough prose to score: 0.1% of 2022 profiles reach 60, then 1.5% in 2023, 5.0% in 2024 and 6.5% in 2025.
+  Profiles from 2022, before ChatGPT, rarely use the scored words: the median word of the main list appears about a seventh as
+  often per 1,000 words as in AI-written cards.
+The rise after 2022 in both is about the size you'd expect as AI-assisted writing spreads; the scores don't say which
+pieces those are.
+
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
 and Chub, 2023) against AI personas (SPB-2602) and cards generated for this project. The 2023 side includes some
@@ -437,6 +448,9 @@ Checked against the upstream code (upstream's `slop-score.html` page and `data/l
 - SlopReview (DrRiceIO7): Reddit WritingPrompts stories against stories from about 22 models. The main test set, but
   optimistic (its human side overlaps the human writing used to weight the lists).
 - Gutenberg antislop-DPO (sam-paech): the independent test.
+- FicWad and PaperDemon fanfiction archives (dated 2005-2024 and mostly 2000s): pre-AI human narrative for false-positive
+  checks and for checking which scored words human fanfiction uses.
+- CharacterHub.com profiles (2022-2025, about 174,000): human character descriptions from before and after ChatGPT.
 - Upstream's outputs from 22 models (`upstream/results/`).
 - Nitral-AI's slop-forensics profile of human Reddit writing, the human side of the weighting.
 

@@ -36,8 +36,11 @@ export function sentenceSpans(text) {
   const sentSplit = /[^.!?]*[.!?]/gs;
   let lastEnd = 0;
   let match;
+  // Only search up to the last . ! or ?: past it the regex can't match, and trying from every position of a long
+  // unterminated tail (an embedded file, a wall of text) took quadratic time. Same spans as before.
+  const head = text.slice(0, Math.max(text.lastIndexOf('.'), text.lastIndexOf('!'), text.lastIndexOf('?')) + 1);
 
-  while ((match = sentSplit.exec(text)) !== null) {
+  while ((match = sentSplit.exec(head)) !== null) {
     spans.push([match.index, match.index + match[0].length]);
     lastEnd = match.index + match[0].length;
   }

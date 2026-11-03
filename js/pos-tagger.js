@@ -96,10 +96,16 @@ const NOUN_TAGS = new Set(['NN', 'NNS', 'NNP', 'NNPS']);
 const ADJ_TAGS = new Set(['JJ', 'JJR', 'JJS']);
 const ADV_TAGS = new Set(['RB', 'RBR', 'RBS']);
 
+// wink's tokenizer tries an e-mail pattern from every position of a long unbroken run, which takes quadratic time: a
+// 300,000-character base64 image inside a story took minutes. Runs of 50,000+ non-space characters (no card scored so
+// far has one; the longest is about 30,000) are blanked with spaces of the same length, so offsets stay put.
+const LONG_RUN = /\S{50000,}/g;
+const guardLong = text => text.length < 50000 ? text : text.replace(LONG_RUN, m => ' '.repeat(m.length));
+
 export function tagWithPos(text, posType = 'verb') {
   if (!winkPOS) return text;
 
-  const tagged = winkPOS.tagSentence(text);
+  const tagged = winkPOS.tagSentence(guardLong(text));
   const result = [];
 
   for (const token of tagged) {
@@ -140,7 +146,7 @@ export function tagStreamWithOffsets(text, posType = 'verb') {
     return { stream: text, pieces: [[0, text.length, 0, text.length]] };
   }
 
-  const tagged = winkPOS.tagSentence(text);
+  const tagged = winkPOS.tagSentence(guardLong(text));
 
   if (!Array.isArray(tagged)) {
     console.error('❌ tagSentence did not return an array!', typeof tagged, tagged);

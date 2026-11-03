@@ -80,10 +80,22 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 - **Provenance set:** cards of known or suspected authorship go in `card-datasets/provenance-split-dataset/`, each
   with a row in its `provenance.csv` (provenance human / ai / mixed, confidence confirmed / suspected, AI share, which
   parts AI wrote, evidence). `npm run score-all -- --only provenance` scores them; see `tools/_provenance.mjs`.
-- **Score cards at any path** (a folder of card PNG/JSON files, a Perchance characters folder, a .zip, optionally
-  with a folder or pattern inside it, or one card file): `npm run score-path -- "<path>" --name <short name>`
+- **Score cards at any path** (a folder of cards, a Perchance characters folder, a .zip / .7z / .rar, optionally
+  with a folder or pattern inside it, or one card / .json / .jsonl / .jsonl.zst file): `npm run score-path -- "<path>" --name <short name>`
   (`--label ai|human|mixed|unknown`). Only scores are written, to `eval/scores/v<version>/<name>.jsonl` with a section
   in that run's `notes.md`; the path is remembered so later full runs score it again (`--extras` lists them).
+- **Card formats read** (by content, not file extension): PNG / WebP / JPEG cards (chara or ccv3 chunks, compressed
+  or not, base64 or raw JSON, data after the image end), Tavern V1 / V2 / V3, RisuAI .charx, Pygmalion, Agnai, Chub API,
+  Character.AI dumps, Perchance, CharacterHub.com profiles, JSON arrays and JSONL. A `details.txt` next to the cards
+  ("by X", "tags: a, b") supplies tags and creator. .7z and .rar need 7-Zip installed.
+- **Convert a pile of cards to plain-text JSONL** for auditing or searching (no images):
+  `node tools/convert_cards.mjs "<path>" --name <name> [--out <folder>]`. Cards with tag metadata are split into
+  `<name>.sfw.jsonl` and `<name>.nsfw.jsonl`, cards without into `<name>.untagged.jsonl` (`--estimate` splits those by
+  the NSFW word read-out); cards whose text or tags suggest a character under 18 together with sexual tags or words go
+  to `<name>.held.jsonl` for a person to review. Exact duplicates are written once, and `<name>.report.md` lists
+  what was read, skipped (and why), duplicated and tagged. `--author-dir 1` takes the creator from the first folder level.
+- **Find cards that already appear elsewhere:** `node tools/dedupe_cards.mjs <set> [<set> ...] [--against raincandy,jaicards]`
+  matches on normalized card text (exact) and simhash (near copies) and writes card ids only.
 - **Current results at a glance** (read-only, safe during a scoring or generation run): `npm run results`
   (`--quick` skips the big JanitorAI file): what's running, every dataset's median and bands, each AI model's
   BBBScorer and original medians, residual and cost per card, and the numbers the page shows.

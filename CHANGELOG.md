@@ -6,6 +6,41 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.29.0] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged: samples of 2,152 stored rows (Korshuk, raincandy Chub, JanitorAI, generated) rescore identically,
+and so does the stored card with the longest unbroken run of characters.
+
+### Added
+- `tools/convert_cards.mjs`: turns cards in any format into plain-text JSONL for auditing (no images), split by the
+  cards' tag metadata into SFW and NSFW files, with untagged cards in their own file (`--estimate` splits them by the
+  NSFW word read-out) and a held file for cards whose text or tags suggest a character under 18 together with sexual
+  tags or words. Exact duplicates are written once; every line carries a text hash and a simhash. A report lists what
+  was read, what was skipped and why, duplicates, near duplicates, tags, dates and the longest cards.
+- `tools/dedupe_cards.mjs`: which cards in one set already appear in others (JanitorAI, the raincandy Chub set, or any
+  path), matching normalized text exactly or by simhash, writing card ids only.
+- Card reading (`tools/_card_parse.mjs`) recognizes files by content, not extension: PNG text chunks of every kind
+  (tEXt, zTXt, compressed iTXt), base64 or raw JSON, card data after the image end, WebP / JPEG cards, Tavern V1 / V2 / V3,
+  RisuAI .charx, Pygmalion, Agnai, Chub API, Character.AI dumps, Perchance exports, CharacterHub.com profiles, JSON
+  arrays, JSONL and .zst. A `details.txt` next to the cards supplies tags and creator, and Perchance's `manifest.json`
+  supplies its rating and categories. Dates in Unix seconds, milliseconds, ISO and TavernAI's "2023-5-1 @14h 30m" form.
+- Scoring any path (`npm run score-path`) also takes .7z and .rar archives (with 7-Zip installed), .jsonl.zst files,
+  and archives inside folders.
+- README: the formats read, the converter and the duplicate finder. BOTSTYLE.md: false-positive checks on pre-AI human
+  writing (FicWad and PaperDemon fanfiction, CharacterHub.com profiles by year) and those datasets under Data and references.
+- Tests for the card formats and for long unbroken runs (145 checks).
+
+### Fixed
+- A text with a very long unbroken run of characters (a 300,000-character embedded image in a story) took minutes to
+  score. Sentence splitting now stops at the last sentence end, and the W++ checks only try a match at the start of a
+  word (both give the same results as before). Runs of 50,000+ non-space characters are blanked before part-of-speech
+  tagging; no card scored so far has a run that long (the longest is about 30,000). A 300,000-character inline image
+  now scores in about a second.
+- JSONL cards with their text under other keys (CharacterHub.com's `info.description`) were read as empty cards.
+- JSON files holding an array of cards, or a card under a wrapper key (Chub API, Character.AI, Perchance exports), weren't
+  read; PNGs that only hold an avatar (Pygmalion's .card.png) are now skipped with a reason instead of silently.
+- An extra dataset's path inside the project's parent folder is found from another machine that mounts the same folder.
+
 ## [0.28.2] - 2026-11-02 · BBBScorer 0.8.2
 
 Scores unchanged.

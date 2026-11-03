@@ -14,7 +14,8 @@
 //   node tools/score_all.mjs --only generated_v2   # score only that dataset's new cards (what generate_ai_cards.mjs
 //                                            # runs after a generation round; --new is accepted and is the default)
 //   node tools/score_all.mjs --add "C:\cards\pack.zip\books\*.png" --name jammy_books [--label ai|human|mixed|unknown]
-//                                            # score cards at any path (folder, Perchance folder, .zip, card file) as an
+//                                            # score cards at any path (folder, Perchance folder, .zip / .7z / .rar,
+//                                            # card PNG / JSON / JSONL / .jsonl.zst file) as an
 //                                            # extra dataset; only scores are written (eval/scores/v<ver>/<name>.jsonl),
 //                                            # never card text. The path is remembered in eval/extra-datasets.json, so
 //                                            # later full runs (new scorer versions) score it again. See tools/_card_sources.mjs.
@@ -206,8 +207,8 @@ if (opt('--remove-extra')) {
 }
 if (opt('--add')) {
   const path = resolve(opt('--add').replace(/^"|"$/g, '')), kind = sourceKind(path);
-  if (!kind) { console.log(`Can't read cards at ${path}: give a folder, a Perchance characters folder, a .zip (optionally with a folder or *.png after it) or a .png/.json/.jsonl file.`); dropLock(); process.exit(2); }
-  const auto = path.replace(/[\\/]\*.*$/, '').split(/[\\/]/).filter(Boolean).slice(-1)[0].replace(/\.zip$/i, '');
+  if (!kind) { console.log(`Can't read cards at ${path}: give a folder, a Perchance characters folder, a .zip / .7z / .rar (optionally with a folder or *.png after it) or a .png / .json / .jsonl / .jsonl.zst file.`); dropLock(); process.exit(2); }
+  const auto = path.replace(/[\\/]\*.*$/, '').split(/[\\/]/).filter(Boolean).slice(-1)[0].replace(/\.(?:zip|7z|rar|charx|zst|jsonl|json)$/gi, '').replace(/\.(?:jsonl|json)$/i, '');
   const name = String(opt('--name') || auto).toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'extra';
   if (DATASETS.some(d => d.name === name)) { console.log(`"${name}" is a built-in dataset name; pick another --name.`); dropLock(); process.exit(2); }
   const label = ['ai', 'human', 'mixed', 'unknown'].includes(opt('--label')) ? opt('--label') : 'unknown';
@@ -216,7 +217,14 @@ if (opt('--add')) {
   if (!prev) { extras.push({ name, path, label, kind, added: new Date().toISOString() }); saveExtras(); console.log(`Added extra dataset "${name}" (${kind}, label ${label}): ${path}`); }
   ONLY = [name];
 }
-for (const x of extras) DATASETS.push({ name: x.name, label: x.label, extra: true, source: x.path, rows: () => readCards(x.path) });
+// An extra's path is stored as given (usually a Windows path). Run from another machine that sees the same claudeslop
+// folder (a mounted copy), a path inside claudeslop is looked up relative to this repo's parent folder instead.
+const localPath = p => {
+  if (existsSync(String(p).replace(/[\\/]\*.*$/, '').replace(/(\.(?:zip|7z|rar|charx))[\\/].*$/i, '$1'))) return p;
+  const m = String(p).match(/[\\/]claudeslop[\\/](.+)$/i);
+  return m ? join(ROOT, '..', ...m[1].split(/[\\/]/)) : p;
+};
+for (const x of extras) DATASETS.push({ name: x.name, label: x.label, extra: true, source: localPath(x.path), rows: () => readCards(localPath(x.path)) });
 
 // notes.md: per dataset, how BBBScorer and the original compare (spread, agreement, disparities, examples).
 const NOTES = join(OUT, 'notes.md');

@@ -11,7 +11,9 @@ const wc = s => (String(s || '').match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).lengt
 
 // ---- definition format detectors: each returns the number of words in that format ----
 const FORMAT_RX = {
-  wpp: /\w+\s*\(\s*"[^"]*"(?:\s*\+\s*"[^"]*")+\s*\)|\[\s*character\s*\(\s*"/gi,
+  // (?<!\w): a match can only start at a word's start anyway; without it a long unbroken run was retried from every
+  // letter (quadratic). Same matches.
+  wpp: /(?<!\w)\w+\s*\(\s*"[^"]*"(?:\s*\+\s*"[^"]*")+\s*\)|\[\s*character\s*\(\s*"/gi,
   plist: /\[[^\[\]\n]{0,40}(?:'s)?\s*(?:personality|appearance|body|clothes|clothing|likes|dislikes|traits?|features)\s*:\s*[^\]]+\]/gi,
   json: /^\s*[{[]?\s*"[\w ]{1,30}"\s*:\s*["{[\d]/gm,
   yaml: /^\s{0,4}[\w][\w ]{0,25}:\s*(?:\n\s{2,}-\s|\[)/gm,
