@@ -6,6 +6,22 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.32.0] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Added
+- An AI hold-out set, `generated_holdout`: cards from 31 models in families the card lists were never mined from
+  (Qwen, MiniMax, Nemotron, StepFun, MiMo, Seed, Solar, Ling, Nova, Granite, LFM, Mercury, Command, LongCat, Inkling,
+  Grok, Palmyra, Meta Muse), written about characters no other generated card uses. `score_all` scores it like the
+  other generated sets; list mining never reads it.
+- `tools/build_seeds_holdout.mjs`: picks the unused characters for the hold-out.
+- `HOLDOUT` and `FAMILY()` in `tools/_model_groups.mjs`: hold-out models (with how close each is to a mined family),
+  and each model's base family (fine-tunes count as their base) for leave-one-family-out tests.
+
+### Changed
+- `mine_card_lists.mjs` skips hold-out models even if their cards land in another file.
+
 ## [0.31.0] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged (the page still uses 0.8.2).

@@ -442,7 +442,7 @@ if (Object.keys(skipped).length) console.log('  skipped this round: ' + Object.e
 // live scorer, and with the prepared next one too when it has a scoring run (eval/scores/v<NEXT_SCORER>/), so both
 // versions always cover the same cards. Only cards not yet in each version's file are scored.
 // score_all refuses to start while another scoring run is active (exit code 3), so they never collide.
-const DATASET_FOR = { 'ai_cards_v2.jsonl': 'generated_v2', 'ai_cards.jsonl': 'generated_v1' };
+const DATASET_FOR = { 'ai_cards_v2.jsonl': 'generated_v2', 'ai_cards.jsonl': 'generated_v1', 'ai_cards_holdout.jsonl': 'generated_holdout' };
 const dsName = DATASET_FOR[OUT.replace(/\\/g, '/').split('/').pop()];
 if (n > 0 && !args['no-score'] && dsName) {
   const { spawnSync } = await import('child_process');

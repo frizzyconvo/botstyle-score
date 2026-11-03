@@ -75,6 +75,10 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
   the page uses with `npm run leaderboard` and `npm run reference`.
 - **Next scorer version (0.9.3, prepared, not live):** `npm run score-all -- --scorer 0.9.3` scores into its own folder (tidying `eval/` leaves it alone);
   what it changes and how it tested is in [docs/TODO.md](docs/TODO.md).
+- **AI hold-out cards:** `generated_holdout` holds cards from model families the card lists were never mined from,
+  written about characters no other generated card uses (`node tools/build_seeds_holdout.mjs` picks them). They are a
+  test set only: list mining skips them (`HOLDOUT` in `tools/_model_groups.mjs`, which also maps each model to its base
+  family for leave-one-family-out tests).
 - **Score only new cards** in a dataset (what the card generator runs after each round, for the live scorer and the prepared next one): `npm run score-all --
   --only generated_v2`. Cards already scored by this scorer version keep their rows.
 - **Provenance set:** cards of known or suspected authorship go in `card-datasets/provenance-split-dataset/`, each

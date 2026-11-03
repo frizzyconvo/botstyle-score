@@ -21,9 +21,12 @@ export const PATHS = {
   aiCardsV1: cards('ai_cards.jsonl'),
   aiCardsV1Invalid: cards('ai_cards_invalid_ids.json'),
   aiCardsV2: cards('ai_cards_v2.jsonl'),
+  // AI hold-out: model families never used to mine lists, characters never used in generation (never mined, test only)
+  aiCardsHoldout: cards('ai_cards_holdout.jsonl'),
   // other inputs: generation seeds, flattened/cut test sets
   seeds: first(E('inputs', 'seeds_jai_2023h1.jsonl'), E('seeds_jai_2023h1.jsonl')),
   seedsWide: E('inputs', 'seeds_wide.jsonl'),
+  seedsHoldout: E('inputs', 'seeds_holdout.jsonl'),   // seeds_wide characters no generated card has used (tools/build_seeds_holdout.mjs)
   gutenberg600: first(E('inputs', 'gutenberg_eval_600w.jsonl'), E('gutenberg_eval_600w.jsonl')),
   // experiments (eval_cards.mjs, phrase_check.mjs)
   sample: first(E('experiments', 'eval_sample.jsonl'), E('eval_sample.jsonl')),

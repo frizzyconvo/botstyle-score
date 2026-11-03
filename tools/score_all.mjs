@@ -122,7 +122,7 @@ function* jsonlStream(p) {   // reads in 4 MB chunks, so the ~1 GB JanitorAI cac
 // creator would tag a card they had written with AI. Tags only feed read-outs (genre, card type), never the score.
 let SEED_TAGS = null;
 function* withSeedTags(rows) {
-  if (!SEED_TAGS) { SEED_TAGS = new Map(); for (const f of [PATHS.seeds, PATHS.seedsWide]) if (f && existsSync(f)) for (const l of readFileSync(f, 'utf-8').split('\n')) { try { const r = l && JSON.parse(l); if (r && r.id != null && r.tags) SEED_TAGS.set(String(r.id), r.tags); } catch { /* skip */ } } }
+  if (!SEED_TAGS) { SEED_TAGS = new Map(); for (const f of [PATHS.seeds, PATHS.seedsWide, PATHS.seedsHoldout]) if (f && existsSync(f)) for (const l of readFileSync(f, 'utf-8').split('\n')) { try { const r = l && JSON.parse(l); if (r && r.id != null && r.tags) SEED_TAGS.set(String(r.id), r.tags); } catch { /* skip */ } } }
   for (const r of rows) yield r.tags || r.seed_tags || !r.seed_id ? { ...r, tags: r.tags || r.seed_tags } : { ...r, tags: SEED_TAGS.get(String(r.seed_id)) };
 }
 const tagsOf = t => Array.isArray(t) ? t : typeof t === 'string' ? (t.match(/[^\[\]",']+/g) || []).map(x => x.trim()).filter(Boolean) : [];
@@ -188,6 +188,8 @@ const DATASETS = [
   { name: 'generated_v1', label: 'ai', rows: () => withSeedTags(jsonlStream(PATHS.aiCardsV1)), need: PATHS.aiCardsV1,
     skip: (() => { try { return new Set(JSON.parse(readFileSync(PATHS.aiCardsV1Invalid, 'utf-8'))); } catch { return new Set(); } })() },
   { name: 'generated_v2', label: 'ai', rows: () => withSeedTags(jsonlStream(PATHS.aiCardsV2)), need: PATHS.aiCardsV2 },
+  // AI hold-out (dev\generate-cards-holdout.cmd): unmined model families, unused characters. A test set only: never mined.
+  { name: 'generated_holdout', label: 'ai', rows: () => withSeedTags(jsonlStream(PATHS.aiCardsHoldout)), need: PATHS.aiCardsHoldout },
   { name: 'jaicards', label: 'human', rows: null },
   // Cards of known or suspected provenance (tools/_provenance.mjs): label per card from provenance.csv.
   { name: 'provenance', label: r => r.prov ? r.prov.provenance : 'unknown', rows: () => provenanceCards(), need: join(PROVENANCE_DIR, 'provenance.csv') },   // filled in below (needs the cache)

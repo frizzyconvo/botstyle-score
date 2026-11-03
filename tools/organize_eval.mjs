@@ -77,7 +77,7 @@ if (!DRY && current && process.platform === 'win32') {
 }
 
 // 6. README
-const EXPECTED = ['korshuk', 'raincandy_chub', 'perchance', 'spb_ai', 'example_cards', 'foreverse_ai', 'generated_v1', 'generated_v2', 'jaicards'];
+const EXPECTED = ['korshuk', 'raincandy_chub', 'perchance', 'spb_ai', 'example_cards', 'foreverse_ai', 'generated_v1', 'generated_v2', 'generated_holdout', 'jaicards'];
 const runRows = runDirs().map(({ version: v, dir }) => {
   const have = existsSync(dir) ? readdirSync(dir).filter(f => f.endsWith('.jsonl') && f !== 'run-log.jsonl').map(f => f.replace(/\.jsonl$/, '')) : [];
   const missing = EXPECTED.filter(x => !have.includes(x)), has = f => existsSync(join(dir, f)) ? 'yes' : 'no';
