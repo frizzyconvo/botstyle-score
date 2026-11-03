@@ -1,12 +1,28 @@
 {
   "name": "botstyle-score",
-  "version": "0.32.6",
-  "private": true,
+  "version": "0.33.0",
   "description": "BB Botstyle Scorer: a character-card pseudo-fork of slop-score that reads how much a card leans on stock AI phrasing",
+  "keywords": [
+    "character-cards",
+    "ai-writing",
+    "slop",
+    "sillytavern",
+    "roleplay",
+    "text-analysis"
+  ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frizzyconvo/botstyle-score.git"
+  },
   "homepage": "https://frizzyconvo.github.io/botstyle-score/",
-  "repository": { "type": "git", "url": "https://github.com/frizzyconvo/botstyle-score.git" },
-  "engines": { "node": ">=18" },
+  "bugs": {
+    "url": "https://github.com/frizzyconvo/botstyle-score/issues"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3",

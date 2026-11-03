@@ -1,0 +1,21 @@
+name: Bug report
+description: Something on the page or in a tool doesn't work.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The BBBScorer version in the page title, or the app version from package.json for tools.
+  - type: input
+    id: where
+    attributes:
+      label: Browser or system
+      description: e.g. Firefox on Android, Chrome on Windows, Node 22 on Linux.

@@ -6,6 +6,17 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.33.0] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Added
+- CONTRIBUTING.md: how to report a card the scorer got wrong, how to run the project, and the rules for changes.
+- SECURITY.md: private reporting through GitHub, and what is in scope.
+- Issue forms: "Card scored wrong" (link, score, how the card was written and how you know) and a bug report; a pull
+  request checklist.
+- `.editorconfig`; `bugs` and `keywords` in `package.json`; a tests badge in the README.
+
 ## [0.32.6] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged.

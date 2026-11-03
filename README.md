@@ -1,5 +1,7 @@
 # BB Botstyle Scorer
 
+[![Tests](https://github.com/frizzyconvo/botstyle-score/actions/workflows/test.yml/badge.svg)](https://github.com/frizzyconvo/botstyle-score/actions/workflows/test.yml)
+
 A rough automated read on how much a character card's description and greeting(s) lean on the stock words,
 phrases and sentence habits of AI models, scored 0–100 by **BBBScorer**. It is not an AI detector, and it doesn't
 measure whether you used AI or how good a card is.
@@ -20,6 +22,7 @@ cards instead of stretching each measure between 22 models and a human baseline.
 - **What changed in each version:** [CHANGELOG.md](CHANGELOG.md)
 - **Every word and pattern list, how it's built and how it has changed:** [docs/LISTS.md](docs/LISTS.md)
 - **Every other doc, and what each one is for:** [docs/README.md](docs/README.md)
+- **A card scored wrong, or want to help:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Use it
 
@@ -61,7 +64,7 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 | `docs/` | The docs index (`docs/README.md`), the list manifest (`docs/LISTS.md`), the to-do list (`docs/TODO.md`) and background notes (Foreverse's card-writing rubric). |
 | `upstream/` | Leftovers from slop-score kept for reference: its model outputs, prompts, benchmark and leaderboard scripts. |
 | `vendor/` | Bundled browser libraries (msgpack, part-of-speech tagger). |
-| `.github/` | GitHub Actions: tests on every push and pull request (`workflows/test.yml`), monthly Dependabot checks (`dependabot.yml`). |
+| `.github/` | GitHub Actions: tests on every push and pull request (`workflows/test.yml`), monthly Dependabot checks (`dependabot.yml`), issue forms (score report, bug report) and the pull request checklist. |
 | `eval/`, `dev/` | Local only, not in git: datasets, scoring runs and dev scripts. |
 
 ## Development

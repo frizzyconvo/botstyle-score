@@ -1,0 +1,43 @@
+name: Card scored wrong
+description: A card the scorer rated too high or too low, ideally with how it was written.
+labels: ["score report"]
+body:
+  - type: input
+    id: link
+    attributes:
+      label: Card link
+      description: Chub, Botbooru, JanitorAI or another public page. Please don't paste private cards.
+    validations:
+      required: true
+  - type: input
+    id: score
+    attributes:
+      label: Score and scorer version
+      description: The score shown and the BBBScorer version in the page title, e.g. "46.7, BBBScorer 0.8.2".
+    validations:
+      required: true
+  - type: dropdown
+    id: how
+    attributes:
+      label: How was the card written?
+      options:
+        - By hand, no AI
+        - By hand, AI only for feedback or editing
+        - Partly AI (some fields or the greeting)
+        - AI from the creator's notes or outline
+        - Entirely AI
+        - Don't know
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: How do you know?
+      description: e.g. "I wrote it", "the creator notes say it was written with ChatGPT" (quote it if you can), or "a guess".
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Which part seems off (description, greeting), the model used, the format.

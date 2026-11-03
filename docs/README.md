@@ -12,6 +12,8 @@ Every doc in the repository and what it's for.
 | [docs/FOREVERSE_NOTES.md](FOREVERSE_NOTES.md) | English summary of Foreverse's character-card-skills (card-writing rubric, blind human-vs-AI test). |
 | [upstream/README.md](../upstream/README.md) | What is kept from slop-score in `upstream/` and which tools still read it. |
 | [upstream/WORDFREQ_PORT.md](../upstream/WORDFREQ_PORT.md) | Notes on upstream's JavaScript port of wordfreq. |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | How to report a card the scorer got wrong, run the project, and the rules for changes (changelog, versions, docs). |
+| [SECURITY.md](../SECURITY.md) | How to report a security problem privately, and what is in scope. |
 | [LICENSE](../LICENSE) | MIT license. |
 | [NOTICE.md](../NOTICE.md) | Licenses of bundled third-party parts (wordfreq, word-list, vendor libraries). |
 
