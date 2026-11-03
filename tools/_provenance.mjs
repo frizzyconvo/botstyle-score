@@ -12,6 +12,8 @@
 //   source        where it came from (Botbooru, JanitorAI via datacat, own card…)
 //   link          the card's page
 //   evidence      why the label is what it is (creator note, tag, timeline…)
+//   workflow      how the card was made, when known (notes or outline given to AI, AI greetings on a hand-written card,
+//                 W++ converted to prose by AI, AI draft heavily edited…)
 //
 // Cards in the folder with no manifest row are scored as provenance "unknown" and listed by --check.
 //   node tools/_provenance.mjs [--check]   prints the manifest as read, and cards missing from it
@@ -55,7 +57,7 @@ export function* provenanceCards(dir = PROVENANCE_DIR) {
     if (!card) continue;
     const provenance = PROVENANCE.includes(m.provenance) ? m.provenance : 'unknown';
     yield { ...card, id: 'prov/' + file, prov: { provenance, confidence: CONFIDENCE.includes(m.confidence) ? m.confidence : null,
-      aiShare: m.ai_share === '' || m.ai_share == null || isNaN(+m.ai_share) ? null : +m.ai_share, aiParts: m.ai_parts || null, model: m.model || null, source: m.source || null } };
+      aiShare: m.ai_share === '' || m.ai_share == null || isNaN(+m.ai_share) ? null : +m.ai_share, aiParts: m.ai_parts || null, model: m.model || null, source: m.source || null, workflow: m.workflow || null } };
   }
 }
 

@@ -405,15 +405,19 @@ VenusAI Discord, a Chub archive to July 2023; 5,164 cards with enough prose, cop
 against the same AI cards, and 1.7% of them reach 60 (JanitorAI 2023: 2.0%). By length, 0.7-0.9% of their cards
 under 400 prose words reach 60, against 2.7% at 400-800 words and 5.2% over 800 (231 cards).
 
-**Cards of known provenance** (25 so far: creator-stated, plus a few suspected). All 4 hand-written cards land in
+**Cards of known provenance** (30 so far: creator-stated, plus a few suspected). All 4 hand-written cards land in
 Original-ish (7–23). All 9 cards their creators say were written with ChatGPT or DeepSeek land in Mixed, Familiar or Common (48–78).
 Of the 4 partly AI-written cards, the AI-edited one scores 50 (Mixed), but the two whose creators give 60% AI score 20 and
 31 and the 30% one 7: much of their AI-written profiles is lists and key-value lines, which aren't scored, and their
 hand-written greetings score low. Seven cards from one creator who says every card is written by AI from their idea,
-outline and writing direction score 19–61 (median 25), and five of the seven land in Original-ish, about the share the
+outline and writing direction score 19–61 (median 31), and five of the seven land in Original-ish, about the share the
 creator reports. Their prose is plain and modern, with none of the stock vocabulary the lists look for: a model steered
-away from house style scores like a person, the same as the anti-slop cards above. Too few cards for rates yet; the set
-is growing.
+away from house style scores like a person, the same as the anti-slop cards above. Five cards from another creator who
+says how AI helped on each (AI-written greetings on a hand-written card, a W++ card converted to prose with Claude and
+then corrected, an AI draft edited heavily) score 11–46: four land in Original-ish, and the one with an AI-written
+greeting and light AI editing in Mixed (46). Where AI wrote the greetings, the greetings alone score 6–46, mostly below
+the descriptions, so an AI greeting on an otherwise hand-written card usually isn't flagged. Too few cards for rates
+yet; the set is growing.
 
 **Human writing from before AI tools** (a check on false positives outside the card sets the lists were built on):
 - Fanfiction excerpts (first 600 words), scored as a description-only card. FicWad stories from 2005 to 2021: 0% of
