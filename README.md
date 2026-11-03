@@ -6,7 +6,7 @@ A rough automated read on how much a character card's description and greeting(s
 phrases and sentence habits of AI models, scored 0–100 by **BBBScorer**. It is not an AI detector, and it doesn't
 measure whether you used AI or how good a card is.
 
-Made by [frizzy_conversation_93532](https://botbooru.com/profile/78685). A pseudo-fork of
+Made by [frizzy_conversation_93532](https://botbooru.com/profile/78685). Derived from
 [slop-score](https://github.com/sam-paech/slop-score) by Sam Paech: it started from that code and keeps its MIT
 license, but no longer tracks upstream (word lists, scoring, card handling and the leaderboard are rebuilt for
 character cards).

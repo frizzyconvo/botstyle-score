@@ -6,6 +6,14 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.33.2] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Changed
+- The README, the page and `package.json` describe the project as derived from slop-score (it is not a GitHub fork
+  and no longer tracks upstream).
+
 ## [0.33.1] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged.
