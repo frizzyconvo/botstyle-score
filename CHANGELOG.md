@@ -6,6 +6,17 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.33.1] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged.
+
+### Changed
+- docs/TODO.md is now a roadmap: the next scorer version with current test results and a release checklist, what was
+  tested and not adopted, and planned work. Stale figures removed.
+- BOTSTYLE.md: the next-version paragraph uses test results on cards from model families never used to build the
+  lists (the earlier figure came mostly from one persona set that overstated the bold-label gain).
+- Docs written in a neutral project voice (no "we" / "our"; list history reasons rewritten).
+
 ## [0.33.0] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged.

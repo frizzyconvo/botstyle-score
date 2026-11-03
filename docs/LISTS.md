@@ -12,38 +12,38 @@ checked for "same lists or not" without diffing.
 
 Four kinds of source, kept apart so each can be redone or replaced on its own terms:
 
-1. **Built by us from data** (rerunnable: same inputs + builder = same list). Rebuild commands are below.
-2. **Taken from someone else's list, as published** (we don't regenerate these; we can only update to a newer copy).
-3. **From papers and research** (findings we tested; nothing is copied into a list unless it passed our own test).
+1. **Built from data by this project** (rerunnable: same inputs + builder = same list). Rebuild commands are below.
+2. **Taken from someone else's list, as published** (not regenerated here; only updated to a newer copy).
+3. **From papers and research** (findings tested on cards; nothing is copied into a list unless it passes that test).
 4. **Community lists and anecdotes** (hand-made lists, forum and Discord lore, user feedback): ideas only, used after
    they pass the same human-vs-AI test, and labeled as such.
 
 | List or pattern set | Kind | Source | Used how |
 |---|---|---|---|
 | AI-favored words, two- and three-word phrases | 1 | AI side: upstream slop-score's outputs from 22 models (creative prompts). Human side: Nitral-AI's slop-forensics profile of Reddit WritingPrompts stories | Scored |
-| Card-mined words and phrases (0.9.1) | 1 | Our generated character cards (37 models, every model counted equally) against half of a 2023 card sample; items tied to one character's premise filtered out | Scored in 0.9.0 (extra points) |
+| Card-mined words and phrases (0.9.1) | 1 | The project's generated character cards (37 models, every model counted equally) against half of a 2023 card sample; items tied to one character's premise filtered out | Scored in 0.9.0 (extra points) |
 | Sentence patterns marked "candidate" | 1 + 4 | Regex candidates written for this project (`tools/mine_structures.py`), some suggested by CharGen's phrase examples; kept only if they separated human from AI text on SlopReview **and** Gutenberg | Scored |
 | Sentence patterns marked "SloppySeconds" | 4 | pixelnull's SloppySeconds community list; kept only if they passed the same test | Scored |
 | Sentence patterns marked "cards" | 1 | Written for character cards; backed by AI card sets only (provisional weights) | Scored |
 | RP-reply tells | 2 | TheDrummer's UnslopNemo target list | Off |
 | AI-favorite names | 1 | Candidates from the same 22-model outputs, kept only if a second, independent set confirms them (SlopReview, SPB-2602 vs 2023 cards, Gutenberg rewrites) | Unscored |
-| Shared clichés | 1 + 4 | Entries our builder dropped from the scored lists because human writers use them too, plus SloppySeconds patterns that failed the test | Unscored |
+| Shared clichés | 1 + 4 | Entries the list builder dropped from the scored lists because human writers use them too, plus SloppySeconds patterns that failed the test | Unscored |
 | RP slop | 2 | TheDrummer's UnslopNemo target list, unchanged | Unscored |
-| Pulp words | 1 | Our card sets: scored words human genre cards use as often as AI cards | Unscored read-out |
-| Old-school AI items | 3 + 1 | Wikipedia's "Signs of AI writing" guide plus stock character-sheet lines, each checked against 2023 cards and our generated cards; only those older models use 2.5×+ as often as 2023 cards count | Unscored read-out |
+| Pulp words | 1 | The card sets: scored words human genre cards use as often as AI cards | Unscored read-out |
+| Old-school AI items | 3 + 1 | Wikipedia's "Signs of AI writing" guide plus stock character-sheet lines, each checked against 2023 cards and the generated cards; only those older models use 2.5×+ as often as 2023 cards count | Unscored read-out |
 | Mood words | 2 | Empath's emotion categories (Fast et al. 2016, MIT), as published; only the 2023-card percentiles are ours | Unscored read-out |
 | Card word frequencies | 1 | How many of 22,577 cards from 2023 use each word (`tools/build_card_words.mjs`) | Signature words read-out |
 | Sexual-content words | 1 | Written for this tool; checked by hand against JanitorAI cards with and without the NSFW flag | Unscored read-out |
-| Scale anchor, reference, format peers, length cut-offs | 1 | Our scoring runs over the card sets (length cut-offs: provisional, from a sample) | Calibration |
+| Scale anchor, reference, format peers, length cut-offs | 1 | Scoring runs over the card sets (length cut-offs: provisional, from a sample) | Calibration |
 | Original slop-score lists | 2 | sam-paech/slop-score, unchanged | The original score only |
 | Typo dictionary | 2 | word-list (MIT) | Typo read-out |
 | "Don't sound like AI" rules in the card generator | 4 | Written for this tool, modeled on humanizer lists (avoid-ai-writing), Sukino's banned tokens, character-card-skills and SloppySeconds | Generating test cards only |
 
-Research we tested but don't copy lists from: StoryScope (discourse features of AI fiction; its surface-checkable
+Research tested but not copied into lists: StoryScope (discourse features of AI fiction; its surface-checkable
 findings were rechecked on cards), the ARB paper (why the generator has a rewrite mode), the Antislop paper (the method
 behind slop-forensics and auto-antislop), Wikipedia's "Signs of AI writing" and tropes.fyi (via the unslop skills).
 
-### Rebuilding the lists we build
+### Rebuilding the built lists
 
 Paths are relative to the repo; the card sets and test sets sit in a folder next to it.
 
@@ -86,7 +86,7 @@ items are copied into a scored list; candidates go into the next re-mining, wher
 **AIStoryHub's Corpus of AI Clichés** (v1.7, 2026-07-15, MIT; github.com/AIStoryHub/AIStoryHub_LLM_Cliche_Corpus).
 758 entries (words and phrases, names, sentence patterns, rhetorical moves, formatting tells, chatbot tells), each with
 a 0–100 strength score and a red / orange / yellow tier. Entries with a measured source carry it. The corpus itself
-is partly compiled with AI help, so we cite the studies below as they appear in it, "via AIStoryHub", without having
+is partly compiled with AI help, so the studies below are cited as they appear in it, "via AIStoryHub", without having
 checked each one:
 
 | Source, as cited via AIStoryHub | Entries |
@@ -109,11 +109,11 @@ checked each one:
 What held up on cards:
 - **Words, phrases and names** (581 entries that can be matched as text): 384 barely occur on cards (under 0.2% of
   either set: marketing, business, email and academic vocabulary). 34 lean AI (3× or more, in 1%+ of AI cards); 22 of
-  those are already in our lists. 12 are new candidates ("the intersection of", curate, orchestrate, "more importantly",
+  those are already in the lists. 12 are new candidates ("the intersection of", curate, orchestrate, "more importantly",
   timeless, "piercing blue eyes", Chen and five more). 14 red-tier entries lean *human* on cards (charming, "when it
   comes to", enhance, immersive, utilize, showcase, unlock…), so the corpus can't be used wholesale.
 - **Sentence patterns, rhetorical moves, formatting tells** (113 entries, published as descriptions for checking by
-  an LLM). We wrote regexes or simple counts for 52 of them. The ones that separate on cards are rare: "Here's the
+  an LLM). 52 of them were written up as regexes or simple counts. The ones that separate on cards are rare: "Here's the
   thing / kicker / truth" (0.3% of AI cards, 13×), "One thing was certain" (0.4%, 9×), unfilled placeholders like
   "[Your Name]" (0.4%, 7×), anti-synthesis closers like "an unspoken understanding" (0.7%, 6×; already a pattern of
   ours), "Let's be honest" / "Let me be clear" (0.3%, 4×). Several lean human on cards: "not only … but also",
@@ -124,13 +124,13 @@ What held up on cards:
 - **Formatting:** bold is the clearest signal in either outside list. Three or more `**bold**` spans: 46% of AI cards
   against 1.6% of 2023 cards, and on Chub 2.3% of 2023 cards against 12% of 2025 cards. It follows the layout (models
   writing free prose rarely bold anything), so the fair comparison is within one format: formatted prose 3.3% of 2023
-  cards vs 81% of AI cards, lists 2.5% vs 59%, structured + prose 2.2% vs 67%, free prose 1.1% vs 3.5%. Our requests
+  cards vs 81% of AI cards, lists 2.5% vs 59%, structured + prose 2.2% vs 67%, free prose 1.1% vs 3.5%. The generation requests
   ask for "sections" or "markdown bullet lists" and never mention bold: models choose `**Appearance:**` where people
   wrote `Appearance:` or a `#` heading. AIStoryHub's "bolded-term bullet" entry (`- **Term:** …`) is the narrow
   version (7.4% vs 0.16%). A candidate for the next scorer. Curly quotes
   look strong (23% vs 0.7%) but depend on the model (most of OpenAI, Google and DeepSeek output; almost none from
   Claude or Llama) and on where a card was typed (7.6% of Chub's 2023 cards already), so they're not used.
-- **Chatbot leftovers** missing from our check (citation markup such as `oaicite`, `utm_source=chatgpt.com`,
+- **Chatbot leftovers** missing from the check (citation markup such as `oaicite`, `utm_source=chatgpt.com`,
   "Regenerate response"): 0 to 4 cards among about 195,000.
 
 **conorbronsdon/avoid-ai-writing** (MIT; github.com/conorbronsdon/avoid-ai-writing): a separate project, a rewriting
@@ -138,7 +138,7 @@ skill with a regex and stylometric detector (`detector/patterns.js`). Run unchan
 separates them with an AUC of 0.75 (BBBScorer 0.86). Its strongest card signals are bold phrases anywhere, headings and
 list labels included (43% of AI cards vs 1.3%; BBBScorer doesn't count bold, see the bolded-term bullets above), em
 dashes (46% vs 7%; counted), uniform paragraphs (5.9% vs 0.8%; added in 0.9.1) and "genuine" / "genuinely" (30% vs 7%;
-in our lists). Its transition and filler lists lean human on cards.
+in the lists). Its transition and filler lists lean human on cards.
 
 ## Unscored (tallied and shown)
 
@@ -166,12 +166,12 @@ Share of cards reading "some" or "strong":
 | Chub, before Jul 2023 | 1,683 | 5.7% | 2.7% |
 | JanitorAI, May 2023–Feb 2024 | 17,675 | 3.1% | 1.0% |
 | SPB-2602 (Kimi, GLM) | 594 | 0.3% | 0.0% |
-| Our cards from older models (Phi-4, Mistral Small, Gemma 3, Llama 3.x, Euryale, Hermes, Maverick, GPT-4o, Gemini 2.5) | 911 | 15.9% | 5.2% |
-| Our cards from newer models (GPT-5/6, Claude 4.5+, GLM 5, Kimi K2, Gemini 3, DeepSeek V4) | 427 | 0.5% | 0.0% |
+| Generated cards from older models (Phi-4, Mistral Small, Gemma 3, Llama 3.x, Euryale, Hermes, Maverick, GPT-4o, Gemini 2.5) | 911 | 15.9% | 5.2% |
+| Generated cards from newer models (GPT-5/6, Claude 4.5+, GLM 5, Kimi K2, Gemini 3, DeepSeek V4) | 427 | 0.5% | 0.0% |
 
 Wikipedia's essay transitions ("Furthermore,", "Moreover,", "Overall,", "Additionally,") and items such as "plays a
-crucial role", "fostering" and "showcased" turned up in 2023 cards but in none of the models we could test, so they're
-listed, not counted. They may be GPT-3.5's own habits (we have no GPT-3.5 cards yet) or simply human essay style.
+crucial role", "fostering" and "showcased" turned up in 2023 cards but in none of the models tested, so they're
+listed, not counted. They may be GPT-3.5's own habits (there are no GPT-3.5 cards in the test sets yet) or simply human essay style.
 
 **Sexual-content check** (all 188,834 JanitorAI cards with 60+ words). JanitorAI's NSFW flag means "NSFW allowed", not
 "has sexual content", so it isn't a label: flagged cards read 44% explicit, 16% suggestive, 40% none; unflagged cards 21%
@@ -185,8 +185,8 @@ Newest first. Scorer versions in brackets.
 | Date | List | Change | Why |
 |---|---|---|---|
 | 2026-11-03 (0.9.2, tried, dropped) | Card-mined lists | Re-mined from 3,836 generated cards by 38 models (423 words, 57 two-word and 5 three-word phrases), then 43 items common in pre-AI fanfiction removed. Not adopted: 0.9.3 keeps the 0.9.1 lists | On a hold-out never used for mining, the re-mined lists caught fewer AI cards than the 0.9.1 lists and put slightly more human cards at 60+ |
-| 2026-10-29 (app 0.26.0) | Mood words, card word frequencies | First added, as unscored read-outs. Empath's topic words were also tried in the genre read and left out: better ranking inside one genre, worse at picking the single genre | Requested: fun read-outs in place of archetypes |
-| 2026-10-28 (app 0.23.0) | Old-school AI items, sexual-content words | First added, as unscored read-outs | Requested: a read for older (ChatGPT-era) bots the fiction-built lists miss, and a sexual-content read |
+| 2026-10-29 (app 0.26.0) | Mood words, card word frequencies | First added, as unscored read-outs. Empath's topic words were also tried in the genre read and left out: better ranking inside one genre, worse at picking the single genre | Lighter read-outs in place of the archetypes |
+| 2026-10-28 (app 0.23.0) | Old-school AI items, sexual-content words | First added, as unscored read-outs | A read for older (ChatGPT-era) bots the fiction-built lists miss, and a sexual-content read |
 | 2026-10-28 (0.9.1, prepared) | Card-mined lists | First built: 217 words, 31 two-word phrases from 2,258 generated cards (162 and 27 not in the story lists) | The story lists come from 22 models' stories; card writing has its own habits ("fiercely loyal", "tilts her head", "leather-bound") |
 | 2026-10-28 (0.9.0, prepared) | Sentence structures | found_herself, it_was_as_if, hung_heavy, felt_a_surge, unspoken, not_just_shes off | Rechecked on cards: no separation, or they lean human |
 | 2026-10-28 (0.9.0, prepared) | Pulp words | Count at half weight in the score (were read-out only) | Raised AUC on cards (0.862 → 0.866 on its own) |

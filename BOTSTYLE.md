@@ -295,7 +295,7 @@ explain themselves on hover or tap.
   so they miss this register. It counts different items, not repeats: two make "a few older-model habits", three at 4+
   per 1,000 words "reads like an older model". Newer models almost never write this way (0.5% of their cards, against
   16% for older models and 3–6% of 2023 cards), so it points at older bots, and people use some of it too. Items from
-  Wikipedia's "Signs of AI writing" guide that are as common in 2023 cards as in any model we tested ("Furthermore,",
+  Wikipedia's "Signs of AI writing" guide that are as common in 2023 cards as in any model tested ("Furthermore,",
   "Overall,", "plays a crucial role") are listed greyed and don't count. Checks in [docs/LISTS.md](docs/LISTS.md).
 - **Mood** (experimental, just for fun): the one or two feelings a card's wording leans on more than 2023 cards do, from
   Empath's emotion word lists (Wattpad-built, MIT): Melancholy, Tender, Uneasy, Hopeful, Sultry, Shy and 16 more. A mood
@@ -440,10 +440,10 @@ yet; the set is growing.
 The rise after 2022 in both is about the size you'd expect as AI-assisted writing spreads; the scores don't say which
 pieces those are.
 
-**Next scorer version (0.9.3, prepared, not live)** adds a few points for bold labels and headings. On the early-2023
-collections against AI cards never used to build the lists (mostly one persona set that uses bold labels heavily), it
-catches 86% of AI cards at the cut-off 2% of the human cards reach, against 68% for 0.9.1, with 2.8% of the human
-cards at 60+ in both. See [docs/TODO.md](docs/TODO.md).
+**Next scorer version (0.9.3, prepared, not live)** adds the card-mined lists, cut-offs by length and a few points for
+bold labels and headings. Against early-2023 collections, on about 1,500 cards from 10 model families never used to
+build the lists, it catches 33% of AI cards at the score 2% of the human cards reach, against 18% for 0.8.2. See the
+[roadmap](docs/TODO.md).
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
@@ -515,7 +515,7 @@ Checked against the upstream code (upstream's `slop-score.html` page and `data/l
 - AIStoryHub's Corpus of AI Clichés (MIT): 758 words, phrases, names and patterns, with the studies behind them
   (Kobak et al., GPTZero's vocabulary study, Liang et al., Juzek & Ward, Wikipedia's "Signs of AI writing", Paech's
   EQ-Bench lists). Checked against cards; most entries are essay and marketing tells that cards don't use, and a dozen
-  are candidates for the next word lists. Its sentence patterns come as descriptions; we wrote regexes for 52 of them. Its formatting entries led to the
+  are candidates for the next word lists. Its sentence patterns come as descriptions; 52 of them were written up as regexes. Its formatting entries led to the
   strongest find: AI-written cards use `**bold**` labels and headings far more than 2023 cards in the same layout.
   Details and the full source list: [docs/LISTS.md](docs/LISTS.md#outside-lists-checked-against-cards-not-used-in-scoring).
 - conorbronsdon/avoid-ai-writing (MIT): its detector, run on cards as a comparison (AUC 0.75 against BBBScorer's 0.86).

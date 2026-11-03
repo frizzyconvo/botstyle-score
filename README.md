@@ -61,7 +61,7 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
 | `data/` | Word and phrase lists, calibration, the leaderboard and the reference distributions the page grades against. |
 | `tools/` | Building lists, scoring datasets, building the leaderboard and reference, generating AI test cards, tests, the local server and the Cloudflare Workers (card proxy, public list). Every tool takes `--help`. |
 | `tests/` | Test fixtures for `npm test` (the tests themselves are `tools/test.mjs`). |
-| `docs/` | The docs index (`docs/README.md`), the list manifest (`docs/LISTS.md`), the to-do list (`docs/TODO.md`) and background notes (Foreverse's card-writing rubric). |
+| `docs/` | The docs index (`docs/README.md`), the list manifest (`docs/LISTS.md`), the roadmap (`docs/TODO.md`) and background notes (Foreverse's card-writing rubric). |
 | `upstream/` | Leftovers from slop-score kept for reference: its model outputs, prompts, benchmark and leaderboard scripts. |
 | `vendor/` | Bundled browser libraries (msgpack, part-of-speech tagger). |
 | `.github/` | GitHub Actions: tests on every push and pull request (`workflows/test.yml`), monthly Dependabot checks (`dependabot.yml`), issue forms (score report, bug report) and the pull request checklist. |
@@ -77,7 +77,7 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
   over. Results go to `eval/scores/v<version>/`; read `notes.md` there first. Then rebuild what
   the page uses with `npm run leaderboard` and `npm run reference`.
 - **Next scorer version (0.9.3, prepared, not live):** `npm run score-all -- --scorer 0.9.3` scores into its own folder (tidying `eval/` leaves it alone);
-  what it changes and how it tested is in [docs/TODO.md](docs/TODO.md).
+  what it changes and how it tests is in the [roadmap](docs/TODO.md).
 - **AI hold-out cards:** `generated_holdout` holds cards from model families the card lists were never mined from,
   written about characters no other generated card uses (`node tools/build_seeds_holdout.mjs` picks them). They are a
   test set only: list mining skips them (`HOLDOUT` in `tools/_model_groups.mjs`, which also maps each model to its base
