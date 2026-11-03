@@ -405,7 +405,7 @@ VenusAI Discord, a Chub archive to July 2023; 5,164 cards with enough prose, cop
 against the same AI cards, and 1.7% of them reach 60 (JanitorAI 2023: 2.0%). By length, 0.7-0.9% of their cards
 under 400 prose words reach 60, against 2.7% at 400-800 words and 5.2% over 800 (231 cards).
 
-**Cards of known provenance** (33 so far: creator-stated, plus a few suspected). Four of the 5 hand-written cards land
+**Cards of known provenance** (44 so far: creator-stated, plus some suspected). Four of the 5 hand-written cards land
 in Original-ish (7–23); the fifth, a dark-fantasy card whose creator says long roleplay with AI has shaped their
 writing, scores 46 (Mixed). All 9 cards their creators say were written with ChatGPT or DeepSeek land in Mixed,
 Familiar or Common (48–78), and a card its creator calls "AI slapped together" scores 81 (Common).
@@ -417,7 +417,9 @@ creator reports. Their prose is plain and modern, with none of the stock vocabul
 away from house style scores like a person, the same as the anti-slop cards above. Five cards from another creator who
 says how AI helped on each (AI-written greetings on a hand-written card, a W++ card converted to prose with Claude and
 then corrected, an AI draft edited heavily) score 11–46: four land in Original-ish, and the one with an AI-written
-greeting and light AI editing in Mixed (46). Where AI wrote the greetings, the greetings alone score 6–46, mostly below
+greeting and light AI editing in Mixed (46). Eleven cards from a creator who writes his cards with AI from his own
+notes, using a prompt template he shares publicly (the template asks for paragraphs under headings and no em dashes),
+score 26–71 (median 43), while the original slop score gives them 3–30. Where AI wrote the greetings, the greetings alone score 6–46, mostly below
 the descriptions, so an AI greeting on an otherwise hand-written card usually isn't flagged. Too few cards for rates
 yet; the set is growing.
 
