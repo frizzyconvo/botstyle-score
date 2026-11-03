@@ -1,7 +1,7 @@
 // scorer-profile.js - Which BBBScorer version's rules are active.
 //
-// The page, the tools and every stored score use the default (0.8.2: 0.8.1's scores, four bands). BBBScorer 0.9.1 is prepared but not
-// switched on: tools can opt in (score_all.mjs --scorer 0.9.1, dev experiments) to test it before the rescore.
+// The page, the tools and every stored score use the default (0.8.2: 0.8.1's scores, four bands). BBBScorer 0.9.3 is prepared but not
+// switched on: tools can opt in (score_all.mjs --scorer 0.9.3, dev experiments) to test it before the rescore.
 // 0.9.0 is kept only to describe its one full run (eval/old/scores/v0.9.0): 0.9.1 = 0.9.0 + the card-mined lists, which
 // were added after that run had started. Any change to a prepared profile that moves scores gets a new number.
 // Each switch below is one change from dev notes (rescore ideas); 0.8.1 has them all off.
@@ -19,10 +19,14 @@
 //   cardLists       points from words and phrases mined from AI-written character cards (data/botstyle_card_lists.json,
 //                   tools/mine_card_lists.mjs): weight × 100 × min(1, rate / p90), rate = summed weights of the items a card
 //                   uses per 1,000 prose words. Tested with models and characters held out (eval/experiments/remine_eval.md).
+//   boldLabels      points for bold used as labels or headings ("**Appearance:**", "**Backstory**" on its own line):
+//                   from `min` labels on, base + per × (count − min), at most `max`
+//   cardLists.file / lengthBands.file  which data file a version uses (default botstyle_card_lists.json /
+//                   botstyle_length_bands.json), so a re-mined list or new length bands get their own file
 //   patternsOff / patternsOn  sentence patterns switched off / on (ids from js/ai-structures.js), from rechecking every
 //                   pattern on character cards instead of the stories they were picked on
 export const DEFAULT_SCORER = '0.8.2';
-export const NEXT_SCORER = '0.9.1';
+export const NEXT_SCORER = '0.9.3';
 export const PROFILES = {
   '0.8.1': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },
   '0.8.2': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },   // same rules as 0.8.1; only the bands changed (four bands)
@@ -48,6 +52,17 @@ export const PROFILES = {
     // These six were picked on stories; on character cards they don't separate (or lean human): 2026-10-28 recheck.
     patternsOff: ['found_herself', 'it_was_as_if', 'hung_heavy', 'felt_a_surge', 'unspoken', 'not_just_shes'], patternsOn: [],
     cardLists: { weight: 0.3 },
+  },
+  '0.9.3': {
+    // 0.9.1 + bold labels / headings + its own length bands. 0.9.2 (the same plus card lists re-mined after card
+    // generation round 5) was scored once and dropped: on the independent hold-out (early-2023 collections vs AI cards
+    // never used for mining) the re-mined lists caught fewer AI cards than 0.9.1's, and the bold labels carried the gain.
+    plistParens: true, maxRepeat: 2.5, stripRpAsterisks: true, compactValues: null,
+    texture: { minParagraphs: 3, minWords: 150, pivot: 0.6, perUnit: 30, min: -12, max: 20 },
+    pulpWeight: 0.5, lengthBands: { file: 'botstyle_length_bands_093.json' },
+    patternsOff: ['found_herself', 'it_was_as_if', 'hung_heavy', 'felt_a_surge', 'unspoken', 'not_just_shes'], patternsOn: [],
+    cardLists: { weight: 0.3 },
+    boldLabels: { min: 2, base: 4, per: 1, max: 10 },
   },
 };
 let current = DEFAULT_SCORER, overrides = {};

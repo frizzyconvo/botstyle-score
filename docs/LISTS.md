@@ -184,6 +184,7 @@ Newest first. Scorer versions in brackets.
 
 | Date | List | Change | Why |
 |---|---|---|---|
+| 2026-11-03 (0.9.2, tried, dropped) | Card-mined lists | Re-mined from 3,836 generated cards by 38 models (423 words, 57 two-word and 5 three-word phrases), then 43 items common in pre-AI fanfiction removed. Not adopted: 0.9.3 keeps the 0.9.1 lists | On a hold-out never used for mining, the re-mined lists caught fewer AI cards than the 0.9.1 lists and put slightly more human cards at 60+ |
 | 2026-10-29 (app 0.26.0) | Mood words, card word frequencies | First added, as unscored read-outs. Empath's topic words were also tried in the genre read and left out: better ranking inside one genre, worse at picking the single genre | Requested: fun read-outs in place of archetypes |
 | 2026-10-28 (app 0.23.0) | Old-school AI items, sexual-content words | First added, as unscored read-outs | Requested: a read for older (ChatGPT-era) bots the fiction-built lists miss, and a sexual-content read |
 | 2026-10-28 (0.9.1, prepared) | Card-mined lists | First built: 217 words, 31 two-word phrases from 2,258 generated cards (162 and 27 not in the story lists) | The story lists come from 22 models' stories; card writing has its own habits ("fiercely loyal", "tilts her head", "leather-bound") |

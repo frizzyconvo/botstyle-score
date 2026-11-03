@@ -4,7 +4,21 @@ Open work, and a short summary of where scoring changes stand.
 
 ## Scoring: next version and what's been tried
 
-**BBBScorer 0.9.1 is prepared but not switched on.** (0.9.1 is 0.9.0 plus the words and phrases mined from AI-written
+**BBBScorer 0.9.3 is prepared but not switched on.** It is 0.9.1 (below) plus a few points for bold used as labels or
+headings (`**Appearance:**`, `- **Likes:** …`, a line that is only `**Backstory**`): from 2 such labels on, 4 points
+plus 1 for each one after that, at most 10. Two or more appear on about 1% of early-2023 human cards and a third of
+AI-written cards. Run with `node tools/score_all.mjs --scorer 0.9.3`; the length cut-offs are rebuilt from that run.
+
+Tested on a hold-out never used to build the lists or pick the settings (early-2023 card collections, 5,164 cards,
+against AI personas and a few other AI cards, 609): at the cut-off that 2% of the human cards reach, 0.9.1 catches
+68% of the AI cards and 0.9.1 plus bold labels 86%, with the same share of human cards at 60+ (2.8%). Almost all of the
+AI side is one persona set that uses bold labels heavily, so the gain on other AI cards will be smaller.
+
+**0.9.2 was tried and dropped.** It also replaced the card-mined lists with lists re-mined from 3,836 cards by 38
+models (items common in pre-AI fanfiction removed). On the same hold-out the re-mined lists caught 7 fewer AI cards in
+100 than 0.9.1's and put slightly more human cards at 60+, so 0.9.3 keeps 0.9.1's lists.
+
+**BBBScorer 0.9.1** (prepared, superseded by 0.9.3). (0.9.1 is 0.9.0 plus the words and phrases mined from AI-written
 cards; adding them moved scores, so the number moved too.) The page and every stored score still use 0.8.2 (0.8.1's scores with four bands). The changes sit
 behind switches in `js/scorer-profile.js` and are used only when a tool asks for them
 (`node tools/score_all.mjs --scorer 0.9.1`). Before it goes live: a full rescore with 0.9.1, the length cut-offs

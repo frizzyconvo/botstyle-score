@@ -79,7 +79,8 @@ const SCORER_VERSION = scorerVersion();
 // A prepared version can change (0.9.0's lists changed while its first run was going: now 0.9.1), so rows carry `fp` and
 // rows from another fingerprint are scored again instead of being kept.
 const FP = (() => { const h = createHash('sha1'); h.update(JSON.stringify(scorerProfile()));
-  for (const f of ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_calibration.json', 'botstyle_pulp_words.json', 'botstyle_card_lists.json', 'botstyle_length_bands.json', 'botstyle_card_drop.json']) {
+  for (const f of ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_calibration.json', 'botstyle_pulp_words.json', 'botstyle_card_lists.json', 'botstyle_length_bands.json', 'botstyle_card_drop.json',
+    ...[scorerProfile().cardLists && scorerProfile().cardLists.file, scorerProfile().lengthBands && scorerProfile().lengthBands.file].filter(Boolean)]) {
     const p = join(ROOT, 'data', f); h.update(f + ':' + (existsSync(p) ? createHash('sha1').update(readFileSync(p)).digest('hex') : 'none')); }
   return h.digest('hex').slice(0, 10); })();
 let ONLY = opt('--only') ? opt('--only').split(',') : null; const LIMIT = Number(opt('--limit') || 0), FORCE = argv.includes('--force') || argv.includes('--rescore');
@@ -291,6 +292,7 @@ for (const ds of DATASETS) {
   const t0 = Date.now(), startedAt = new Date().toISOString(); let rows = []; let n = 0, totalWords = 0;   // rows are small (no card text)
   const total = ds.name === 'jaicards' ? countLines(join(CARDS, 'jaicards-cards-js', 'jaicards_cards.jsonl')) : ds.need ? countLines(ds.need) : null;
   say(`[${dsIndex}/${todo.length}] ${ds.name}: scoring${kept ? ` new cards only (${kept.length.toLocaleString()} already scored)` : total ? ` ${total.toLocaleString()} cards` : ''}…`);
+  const done0 = kept ? kept.length : 0;   // already scored (resumed or kept): progress counts them too
   let lastSay = Date.now(), flushed = 0; const stillThere = new Set();   // ids still valid in the source
   if (!LIMIT && resumeFrom !== partial) { try { unlinkSync(partial); } catch { /* none */ } }   // a checkpoint only ever holds this run's rows
   for (const raw of ds.rows()) {
@@ -316,7 +318,7 @@ for (const ds of DATASETS) {
       lastSay = Date.now(); touchLock();
       if (!LIMIT && rows.length > flushed) { appendFileSync(partial, rows.slice(flushed).map(x => JSON.stringify(x)).join('\n') + '\n'); flushed = rows.length; }
       const secs = (Date.now() - t0) / 1000, rate = n / Math.max(1, secs);
-      say(`[${dsIndex}/${todo.length}] ${ds.name}: ${n.toLocaleString()}${total ? ` / ${total.toLocaleString()} (${(100 * n / total).toFixed(1)}%)` : ''} cards, ${Math.round(rate * 60).toLocaleString()} cards/min${total ? `, about ${fmtDur((total - n) / rate)} left` : ''}`);
+      say(`[${dsIndex}/${todo.length}] ${ds.name}: ${(n + done0).toLocaleString()}${total ? ` / ${total.toLocaleString()} (${(100 * (n + done0) / total).toFixed(1)}%)` : ''} cards${done0 ? ` (${n.toLocaleString()} this session)` : ''}, ${Math.round(rate * 60).toLocaleString()} cards/min${total ? `, about ${fmtDur((total - n - done0) / rate)} left` : ''}`);
     }
   }
   const scoredNow = rows.length;
@@ -326,7 +328,8 @@ for (const ds of DATASETS) {
     rows = kept.filter(x => stillThere.has(x.id)).concat(rows);   // not unshift(...): spreading 100k+ rows overflows the stack
     if (gone) say(`  dropped ${gone} row(s) whose cards are no longer valid in the source`);
   }
-  writeFileSync(outFile, rows.map(x => JSON.stringify(x)).join('\n') + '\n');
+  // .tmp + rename: a run stopped mid-write (a timeout, a closed window) must never leave a truncated results file
+  writeFileSync(outFile + '.tmp', rows.map(x => JSON.stringify(x)).join('\n') + '\n'); renameSync(outFile + '.tmp', outFile);
   try { unlinkSync(partial); } catch { /* none */ }
   const ok = rows.filter(x => !x.error && x.reliable && !x.nonEnglish);
   const bands = {}; for (const x of rows) if (!x.error) bands[x.band] = (bands[x.band] || 0) + 1;

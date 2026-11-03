@@ -426,6 +426,11 @@ is growing.
 The rise after 2022 in both is about the size you'd expect as AI-assisted writing spreads; the scores don't say which
 pieces those are.
 
+**Next scorer version (0.9.3, prepared, not live)** adds a few points for bold labels and headings. On the early-2023
+collections against AI cards never used to build the lists (mostly one persona set that uses bold labels heavily), it
+catches 86% of AI cards at the cut-off 2% of the human cards reach, against 68% for 0.9.1, with 2.8% of the human
+cards at 60+ in both. See [docs/TODO.md](docs/TODO.md).
+
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
 and Chub, 2023) against AI personas (SPB-2602) and cards generated for this project. The 2023 side includes some

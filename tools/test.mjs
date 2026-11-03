@@ -140,7 +140,7 @@ const wppTells = scoreCard({ description: '[Appearance:{muscular,blue eyes,blond
 check('W++ commas are not missing-space typos', !(wppTells.checks.humanTells || []).some(t => t.id === 'missing_space_after'));
 check('default fields: personality not scored', scoreCard({ description: 'She bakes bread.', personality: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
 check('default fields: scenario not scored', scoreCard({ description: 'She bakes bread.', scenario: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
-// BBBScorer 0.9.1 is prepared but opt-in: the default stays 0.8.1, and 0.9.1 changes only what it says it changes
+// BBBScorer 0.9.1 / 0.9.3 are prepared but opt-in: the default stays 0.8.2, and each changes only what it says it changes
 {
   const SP = await import('../js/scorer-profile.js');
   check('default scorer is 0.8.2', SP.scorerVersion() === '0.8.2' && scoreCard('She bakes bread.').version === '0.8.2');
@@ -159,6 +159,14 @@ check('default fields: scenario not scored', scoreCard({ description: 'She bakes
   SP.setScorerProfile('0.9.1');
   const ml = scoreCard({ description: 'Fiercely loyal and endlessly patient, she tilts her head and leans forward. Ancient leather-bound books, a faint smell of ink and dust. Her voice is a low rumble. Well, well, she must say, either way it is fascinating, precisely the practical sort of thing. '.repeat(2) });
   check('0.9.1: card-mined words add points', ml.extraPoints.cardLists > 0 && ml.cardListHits.length > 3, JSON.stringify(ml.extraPoints));
+  const { boldLabelCount } = await import('../js/score-card.js');
+  const bolded = '**Appearance:** tall, dark hair.\n- **Likes:** rain, tea\n**Backstory**\nShe grew up by the sea and still walks the shore every morning before work.';
+  check('bold labels and headings are counted', boldLabelCount(bolded) === 3 && boldLabelCount('She is **very** tired. **Run.**') === 0, String(boldLabelCount(bolded)));
+  check('0.9.1: no bold-label points', !scoreCard({ description: bolded }).extraPoints.boldLabels);
+  SP.setScorerProfile('0.9.3');
+  check('0.9.3: bold labels add points (2 labels = 4, +1 each after)', scoreCard({ description: bolded }).extraPoints.boldLabels === 5, JSON.stringify(scoreCard({ description: bolded }).extraPoints));
+  check('0.9.3: one bold label adds nothing', scoreCard({ description: '**Appearance:** tall, dark hair. She walks the shore every morning.' }).extraPoints.boldLabels === 0);
+  check('0.9.3 uses the 0.9.1 card lists', scoreCard({ description: 'Fiercely loyal and endlessly patient, she tilts her head and leans forward. Ancient leather-bound books, a faint smell of ink and dust. '.repeat(2) }).extraPoints.cardLists > 0);
   SP.setScorerProfile();
   check('profile back to 0.8.2', scoreCard('She bakes bread.').version === '0.8.2' && scoreCard({ description: wpp }).extraPoints.compactValues === 0);
 }

@@ -6,6 +6,24 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.31.0] - 2026-11-03 · BBBScorer 0.8.2
+
+Scores unchanged (the page still uses 0.8.2).
+
+### Added
+- Prepared scorer 0.9.3 (not live): 0.9.1 plus a few points for bold used as labels or headings (`**Appearance:**`,
+  `- **Likes:** …`, a heading line on its own). From 2 such labels on, 4 points plus 1 for each one after, at most 10.
+  On an independent hold-out it catches 86% of AI cards at a 2% false-positive rate, against 68% for 0.9.1.
+- A prepared scorer version can name its own card-list and length-band files, so a new list or new cut-offs never
+  change an older version's scores.
+- Tests for bold-label counting and the 0.9.3 profile.
+
+### Changed
+- `score_all` includes a version's own list and band files in its fingerprint, writes each results file in one step
+  (a stopped run can no longer leave a cut-off file), and counts cards kept from an earlier run in its progress line.
+- Docs: README, BOTSTYLE.md, docs/TODO.md and docs/LISTS.md describe 0.9.3, and why the re-mined lists tried as 0.9.2
+  were dropped.
+
 ## [0.30.0] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged.

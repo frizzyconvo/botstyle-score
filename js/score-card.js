@@ -11,7 +11,7 @@
 // A plain string is accepted too (treated as description + greeting pasted together).
 
 import { loadBotstyle, scoreWeighted, computeBotstyleScore, peerPercentile, tallyNames, MIN_PROSE_WORDS, setWordFactors, ngramTokens } from './botstyle.js';
-import { scorerProfile, scorerVersion, DEFAULT_SCORER, NEXT_SCORER } from './scorer-profile.js';
+import { scorerProfile, scorerVersion, DEFAULT_SCORER, NEXT_SCORER, PROFILES } from './scorer-profile.js';
 import { preprocessCard } from './card-preprocess.js';
 import { scoreStructures } from './ai-structures.js';
 import { findArtifacts } from './ai-artifacts.js';
@@ -54,23 +54,32 @@ export const BAND_LABELS = { original: 'Original-ish', mixed: 'Mixed', familiar:
 export const BAND_TAGLINES = { original: 'Meatbag adjacent', mixed: 'Mixed signals', familiar: 'Rings a bell', common: 'Might just be slop' };
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
-let LENGTH_BANDS = null;   // data/botstyle_length_bands.json: band cut-offs by prose length (0.9.0 lengthBands)
-let CARD_LISTS = null;     // data/botstyle_card_lists.json: words and phrases mined from AI-written cards (0.9.0 cardLists)
+let LENGTH_BANDS = {};     // file -> data/botstyle_length_bands*.json: band cut-offs by prose length (0.9.x lengthBands)
+let CARD_LISTS = {};       // file -> data/botstyle_card_lists*.json: words and phrases mined from AI-written cards (0.9.x cardLists)
+// Each prepared profile names its own list and length-band files (by default botstyle_card_lists.json / botstyle_length_bands.json),
+// so re-mining for a new version never changes an older version's scores.
+const cardListsFile = () => { const c = scorerProfile().cardLists; return (c && c.file) || 'botstyle_card_lists.json'; };
+const lengthBandsFile = () => { const l = scorerProfile().lengthBands; return (l && typeof l === 'object' && l.file) || 'botstyle_length_bands.json'; };
 
 export async function loadAll(base = './data/') {
   // extra_words.txt (~0.6 MB compressed) only feeds the typo read-out, so it loads alongside the rest
   await Promise.all([loadBotstyle(base), loadCliches(base), loadPulp(base), loadExtraWords(base)]);
   try { const r = await fetch(base + 'botstyle_reference.json'); if (r.ok) REFERENCE = await r.json(); } catch { REFERENCE = null; }
-  try { const r = await fetch(base + 'botstyle_length_bands.json'); if (r.ok) LENGTH_BANDS = await r.json(); } catch { LENGTH_BANDS = null; }
-  try { const r = await fetch(base + 'botstyle_card_lists.json'); if (r.ok) { const j = await r.json(); CARD_LISTS = { p90: j.p90, words: new Map(j.words.map(x => [x[0], x[1]])), bigrams: new Map(j.bigrams.map(x => [x[0], x[1]])) }; } } catch { CARD_LISTS = null; }
+  // Only the files some profile uses (the page's default profile uses none of them).
+  const files = (k, def) => [...new Set(Object.values(PROFILES).map(p => p[k]).filter(Boolean).map(v => (typeof v === 'object' && v.file) || def))];
+  for (const f of files('lengthBands', 'botstyle_length_bands.json')) { try { const r = await fetch(base + f); if (r.ok) LENGTH_BANDS[f] = await r.json(); } catch { /* none */ } }
+  for (const f of files('cardLists', 'botstyle_card_lists.json')) {
+    try { const r = await fetch(base + f); if (r.ok) { const j = await r.json(); CARD_LISTS[f] = { p90: j.p90, words: new Map(j.words.map(x => [x[0], x[1]])), bigrams: new Map(j.bigrams.map(x => [x[0], x[1]])) }; } } catch { /* none */ }
+  }
   setWordFactors(pulpWords());
 }
 
 // 0.9.x lengthBands: the cut-offs for a card with this many prose words. Same 40 / 60 / 80 everywhere otherwise.
 // The length-bands file gives the Original-ish and Familiar cut-offs (its `common` key); the top band stays at 80+.
 export function bandCuts(proseWords) {
-  if (!scorerProfile().lengthBands || !LENGTH_BANDS || !LENGTH_BANDS.bins) return { ...WRITING_STYLE_BANDS, byLength: false };
-  const b = LENGTH_BANDS.bins.find(x => proseWords >= x.from && (x.to === null || proseWords < x.to)) || LENGTH_BANDS.bins[LENGTH_BANDS.bins.length - 1];
+  const LB = LENGTH_BANDS[lengthBandsFile()];
+  if (!scorerProfile().lengthBands || !LB || !LB.bins) return { ...WRITING_STYLE_BANDS, byLength: false };
+  const b = LB.bins.find(x => proseWords >= x.from && (x.to === null || proseWords < x.to)) || LB.bins[LB.bins.length - 1];
   return { original: b.original, familiar: b.common, common: Math.max(WRITING_STYLE_BANDS.common, b.common + 10), byLength: true, from: b.from, to: b.to };
 }
 
@@ -97,15 +106,22 @@ export function paragraphCv(prose) {
 }
 // 0.9.0 cardLists: each mined word or two-word phrase counts once per card (presence), weighted; per 1,000 prose words.
 export function cardListHits(prose) {
-  if (!CARD_LISTS) return { rate: 0, hits: [] };
+  const CL = CARD_LISTS[cardListsFile()];
+  if (!CL) return { rate: 0, hits: [] };
   const t = ngramTokens(String(prose || '')), seen = new Set(), hits = [];
   for (let i = 0; i < t.length; i++) {
-    for (const [g, L] of [[t[i], CARD_LISTS.words], [i + 1 < t.length ? t[i] + ' ' + t[i + 1] : null, CARD_LISTS.bigrams]]) if (g && !seen.has(g) && L.has(g)) { seen.add(g); hits.push({ item: g, weight: L.get(g) }); }
+    for (const [g, L] of [[t[i], CL.words], [i + 1 < t.length ? t[i] + ' ' + t[i + 1] : null, CL.bigrams]]) if (g && !seen.has(g) && L.has(g)) { seen.add(g); hits.push({ item: g, weight: L.get(g) }); }
   }
   const n = (String(prose || '').match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).length;
   return { rate: 1000 * hits.reduce((a, h) => a + h.weight, 0) / Math.max(60, n), hits: hits.sort((a, b) => b.weight - a.weight) };
 }
-function cardListPoints(h) { const c = scorerProfile().cardLists; return c && CARD_LISTS ? c.weight * 100 * Math.min(1, h.rate / CARD_LISTS.p90) : 0; }
+function cardListPoints(h) { const c = scorerProfile().cardLists, CL = CARD_LISTS[cardListsFile()]; return c && CL ? c.weight * 100 * Math.min(1, h.rate / CL.p90) : 0; }
+// 0.9.3 boldLabels: bold used as labels or headings ("**Appearance:**", "- **Likes:** ...", a line that is only "**Backstory**").
+// Rare on early-2023 human cards (2+ on 0-1.2% of them) and common on AI-written ones (33%), whatever the format.
+const BOLD_LABEL = /^[ \t]*(?:[-*\u2022+]|\d+[.)])?[ \t]*(?:\*\*|__)[^*_\n]{1,40}?(?::[ \t]*(?:\*\*|__)|(?:\*\*|__)[ \t]*:)/gm;
+const BOLD_HEAD = /^[ \t]*(?:\*\*|__)[^*_\n]{1,40}(?:\*\*|__)[ \t]*$/gm;
+export function boldLabelCount(text) { const t = String(text || ''); return (t.match(BOLD_LABEL) || []).length + (t.match(BOLD_HEAD) || []).length; }
+function boldPoints(n) { const c = scorerProfile().boldLabels; return !c || n < c.min ? 0 : Math.min(c.max, c.base + c.per * (n - c.min)); }
 function texturePoints(pc, proseWords) {
   const c = scorerProfile().texture;
   if (!c || pc.cv === null || pc.paragraphs < c.minParagraphs || proseWords < c.minWords) return 0;
@@ -217,8 +233,9 @@ export function scoreCard(card, opts = {}) {
   // unevenness (−). Like em-dash and chatbot-leftover points, they sit on top of the word / phrase / pattern score.
   const compact = compactValueStats(definition), pCv = paragraphCv(pre.prose);
   const cl = scorerProfile().cardLists ? cardListHits(pre.prose) : { rate: 0, hits: [] };
-  const extra = { compactValues: +compactPoints(compact).toFixed(2), texture: +texturePoints(pCv, pre.stats.proseWords).toFixed(2), cardLists: +cardListPoints(cl).toFixed(2) };
-  const extraPts = extra.compactValues + extra.texture + extra.cardLists;
+  const bold = boldLabelCount(text);
+  const extra = { compactValues: +compactPoints(compact).toFixed(2), texture: +texturePoints(pCv, pre.stats.proseWords).toFixed(2), cardLists: +cardListPoints(cl).toFixed(2), boldLabels: +boldPoints(bold).toFixed(2) };
+  const extraPts = extra.compactValues + extra.texture + extra.cardLists + extra.boldLabels;
   if (extraPts) for (const k of ['score', 'low', 'high']) score[k] = Math.max(0, Math.min(100, score[k] + extraPts));
   if (mixed && opts.mixedPolicy === 'higher') {
     const hi = parts[mixed.higher];
