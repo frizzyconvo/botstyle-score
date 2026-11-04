@@ -11,8 +11,10 @@ new bands and length cut-offs.
 - **Constructions (0.10.1):** +15 points for each distinct construction a card uses, at most 25: "He is not X. He is
   not Y.", "It's not X. It's Y.", "not X, just Y", "Not because X. Because Y.", "No more. No less.", "And honestly?",
   "*A beat.*", "like someone who", "somehow worse". They come from a blind read of AI-written cards the scorer missed.
-  Any of them appears on 0.13% of early-2023 human cards and on 7 of 47 cards of known provenance (all AI-written or
-  hybrid). With the 0.10.0 bands, the share in Common moves from 42.6% to 51.1% on the provenance cards, 43.9% to
+  Any of them appears on 0.13% of early-2023 human cards, on 6 of 40 AI-written or hybrid cards of known provenance
+  (and on 1 of the 5 hand-written ones), and on 10 of 100 cards from a creator who writes every card with AI. With the
+  0.10.0 bands, the share in Common moves from 42.6% to 51.1% on AI-written and hybrid cards of known provenance (an
+  earlier 47-card version of that set), 43.9% to
   45.9% on AI cards from unmined model families, 63.9% to 64.8% on a template creator's AI-written cards, and from
   3.22% to 3.24% on early-2023 human cards. The bands are 0.10.0's.
 

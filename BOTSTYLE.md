@@ -438,17 +438,18 @@ VenusAI Discord, a Chub archive to July 2023; 5,164 cards with enough prose, cop
 against the same AI cards, and 1.6% of them reach Familiar (JanitorAI 2023: 1.7%). By length: 1.4% under 400 prose
 words, 2.0% at 400–800 and 1.7% over 800 (231 cards).
 
-**Cards of known provenance** (52 so far: creator-stated, plus some suspected). Four of the 5 hand-written cards land
+**Cards of known provenance** (45 so far: creator-stated, plus some suspected), and a separate set of 100 cards from
+one creator who states that all of their cards are written by AI. Four of the 5 hand-written cards land
 in Original-ish (0–28); the fifth, a dark-fantasy card whose creator says long roleplay with AI has shaped their
 writing, scores 54 (Mixed). The 11 whole cards their creators say were written with ChatGPT, DeepSeek or another chat
 model score 55–94 and all land in Mixed or above. Recent Claude models are harder: a whole card by Claude Opus 4.6
 scores 28 (Original-ish), and one by Claude Sonnet 4.5 scores 68 (Mixed), with its AI-written greeting (27) far below
 its description (76), so it is flagged as a hybrid card. Of the 4 partly AI-written cards, the AI-edited one scores 51
 (Mixed), but the two whose creators give 60% AI score 32 and 19 and the 30% one 2: much of their AI-written profiles is
-lists and key-value lines, which aren't scored, and their hand-written greetings score low. Seven cards from one
-creator who says every card is written by AI from their idea, outline and writing direction score 30–69 (median 42),
-and four of the seven land in Original-ish. Their prose is plain and modern, with little of the stock vocabulary the
-lists look for: a model steered away from house style scores like a person, the same as the anti-slop cards above.
+lists and key-value lines, which aren't scored, and their hand-written greetings score low. All 100 public cards from one
+creator who says every card is written by AI from their idea, outline and writing direction score a median of 57,
+but the newer the card, the lower: 3 of 38 cards from 2024 land in Original-ish, 10 of 30 from 2025 and 27 of 32 from
+2026. Their prose is plain and modern, with little of the stock vocabulary the lists look for: a model steered away from house style scores like a person, the same as the anti-slop cards above.
 Five cards from another creator who says how AI helped on each (AI-written greetings on a hand-written card, a W++ card
 converted to prose with Claude and then corrected, an AI draft edited heavily) score 16–50: four land in Original-ish,
 and the one with an AI-written greeting and light AI editing in Mixed (50). Eleven cards from a creator who writes his

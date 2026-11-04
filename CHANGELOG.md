@@ -6,6 +6,13 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.36.2] - 2026-11-04 · BBBScorer 0.9.1
+
+### Changed
+- BOTSTYLE.md and the roadmap describe the provenance set as 45 cards plus a separate set of all 100 public cards
+  from one creator who writes every card with AI (the 7 cards of that creator that were in the provenance set now
+  live only there), with that creator's results by year and the construction-tell counts on both sets.
+
 ## [0.36.1] - 2026-11-04 · BBBScorer 0.9.1
 
 ### Removed
