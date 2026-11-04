@@ -251,14 +251,14 @@ function writeNotes(name, rows) {
   if (spreadB < 20) warn.push(`BBBScorer spread is narrow here (p10–p90 ${spreadB.toFixed(0)} points)`);
   if (spearman < .4) warn.push(`the two scores barely agree on order (Spearman ${spearman.toFixed(2)})`);
   if (vb.length / n > .05) warn.push(`${(100 * vb.length / n).toFixed(1)}% of cards have a very big disparity`);
-  const mixed = ok.filter(x => x.mixed).length;
+  const hybrid = ok.filter(x => x.hybrid || x.mixed).length;
   const md = `\n## ${name} (${new Date().toISOString().slice(0, 16)}, BBBScorer ${SCORER_VERSION})\n\n`
     + `${n} reliable English cards of ${rows.length}. Text: description + first message for both scorers.\n\n`
     + `| | p10 / p25 / p50 / p75 / p90 / p99 |\n|---|---|\n| BBBScorer | ${qs(B)} |\n| original | ${qs(U)} |\n\n`
     + `- Agreement on order (Spearman): ${spearman.toFixed(2)}. Spread p10–p90: BBBScorer ${spreadB.toFixed(0)}, original ${spreadU.toFixed(0)} points.\n`
     + `- Disparities (|BBB − original| ≥ ${DISPARITY.big} = big, ≥ ${DISPARITY.veryBig} = VERY BIG): ${flagged.length} (${(100 * flagged.length / n).toFixed(1)}%), of which ${vb.length} very big. `
     + `BBB higher: ${up.length}; original higher: ${down.length}.\n`
-    + `- Mixed cards (description and greeting ${'≥'}25 apart): ${mixed} (${(100 * mixed / n).toFixed(1)}%).\n`
+    + `- Hybrid cards (description and greeting ${'≥'}25 apart): ${hybrid} (${(100 * hybrid / n).toFixed(1)}%).\n`
     + (warn.length ? `- **Check:** ${warn.join('; ')}.\n` : '')
     + `- Why BBB is higher: ${reasons(up)}\n- Why the original is higher: ${reasons(down)}\n`
     + (up.length ? `\nBiggest "BBB higher":\n${ex(up)}\n` : '') + (down.length ? `\nBiggest "original higher":\n${ex(down)}\n` : '');
@@ -307,7 +307,7 @@ for (const ds of DATASETS) {
     const up = upstreamParts(r.text), disp = disparity(r, up);
     rows.push({ id: c.id, name: String(c.name || '').slice(0, 60), dataset: ds.name, label: typeof ds.label === 'function' ? ds.label(c) : ds.label, createdAt: c.createdAt, model: raw.model, mode: raw.mode, style: raw.style_requested, round: raw.round,
       version: r.version, fp: FP, score: +r.score.toFixed(2), upstream: up ? up.score : null, upstreamParts: up, disparity: disp,
-      desc: r.parts.description ? r.parts.description.score : null, greet: r.parts.greeting ? r.parts.greeting.score : null, joint: +r.joint.score.toFixed(2), mixed: r.mixed,
+      desc: r.parts.description ? r.parts.description.score : null, greet: r.parts.greeting ? r.parts.greeting.score : null, joint: +r.joint.score.toFixed(2), hybrid: r.hybrid,
       repeats: { desc: r.repetition.description.per1k, greet: r.repetition.greeting.per1k, between: r.repetition.between.per1k }, low: +r.low.toFixed(2), high: +r.high.toFixed(2), band: r.band.id, reliable: r.reliable, nonEnglish: !!r.stats.nonEnglish,
       proseWords: r.stats.proseWords, totalWords: r.stats.totalWords, format: r.format.format, greeting: r.greeting ? r.greeting.primary : null, type: r.type,
       comp: Object.fromEntries(Object.entries(r.components).map(([k, v]) => [k, +v.toFixed(3)])), emdashPoints: +r.emdashPoints.toFixed(2), artifactPoints: r.artifactPoints,

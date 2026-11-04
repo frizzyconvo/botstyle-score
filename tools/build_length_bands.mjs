@@ -16,6 +16,8 @@
 //   --shared-from <words>          bins from this length up share one set of cut-offs, taken over every row with at
 //                                  least --shared-pool prose words (default 150). Per-bin cut-offs for long cards rise
 //                                  to ~72 and cost real AI cards, which are mostly long; short bins keep their own.
+//   --fresh <percentile>           also cut a `fresh` line per bin at that point (0.10.0 bands: Original below it, Fresh
+//                                  from it up to the `original` line); e.g. 0.65
 //   --out <file>                   output file (default data/botstyle_length_bands.json)
 //
 // Writes data/botstyle_length_bands.json (or --out).
@@ -27,15 +29,17 @@ const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf(k);
 export const BINS = [[0, 150], [150, 250], [250, 350], [350, 500], [500, 800], [800, null]];
 export const POINTS = { original: 0.94, common: 0.98 };
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; };
-export function lengthBands(rows, { sharedFrom = null, sharedPool = 150 } = {}) {   // rows: { score, proseWords } of human cards (reliable or not; English, labeled)
-  let lastO = 0, lastC = 0;
+export function lengthBands(rows, { sharedFrom = null, sharedPool = 150, fresh = null } = {}) {   // rows: { score, proseWords } of human cards (reliable or not; English, labeled)
+  let lastO = 0, lastC = 0, lastF = 0;
   const pooled = sharedFrom === null ? null : rows.filter(r => r.proseWords >= sharedPool).map(r => r.score);
   return BINS.map(([from, to]) => {
     const shared = pooled && from >= sharedFrom;
     const v = shared ? pooled : rows.filter(r => r.proseWords >= from && (to === null || r.proseWords < to)).map(r => r.score);
     const o = Math.max(lastO, +q(v, POINTS.original).toFixed(1)), c = Math.max(lastC, o + 5, +q(v, POINTS.common).toFixed(1));
     lastO = o; lastC = c;
-    return shared ? { from, to, original: o, common: c, n: v.length, shared: true } : { from, to, original: o, common: c, n: v.length };
+    const f = fresh === null ? null : Math.min(o, Math.max(lastF, +q(v, fresh).toFixed(1)));
+    if (f !== null) lastF = f;
+    return { from, to, ...(f === null ? {} : { fresh: f }), original: o, common: c, n: v.length, ...(shared ? { shared: true } : {}) };
   });
 }
 if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || process.argv[1].endsWith('build_length_bands.mjs')) {
@@ -56,10 +60,12 @@ if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || proce
   const before = rows.length; rows = rows.filter(r => !dropLevels.includes(r.oldSchool));
   if (dropLevels.length) source += `; left out ${before - rows.length} rows with old-school level ${dropLevels.join(' / ')}`;
   const sharedFrom = opt('--shared-from') ? +opt('--shared-from') : null, sharedPool = +opt('--shared-pool', 150);
-  const bins = lengthBands(rows, { sharedFrom, sharedPool });
+  const fresh = opt('--fresh') ? +opt('--fresh') : null;
+  const bins = lengthBands(rows, { sharedFrom, sharedPool, fresh });
   const about = 'Band cut-offs by prose length for BBBScorer 0.9.x (tools/build_length_bands.mjs): Original-ish below the 94th percentile of 2023 cards (mostly human) of that length, Familiar from the 98th.' +
     (sharedFrom === null ? '' : ` From ${sharedFrom} prose words up, one set of cut-offs taken over all cards with ${sharedPool}+ prose words.`);
-  const out = { about, source, note: opt('--note', ''), built: new Date().toISOString().slice(0, 10), points: POINTS, ...(sharedFrom === null ? {} : { sharedFrom, sharedPool }), bins };
+  const aboutV10 = `Band cut-offs by prose length for BBBScorer 0.10.0 (tools/build_length_bands.mjs), as percentiles of 2023 cards (mostly human) of that length: Original below the ${Math.round(fresh * 100)}th, Fresh to the 94th, Mixed to the 98th, Common from the 98th.` + (sharedFrom === null ? '' : ` From ${sharedFrom} prose words up, one set of cut-offs taken over all cards with ${sharedPool}+ prose words.`);
+  const out = { about: fresh === null ? about : aboutV10, source, note: opt('--note', ''), built: new Date().toISOString().slice(0, 10), points: fresh === null ? POINTS : { fresh, ...POINTS }, ...(sharedFrom === null ? {} : { sharedFrom, sharedPool }), bins };
   writeFileSync(opt('--out', 'data/botstyle_length_bands.json'), JSON.stringify(out, null, 1) + '\n');
-  for (const b of bins) console.log(`${b.from}–${b.to ?? '∞'} prose words: Original-ish under ${b.original}, Familiar from ${b.common} (n=${b.n})`);
+  for (const b of bins) console.log(`${b.from}–${b.to ?? '∞'} prose words: ${b.fresh !== undefined ? `Fresh from ${b.fresh}, Mixed from ${b.original}, Common from ${b.common}` : `Original-ish under ${b.original}, Familiar from ${b.common}`} (n=${b.n})`);
 }

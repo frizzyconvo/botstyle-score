@@ -31,13 +31,13 @@ import { cardRepetition } from './repetition.js';
 // scores or labels: lists, weights, calibration, bands, preprocessing. Every result carries it, so
 // stored scores can be regression-tested against a new version (tools/compare_scores.mjs).
 // The default stays here as a literal (tools/scorer_manifest.mjs reads it from the source); it must equal DEFAULT_SCORER in
-// scorer-profile.js (a test checks). 0.9.1 is prepared there and only used when a tool opts in.
-export const SCORER_VERSION = '0.8.2';
+// scorer-profile.js (a test checks). Newer versions are prepared there and only used when a tool opts in.
+export const SCORER_VERSION = '0.9.1';
 export { NEXT_SCORER };
 // Versions whose botstyle *numbers* are identical to this one, so references built with them still apply.
 // 0.7.0 re-anchored the scale to AI-written cards and made repeat damping length-independent, so older
 // references don't apply.
-export const SAME_SCORES_AS = ['0.8.1', '0.8.2'];
+export const SAME_SCORES_AS = ['0.9.1'];
 // Card fields scored by default (scoreCard opts.fields overrides): what the page says it scores.
 export const DEFAULT_FIELDS = ['description', 'first_mes'];
 
@@ -52,6 +52,21 @@ export const SHORT_STAMP_WORDS = 250;
 // Band names (descriptive), plus a just-for-fun tagline for each shown next to them on the page.
 export const BAND_LABELS = { original: 'Original-ish', mixed: 'Mixed', familiar: 'Familiar', common: 'Common' };
 export const BAND_TAGLINES = { original: 'Meatbag adjacent', mixed: 'Mixed signals', familiar: 'Rings a bell', common: 'Might just be slop' };
+// Band schemes. 'four' (0.8.2-0.9.x): Original-ish / Mixed / Familiar / Common. 'v10' (0.10.0): Original / Fresh / Mixed /
+// Common, all cut by length: Fresh from the 65th percentile of human cards of that length, Mixed from the 94th, Common
+// from the 98th (Familiar merges into Common). A profile picks one with `bandScheme`.
+export const BAND_SCHEMES = {
+  four: { ids: ['original', 'mixed', 'familiar', 'common'], labels: BAND_LABELS, taglines: BAND_TAGLINES },
+  v10: { ids: ['original', 'fresh', 'mixed', 'common'],
+    labels: { original: 'Original', fresh: 'Fresh', mixed: 'Mixed', common: 'Common' },
+    taglines: { original: 'Meatbag adjacent', fresh: 'Certified flesh?', mixed: 'Big cyborg energy', common: 'Might just be slop' } },
+};
+export function bandScheme() { return BAND_SCHEMES[scorerProfile().bandScheme] || BAND_SCHEMES.four; }
+/** Band id for a score under the given cut-offs (from bandCuts) and the active scheme. */
+export function bandIdFor(score, cuts = WRITING_STYLE_BANDS) {
+  if (cuts.scheme === 'v10') return score >= cuts.common ? 'common' : score >= cuts.mixed ? 'mixed' : score >= cuts.fresh ? 'fresh' : 'original';
+  return score < cuts.original ? 'original' : score < cuts.familiar ? 'mixed' : score < cuts.common ? 'familiar' : 'common';
+}
 
 let REFERENCE = null;   // data/botstyle_reference.json: score quantiles of human and AI cards
 let LENGTH_BANDS = {};     // file -> data/botstyle_length_bands*.json: band cut-offs by prose length (0.9.x lengthBands)
@@ -76,10 +91,12 @@ export async function loadAll(base = './data/') {
 
 // 0.9.x lengthBands: the cut-offs for a card with this many prose words. Same 40 / 60 / 80 everywhere otherwise.
 // The length-bands file gives the Original-ish and Familiar cut-offs (its `common` key); the top band stays at 80+.
+// Scheme 'v10' returns where each band starts: { scheme: 'v10', fresh, mixed, common } (the file's fresh / original / common).
 export function bandCuts(proseWords) {
   const LB = LENGTH_BANDS[lengthBandsFile()];
   if (!scorerProfile().lengthBands || !LB || !LB.bins) return { ...WRITING_STYLE_BANDS, byLength: false };
   const b = LB.bins.find(x => proseWords >= x.from && (x.to === null || proseWords < x.to)) || LB.bins[LB.bins.length - 1];
+  if (scorerProfile().bandScheme === 'v10' && b.fresh !== undefined) return { scheme: 'v10', fresh: b.fresh, mixed: b.original, common: b.common, byLength: true, from: b.from, to: b.to };
   return { original: b.original, familiar: b.common, common: Math.max(WRITING_STYLE_BANDS.common, b.common + 10), byLength: true, from: b.from, to: b.to };
 }
 
@@ -157,9 +174,8 @@ export function writingStyleBand(score, reliable, format, stats = {}, obviousTel
   // an obvious chatbot tell ("Certainly! Here is…") is conclusive at any length
   if (!obviousTell && stats.proseWords !== undefined && stats.proseWords < MIN_JUDGE_WORDS)
     return { id: 'na', label: stats.structuredWords > stats.proseWords ? 'Mostly W++/lists: too little prose to judge' : 'Too little prose to judge' };
-  const B = cuts || WRITING_STYLE_BANDS;
-  const id = score < B.original ? 'original' : score < B.familiar ? 'mixed' : score < B.common ? 'familiar' : 'common';
-  return { id, label: BAND_LABELS[id] + (reliable ? '' : ' (low confidence)'), tagline: BAND_TAGLINES[id],
+  const id = bandIdFor(score, cuts || WRITING_STYLE_BANDS), S = cuts && cuts.scheme === 'v10' ? BAND_SCHEMES.v10 : BAND_SCHEMES.four;
+  return { id, label: S.labels[id] + (reliable ? '' : ' (low confidence)'), tagline: S.taglines[id],
     short: stats.proseWords !== undefined && stats.proseWords < SHORT_STAMP_WORDS };
 }
 
@@ -173,10 +189,12 @@ function quietly(fn) {
  * @param {object|string} card  { description, personality, scenario, first_mes, alternate_greetings, tags }
  * @param {object} opts         { fields: DEFAULT_FIELDS, includeAltGreetings: false, includeExampleDialogue: false, lookupZipf: fn (typo check) }
  */
-// Mixed-card detection (see scoreCard): minimum prose words per part, and the gap in points.
+// Hybrid-card detection (see scoreCard): minimum prose words per part, and the gap in points. "Hybrid" (description
+// and first message far apart, e.g. one written by hand and one with AI) is not the Mixed band.
 export const PART_MIN_WORDS = 60, PART_WEIGHT_CAP = 400;   // card score = blend of parts (see scoreCard)
-export const MIXED_MIN_WORDS = 150;
-export const MIXED_GAP = 25;   // ~6% of human 2023 cards and ~6% of AI cards trip it (eval_cards.mjs)
+export const HYBRID_MIN_WORDS = 150;
+export const HYBRID_GAP = 25;   // ~6% of human 2023 cards and ~6% of AI cards trip it (eval_cards.mjs)
+export const MIXED_MIN_WORDS = HYBRID_MIN_WORDS, MIXED_GAP = HYBRID_GAP;   // old names
 function partScore(text) {
   if (!String(text || '').trim()) return null;
   const p = preprocessCard(text), w = scoreWeighted(p.prose);
@@ -206,14 +224,14 @@ export function scoreCard(card, opts = {}) {
   const st = scoreStructures(pre.prose, contrast.matches || []);
   const artifacts = findArtifacts([preprocessCard(definition).nonBoilerplate].concat(greetings.map(g => preprocessCard(g).nonBoilerplate)));
   const score = computeBotstyleScore(w, st, artifacts.points);
-  // Mixed cards: the description and the greeting(s) scored on their own. A card counts as mixed when
-  // both parts have enough prose and land MIXED_GAP or more points apart (e.g. a hand-written
-  // description with an AI-written greeting). Scorer 0.7.0 reports this; the card score stays joint
-  // unless opts.mixedPolicy = 'higher'. (Since 0.8.0 the card score is a blend of the parts, below.)
+  // Hybrid cards: the description and the greeting(s) scored on their own. A card counts as hybrid when
+  // both parts have enough prose and land HYBRID_GAP or more points apart (e.g. a hand-written
+  // description with an AI-written greeting). Scorer 0.7.0 reports this (it was called "mixed" until app 0.35.0);
+  // the card score stays a blend unless opts.hybridPolicy = 'higher'. (Since 0.8.0 the card score is a blend of the parts, below.)
   const parts = partScores(definition, greetings);
   const repetition = cardRepetition(definition, greetings[0] || '', c.alternate_greetings);
-  const mixed = parts.description && parts.greeting && parts.description.proseWords >= MIXED_MIN_WORDS && parts.greeting.proseWords >= MIXED_MIN_WORDS
-    && Math.abs(parts.description.score - parts.greeting.score) >= MIXED_GAP
+  const hybrid = parts.description && parts.greeting && parts.description.proseWords >= HYBRID_MIN_WORDS && parts.greeting.proseWords >= HYBRID_MIN_WORDS
+    && Math.abs(parts.description.score - parts.greeting.score) >= HYBRID_GAP
     ? { higher: parts.greeting.score > parts.description.score ? 'greeting' : 'description', gap: +Math.abs(parts.description.score - parts.greeting.score).toFixed(1) } : null;
   // Card score (scorer 0.8.0+): the description and the greeting(s) are scored separately and blended,
   // each weighted by its prose words up to PART_WEIGHT_CAP, plus card-level chatbot-leftover points. A part
@@ -237,8 +255,8 @@ export function scoreCard(card, opts = {}) {
   const extra = { compactValues: +compactPoints(compact).toFixed(2), texture: +texturePoints(pCv, pre.stats.proseWords).toFixed(2), cardLists: +cardListPoints(cl).toFixed(2), boldLabels: +boldPoints(bold).toFixed(2) };
   const extraPts = extra.compactValues + extra.texture + extra.cardLists + extra.boldLabels;
   if (extraPts) for (const k of ['score', 'low', 'high']) score[k] = Math.max(0, Math.min(100, score[k] + extraPts));
-  if (mixed && opts.mixedPolicy === 'higher') {
-    const hi = parts[mixed.higher];
+  if (hybrid && (opts.hybridPolicy || opts.mixedPolicy) === 'higher') {
+    const hi = parts[hybrid.higher];
     if (hi.score > score.score) { score.score = hi.score; score.low = Math.max(score.low, hi.low); score.high = Math.max(score.high, hi.high); }
   }
 
@@ -257,7 +275,7 @@ export function scoreCard(card, opts = {}) {
   const likelihood = aiStyleLikelihood(score.score, texture, pre.stats.proseWords);
   const result = {
     version: scorerVersion(),
-    score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable, joint, parts, mixed, repetition,
+    score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable, joint, parts, hybrid, mixed: hybrid, repetition,   // mixed: old name of hybrid
     components: score.components, emdashPoints: score.emdashPoints, artifactPoints: score.artifactPoints,
     band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0, bandCuts(pre.stats.proseWords)),
     bandCuts: bandCuts(pre.stats.proseWords), extraPoints: extra, compactValues: compact, paragraphEvenness: pCv, cardListHits: cl.hits.slice(0, 20),

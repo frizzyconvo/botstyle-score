@@ -17,14 +17,17 @@ import { join } from 'path';
 import { WRITING_STYLE_BANDS as WB, SCORER_VERSION } from '../js/score-card.js';
 import { FAILED, JUST_FOR_FUN } from './_model_groups.mjs';
 import { PATHS } from './_paths.mjs';
-// band shares are recomputed from the score with the current cut-offs, so older score files stay usable
 import { pageRunDir } from './_paths.mjs';
 // default: the page's scorer version's run (not the newest folder: a prepared next version may be mid-run)
 const dir = process.argv[2] || pageRunDir();
 const load = n => existsSync(join(dir, n + '.jsonl')) ? readFileSync(join(dir, n + '.jsonl'), 'utf-8').split('\n').filter(Boolean).map(JSON.parse).filter(r => !r.error && r.reliable && !r.nonEnglish) : [];
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1) : null; };
+// From 0.9.0 the cut-offs depend on length: rows scored by the page's version keep their stored band; older rows are
+// re-banded from the score with the fixed cut-offs.
+const bandOf = r => r.version === SCORER_VERSION && r.band ? r.band : r.score < WB.original ? 'original' : r.score < WB.familiar ? 'mixed' : r.score < WB.common ? 'familiar' : 'common';
+const share = (rows, id) => +(100 * rows.filter(r => bandOf(r) === id).length / Math.max(1, rows.length)).toFixed(1);
 const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, median: q(v, .5), p25: q(v, .25), p75: q(v, .75),
-  original: +(100 * v.filter(x => x < WB.original).length / Math.max(1, v.length)).toFixed(1), familiar: +(100 * v.filter(x => x >= WB.familiar && x < WB.common).length / Math.max(1, v.length)).toFixed(1), common: +(100 * v.filter(x => x >= WB.common).length / Math.max(1, v.length)).toFixed(1),
+  original: share(rows, 'original'), familiar: share(rows, 'familiar'), common: share(rows, 'common'),
   pulp: q(rows.map(r => r.pulp).filter(x => x !== null && x !== undefined), .5),
   upstream: q(rows.map(r => r.upstream).filter(x => x !== null && x !== undefined), .5) }; };
 // Cards made at a non-default temperature / min_p (ids with |t… or |mp…) are sampler tests, not leaderboard cards.

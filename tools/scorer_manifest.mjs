@@ -60,7 +60,7 @@ function manifest(ref) {   // ref = null -> working tree
     anchor, bands: m(sc, /WRITING_STYLE_BANDS = (\{[^}]*\})/), bandLabels: m(sc, /BAND_LABELS = (\{[^}]*\})/),
     emdash: m(st, /EMDASH_POINTS = (\{[^}]*\})/), artifacts: m(ar, /ARTIFACT_POINTS = (\{[^}]*\})/), contrastWeight: m(st, /CONTRAST_WEIGHT = ([0-9.]+)/),
     cardScore: /PART_WEIGHT_CAP/.test(sc) ? `blend of separately scored description and greeting, weighted by prose words (${m(sc, /PART_MIN_WORDS = (\d+)/)}–${m(sc, /PART_WEIGHT_CAP = (\d+)/)})` : 'one text (description + greeting joined)',
-    mixed: /MIXED_GAP/.test(sc) ? `flag when both parts ≥ ${m(sc, /MIXED_MIN_WORDS = (\d+)/)} prose words and ≥ ${m(sc, /MIXED_GAP = (\d+)/)} points apart` : 'none',
+    hybrid: /(?:HYBRID|MIXED)_GAP = \d/.test(sc) ? `flag when both parts ≥ ${m(sc, /(?:HYBRID|MIXED)_MIN_WORDS = (\d+)/)} prose words and ≥ ${m(sc, /(?:HYBRID|MIXED)_GAP = (\d+)/)} points apart` : 'none',
     dialogue: /subkind: speech \? 'dialogue'|subkind === 'dialogue'|'dialogue'/.test(read('js/card-preprocess.js') || '') ? 'in-character dialogue counted as prose' : 'labeled/bulleted dialogue lines dropped as lists',
     structures: { contrast: 'not-x-but-y', patterns: patterns.map(p => ({ ...p, off: disabled.includes(p.id) })) },
     lists: ['botstyle_words.json', 'botstyle_bigrams.json', 'botstyle_trigrams.json', 'botstyle_names.json', 'botstyle_pulp_words.json', 'botstyle_calibration.json', 'botstyle_reference.json', 'botstyle_length_bands.json'].map(listInfo).filter(Boolean),
@@ -75,7 +75,7 @@ function toMd(x) {
   row('Card fields scored by default', x.defaultFields); row('Card score', x.cardScore); row('Component weights', x.weights);
   row('Scale anchor', x.anchor ? `${x.anchor.source}: words ${x.anchor.p90.words}, phrases ${x.anchor.p90.phrases}, structures ${x.anchor.p90.structures}` : null);
   row('Repeats', x.repeats); row('Bands', x.bands); row('Band labels', x.bandLabels); row('Em-dash points', x.emdash); row('Chatbot-leftover points', x.artifacts);
-  row('Not-x-but-y weight', x.contrastWeight); row('Mixed cards', x.mixed); row('Dialogue', x.dialogue); row('Low confidence under', x.minProseWords ? `${x.minProseWords} prose words` : null);
+  row('Not-x-but-y weight', x.contrastWeight); row('Hybrid cards', x.hybrid); row('Dialogue', x.dialogue); row('Low confidence under', x.minProseWords ? `${x.minProseWords} prose words` : null);
   row('Scores identical to', x.profile ? null : x.sameScoresAs);
   if (x.profile) row('Rule switches (js/scorer-profile.js)', Object.entries(x.profile).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join('; '));
   L.push('', '## Sentence-structure patterns', '', x.structures.patterns.map(p => `${p.id} ${p.weight}${p.off ? ' (off)' : ''}`).join(' · ') || '(none found)');

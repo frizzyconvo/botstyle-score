@@ -1,7 +1,9 @@
 // app.js - BB Botstyle Scorer page. Scores cards in the browser with js/score-card.js; nothing is
 // sent anywhere except card fetches (Chub/Botbooru) and, if switched on and chosen per card, the
 // public list (js/site-config.js PUBLIC_RUNS).
-import { scoreCard, loadAll, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, BAND_LABELS, BAND_TAGLINES, SHORT_STAMP_WORDS } from './score-card.js';
+import { scoreCard, loadAll, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, bandScheme, bandCuts, bandIdFor, SHORT_STAMP_WORDS } from './score-card.js';
+// Band ids, names and taglines of the live scorer's scheme (four bands up to 0.9.x; Original / Fresh / Mixed / Common from 0.10.0).
+const BS = bandScheme(), BAND_LABELS = BS.labels, BAND_TAGLINES = BS.taglines, BAND_IDS = BS.ids;
 // The scorer version is part of the page title and the heading, so a tab, bookmark or screenshot says which scorer
 // made a score. Phones get the short name.
 const PHONE = window.matchMedia ? window.matchMedia('(max-width: 520px)') : { matches: false };
@@ -11,7 +13,8 @@ for (const el of document.querySelectorAll('.title-ver')) el.textContent = 'v' +
 // Band zones on the leaderboard axis follow the scorer's cut-offs (css/app.css reads these).
 document.documentElement.style.setProperty('--band1', WB.original + '%'); document.documentElement.style.setProperty('--band2', WB.familiar + '%'); document.documentElement.style.setProperty('--band3', WB.common + '%');
 // Band from a stored score: saved and shared cards from before 0.8.2 stored three-band ids, so lists re-derive the band.
-const bandOfScore = (v, stored) => stored === 'na' ? 'na' : v < WB.original ? 'original' : v < WB.familiar ? 'mixed' : v < WB.common ? 'familiar' : 'common';
+// Saved cards keep their prose-word count, so the band follows the live scorer's cut-offs for that length.
+const bandOfScore = (v, stored, proseWords) => stored === 'na' ? 'na' : proseWords != null ? bandIdFor(v, bandCuts(proseWords)) : BAND_IDS.includes(stored) ? stored : bandIdFor(v, WB);
 import { parseCardText, parseCardPng } from './card-import.js';
 import { fetchCard, CARD_SOURCES } from './card-fetch.js';
 import { initPosTagger } from './pos-tagger.js';
@@ -309,7 +312,8 @@ function renderResult(r) {
   if (noDesc || noGreet) L += `<div class="alert"><b>${noDesc && noGreet ? 'No description or first message.' : noDesc ? 'No description.' : 'No first message.'}</b> ${noDesc ? 'Every card should have a description; ' : ''}${noDesc && !noGreet ? 'this score is the first message alone.' : noGreet && !noDesc ? 'This score is the description alone. If the greeting is pasted into the description box, move it to the first-message box.' : ''}</div>`;
   const P = r.parts || {}, partTxt = [['Description', P.description], ['Greeting', P.greeting]].filter(([, p]) => p && p.proseWords >= 60)
     .map(([l, p]) => `${l} <b>${p.score.toFixed(1)}</b>${p.reliable ? '' : ' <span class="faint">(short)</span>'}`);
-  if (r.mixed) L += `<div class="alert"><b>Mixed card:</b> the ${r.mixed.higher} reads ${r.mixed.gap.toFixed(0)} points more AI-styled than the ${r.mixed.higher === 'greeting' ? 'description' : 'greeting'} (${partTxt.join(' · ')}). Often a hand-written ${r.mixed.higher === 'greeting' ? 'description with an AI-written greeting' : 'greeting with an AI-written description'}. The card score blends the two by length.</div>`;
+  const hy = r.hybrid || r.mixed;
+  if (hy) L += `<div class="alert"><b>Hybrid card:</b> the ${hy.higher} reads ${hy.gap.toFixed(0)} points more AI-styled than the ${hy.higher === 'greeting' ? 'description' : 'greeting'} (${partTxt.join(' · ')}). Often a hand-written ${hy.higher === 'greeting' ? 'description with an AI-written greeting' : 'greeting with an AI-written description'}. The card score blends the two by length.</div>`;
   else if (partTxt.length > 1) L += `<div class="note">Each part alone: ${partTxt.join(' · ')}.</div>`;
   if (r.pulp && band.id !== 'na' && r.pulp.score > 0) {   // nothing to say when no AI-favored word is genre vocabulary
     const P = r.pulp;
@@ -330,6 +334,10 @@ function renderResult(r) {
     R += `<div class="sec"><h3>What scored</h3>${r.hits.phrases.length ? `<div class="dim small">Phrases</div>${chips(r.hits.phrases)}` : ''}${r.hits.words.length ? `<div class="dim small" style="margin-top:6px">Words</div>${chips(r.hits.words)}` : ''}`
       + (r.hits.structures.length ? `<div class="dim small" style="margin-top:6px">Sentence structures</div><ul>${r.hits.structures.slice(0, 12).map(x => `<li>${esc(x.label)}${x.count > 1 ? ' ×' + x.count : ''} <span class="faint">(${x.weight.toFixed(1)})</span>${x.examples && x.examples[0] ? `<span class="ex">“${esc(String(x.examples[0]).slice(0, 100))}”</span>` : ''}</li>`).join('')}</ul>` : '') + '</div>';
   }
+  // 0.9.x extra points: words and phrases mined from AI-written cards, bold labels
+  const XP = r.extraPoints || {}, CL = r.cardListHits || [];
+  if (XP.cardLists > 0 || XP.boldLabels > 0) R += `<div class="sec"><h3>Card-style points</h3>${XP.cardLists > 0 ? `<div class="small">Words and phrases common in AI-written cards: <b>+${XP.cardLists.toFixed(1)}</b> points</div><div>${CL.slice(0, 16).map(x => `<span class="tag hot">${esc(x.item)}<span class="w">${x.weight.toFixed(1)}</span></span>`).join('')}</div>` : ''}`
+    + `${XP.boldLabels > 0 ? `<div class="small" style="margin-top:6px">Bold labels and headings: <b>+${XP.boldLabels.toFixed(1)}</b> points</div>` : ''}</div>`;
   R += compareSection(r);
   const f = r.format.format, g = r.greeting;
   const gl = g ? (GREETING_FORMATS[g.rp] || [g.rp, '']) : null;
@@ -376,7 +384,8 @@ function renderResult(r) {
   if (rep.length) R += `<div class="sec"><h3>Repeated wording ${UNS}</h3><span class="faint small">Repetition is a writing issue; in our data human cards repeat themselves more often than AI-written ones.</span><ul>${rep.join('')}</ul></div>`;
   if (r.texture && r.texture.paraCv !== null) {
     const lk = r.experimental.aiStyleLikelihood;
-    R += `<div class="sec"><h3>Texture ${EXP}${UNS}</h3><span class="small">Paragraph evenness: length CV ${r.texture.paraCv.toFixed(2)} over ${r.texture.paragraphs} paragraphs (2023 human cards ~0.67, AI-written ~0.32; lower = more even).${lk !== null ? ` AI-style likelihood (score + evenness): <b>${Math.round(lk * 100)}%</b>.` : ''} Careful writers can be even too.</span></div>`;
+    const tp = r.extraPoints && r.extraPoints.texture ? r.extraPoints.texture : 0;
+    R += `<div class="sec"><h3>Texture${tp ? '' : ` ${UNS}`}</h3><span class="small">Paragraph evenness: length CV ${r.texture.paraCv.toFixed(2)} over ${r.texture.paragraphs} paragraphs (2023 human cards ~0.67, AI-written ~0.32; lower = more even).${tp ? ` In the score: <b>${tp > 0 ? '+' : '−'}${Math.abs(tp).toFixed(1)}</b> points.` : ''}${lk !== null ? ` AI-style likelihood (score + evenness, experimental): <b>${Math.round(lk * 100)}%</b>.` : ''} Careful writers can be even too.</span></div>`;
   }
   const nn = nerdStats(r.text);
   const cc = state.card || {}, everything = [cc.description, cc.personality, cc.scenario, cc.first_mes, cc.mes_example, ...(cc.alternate_greetings || [])].filter(Boolean).join('\n\n');
@@ -461,16 +470,16 @@ const median = a => { const s = [...a].sort((x, y) => x - y); return s.length ? 
 function renderMine() {
   const list = store.all();
   $('mine').hidden = !list.length; if (!list.length) return;
-  const sc = list.map(x => x.score), bands = b => list.filter(x => bandOfScore(x.score, x.band) === b).length;
+  const sc = list.map(x => x.score), bands = b => list.filter(x => bandOfScore(x.score, x.band, x.proseWords) === b).length;
   const mineByCreator = list.filter(x => x.creator);
   const vers = [...new Set(list.map(x => x.version))];
   $('mineSummary').innerHTML = `<div class="stat"><b>${list.length}</b><span>cards</span></div><div class="stat"><b>${median(sc).toFixed(1)}</b><span>median score</span></div>`
     + `<div class="stat"><b>${(sc.reduce((a, b) => a + b, 0) / sc.length).toFixed(1)}</b><span>average</span></div>`
-    + `<div class="stat"><b>${bands('original')} · ${bands('mixed')} · ${bands('familiar')} · ${bands('common')}</b><span>${esc(BAND_LABELS.original)} · ${esc(BAND_LABELS.mixed.toLowerCase())} · ${esc(BAND_LABELS.familiar.toLowerCase())} · ${esc(BAND_LABELS.common.toLowerCase())}</span></div>`
+    + `<div class="stat"><b>${BAND_IDS.map(bands).join(' · ')}</b><span>${BAND_IDS.map((b, i) => esc(i ? BAND_LABELS[b].toLowerCase() : BAND_LABELS[b])).join(' · ')}</span></div>`
     + (mineByCreator.length ? `<div class="stat"><b>${median(mineByCreator.map(x => x.score)).toFixed(1)}</b><span>median, cards you made (${mineByCreator.length})</span></div>` : '')
     + (vers.length > 1 ? `<div class="stat"><b>${vers.length}</b><span>BBBScorer versions mixed</span></div>` : '');
   $('mineList').innerHTML = [...list].reverse().map(x => `<div class="item"><span class="nm">${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}</span><span class="meta"><span class="band ${bandOfScore(x.score, x.band)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(x.score, x.band)] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse)}` : ''}</span>
+    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}</span><span class="meta"><span class="band ${bandOfScore(x.score, x.band, x.proseWords)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(x.score, x.band, x.proseWords)] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse)}` : ''}</span>
     <button class="x" type="button" data-key="${esc(x.key)}" title="Remove">✕</button></div>`).join('');
   $('mineList').querySelectorAll('button.x').forEach(b => b.addEventListener('click', () => { store.remove(b.dataset.key); renderMine(); renderBoard(); }));
 }

@@ -1,17 +1,20 @@
 # Roadmap
 
-Planned work and the status of scoring changes. The live scorer is **BBBScorer 0.8.2**; the next version is
-prepared behind switches in `js/scorer-profile.js` and used only when a tool asks for it.
+Planned work and the status of scoring changes. The live scorer is **BBBScorer 0.9.1** (card-mined lists, cut-offs by
+length); the next version is prepared behind switches in `js/scorer-profile.js` and used only when a tool asks for it.
 
-## Next scorer version: 0.9.4 (prepared, not live)
+## Next scorer version: 0.10.0 (prepared, not live)
 
-0.9.4 scores cards exactly like 0.9.3 and changes only the band cut-offs by length. 0.9.3 is 0.9.1 (below) plus
-points for bold used as labels or headings (`**Appearance:**`, `- **Likes:** …`, a line that is only
-`**Backstory**`): from 2 such labels on, 4 points plus 1 for each one after, at most 10. Two or more appear on about
-1% of early-2023 human cards and on about a third of AI-written cards.
+0.10.0 scores cards like 0.9.3 and has new bands and length cut-offs.
 
-0.9.4's length bands:
-- **Built from early-2023 card collections** that the lists were never mined from, instead of a sample of 2023
+- **Bold labels and headings** (from 0.9.3): points for bold used as labels or headings (`**Appearance:**`,
+  `- **Likes:** …`, a line that is only `**Backstory**`): from 2 such labels on, 4 points plus 1 for each one after, at
+  most 10. Two or more appear on about 1% of early-2023 human cards and on about a third of AI-written cards.
+- **New bands: Original, Fresh, Mixed, Common.** Familiar merges into Common. Taglines: *meatbag adjacent*,
+  *certified flesh?*, *big cyborg energy*, *might just be slop*. All cut by length, as percentiles of human cards of
+  the same length: Fresh from the 65th (about 20 for cards with 350+ prose words), Mixed from the 94th, Common from
+  the 98th.
+- **Cut-offs from early-2023 card collections** that the lists were never mined from, instead of a sample of 2023
   cards the lists were mined against.
 - **ChatGPT-era cards left out of the human side.** The 2023 sets include some cards written with early ChatGPT
   ("Overall, her personality is one of…", "a complex and multifaceted personality"). The ones with a strong
@@ -19,23 +22,23 @@ points for bold used as labels or headings (`**Appearance:**`, `- **Likes:** …
   read as AI-written. Counted as human, they pushed the cut-offs up.
 - **Own cut-offs under 350 prose words, one shared set from 350 up.** Short cards score as well as long ones but
   rarely reach a cut-off set for all lengths; per-length cut-offs for long cards rose to about 72 and missed real
-  AI-written cards, which are mostly long.
+  AI-written cards, which are mostly long. (0.9.4 had these cut-offs with the four old bands.)
 
-Score with it: `node tools/score_all.mjs --scorer 0.9.4`.
+Score with it: `node tools/score_all.mjs --scorer 0.10.0`.
 
 **Test results.** Human side: early-2023 card collections. AI side: cards from model families that were never used
 to build the lists. At the score that 2% of the human cards reach:
 
-| AI test set | 0.8.2 | 0.9.1 | 0.9.3 / 0.9.4 |
+| AI test set | 0.8.2 | 0.9.1 | 0.9.3 / 0.10.0 |
 |---|---|---|---|
 | Generated cards by 30 models from 18 unmined families (about 4,000) | 18% | 29% | 33% |
 | A creator's cards written with AI from a public prompt template (109) | 41% | 57% | 59% |
 | Cards whose creators say they used AI (47) | 28% | 36% | 36% |
 
-Labeled Familiar or above (0.9.3's length bands → 0.9.4's), with an independent human set (Korshuk, Chub before
+At the top line of each version's length bands (0.9.3: Familiar or above; 0.10.0: Common), with an independent human set (Korshuk, Chub before
 July 2023, a JanitorAI sample from before March 2024; about 15,000 cards):
 
-| Set | 0.9.3 | 0.9.4 |
+| Set | 0.9.3 | 0.10.0 |
 |---|---|---|
 | Generated cards from unmined model families | 33% | 44% |
 | Prompt-template cards | 44% | 64% |
@@ -43,17 +46,19 @@ July 2023, a JanitorAI sample from before March 2024; about 15,000 cards):
 | Human cards (ChatGPT-era cards left out) | 1.5% | 2.5% |
 | Human cards over 800 prose words (same) | 1.6% | 3.8% |
 
-0.9.3's bands came out stricter than their 2% target; 0.9.4's sit near it, with more of the false positives on
-long cards.
+0.9.3's bands came out stricter than their 2% target; 0.10.0's sit near it, with more of the false positives on
+long cards. Read by hand, a sample of the long "human" cards that only 0.10.0 flags were mostly AI-written,
+hand-written with an AI-written greeting, or purple genre writing.
 
 **Before release:**
 - [ ] Full rescore with the release candidate.
-- [ ] Length cut-offs checked against that run (0.9.4's come from early-2023 collections: `node tools/build_length_bands.mjs --rows … --drop-oldschool strong --shared-from 350`).
+- [ ] Length cut-offs checked against that run (0.10.0's come from early-2023 collections: `node tools/build_length_bands.mjs --rows … --drop-oldschool strong --shared-from 350 --fresh 0.65`).
 - [ ] Reference and leaderboard rebuilt.
-- [ ] New band names: Original, Fresh, Mixed, Common (Familiar merges into Common), with the page, How It Works,
-      docs, title test and public-list worker updated.
+- [x] New band names in the scorer: Original, Fresh, Mixed, Common (`bandScheme: 'v10'`).
+- [x] Public-list worker accepts the `fresh` band id (redeploy needed).
+- [ ] Page, How It Works, leaderboard band shares (it counts Familiar), docs and title test switched to the new bands.
 
-### What 0.9.x changes compared with 0.8.2
+### What 0.9.1 (live) changes compared with 0.8.2
 
 - **Cut-offs by length.** Each length range is cut at the same points of 2023 cards of that length, so short and
   long cards are judged against cards like them.
@@ -67,8 +72,9 @@ long cards.
 - **Words and phrases mined from AI-written cards.** A second list mined from about 2,250 cards by 37 models, every
   model counted equally ("fiercely loyal", "tilts her head", "leather-bound").
 - **Paragraph evenness.** A few points for very even paragraph lengths, a few off for very uneven ones.
-- **Bold labels and headings** (0.9.3).
-- **Length bands from cards the lists never saw, without ChatGPT-era cards, shared from 350 prose words up** (0.9.4).
+
+Prepared since: bold labels and headings (0.9.3), length bands from cards the lists never saw without ChatGPT-era
+cards (0.9.4), and the 0.10.0 bands.
 
 ## Tested and not adopted
 
@@ -104,7 +110,7 @@ long cards.
   typical a card's mix of topics is. Not started.
 - **Old-school AI.** Check it against GPT-3.5 Turbo and GPT-4 cards (the models early-2023 AI cards most likely came
   from). Essay transitions ("Furthermore,", "Overall,") are listed but not counted until then. Its strong level
-  already decides which 2023 cards are left out of 0.9.4's human side; points for it add little once those are out.
+  already decides which 2023 cards are left out of 0.10.0's human side; points for it add little once those are out.
 - **Genre read.** Use card tags first; rebuild the genre words, then the pulp list, from tag-labeled cards.
 - **Archetypes.** Being redone from the axes that carry information (description format, greeting point of view,
   size); hidden on the page until then.

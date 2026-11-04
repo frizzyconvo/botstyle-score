@@ -3,7 +3,8 @@
 How BBBScorer (the BB Botstyle Scorer) works, what every number, band, tag and label on the page means, and how it
 was tested. The quick start is in [README.md](README.md); version history is in [CHANGELOG.md](CHANGELOG.md).
 
-Numbers below are from the **BBBScorer v0.8.2** scoring run (0.8.2 has 0.8.1's scores, with four bands instead of three).
+Numbers below are from the **BBBScorer v0.9.1** scoring run (card-mined lists, cut-offs by length, paragraph evenness and
+half-weight genre words on top of 0.8.2), unless a figure says otherwise.
 
 **Contents:** [What it is](#what-it-is) · [What gets scored](#what-gets-scored) · [The score](#the-score) ·
 [Bands](#bands) · [Formats](#formats) · [Greeting](#greeting) · [Tags](#tags) · [Archetypes](#archetypes) ·
@@ -51,6 +52,18 @@ needs 60 words of prose to count on its own.
 - **Em-dashes:** above 6 per 1,000 words they add up to 10 points (the full 10 at 16 per 1,000). Human cards rarely
   pass 6; AI cards sit around 10.
 - **Chatbot leftovers:** 40 points each, up to 80. See [Chatbot leftovers](#chatbot-leftovers).
+- **Card-mined words and phrases** (0.9.1): a second list mined from about 2,250 AI-written cards by 37 models, every
+  model counted equally ("fiercely loyal", "tilts her head", "leather-bound", "practical"). Up to 30 points: 30 ×
+  the card's rate of list items (summed weights per 1,000 prose words) relative to the 90th percentile of the AI cards
+  it was mined from, capped at 1. The page lists the items a card hit under *Card-style points*.
+- **Paragraph evenness** (0.9.1): AI text keeps paragraphs close to the same length. For cards with 3+ paragraphs and
+  150+ prose words, 30 points per unit below a paragraph-length CV of 0.6, from −12 (very uneven) to +20 (very even).
+
+**Genre words count half** (0.9.1): words that human fantasy, horror, action and romance cards use about as often as
+AI cards ("realm", "crimson", "primal") count at half weight. Six sentence patterns picked on stories that don't
+separate on cards are off ("found herself …ing", "it was as if" and four more), W++ / PList inside parentheses is
+read as a PList, one word or phrase counts at most 2.5 times its weight per 700 words, and roleplay asterisks are
+removed before the sentence patterns run.
 
 **Range:** the "range" under the score is ±1 standard error, a rough idea of how much the number could move with
 a little more or less text.
@@ -137,32 +150,49 @@ card-field residue (`"first_mes": "…"`), unfilled placeholders ("[Insert name]
 
 ## Bands
 
-| Score | Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
-|---|---|---|---|---|
-| under 40 | **Original-ish** | *Meatbag adjacent* | 94.2% | 45.6% |
-| 40–60 | **Mixed** | *Mixed signals* | 3.7% | 26.3% |
-| 60–80 | **Familiar** | *Rings a bell* | 1.5% | 19.0% |
-| 80 and up | **Common** | *Might just be slop* | 0.5% | 9.1% |
-| (too short or not English) | **Low confidence** / no band | | | |
+| Band | Fun tagline | 2023 cards (mostly human) | AI-written cards |
+|---|---|---|---|
+| **Original-ish** | *Meatbag adjacent* | 94.6% | 26.0% |
+| **Mixed** | *Mixed signals* | 3.5% | 32.2% |
+| **Familiar** | *Rings a bell* | 1.0% | 16.7% |
+| **Common** | *Might just be slop* | 0.9% | 25.1% |
+| (too short or not English) | **Low confidence** / no band | | |
 
 The band names say how common the card's phrasing is in AI writing. The taglines are just for fun and shown next
-to them. Familiar and Common split what used to be one "Common" band (60 and up), so a card at 62 and a card at
-95 no longer get the same label.
+to them.
+
+**Cut-offs by length** (0.9.1). Short cards have few chances to hit anything, so one set of cut-offs for every length
+flagged long human cards far more often than short ones. Each length range is cut at the same points of 2023 cards
+of that length: Mixed from their 94th percentile, Familiar from the 98th, Common from 80 or 10 points above Familiar,
+whichever is higher. Cut-offs never fall as length grows.
+
+| Prose words | Mixed from | Familiar from | Common from |
+|---|---|---|---|
+| under 150 | 21.7 | 33.4 | 80 |
+| 150–250 | 32.5 | 47.9 | 80 |
+| 250–350 | 41.1 | 70.9 | 80.9 |
+| 350–500 | 45 | 70.9 | 80.9 |
+| 500–800 | 49.7 | 71.5 | 81.5 |
+| 800 and up | 49.7 | 72.5 | 82.5 |
+
+These were built from half of a 23,500-card sample of 2023 cards scored with the 0.9.0 rules. On the full run, 1.1–2.1%
+of 2023 cards reach Familiar at every length (under 150 prose words: 1.6%; 800 and up: 2.1%).
 
 **"Too short to tell" stamp:** a card with under 250 prose words gets a small stamp on the corner of its band
-tag. Short cards give few chances for a hit, so their low scores say little (see [Limits](#limits)).
+tag. Short cards give few chances for a hit, so their low scores say little (see [Limits](#known-limits)).
 
-The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,129
-(Korshuk, JanitorAI, Chub), median 12. AI-written cards: 4,175, median 43.2.
+The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,127
+(Korshuk, JanitorAI, Chub), median 11.7. AI-written cards: 4,175, median 60.
 
 **The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
 AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
 up ChatGPT-, Claude- and Bing-written cards from 2023 among them. Some of its 2% in Familiar or Common are real AI cards, so
 the false-positive rate on human writing is somewhat lower than these numbers suggest.
 
-**Mixed card** (flag, not a band): the description and the first message both have 150+ words of prose and land
-25+ points apart, for example a hand-written description with an AI-written greeting. The card score stays a
-blend; taking the higher part raised false positives on human cards, because short greetings are noisy.
+**Hybrid card** (flag, not a band; called a "mixed card" before app 0.35.0): the description and the first message
+both have 150+ words of prose and land 25+ points apart, for example a hand-written description with an AI-written
+greeting. The card score stays a blend; taking the higher part raised false positives on human cards, because short
+greetings are noisy. Hybrid is about the two parts; Mixed is a band.
 
 ## Formats
 
@@ -255,7 +285,8 @@ when it's close.
 **Pulp read** (experimental, unscored): pulpy fantasy, horror, action and romance writing shares a lot of
 vocabulary with AI models ("ancient", "shadows", "crimson"). The pulp read shows how much of a card's AI-favored
 word weight is genre vocabulary that human genre cards use about as often, and what the score would be without
-it. When pulp vocabulary is 15%+ of the word weight and the card scores 40+, it gets one of two flags:
+it. Since 0.9.1 those genre words already count half in the score; the read shows what is left of them. When pulp
+vocabulary is 15%+ of the word weight and the card scores 40+, it gets one of two flags:
 
 - **Reads as pulp, not AI-styled:** without the genre vocabulary it would drop under 40.
 - **Pulpy and AI-suspect:** it stays at 40+ even without it.
@@ -286,9 +317,9 @@ explain themselves on hover or tap.
 - **Repeated wording:** inside the description, inside the first message, and shared between them. Human cards
   repeat themselves more often than AI-written ones, so it's a writing note, not an AI sign. Alternate greetings
   reusing the first message are noted as normal.
-- **Texture** (experimental): paragraph evenness. AI text keeps paragraphs close to the same length (length CV
-  around 0.32 vs 0.67 for 2023 human cards). Shown with an "AI-style likelihood" that combines it with the score.
-  Careful human writers can be even too.
+- **Texture:** paragraph evenness. AI text keeps paragraphs close to the same length (length CV around 0.32 vs 0.67
+  for 2023 human cards). Since 0.9.1 it counts in the score (see [Extra points](#the-score)); the "AI-style likelihood"
+  that combines it with the score stays an experimental read-out. Careful human writers can be even too.
 - **Old-school AI** (experimental): the essay and character-sheet register of older models, ChatGPT-era GPT-3.5 / GPT-4
   and 2024-era open models such as Phi-4, Mistral Small, Gemma 3 and Llama 3 ("a testament to", "meticulously",
   "intricacies", "a force to be reckoned with", "her sharp wit", ", reflecting the…"). The scored lists come from fiction,
@@ -350,18 +381,18 @@ nearly) are counted once.
 
 | Set | Cards | Median | Original-ish | Familiar or Common |
 |---|---|---|---|---|
-| Korshuk cards, Feb–Apr 2023 | 360 | 7.5 | 97% | 1% |
-| JanitorAI cards, May–Jun 2023 | 9,145 | 11.6 | 95% | 2% |
-| JanitorAI cards, Jul 2023–Feb 2024 | 97,042 | 12.2 | 94% | 2% |
-| Chub cards, before Jul 2023 | 1,582 | 18.2 | 88% | 3% |
-| Chub cards, 2025 | 680 | 33.5 | 61% | 15% |
-| Pygmalion Discord cards, to Apr 2023 | 412 | 7.5 | 97% | 1% |
-| Roko's Basilisk Archive, Feb–Jul 2023 | 229 | 10.9 | 98% | 1% |
-| VenusAI Discord cards, 2023 | 1,452 | 13.7 | 92% | 3% |
-| Chub archive (mega.nz), to Jul 2023 | 3,071 | 14.8 | 93% | 1% |
-| Perchance cards (SFW), 2024–25 (human and AI-assisted) | 424 | 36.5 | 55% | 20% |
-| SPB-2602 AI personas (Kimi, GLM) | 593 | 55.1 | 14% | 37% |
-| Foreverse anti-slop AI cards | 6 | 21.1 | 100% | 0% |
+| Korshuk cards, Feb–Apr 2023 | 360 | 12.4 | 94% | 1% |
+| JanitorAI cards, May–Jun 2023 | 9,145 | 12.5 | 95% | 2% |
+| JanitorAI cards, Jul 2023–Feb 2024 | 97,040 | 11.5 | 93% | 2% |
+| Chub cards, before Jul 2023 | 1,582 | 20.3 | 89% | 3% |
+| Chub cards, 2025 | 680 | 39.1 | 64% | 11% |
+| Pygmalion Discord cards, to Apr 2023 | 412 | 12.0 | 94% | 1% |
+| Roko's Basilisk Archive, Feb–Jul 2023 | 229 | 9.7 | 99% | 0% |
+| VenusAI Discord cards, 2023 | 1,452 | 15.4 | 91% | 2% |
+| Chub archive (mega.nz), to Jul 2023 | 3,071 | 16.2 | 92% | 2% |
+| Perchance cards (SFW), 2024–25 (human and AI-assisted) | 424 | 37.7 | 57% | 17% |
+| SPB-2602 AI personas (Kimi, GLM) | 593 | 70.8 | 7% | 46% |
+| Foreverse anti-slop AI cards | 6 | 19.5 | 100% | 0% |
 
 **Yours:** the card you just scored (gold), and your saved cards together.
 
@@ -375,16 +406,16 @@ the same link sit in a fold under the newest one.
 ## Known limits
 
 - **Genre vocabulary.** Dark fantasy, horror and action cards use words AI fiction also overuses ("primal",
-  "abyss", "ember"). The pulp read shows how much of a score comes from them.
+  "abyss", "ember"). Since 0.9.1 the ones human genre cards use as often count half; the pulp read shows how much
+  of a score still comes from them.
 - **In-voice cards** and some roleplay fine-tunes score lower than their AI origin suggests: they avoid the
   third-person narration the lists were built from.
 - **"Don't sound like AI" instructions work.** Cards written by a model under strict anti-slop rules score like
   human cards. The score measures house style, not authorship.
 - **Short and compact cards read low.** W++, PLists and lists are set aside, so a compact card is scored mostly on
   its greeting, and short prose gives few chances for a hit. AI-written cards with under 150 prose words have a
-  median of about 14 (9 in 10 land in Original-ish); with 150–250 words, about 23. The band cut-offs are the same
-  at every length, so human cards that short almost never reach Familiar either (0.1%, against 3–4% of very long
-  human cards). Treat a low score on a bite-sized card as "not enough to go on".
+  median of about 27 (4 in 10 land in Original-ish); with 150–250 words, about 40. The band cut-offs are lower for
+  short cards (see [Bands](#bands)), but treat a low score on a bite-sized card as "not enough to go on".
 - **Repetition isn't an AI sign on cards** (see [Other read-outs](#other-read-outs-unscored)).
 - **English only.** The word lists are English; other languages get no band.
 
@@ -394,58 +425,59 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,129 from 2023 (mostly human) vs 4,175 AI-written | 0.77 | 0.86 |
+| Character cards: 108,127 from 2023 (mostly human) vs 4,175 AI-written | 0.77 | 0.93 |
 
-On the cards, at a 2% false-positive rate on the 2023 cards, BBBScorer flags 28% of AI-written cards and the original
-slop score 21%. The AI side now includes many hard cards on purpose: short requests, "don't sound like AI" rules and
+SlopReview and Gutenberg were last run with BBBScorer 0.8.2. On the cards, at a 2% false-positive rate on the 2023
+cards, BBBScorer 0.9.1 flags 43% of AI-written cards and the original slop score 22%. Part of that gain is in-sample:
+the card-mined list was mined from these AI cards' models; on cards from 18 model families never used to build the lists,
+0.9.1 flags 29% (0.8.2: 18%). The AI side now includes many hard cards on purpose: short requests, "don't sound like AI" rules and
 light rewrites of human cards.
 
 **Early-2023 card collections as a second human side** (Pygmalion Discord to April 2023, Roko's Basilisk Archive,
-VenusAI Discord, a Chub archive to July 2023; 5,164 cards with enough prose, copies of other sets left out): AUC 0.84
-against the same AI cards, and 1.7% of them reach 60 (JanitorAI 2023: 2.0%). By length, 0.7-0.9% of their cards
-under 400 prose words reach 60, against 2.7% at 400-800 words and 5.2% over 800 (231 cards).
+VenusAI Discord, a Chub archive to July 2023; 5,164 cards with enough prose, copies of other sets left out): AUC 0.91
+against the same AI cards, and 1.6% of them reach Familiar (JanitorAI 2023: 1.7%). By length: 1.4% under 400 prose
+words, 2.0% at 400–800 and 1.7% over 800 (231 cards).
 
 **Cards of known provenance** (52 so far: creator-stated, plus some suspected). Four of the 5 hand-written cards land
-in Original-ish (7–23); the fifth, a dark-fantasy card whose creator says long roleplay with AI has shaped their
-writing, scores 46 (Mixed). All 11 cards their creators say were written with ChatGPT or DeepSeek land in Mixed,
-Familiar or Common (45–78), and a card its creator calls "AI slapped together" scores 81 (Common). Recent Claude models are harder: a whole card
-by Claude Opus 4.6 scores 22 (Original-ish), and one by Claude Sonnet 4.5 scores 53, with its AI-written greeting (28)
-far below its description (77), so it is flagged as a mixed card.
-Of the 4 partly AI-written cards, the AI-edited one scores 50 (Mixed), but the two whose creators give 60% AI score 20 and
-31 and the 30% one 7: much of their AI-written profiles is lists and key-value lines, which aren't scored, and their
-hand-written greetings score low. Seven cards from one creator who says every card is written by AI from their idea,
-outline and writing direction score 19–61 (median 31), and five of the seven land in Original-ish, about the share the
-creator reports. Their prose is plain and modern, with none of the stock vocabulary the lists look for: a model steered
-away from house style scores like a person, the same as the anti-slop cards above. Five cards from another creator who
-says how AI helped on each (AI-written greetings on a hand-written card, a W++ card converted to prose with Claude and
-then corrected, an AI draft edited heavily) score 11–46: four land in Original-ish, and the one with an AI-written
-greeting and light AI editing in Mixed (46). Eleven cards from a creator who writes his cards with AI from his own
-notes, using a prompt template he shares publicly (the template asks for paragraphs under headings and no em dashes),
-score 26–71 (median 43), while the original slop score gives them 3–30. A card from a creator who says AI writes
-their descriptions is flagged as a mixed card: description 59, greeting 34. The template creator's other 109 cards,
-kept as a separate test set, have a median of 52 and 41% of them reach the score that 2% of the early-2023 cards
-reach; the original slop score's median for them is 18. Across seven cards where AI wrote the greeting, the greetings alone score 6–48, mostly
-below the descriptions, so an AI greeting on an otherwise hand-written card usually isn't flagged; the exception is a
-Claude 3 Opus greeting (48) on a hand-written description (13), which is flagged as a mixed card. Too few cards for rates
-yet; the set is growing.
+in Original-ish (0–28); the fifth, a dark-fantasy card whose creator says long roleplay with AI has shaped their
+writing, scores 54 (Mixed). The 11 whole cards their creators say were written with ChatGPT, DeepSeek or another chat
+model score 55–94 and all land in Mixed or above. Recent Claude models are harder: a whole card by Claude Opus 4.6
+scores 28 (Original-ish), and one by Claude Sonnet 4.5 scores 68 (Mixed), with its AI-written greeting (27) far below
+its description (76), so it is flagged as a hybrid card. Of the 4 partly AI-written cards, the AI-edited one scores 51
+(Mixed), but the two whose creators give 60% AI score 32 and 19 and the 30% one 2: much of their AI-written profiles is
+lists and key-value lines, which aren't scored, and their hand-written greetings score low. Seven cards from one
+creator who says every card is written by AI from their idea, outline and writing direction score 30–69 (median 42),
+and four of the seven land in Original-ish. Their prose is plain and modern, with little of the stock vocabulary the
+lists look for: a model steered away from house style scores like a person, the same as the anti-slop cards above.
+Five cards from another creator who says how AI helped on each (AI-written greetings on a hand-written card, a W++ card
+converted to prose with Claude and then corrected, an AI draft edited heavily) score 16–50: four land in Original-ish,
+and the one with an AI-written greeting and light AI editing in Mixed (50). Eleven cards from a creator who writes his
+cards with AI from his own notes, using a prompt template he shares publicly (the template asks for paragraphs under
+headings and no em dashes), score 42–81 (median 55), while the original slop score gives them 3–30. The template
+creator's other 109 cards, kept as a separate test set, have a median of 66 and 57% of them reach the score that 2% of
+the early-2023 cards reach; the original slop score's median for them is 18. Where AI wrote only the greeting, the
+greetings alone score 4–45, so an AI greeting on an otherwise hand-written card usually isn't flagged; the exception
+is a Claude 3 Opus greeting (44) on a hand-written description (13), which is flagged as a hybrid card. Too few cards
+for rates yet; the set is growing.
 
 **Human writing from before AI tools** (a check on false positives outside the card sets the lists were built on):
 - Fanfiction excerpts (first 600 words), scored as a description-only card. FicWad stories from 2005 to 2021: 0% of
-  G to PG-13 stories and 0.1% of R / NC-17 stories reach 60 (BBBScorer 0.8.2; medians 6.8 and 8.3). PaperDemon
-  (mostly 2000s): 0.2%. FicWad stories from 2023 on: 5.6%, median 11.9. Prepared 0.9.1: 0% / 0.2% / 0.5%, and 7.0% for 2023 on.
+  G to PG-13 stories and 0.2% of R / NC-17 stories reach 60 (BBBScorer 0.9.1). PaperDemon (mostly 2000s): 0.5%.
+  FicWad stories from 2023 on: 7.0%. (0.8.2: 0% / 0.1% / 0.2%, and 5.6% for 2023 on.)
 - CharacterHub.com character profiles (a site where writers keep profiles of their characters; no greetings), with
-  enough prose to score: 0.1% of 2022 profiles reach 60, then 1.5% in 2023, 5.0% in 2024 and 6.5% in 2025.
+  enough prose to score: 0.3% of 2022 profiles reach Familiar, then 1.3% in 2023, 4.2% in 2024 and 5.5% in 2025.
   Profiles from 2022, before ChatGPT, rarely use the scored words: the median word of the main list appears about a seventh as
   often per 1,000 words as in AI-written cards.
 The rise after 2022 in both is about the size you'd expect as AI-assisted writing spreads; the scores don't say which
 pieces those are.
 
-**Next scorer version (0.9.4, prepared, not live)** adds the card-mined lists, cut-offs by length and a few points for
-bold labels and headings. Against early-2023 collections, on about 4,000 cards by 30 models from 18 families never used to
-build the lists, it catches 33% of AI cards at the score 2% of the human cards reach, against 18% for 0.8.2. Its
-length bands come from those early-2023 collections with ChatGPT-era cards left out, with their own cut-offs under
-350 prose words: 44% of the same AI cards and 2.5% of human cards land at Familiar or above. See the
-[roadmap](docs/TODO.md).
+**Next scorer version (0.10.0, prepared, not live)** adds a few points for bold labels and headings (0.9.3), new
+length cut-offs and new bands: **Original**, **Fresh**, **Mixed** and **Common** (Familiar merges into Common). Its
+cut-offs come from the early-2023 collections with ChatGPT-era cards left out: Fresh from the 65th percentile of human
+cards of the same length (about 20 for cards with 350+ prose words), Mixed from the 94th, Common from the 98th, with
+their own cut-offs under 350 prose words and one shared set from 350 up. On about 4,000 cards by 30 models from 18
+families never used to build the lists, it catches 33% of AI cards at the score 2% of the human cards reach (0.8.2:
+18%), and 44% land in Common against 2.5% of human cards. See the [roadmap](docs/TODO.md).
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
@@ -484,7 +516,7 @@ Checked against the upstream code (upstream's `slop-score.html` page and `data/l
 - Upstream's outputs from 22 models (`upstream/results/`).
 - Nitral-AI's slop-forensics profile of human Reddit writing, the human side of the weighting.
 
-**Human and mixed cards**
+**Human cards, and sets of mixed origin**
 - Korshuk: the cleanest human pool, mostly W++.
 - AUTOMATIC/jaicards: 188k JanitorAI cards. The 2023 baseline, trends over time and by tag, and seeds for generating
   cards. Mostly human: it includes some AI-written cards from 2023.
@@ -535,12 +567,13 @@ the pulp word-list builder and the phrase checker.
 | **BBBScorer** | The BB Botstyle Scorer: this scoring pipeline. Its version is stored with every score; scores from different versions shouldn't be compared directly. |
 | **App version** | The page and tools version (`package.json`). Moves for any change, including ones that don't touch scores. |
 | **Original slop score** | Sam Paech's slop-score formula, unchanged, on the same text. |
-| **Original-ish / Mixed / Familiar / Common** | The four bands (under 40, 40–60, 60–80, 80+). Their fun taglines: meatbag adjacent, mixed signals, rings a bell, might just be slop. |
+| **Original-ish / Mixed / Familiar / Common** | The four bands (cut-offs by length; see [Bands](#bands)). Their fun taglines: meatbag adjacent, mixed signals, rings a bell, might just be slop. |
+| **Original / Fresh / Mixed / Common** | The bands of the prepared 0.10.0 (Familiar merges into Common). Taglines: meatbag adjacent, certified flesh?, big cyborg energy, might just be slop. |
 | **Prose words** | Words left after lists, headers, W++/PList blocks and boilerplate are set aside. Only these are scored. |
 | **Boilerplate** | Instructions to the model, narrator rules, pasted jailbreaks. |
 | **W++ / PList / Ali:Chat** | Card-writing formats: W++ is `Trait("value" + "value")`; PList is `[Name's personality: a, b, c]`; Ali:Chat is example exchanges in the character's voice. |
 | **Part score** | The score of the description or the first message alone. |
-| **Mixed card** | Description and first message 25+ points apart (both 150+ prose words). |
+| **Hybrid card** | Description and first message 25+ points apart (both 150+ prose words), for example a hand-written description with an AI-written greeting. Called a "mixed card" before app 0.35.0. Not the Mixed band. |
 | **Low confidence** | Under 150 prose words: the number is shown but can swing a lot. |
 | **Percentile ("pct")** | Share of the comparison cards scoring lower. |
 | **Request style** | How a leaderboard card was asked for (lazy prompt or one of the formats). |

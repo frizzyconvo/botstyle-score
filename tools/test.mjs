@@ -140,13 +140,14 @@ const wppTells = scoreCard({ description: '[Appearance:{muscular,blue eyes,blond
 check('W++ commas are not missing-space typos', !(wppTells.checks.humanTells || []).some(t => t.id === 'missing_space_after'));
 check('default fields: personality not scored', scoreCard({ description: 'She bakes bread.', personality: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
 check('default fields: scenario not scored', scoreCard({ description: 'She bakes bread.', scenario: 'Her eyes sparkled with mischief, a testament to her resilience. '.repeat(30) }).score < 5);
-// BBBScorer 0.9.1 / 0.9.3 are prepared but opt-in: the default stays 0.8.2, and each changes only what it says it changes
+// BBBScorer 0.9.1 is the default; 0.9.3 / 0.9.4 / 0.10.0 are prepared and opt-in, and each changes only what it says it changes
 {
   const SP = await import('../js/scorer-profile.js');
-  check('default scorer is 0.8.2', SP.scorerVersion() === '0.8.2' && scoreCard('She bakes bread.').version === '0.8.2');
+  check('default scorer is 0.9.1', SP.scorerVersion() === '0.9.1' && scoreCard('She bakes bread.').version === '0.9.1');
   const { SCORER_VERSION } = await import('../js/score-card.js');
   check('SCORER_VERSION matches the default profile', SCORER_VERSION === SP.DEFAULT_SCORER);
   const plist = '([Name: Mira; voice: low and melodic, like wind through the rings of a distant planet; backstory: born from the quiet wish of an ancient comet, she drifts between planets and rooftops offering company and perspective; goals: to help others feel seen, to remind people that they are part of something vast and beautiful])';
+  SP.setScorerProfile('0.8.2');
   const before = scoreCard({ description: plist }).stats.proseWords;
   SP.setScorerProfile('0.9.1');
   const after = scoreCard({ description: plist }).stats.proseWords;
@@ -179,8 +180,17 @@ check('default fields: scenario not scored', scoreCard({ description: 'She bakes
   const rows = [...Array(400)].map((_, i) => ({ score: i % 100, proseWords: 100 + (i * 7) % 1200 }));
   const shared = lengthBands(rows, { sharedFrom: 350 });
   check('length bands: bins from sharedFrom up share one set of cut-offs, never falling with length', shared.filter(b => b.shared).length === 3 && new Set(shared.filter(b => b.shared).map(b => b.common)).size === 1 && shared.every((b, i) => !i || b.common >= shared[i - 1].common), JSON.stringify(shared));
+  // 0.10.0: 0.9.4's scores, bands Original / Fresh / Mixed / Common cut by length
+  SP.setScorerProfile('0.10.0');
+  check('0.10.0 scores like 0.9.4', scoreCard({ description: bolded }).score === s93);
+  const { writingStyleBand: wsb, bandIdFor, bandScheme } = await import('../js/score-card.js');
+  const c10 = scoreCard({ description: longCard }).bandCuts;
+  check('0.10.0: band cut-offs Fresh < Mixed < Common, by length', c10.scheme === 'v10' && c10.fresh < c10.mixed && c10.mixed < c10.common && c10.byLength, JSON.stringify(c10));
+  const ids10 = [c10.fresh - 1, c10.fresh + .1, c10.mixed + .1, c10.common + .1].map(v => wsb(v, true, 'free_prose', { proseWords: 600 }, false, c10).id).join();
+  check('0.10.0: four bands original / fresh / mixed / common', ids10 === 'original,fresh,mixed,common' && bandScheme().labels.fresh === 'Fresh' && wsb(c10.common + 1, true, 'free_prose', { proseWords: 600 }, false, c10).tagline === 'Might just be slop', ids10);
+  check('0.10.0: no Familiar band', !bandScheme().ids.includes('familiar') && bandIdFor(99, c10) === 'common');
   SP.setScorerProfile();
-  check('profile back to 0.8.2', scoreCard('She bakes bread.').version === '0.8.2' && scoreCard({ description: wpp }).extraPoints.compactValues === 0);
+  check('profile back to 0.9.1', scoreCard('She bakes bread.').version === '0.9.1' && scoreCard({ description: wpp }).extraPoints.compactValues === 0 && !scoreCard({ description: bolded }).extraPoints.boldLabels);
 }
 
 // 0.8.0: card score blends the separately scored parts; repetition is measured, not scored
@@ -279,7 +289,16 @@ check('zip source: inner pattern and PNG chara chunk', zBooks.length === 1 && zB
   check('signature: rarest words and a percentile', sg && sg.words.length === 6 && sg.percentile !== null && sg.words[0].cards <= sg.words[5].cards, JSON.stringify(sg && sg.words));
 }
 
-// four bands (0.8.2) and the "too short to tell" stamp
+// hybrid cards (description and first message far apart); `mixed` is kept as the old name of the field
+{
+  const S = await import('../js/score-card.js');
+  const human = 'my oc lol. she works at the bakery on 5th and hates mondays. likes cats, rainy days, bad movies. dont make her mean pls. '.repeat(12);
+  const ai = 'Her voice was barely above a whisper, a testament to the weight of unspoken memories. The air was thick with the scent of old books, and something ancient stirred in her eyes, a flicker of mischief. '.repeat(8);
+  const r = S.scoreCard({ description: human, first_mes: ai });
+  check('hybrid card: description and greeting far apart are flagged as hybrid', r.hybrid && r.hybrid.higher === 'greeting' && r.mixed === r.hybrid && S.HYBRID_GAP === 25, JSON.stringify({ h: r.hybrid, d: r.parts.description.score, g: r.parts.greeting.score }));
+}
+
+// four bands (0.8.2 / 0.9.x) and the "too short to tell" stamp
 {
   const { writingStyleBand, WRITING_STYLE_BANDS: B } = await import('../js/score-card.js');
   const ids = [10, 45, 65, 85].map(v => writingStyleBand(v, true, 'free_prose', { proseWords: 400 }).id).join();

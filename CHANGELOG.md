@@ -6,6 +6,37 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.35.0] - 2026-11-04 · BBBScorer 0.9.1
+
+**Scores and labels change:** the page now scores with BBBScorer 0.9.1 (it was 0.8.2). Cards saved under 0.8.2 keep
+their stored score and get the band for their length.
+
+### Changed
+- Live scorer 0.9.1: words and phrases mined from AI-written cards (up to 30 points), paragraph evenness in the score
+  (−12 to +20), genre words at half weight, six story-only sentence patterns off, PList in parentheses read as a
+  PList, repeats capped, RP asterisks removed before the sentence patterns. Band cut-offs depend on the card's
+  length (Mixed from the 94th percentile of 2023 cards of that length, Familiar from the 98th).
+- Reference and leaderboard rebuilt from the 0.9.1 run: 2023 cards (108,127) split 94.6 / 3.5 / 1.0 / 0.9% across the
+  bands, AI-written cards (4,175) 26 / 32 / 17 / 25%; AUC 0.93; 43% of AI cards flagged at a 2% false-positive rate
+  (29% on cards from model families never used to build the lists).
+- "Mixed card" is now **hybrid card** everywhere (description and first message 25+ points apart), so it isn't
+  confused with the Mixed band. Results carry `hybrid`; `mixed` stays as an alias for older tools, and score files
+  written from now on use `hybrid`.
+- How It Works, BOTSTYLE.md and the roadmap describe 0.9.1 with numbers from its run.
+- `tools/build_reference.mjs` and `tools/build_card_leaderboard.mjs` count bands from each row's stored band (cut-offs
+  depend on length since 0.9.0).
+
+### Added
+- The result shows *Card-style points*: the card-mined words and phrases a card hit, and bold-label points.
+- Texture shows the points paragraph evenness adds or takes off.
+- Prepared scorer 0.10.0 (not live): 0.9.4's scores with the new bands **Original / Fresh / Mixed / Common**
+  (Familiar merges into Common; taglines meatbag adjacent, certified flesh?, big cyborg energy, might just be slop).
+  Fresh starts at the 65th percentile of human cards of the same length, Mixed at the 94th, Common at the 98th
+  (`data/botstyle_length_bands_0100.json`; `bandScheme: 'v10'`). `NEXT_SCORER` is 0.10.0.
+- `tools/build_length_bands.mjs --fresh <percentile>` for the 0.10.0 Fresh line.
+- Tests for the default scorer, 0.10.0 bands and hybrid cards.
+- The public-list worker accepts the `fresh` band id (needed for 0.10.0; takes effect on the next worker deploy).
+
 ## [0.34.0] - 2026-11-04 · BBBScorer 0.8.2
 
 Scores unchanged (the live scorer is still 0.8.2).

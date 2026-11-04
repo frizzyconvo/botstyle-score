@@ -46,7 +46,8 @@ export function disparity(r, up) {
     if (share < .6) why.push(`only ${Math.round(share * 100)}% prose scored by BBBScorer`);
     if (r.pulp && r.pulp.score >= 15) why.push('genre vocabulary');
   }
-  if (r.mixed) why.push(`mixed card (${r.mixed.higher} +${r.mixed.gap})`);
+  const hy = r.hybrid || r.mixed;
+  if (hy) why.push(`hybrid card (${hy.higher} +${hy.gap})`);
   return { diff: d, flag: a >= DISPARITY.veryBig ? 'very_big' : 'big', dir: d > 0 ? 'bbb_higher' : 'orig_higher', why };
 }
 
@@ -70,7 +71,7 @@ export function explainDifference(r, up) {
   if (gap < 0 && r.pulp && r.pulp.score >= 15) out.push({ side: 'orig', text: `Genre vocabulary (${Math.round(r.pulp.score)}% of the AI-favored word weight) that human genre cards use about as much.` });
   if (r.emdashPoints > 0) out.push({ side: 'bbb', text: `Em-dash overuse adds ${r.emdashPoints.toFixed(1)} points on BBBScorer only.` });
   if (r.artifactPoints > 0) out.push({ side: 'bbb', text: `Chatbot leftovers add ${r.artifactPoints} points on BBBScorer only.` });
-  if (r.mixed) out.push({ side: 'bbb', text: `The ${r.mixed.higher} reads ${r.mixed.gap.toFixed(0)} points more AI-styled than the other part; BBBScorer scores the two separately and blends them, the original scores them together.` });
+  if (r.hybrid || r.mixed) out.push({ side: 'bbb', text: `The ${(r.hybrid || r.mixed).higher} reads ${(r.hybrid || r.mixed).gap.toFixed(0)} points more AI-styled than the other part (a hybrid card); BBBScorer scores the two separately and blends them, the original scores them together.` });
   if (gap > 0 && r.components.words >= .5 && up.words >= 8) out.push({ side: 'bbb', text: `Strongly AI-favored words weigh more on BBBScorer: its top words here are ${(r.hits.words || []).slice(0, 5).map(x => `"${x.item}"`).join(', ')}.` });
   return out;
 }

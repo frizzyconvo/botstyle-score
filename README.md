@@ -76,7 +76,7 @@ Two version numbers, both in [CHANGELOG.md](CHANGELOG.md):
   file only get their new cards, and a run stopped halfway resumes from its checkpoint. `--force` (or `--rescore`) starts
   over. Results go to `eval/scores/v<version>/`; read `notes.md` there first. Then rebuild what
   the page uses with `npm run leaderboard` and `npm run reference`.
-- **Next scorer version (0.9.4, prepared, not live):** `npm run score-all -- --scorer 0.9.4` scores into its own folder (tidying `eval/` leaves it alone);
+- **Next scorer version (0.10.0, prepared, not live):** `npm run score-all -- --scorer 0.10.0` scores into its own folder (tidying `eval/` leaves it alone);
   what it changes and how it tests is in the [roadmap](docs/TODO.md).
 - **AI hold-out cards:** `generated_holdout` holds cards from model families the card lists were never mined from,
   written about characters no other generated card uses (`node tools/build_seeds_holdout.mjs` picks them). They are a
