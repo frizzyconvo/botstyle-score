@@ -183,7 +183,6 @@ const DATASETS = [
   { name: 'raincandy_chub', label: r => String(r.createdAt || '') < '2023-07' ? 'human' : 'mixed', rows: () => jsonlStream(join(CARDS, 'raincandy-chub-ai-cards', 'raincandy_cards.jsonl')), need: join(CARDS, 'raincandy-chub-ai-cards', 'raincandy_cards.jsonl') },
   { name: 'perchance', label: 'mixed', rows: perchance },
   { name: 'spb_ai', label: 'ai', rows: function* () { let i = 0; for (const r of jsonlStream(join(CARDS, 'spb-2602-ai-personas', 'data.jsonl'))) yield { id: 'spb/' + i++, description: r.persona_text }; }, need: join(CARDS, 'spb-2602-ai-personas', 'data.jsonl') },
-  { name: 'example_cards', label: 'example', rows: () => cardFiles(join(CARDS, 'example-cards'), f => /\.json$/i.test(f)) },
   { name: 'foreverse_ai', label: 'ai', rows: () => cardFiles(resolve(ROOT, '..', 'character-card-skills', 'cards', 'en'), f => /\.v2\.json$/i.test(f)) },
   { name: 'generated_v1', label: 'ai', rows: () => withSeedTags(jsonlStream(PATHS.aiCardsV1)), need: PATHS.aiCardsV1,
     skip: (() => { try { return new Set(JSON.parse(readFileSync(PATHS.aiCardsV1Invalid, 'utf-8'))); } catch { return new Set(); } })() },

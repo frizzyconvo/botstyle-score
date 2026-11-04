@@ -6,6 +6,12 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.36.1] - 2026-11-04 · BBBScorer 0.9.1
+
+### Removed
+- The `example_cards` dataset from `tools/score_all.mjs`: its three cards are part of the provenance set, with their
+  provenance labels.
+
 ## [0.36.0] - 2026-11-04 · BBBScorer 0.9.1
 
 Live scores don't change (the page still scores with 0.9.1).
