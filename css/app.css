@@ -264,7 +264,12 @@ html { scroll-behavior: smooth; }
 .title-ver { font-size: .55em; font-weight: 700; letter-spacing: .5px; color: var(--dim); text-shadow: none; vertical-align: .15em; white-space: nowrap; }
 .bl { display: flex; flex-direction: column; justify-content: center; min-width: 0; line-height: 1.3; }
 .bl-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bl-name .fam { color: var(--faint); font-size: 11px; font-weight: normal; }
+/* model family tag, styled like the band tags but in the leaderboard's purple so it can't be mistaken for a band */
+/* with a family tag the name shrinks (ellipsis) and the tag and n= always stay visible */
+.bl-name.has-fam { display: flex; align-items: baseline; min-width: 0; }
+.bl-name.has-fam .bl-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.bl-name.has-fam .fam, .bl-name.has-fam .n { flex: none; }
+.bl-name .fam { display: inline-block; margin-left: 6px; padding: 0 5px; vertical-align: 1px; border-radius: 4px; font-size: 9.5px; line-height: 1.5; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--purple-light); border: 1px solid currentColor; background: color-mix(in srgb, var(--purple-light) 12%, transparent); }
 .bl-sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-style: normal; color: var(--faint); font-variant-numeric: tabular-nums; }
 .bl-sub .nw { white-space: nowrap; }
 .sec { position: relative; }
@@ -283,7 +288,8 @@ html { scroll-behavior: smooth; }
   .axis-track .t100-long { display: none; }
   .bl-sub { white-space: normal; }
   .brow.ref .bl-name { white-space: normal; overflow-wrap: anywhere; } /* card-set names wrap so (SFW) / (NSFW) stay visible */
-  .brow .bl-name .fam { display: block; } /* model family on its own line, so a long name's ellipsis can't hide it */
+  .brow .bl-name.has-fam { display: block; }
+  .brow .bl-name .fam { display: block; width: fit-content; margin: 2px 0 1px; } /* model family on its own line, so a long name's ellipsis can't hide it */
 }
 
 /* 0.12: band names with fun taglines */

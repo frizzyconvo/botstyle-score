@@ -6,6 +6,12 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.38.1] - 2026-11-04 · BBBScorer 0.9.1
+
+### Changed
+- Leaderboard: the model family is a tag in the style of the band tags (outlined, uppercase, purple) instead of a name
+  in brackets; long model names shorten so the tag and card count stay visible.
+
 ## [0.38.0] - 2026-11-04 · BBBScorer 0.9.1
 
 ### Added
