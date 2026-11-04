@@ -167,6 +167,18 @@ check('default fields: scenario not scored', scoreCard({ description: 'She bakes
   check('0.9.3: bold labels add points (2 labels = 4, +1 each after)', scoreCard({ description: bolded }).extraPoints.boldLabels === 5, JSON.stringify(scoreCard({ description: bolded }).extraPoints));
   check('0.9.3: one bold label adds nothing', scoreCard({ description: '**Appearance:** tall, dark hair. She walks the shore every morning.' }).extraPoints.boldLabels === 0);
   check('0.9.3 uses the 0.9.1 card lists', scoreCard({ description: 'Fiercely loyal and endlessly patient, she tilts her head and leans forward. Ancient leather-bound books, a faint smell of ink and dust. '.repeat(2) }).extraPoints.cardLists > 0);
+  // 0.9.4: same scores as 0.9.3, rebuilt length bands (own cut-offs under 350 prose words, one shared set from 350 up)
+  const s93 = scoreCard({ description: bolded }).score;
+  SP.setScorerProfile('0.9.4');
+  check('0.9.4 scores like 0.9.3', scoreCard({ description: bolded }).score === s93);
+  const longCard = 'She keeps the lighthouse running and writes letters nobody answers. '.repeat(60);
+  const shortCard = 'She keeps the lighthouse running and writes letters nobody answers. '.repeat(25);
+  const bl = scoreCard({ description: longCard }).bandCuts, bs = scoreCard({ description: shortCard }).bandCuts;
+  check('0.9.4: length bands from its own file (shared cut-offs from 350 prose words, lower under 350)', bl.byLength && bs.byLength && bl.from >= 350 && bs.to <= 350 && bs.familiar < bl.familiar, JSON.stringify({ bl, bs }));
+  const { lengthBands } = await import('./build_length_bands.mjs');
+  const rows = [...Array(400)].map((_, i) => ({ score: i % 100, proseWords: 100 + (i * 7) % 1200 }));
+  const shared = lengthBands(rows, { sharedFrom: 350 });
+  check('length bands: bins from sharedFrom up share one set of cut-offs, never falling with length', shared.filter(b => b.shared).length === 3 && new Set(shared.filter(b => b.shared).map(b => b.common)).size === 1 && shared.every((b, i) => !i || b.common >= shared[i - 1].common), JSON.stringify(shared));
   SP.setScorerProfile();
   check('profile back to 0.8.2', scoreCard('She bakes bread.').version === '0.8.2' && scoreCard({ description: wpp }).extraPoints.compactValues === 0);
 }

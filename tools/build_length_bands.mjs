@@ -10,7 +10,15 @@
 //   node tools/build_length_bands.mjs [eval/scores/v0.9.1]      # from a complete scoring run (the human 2023 sets)
 //   node tools/build_length_bands.mjs --rows <file.json> --key <score field> [--note "..."]   # from an experiment
 //
-// Writes data/botstyle_length_bands.json.
+// Options:
+//   --drop-oldschool strong|some   leave out rows whose `oldSchool` field (js/old-school.js level) is at least that
+//                                  level: ChatGPT-era cards inside the 2023 sets, which otherwise count as human
+//   --shared-from <words>          bins from this length up share one set of cut-offs, taken over every row with at
+//                                  least --shared-pool prose words (default 150). Per-bin cut-offs for long cards rise
+//                                  to ~72 and cost real AI cards, which are mostly long; short bins keep their own.
+//   --out <file>                   output file (default data/botstyle_length_bands.json)
+//
+// Writes data/botstyle_length_bands.json (or --out).
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
@@ -19,20 +27,22 @@ const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf(k);
 export const BINS = [[0, 150], [150, 250], [250, 350], [350, 500], [500, 800], [800, null]];
 export const POINTS = { original: 0.94, common: 0.98 };
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; };
-export function lengthBands(rows) {   // rows: { score, proseWords } of human cards (reliable or not; English, labeled)
+export function lengthBands(rows, { sharedFrom = null, sharedPool = 150 } = {}) {   // rows: { score, proseWords } of human cards (reliable or not; English, labeled)
   let lastO = 0, lastC = 0;
+  const pooled = sharedFrom === null ? null : rows.filter(r => r.proseWords >= sharedPool).map(r => r.score);
   return BINS.map(([from, to]) => {
-    const v = rows.filter(r => r.proseWords >= from && (to === null || r.proseWords < to)).map(r => r.score);
+    const shared = pooled && from >= sharedFrom;
+    const v = shared ? pooled : rows.filter(r => r.proseWords >= from && (to === null || r.proseWords < to)).map(r => r.score);
     const o = Math.max(lastO, +q(v, POINTS.original).toFixed(1)), c = Math.max(lastC, o + 5, +q(v, POINTS.common).toFixed(1));
     lastO = o; lastC = c;
-    return { from, to, original: o, common: c, n: v.length };
+    return shared ? { from, to, original: o, common: c, n: v.length, shared: true } : { from, to, original: o, common: c, n: v.length };
   });
 }
 if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || process.argv[1].endsWith('build_length_bands.mjs')) {
   let rows, source;
   if (opt('--rows')) {
     const key = opt('--key', 'score');
-    rows = JSON.parse(readFileSync(opt('--rows'), 'utf-8')).filter(r => r.set === 'human' && !r.nonEnglish && !r.na).map(r => ({ score: r[key], proseWords: r.pwCore ?? r.pw }));
+    rows = JSON.parse(readFileSync(opt('--rows'), 'utf-8')).filter(r => r.set === 'human' && !r.nonEnglish && !r.na).map(r => ({ score: r[key], proseWords: r.pwCore ?? r.pw, oldSchool: r.oldSchool }));
     source = `experiment rows ${opt('--rows')} (${key})`;
   } else {
     const dir = argv.find(a => !a.startsWith('--')) || join('eval', 'scores', readdirSync(join('eval', 'scores')).filter(d => /^v\d/.test(d)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).pop());
@@ -42,8 +52,14 @@ if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || proce
     rows = [...load('korshuk').filter(ok), ...load('raincandy_chub').filter(r => ok(r) && early(r, '2023-07')), ...load('jaicards').filter(r => ok(r) && early(r, '2024-03'))];
     source = `scoring run ${dir.replace(/\\/g, '/')}`;
   }
-  const bins = lengthBands(rows);
-  const out = { about: 'Band cut-offs by prose length for BBBScorer 0.9.x (tools/build_length_bands.mjs): Original-ish below the 94th percentile of 2023 cards (mostly human) of that length, Common from the 98th.', source, note: opt('--note', ''), built: new Date().toISOString().slice(0, 10), points: POINTS, bins };
-  writeFileSync('data/botstyle_length_bands.json', JSON.stringify(out, null, 1) + '\n');
-  for (const b of bins) console.log(`${b.from}–${b.to ?? '∞'} prose words: Original-ish under ${b.original}, Common from ${b.common} (n=${b.n})`);
+  const drop = opt('--drop-oldschool'), dropLevels = drop === 'some' ? ['some', 'strong'] : drop ? ['strong'] : [];
+  const before = rows.length; rows = rows.filter(r => !dropLevels.includes(r.oldSchool));
+  if (dropLevels.length) source += `; left out ${before - rows.length} rows with old-school level ${dropLevels.join(' / ')}`;
+  const sharedFrom = opt('--shared-from') ? +opt('--shared-from') : null, sharedPool = +opt('--shared-pool', 150);
+  const bins = lengthBands(rows, { sharedFrom, sharedPool });
+  const about = 'Band cut-offs by prose length for BBBScorer 0.9.x (tools/build_length_bands.mjs): Original-ish below the 94th percentile of 2023 cards (mostly human) of that length, Familiar from the 98th.' +
+    (sharedFrom === null ? '' : ` From ${sharedFrom} prose words up, one set of cut-offs taken over all cards with ${sharedPool}+ prose words.`);
+  const out = { about, source, note: opt('--note', ''), built: new Date().toISOString().slice(0, 10), points: POINTS, ...(sharedFrom === null ? {} : { sharedFrom, sharedPool }), bins };
+  writeFileSync(opt('--out', 'data/botstyle_length_bands.json'), JSON.stringify(out, null, 1) + '\n');
+  for (const b of bins) console.log(`${b.from}–${b.to ?? '∞'} prose words: Original-ish under ${b.original}, Familiar from ${b.common} (n=${b.n})`);
 }

@@ -1,0 +1,59 @@
+{
+ "about": "Band cut-offs by prose length for BBBScorer 0.9.x (tools/build_length_bands.mjs): Original-ish below the 94th percentile of 2023 cards (mostly human) of that length, Familiar from the 98th. From 350 prose words up, one set of cut-offs taken over all cards with 150+ prose words.",
+ "source": "dev experiment rows (dev/analysis/band_rows_early2023.mjs) (score); left out 62 rows with old-school level strong",
+ "note": "BBBScorer 0.9.3 scores of early-2023 collections (Pygmalion Discord, Roko's Basilisk, VenusAI, Chub mega; deduplicated), cards the lists were never mined from. ChatGPT-era cards (strong old-school level) left out of the human side; one shared cut-off from 350 prose words up.",
+ "built": "2026-11-04",
+ "points": {
+  "original": 0.94,
+  "common": 0.98
+ },
+ "sharedFrom": 350,
+ "sharedPool": 150,
+ "bins": [
+  {
+   "from": 0,
+   "to": 150,
+   "original": 15.4,
+   "common": 25.6,
+   "n": 9640
+  },
+  {
+   "from": 150,
+   "to": 250,
+   "original": 35,
+   "common": 50.1,
+   "n": 1355
+  },
+  {
+   "from": 250,
+   "to": 350,
+   "original": 37.2,
+   "common": 50.1,
+   "n": 1062
+  },
+  {
+   "from": 350,
+   "to": 500,
+   "original": 45.2,
+   "common": 61.1,
+   "n": 5105,
+   "shared": true
+  },
+  {
+   "from": 500,
+   "to": 800,
+   "original": 45.2,
+   "common": 61.1,
+   "n": 5105,
+   "shared": true
+  },
+  {
+   "from": 800,
+   "to": null,
+   "original": 45.2,
+   "common": 61.1,
+   "n": 5105,
+   "shared": true
+  }
+ ]
+}

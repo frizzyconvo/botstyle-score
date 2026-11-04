@@ -440,9 +440,11 @@ yet; the set is growing.
 The rise after 2022 in both is about the size you'd expect as AI-assisted writing spreads; the scores don't say which
 pieces those are.
 
-**Next scorer version (0.9.3, prepared, not live)** adds the card-mined lists, cut-offs by length and a few points for
-bold labels and headings. Against early-2023 collections, on about 1,500 cards from 10 model families never used to
-build the lists, it catches 33% of AI cards at the score 2% of the human cards reach, against 18% for 0.8.2. See the
+**Next scorer version (0.9.4, prepared, not live)** adds the card-mined lists, cut-offs by length and a few points for
+bold labels and headings. Against early-2023 collections, on about 4,000 cards by 30 models from 18 families never used to
+build the lists, it catches 33% of AI cards at the score 2% of the human cards reach, against 18% for 0.8.2. Its
+length bands come from those early-2023 collections with ChatGPT-era cards left out, with their own cut-offs under
+350 prose words: 44% of the same AI cards and 2.5% of human cards land at Familiar or above. See the
 [roadmap](docs/TODO.md).
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.

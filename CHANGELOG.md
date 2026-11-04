@@ -6,6 +6,24 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.34.0] - 2026-11-04 · BBBScorer 0.8.2
+
+Scores unchanged (the live scorer is still 0.8.2).
+
+### Added
+- Prepared scorer 0.9.4 (not live): 0.9.3's scores with rebuilt length bands
+  (`data/botstyle_length_bands_094.json`). Built from early-2023 card collections the lists were never mined from,
+  with ChatGPT-era cards (strong old-school read) left out of the human side, its own cut-offs under 350 prose words
+  and one shared set from 350 up. On cards by 30 models from 18 unmined families, 44% land at Familiar or above (0.9.3's
+  bands: 33%); prompt-template AI cards 64% (44%); cards whose creators say they used AI 43% (19%); human cards
+  2.5% (1.5%).
+- `tools/build_length_bands.mjs`: `--drop-oldschool`, `--shared-from` / `--shared-pool` and `--out`.
+- Tests for 0.9.4 and for shared length bands.
+
+### Changed
+- The next scorer version is 0.9.4 (`NEXT_SCORER`); the roadmap, README and BOTSTYLE.md describe it, with test
+  results on about 4,000 generated cards by 30 models from 18 unmined families.
+
 ## [0.33.2] - 2026-11-03 · BBBScorer 0.8.2
 
 Scores unchanged.

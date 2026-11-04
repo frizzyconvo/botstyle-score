@@ -1,7 +1,7 @@
 // scorer-profile.js - Which BBBScorer version's rules are active.
 //
-// The page, the tools and every stored score use the default (0.8.2: 0.8.1's scores, four bands). BBBScorer 0.9.3 is prepared but not
-// switched on: tools can opt in (score_all.mjs --scorer 0.9.3, dev experiments) to test it before the rescore.
+// The page, the tools and every stored score use the default (0.8.2: 0.8.1's scores, four bands). BBBScorer 0.9.4 is prepared but not
+// switched on: tools can opt in (score_all.mjs --scorer 0.9.4, dev experiments) to test it before the rescore.
 // 0.9.0 is kept only to describe its one full run (eval/old/scores/v0.9.0): 0.9.1 = 0.9.0 + the card-mined lists, which
 // were added after that run had started. Any change to a prepared profile that moves scores gets a new number.
 // Each switch below is one change from dev notes (rescore ideas); 0.8.1 has them all off.
@@ -26,7 +26,7 @@
 //   patternsOff / patternsOn  sentence patterns switched off / on (ids from js/ai-structures.js), from rechecking every
 //                   pattern on character cards instead of the stories they were picked on
 export const DEFAULT_SCORER = '0.8.2';
-export const NEXT_SCORER = '0.9.3';
+export const NEXT_SCORER = '0.9.4';
 export const PROFILES = {
   '0.8.1': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },
   '0.8.2': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },   // same rules as 0.8.1; only the bands changed (four bands)
@@ -60,6 +60,17 @@ export const PROFILES = {
     plistParens: true, maxRepeat: 2.5, stripRpAsterisks: true, compactValues: null,
     texture: { minParagraphs: 3, minWords: 150, pivot: 0.6, perUnit: 30, min: -12, max: 20 },
     pulpWeight: 0.5, lengthBands: { file: 'botstyle_length_bands_093.json' },
+    patternsOff: ['found_herself', 'it_was_as_if', 'hung_heavy', 'felt_a_surge', 'unspoken', 'not_just_shes'], patternsOn: [],
+    cardLists: { weight: 0.3 },
+    boldLabels: { min: 2, base: 4, per: 1, max: 10 },
+  },
+  '0.9.4': {
+    // 0.9.3 with rebuilt length bands (same scores, different band cut-offs): built from early-2023 collections the lists
+    // were never mined from, ChatGPT-era cards left out of the human side, own cut-offs under 350 prose words and one
+    // shared set from 350 up (per-length cut-offs for long cards rose to ~72 and missed real AI cards, which are mostly long).
+    plistParens: true, maxRepeat: 2.5, stripRpAsterisks: true, compactValues: null,
+    texture: { minParagraphs: 3, minWords: 150, pivot: 0.6, perUnit: 30, min: -12, max: 20 },
+    pulpWeight: 0.5, lengthBands: { file: 'botstyle_length_bands_094.json' },
     patternsOff: ['found_herself', 'it_was_as_if', 'hung_heavy', 'felt_a_surge', 'unspoken', 'not_just_shes'], patternsOn: [],
     cardLists: { weight: 0.3 },
     boldLabels: { min: 2, base: 4, per: 1, max: 10 },
