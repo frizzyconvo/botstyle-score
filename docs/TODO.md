@@ -113,6 +113,12 @@ cards (0.9.4), and the 0.10.0 bands.
 - [ ] Cards from recent models (for example Claude 4.5 and later) often score low.
 - [ ] Short cards: a note suggesting scoring with the alternate greetings, scenario or example dialogue.
 - [x] Leave-one-family-out mining: a family left out of mining is caught 0–3.5 points less than with it.
+- [ ] Human baseline for the next band cut-offs: leave out the same obvious AI-written cards as the reference (creator
+      statements, chatbot leftovers, strong old-school reads), plus 2023 cards a blind read confidently calls
+      AI-written. Compare with the oldest cards (CharacterHub 2022, before ChatGPT's release) as a clean check.
+- [ ] Judge scorer changes first against blind reads (cards sampled across all score levels, read without knowing
+      their source), with the AI sets of known origin as a second check. The goal is whether a card reads like a
+      human wrote it, not who wrote it.
 - [ ] Sentence patterns of recent models ("He is not X. He is not Y.", "No more. No less.", "And honestly?"), checked
       on prompt-template and creator-stated AI cards before use.
 

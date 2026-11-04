@@ -6,6 +6,22 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.37.0] - 2026-11-04 · BBBScorer 0.9.1
+
+Scores and bands unchanged; the reference numbers behind "How it works" and the ⓘ comparison changed.
+
+### Changed
+- The AI side of the reference is the AI-written cards generated for this project (3,582). SPB-2602 personas (one
+  prompt style, two models) are no longer part of it: they made the headline better than other AI cards do. They stay
+  a separate dataset.
+- The human side leaves out about 1,160 obviously AI-written cards inside the 2023 sets (1.1%): cards whose creator
+  says they are AI-written, cards with chatbot leftovers, and strong old-school AI reads among the top tenth of scores.
+  `tools/build_reference.mjs` reads the list when it exists; `--no-exclusions` keeps them.
+- Headline: AUC 0.93; at a 2% false-positive rate on 2023 cards BBBScorer flags 47% of AI-written cards (was 43% with
+  SPB and without the exclusions; 39% with SPB removed alone), the original slop score 28%; on model families never
+  used to build the lists, 35% (0.8.2: 21%).
+- Roadmap: cleaner human baseline for the next band cut-offs, and blind reads as the first test for scorer changes.
+
 ## [0.36.4] - 2026-11-04 · BBBScorer 0.9.1
 
 ### Changed

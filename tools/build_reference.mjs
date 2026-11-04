@@ -8,8 +8,12 @@
 // percentile) of the botstyle score per reference group, reliable English cards only:
 //   human_2023  Korshuk + Chub (raincandy) created before --human-before + JanitorAI created before
 //               --jai-before (JanitorAI's dump runs May 2023-Feb 2024)
-//   ai_cards    generated runs (valid cards) + SPB-2602. character-card-skills cards are left out:
-//               they were written to evade exactly this kind of scoring.
+//   ai_cards    generated runs (valid cards). SPB-2602 is left out: one prompt style from two models, and it
+//               flattered the headline numbers; it stays a contrast dataset. character-card-skills cards are left
+//               out too: they were written to evade exactly this kind of scoring.
+// Human-side exclusions: if eval/human_baseline_exclusions.json exists (dev/analysis/human_baseline_exclusions.mjs),
+// the cards it lists are left out of human_2023: creator-stated AI cards, chatbot leftovers and strong old-school
+// (ChatGPT-era) reads inside the 2023 sets. --no-exclusions keeps them.
 // Rebuild whenever the scorer version changes. Node only, so it runs on Windows without Python.
 import { helpIfAsked } from './_help.mjs';
 helpIfAsked(import.meta.url);
@@ -32,8 +36,13 @@ const parts = {
   ['chub_before_' + HB]: load('raincandy_chub').filter(r => ok(r) && early(r, HB)),
   ['janitorai_before_' + JB]: load('jaicards').filter(r => ok(r) && early(r, JB)),
 };
+const EXCL = 'eval/human_baseline_exclusions.json';
+const excl = !argv.includes('--no-exclusions') && existsSync(EXCL) ? new Set(JSON.parse(readFileSync(EXCL, 'utf-8')).cards.map(x => x.dataset + '|' + x.id)) : new Set();
+const dsOf = { korshuk: 'korshuk', ['chub_before_' + HB]: 'raincandy_chub', ['janitorai_before_' + JB]: 'jaicards' };
+let excluded = 0;
+for (const k of Object.keys(parts)) { const before = parts[k].length; parts[k] = parts[k].filter(r => !excl.has(dsOf[k] + '|' + r.id)); excluded += before - parts[k].length; }
 const human = Object.values(parts).flat();
-const ai = ['generated_v1', 'generated_v2', 'spb_ai'].flatMap(n => load(n).filter(ok));
+const ai = ['generated_v1', 'generated_v2'].flatMap(n => load(n).filter(ok));
 const versions = new Set([...human, ...ai].map(r => r.version));
 if (versions.size !== 1) { console.error(`mixed scorer versions in ${SC}: ${[...versions].join(', ')}`); process.exit(1); }
 const quantiles = v => { const s = [...v].sort((a, b) => a - b); return Array.from({ length: 101 }, (_, q) => +s[Math.min(s.length - 1, Math.round(q / 100 * (s.length - 1)))].toFixed(2)); };
@@ -58,7 +67,7 @@ const summary = { bands: IDS, byLength: !!scorerProfile().lengthBands,
 const out = { note: 'Botstyle score quantiles (index = percentile). Built by tools/build_reference.mjs.', version: [...versions][0], built: new Date().toISOString().slice(0, 10),
   summary,
   groups: {
-    human_2023: { label: '2023 cards (mostly human)', n: human.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])), q: quantiles(human.map(r => r.score)) },
+    human_2023: { label: '2023 cards (mostly human)', n: human.length, excluded, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])), q: quantiles(human.map(r => r.score)) },
     ai_cards: { label: 'AI-written cards', n: ai.length, q: quantiles(ai.map(r => r.score)) },
   } };
 writeFileSync('data/botstyle_reference.json', JSON.stringify(out, null, 1));

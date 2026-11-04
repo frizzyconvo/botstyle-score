@@ -181,13 +181,17 @@ of 2023 cards reach Familiar at every length (under 150 prose words: 1.6%; 800 a
 **"Too short to tell" stamp:** a card with under 250 prose words gets a small stamp on the corner of its band
 tag. Short cards give few chances for a hit, so their low scores say little (see [Limits](#known-limits)).
 
-The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 108,127
-(Korshuk, JanitorAI, Chub), median 11.7. AI-written cards: 4,175, median 60.
+The cut-offs keep false positives on human cards low, so a low score doesn't clear anyone. 2023 cards: 106,968
+(Korshuk, JanitorAI, Chub), median 11.6. AI-written cards generated for this project: 3,582, median 56.4.
 
 **The 2023 set is mostly human, not all human.** It's the closest thing to a human baseline: cards written before
 AI writing tools were common. But reading the cards where BBBScorer and the original score disagree most turned
-up ChatGPT-, Claude- and Bing-written cards from 2023 among them. Some of its 2% in Familiar or Common are real AI cards, so
-the false-positive rate on human writing is somewhat lower than these numbers suggest.
+up ChatGPT-, Claude- and Bing-written cards from 2023 among them. The obvious ones are left out of the human side
+(about 1,160, 1.1%): cards whose creator says they are AI-written, cards with chatbot leftovers ("Certainly! Here
+is…"), and, among the top tenth of scores, cards with a strong old-school AI read (in a blind read, 17 of 20 such cards
+read as AI-written). Subtler ones remain: in a blind read of early-2023 cards sampled across all score levels, about 1 in
+8 read as AI-written, and most cards in Familiar or Common did, so the false-positive rate on human writing is lower
+than these numbers suggest.
 
 **Hybrid card** (flag, not a band; called a "mixed card" before app 0.35.0): the description and the first message
 both have 150+ words of prose and land 25+ points apart, for example a hand-written description with an AI-written
@@ -425,12 +429,12 @@ the same link sit in a fold under the newest one.
 |---|---|---|
 | SlopReview: 5,000 Reddit stories vs 6,405 AI stories | 0.930 | 0.977 |
 | Gutenberg antislop-DPO: 2,999 book passages vs AI rewrites | 0.973 | 0.996 |
-| Character cards: 108,127 from 2023 (mostly human) vs 4,175 AI-written | 0.77 | 0.93 |
+| Character cards: 106,968 from 2023 (mostly human) vs 3,582 AI-written | 0.80 | 0.93 |
 
 SlopReview and Gutenberg were last run with BBBScorer 0.8.2. On the cards, at a 2% false-positive rate on the 2023
-cards, BBBScorer 0.9.1 flags 43% of AI-written cards and the original slop score 22%. Part of that gain is in-sample:
+cards, BBBScorer 0.9.1 flags 47% of AI-written cards and the original slop score 28%. Part of that gain is in-sample:
 the card-mined list was mined from these AI cards' models; on cards from 18 model families never used to build the lists,
-0.9.1 flags 29% (0.8.2: 18%). The AI side now includes many hard cards on purpose: short requests, "don't sound like AI" rules and
+0.9.1 flags 35% (0.8.2: 21%). The AI side now includes many hard cards on purpose: short requests, "don't sound like AI" rules and
 light rewrites of human cards.
 
 **Early-2023 card collections as a second human side** (Pygmalion Discord to April 2023, Roko's Basilisk Archive,
@@ -486,7 +490,9 @@ families never used to build the lists, it catches 33% of AI cards at the score 
 
 SlopReview's human side overlaps the human writing used to weight the lists, so treat it as optimistic.
 Gutenberg is independent. The card test uses cards made before AI writing tools were common (Korshuk, JanitorAI
-and Chub, 2023) against AI personas (SPB-2602) and cards generated for this project. The 2023 side includes some
+and Chub, 2023) against cards generated for this project. AI personas from SPB-2602 (one prompt style, two models)
+were on the AI side until app 0.37.0; they made the numbers look better than on other AI cards, so they are now a
+separate comparison set. The 2023 side includes some
 AI-written cards (see [Bands](#bands)), which makes these numbers a little pessimistic.
 
 ### How BBBScorer differs from slop-score
