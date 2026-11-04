@@ -127,6 +127,14 @@ cards (0.9.4), and the 0.10.0 bands.
   size); hidden on the page until then.
 - **Provenance set.** Grow the set of cards with creator-stated authorship, especially partly AI-written ones.
 
+### Tools
+- [ ] **Multi-core scoring in `tools/score_all.mjs`.** Cards are scored one at a time on one core; a full run takes
+      about 70 minutes, most of it the JanitorAI (about 189,000 cards) and CharacterHub (about 156,000) datasets. Plan:
+      a `--workers N` option (default 1) with a pool of worker threads that each load the lists once and score batches
+      of cards, while the main thread keeps reading cards, the checkpoint, the lock file and writing rows in the
+      original order. Before use, check that 1 and N workers give identical output files. Expected: roughly 4x faster
+      with 6 workers; each worker adds a few hundred MB of memory.
+
 ### Linux support
 The scorer, the page and the Node tools already run on Linux (`npm test`, `npm start`). The convenience layer is
 Windows-only.

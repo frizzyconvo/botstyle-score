@@ -6,6 +6,11 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.36.4] - 2026-11-04 · BBBScorer 0.9.1
+
+### Changed
+- Roadmap: multi-core scoring for `tools/score_all.mjs` (a `--workers` option) is planned.
+
 ## [0.36.3] - 2026-11-04 · BBBScorer 0.9.1
 
 ### Changed
