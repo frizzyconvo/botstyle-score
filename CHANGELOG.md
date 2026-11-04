@@ -6,6 +6,13 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.38.2] - 2026-11-04 · BBBScorer 0.9.1
+
+### Changed
+- Score report form: "Anything else" says the card's text can be pasted when it's the reporter's own or a public card
+  and follows GitHub's Acceptable Use Policies (no sexually explicit text), and that a short excerpt is enough for
+  someone else's card.
+
 ## [0.38.1] - 2026-11-04 · BBBScorer 0.9.1
 
 ### Changed

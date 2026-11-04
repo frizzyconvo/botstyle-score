@@ -40,4 +40,8 @@ body:
     id: notes
     attributes:
       label: Anything else
-      description: Which part seems off (description, greeting), the model used, the format.
+      description: >-
+        Which part seems off (description, greeting), the model used, the format. You can paste the card's text (or the
+        part that seems off) if it's your own card or a public one and it follows GitHub's
+        [Acceptable Use Policies](https://docs.github.com/en/site-policy/acceptable-use-policies): no sexually explicit
+        text. For someone else's card, a short excerpt is enough.
