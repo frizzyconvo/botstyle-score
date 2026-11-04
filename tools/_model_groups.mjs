@@ -40,3 +40,10 @@ export function FAMILY(model) {
   if (lab === 'google') return name.startsWith('gemma') ? 'gemma' : 'gemini';
   return LAB[lab] || lab;
 }
+// Display name of a model's family for the leaderboard tag ("l3.1-euryale-70b [Llama]"). Fine-tunes show their base
+// model's family (BASE above). Unknown labs fall back to the lab name.
+const FAMILY_NAMES = { claude: 'Claude', gpt: 'GPT', gemini: 'Gemini', gemma: 'Gemma', llama: 'Llama', qwen: 'Qwen', mistral: 'Mistral',
+  deepseek: 'DeepSeek', kimi: 'Kimi', glm: 'GLM', hunyuan: 'Hunyuan', phi: 'Phi', xiaomi: 'MiMo', nvidia: 'Nemotron', minimax: 'MiniMax',
+  stepfun: 'Step', seed: 'Seed', 'x-ai': 'Grok', cohere: 'Command', amazon: 'Nova', 'ibm-granite': 'Granite', liquid: 'LFM',
+  inception: 'Mercury', inclusionai: 'Ling', meituan: 'LongCat', thinkingmachines: 'Inkling', writer: 'Palmyra', upstage: 'Solar', meta: 'Muse' };
+export function familyLabel(model) { const f = FAMILY(model); return FAMILY_NAMES[f] || (f ? f[0].toUpperCase() + f.slice(1) : ''); }

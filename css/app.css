@@ -264,6 +264,7 @@ html { scroll-behavior: smooth; }
 .title-ver { font-size: .55em; font-weight: 700; letter-spacing: .5px; color: var(--dim); text-shadow: none; vertical-align: .15em; white-space: nowrap; }
 .bl { display: flex; flex-direction: column; justify-content: center; min-width: 0; line-height: 1.3; }
 .bl-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bl-name .fam { color: var(--faint); font-size: 11px; font-weight: normal; }
 .bl-sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-style: normal; color: var(--faint); font-variant-numeric: tabular-nums; }
 .bl-sub .nw { white-space: nowrap; }
 .sec { position: relative; }
@@ -282,6 +283,7 @@ html { scroll-behavior: smooth; }
   .axis-track .t100-long { display: none; }
   .bl-sub { white-space: normal; }
   .brow.ref .bl-name { white-space: normal; overflow-wrap: anywhere; } /* card-set names wrap so (SFW) / (NSFW) stay visible */
+  .brow .bl-name .fam { display: block; } /* model family on its own line, so a long name's ellipsis can't hide it */
 }
 
 /* 0.12: band names with fun taglines */
@@ -350,3 +352,5 @@ details.cmp summary .cmp-vals { display: block; margin-top: 2px; }
 .band .stamp { position: absolute; left: calc(100% - 18px); top: -13px; transform: rotate(12deg); padding: 1px 4px; text-align: center; border: 1.5px solid var(--dim);
   border-radius: 3px; background: var(--panel); color: var(--dim); font: 800 8.5px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .8px;
   white-space: nowrap; opacity: .92; pointer-events: auto; cursor: help; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+
+.report-row { margin-top: 6px; gap: 8px; flex-wrap: wrap; }

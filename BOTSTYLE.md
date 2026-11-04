@@ -350,7 +350,10 @@ explain themselves on hover or tap.
 ## Leaderboard
 
 **AI models:** character cards each model wrote for this test from the same requests: the name, creator note and
-tags of real 2023 human cards, asked for in seven **request styles**:
+tags of real 2023 human cards, asked for in seven **request styles**. Each model carries its family in brackets
+(Llama, Mistral, Qwen, GPT, Claude, Gemini, Gemma, DeepSeek, Kimi, GLM and so on); fine-tunes show their base model's
+family, so l3.1-euryale-70b is [Llama], unslopnemo-12b and cydonia-24b-v4.1 are [Mistral], and magnum-v4-72b is
+[Qwen].
 
 | Request style | What was asked for |
 |---|---|

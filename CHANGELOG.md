@@ -6,6 +6,15 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.38.0] - 2026-11-04 · BBBScorer 0.9.1
+
+### Added
+- Leaderboard: each model shows its family in brackets, with fine-tunes under their base model's family
+  ("l3.1-euryale-70b [Llama]", "magnum-v4-72b [Qwen]"). On phones the family sits on its own line under the name.
+- A "Report this score" link under each result. It opens the "Card scored wrong" form with the card link (when the
+  card came from a link), the score and scorer version, the band, the description and greeting scores and the scored
+  fields already filled in, plus "I made this card" and the AI-use setting when ticked. It never includes card text.
+
 ## [0.37.0] - 2026-11-04 · BBBScorer 0.9.1
 
 Scores and bands unchanged; the reference numbers behind "How it works" and the ⓘ comparison changed.

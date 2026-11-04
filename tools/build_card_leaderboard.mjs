@@ -15,7 +15,7 @@ helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { WRITING_STYLE_BANDS as WB, SCORER_VERSION } from '../js/score-card.js';
-import { FAILED, JUST_FOR_FUN } from './_model_groups.mjs';
+import { FAILED, JUST_FOR_FUN, familyLabel } from './_model_groups.mjs';
 import { PATHS } from './_paths.mjs';
 import { pageRunDir } from './_paths.mjs';
 // default: the page's scorer version's run (not the newest folder: a prepared next version may be mid-run)
@@ -54,7 +54,7 @@ for (const [m, rows] of Object.entries(models)) {
   const styleMed = Object.entries(byStyle).map(([k, v]) => ({ style: k, n: v.length, median: q(v.map(x => x.score), .5) })).sort((a, b) => a.median - b.median);
   const lazy = byStyle.default ? { n: byStyle.default.length, median: q(byStyle.default.map(x => x.score), .5), upstream: q(byStyle.default.map(x => x.upstream).filter(x => x != null), .5) } : null;
   const styles = { lazy, min: styleMed.find(x => x.style !== 'default') || null, max: [...styleMed].reverse().find(x => x.style !== 'default') || null, all: styleMed };
-  const entry = { model: m, ...stats(fresh), byMode, styles };
+  const entry = { model: m, family: familyLabel(m), ...stats(fresh), byMode, styles };
   if (FAILED[m]) { const a = attempts[m] || { all: 0, failed: 0 }; out.fun.push({ kind: 'failed', ...entry, why: FAILED[m], generated: a.all, failedShare: a.all ? +(100 * a.failed / a.all).toFixed(0) : null }); }
   else if (JUST_FOR_FUN[m]) out.fun.push({ kind: 'model', ...entry, why: JUST_FOR_FUN[m] });
   else out.models.push(entry);

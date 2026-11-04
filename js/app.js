@@ -456,7 +456,21 @@ function saveBox(r) {
   return `<div class="save-box"><label><input type="checkbox" id="creatorChk"${e.creator ? ' checked' : ''}> I made this card</label>
     <div id="creatorMore"${e.creator ? '' : ' hidden'}><div class="slider"><span class="small dim">AI-assisted writing</span><input type="range" id="aiUse" min="0" max="100" step="10" value="${ai}"><output id="aiOut">${aiLabel(ai)}</output></div>
     <div class="faint small">Honor system, for your own comparison. Stored with the card in this browser.</div></div>
-    ${PUBLIC_RUNS ? `<div class="row-end"><span class="faint small">Shares name, link, score, version and the boxes above. Never the card text.</span><button id="shareBtn" class="ghost" type="button"${e.shared ? ' disabled' : ''}>${e.shared ? 'Shared' : 'Share to public list'}</button></div>` : ''}</div>`;
+    ${PUBLIC_RUNS ? `<div class="row-end"><span class="faint small">Shares name, link, score, version and the boxes above. Never the card text.</span><button id="shareBtn" class="ghost" type="button"${e.shared ? ' disabled' : ''}>${e.shared ? 'Shared' : 'Share to public list'}</button></div>` : ''}
+    <div class="row-end report-row"><span class="faint small">Score looks wrong for this card?</span><a id="reportLink" href="${esc(reportUrl(r))}" target="_blank" rel="noopener">Report this score</a></div></div>`;
+}
+// Link to the "Card scored wrong" issue form, with the text fields filled in from the result (GitHub fills issue-form
+// fields from query parameters named after their ids). Never the card text. The "how was it written" dropdown is left
+// for the reporter. Rebuilt on click, so the "I made this card" boxes count.
+const REPORT_FORM = 'https://github.com/frizzyconvo/botstyle-score/issues/new?template=score_report.yml';
+function reportUrl(r) {
+  const e = (state.meta && store.all().find(x => x.key === state.meta.key)) || {};
+  const parts = [`Band: ${r.band.label || r.band.id}`, r.parts && r.parts.description ? `description ${r.parts.description.score.toFixed(1)}` : '', r.parts && r.parts.greeting ? `greeting ${r.parts.greeting.score.toFixed(1)}` : '',
+    (r.hybrid || r.mixed) ? 'flagged as a hybrid card' : '', `prose words ${r.stats.proseWords}`, `fields scored: ${fieldList(state.fields, state.alts).join(', ') || 'none'}`].filter(Boolean);
+  const q = new URLSearchParams({ title: `Score report: ${(state.card && state.card.name) || 'card'} (${r.score.toFixed(1)})`, score: `${r.score.toFixed(1)}, BBBScorer ${SCORER_VERSION}`, notes: parts.join('; ') });
+  if (state.meta && state.meta.link) q.set('link', state.meta.link);
+  if (e.creator) q.set('source', `I made this card (AI-assisted writing: ${aiLabel(e.aiUse)})`);
+  return REPORT_FORM + '&' + q.toString();
 }
 const aiLabel = v => v == null ? '–' : +v === 0 ? 'none (0%)' : +v === 100 ? 'all (100%)' : `about ${v}%`;
 function bindSaveBox() {
@@ -465,6 +479,7 @@ function bindSaveBox() {
   chk.addEventListener('change', () => { $('creatorMore').hidden = !chk.checked; store.patch(key, { creator: chk.checked, aiUse: chk.checked ? +$('aiUse').value : null }); renderMine(); });
   $('aiUse').addEventListener('input', e => { $('aiOut').textContent = aiLabel(e.target.value); store.patch(key, { aiUse: +e.target.value }); renderMine(); });
   const sb = $('shareBtn'); if (sb) sb.addEventListener('click', () => share(key, sb));
+  const rl = $('reportLink'); if (rl) rl.addEventListener('click', () => { if (state.result) rl.href = reportUrl(state.result); });
 }
 
 // ---------------------------------------------------------------- your cards
@@ -497,7 +512,7 @@ function renderBoard() {
   const sorted = list => [...(list || [])].sort((a, b) => sorter(b) - sorter(a));
   const big = m => !hideSmall || (m.n || 0) >= 20;   // "hide models with under 20 cards" (models only; card sets stay)
   const orig = v => v == null ? '' : `<span class="orig" title="Original slop-score (Sam Paech's formula) median">orig ${(+v).toFixed(1)}</span>`;
-  const row = (cls, label, n, p25, med, p75, val, detail, up = null, extra = '') => `<div class="brow ${cls}"><div class="bl" title="${esc(label)}"><span class="bl-name">${esc(label)}<span class="n${n && n < 20 ? ' low' : ''}"${n && n < 20 ? ' title="Fewer than 20 cards: treat as a rough guess"' : ''}>${n ? (n < 20 ? '<span class="star">*</span>' : '') + 'n=' + n.toLocaleString() : ''}</span></span>${extra}</div>
+  const row = (cls, label, n, p25, med, p75, val, detail, up = null, extra = '', fam = '') => `<div class="brow ${cls}"><div class="bl" title="${esc(label)}${fam ? ` (${esc(fam)} family)` : ''}"><span class="bl-name">${esc(label)}${fam ? ` <span class="fam">[${esc(fam)}]</span>` : ''}<span class="n${n && n < 20 ? ' low' : ''}"${n && n < 20 ? ' title="Fewer than 20 cards: treat as a rough guess"' : ''}>${n ? (n < 20 ? '<span class="star">*</span>' : '') + 'n=' + n.toLocaleString() : ''}</span></span>${extra}</div>
     <div class="track"><div class="iqr" style="left:${Math.min(100, p25)}%;width:${Math.max(1, Math.min(100, p75) - Math.min(100, p25))}%"></div><div class="med" style="left:${Math.min(100, med)}%"></div></div>
     <div class="bv">${val}${orig(up)}</div>${detail ? `<div class="bdetail" hidden>${detail}</div>` : ''}</div>`;
   let h = `<div class="board-sort small faint">Sort by: ${Object.entries(BOARD_SORTS).map(([k, [l]]) => `<button type="button" class="ghost sort-btn${k === sortKey ? ' on' : ''}" data-sort="${k}">${l}</button>`).join(' ')} <label class="check hide-small"><input type="checkbox" id="hideSmallChk"${hideSmall ? ' checked' : ''}> Hide models with under 20 cards</label></div>`;
@@ -512,7 +527,7 @@ function renderBoard() {
   const styleInline = m => { const S = m.styles; if (!S || !(S.min && S.max) && !S.lazy) return '';
     return `<span class="bl-sub" title="Range: lowest to highest median across the request styles (lazy prompt aside). Lazy: the lazy-prompt median.">${S.min && S.max ? `<span class="nw">styles ${S.min.median.toFixed(0)}–${S.max.median.toFixed(0)}</span>` : ''}${S.min && S.max && S.lazy ? ' · ' : ''}${S.lazy ? `<span class="nw">lazy ${S.lazy.median.toFixed(0)}</span>` : ''}</span>`; };
   h += `<div class="group-label">AI models · cards written for this test</div>` + sorted(B.models.filter(big)).map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m))).join('');
+    `${esc(m.model)}${m.family ? ` (${esc(m.family)} family)` : ''} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m), m.family || '')).join('');
   // Card sets: dates (if any) go on a second line under the name.
   const setDetail = r => `${r.n.toLocaleString()} cards${r.sub ? ` · ${esc(r.sub)}` : ''} · ${r.original}% ${BAND_LABELS.original}, ${r.familiar ?? 0}% ${BAND_LABELS.familiar}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`;
   const setRow = (cls, r) => row(cls, r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1), setDetail(r), r.upstream, r.sub ? `<span class="bl-sub">${esc(r.sub)}</span>` : '');
@@ -521,7 +536,7 @@ function renderBoard() {
   // (most of their cards failed the format checks, so what's left isn't a fair sample). Older data files call it "pending".
   const fun = B.fun || (B.pending || []).map(m => ({ kind: 'model', ...m }));
   const funModel = (cls, m, extra) => row(cls, m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)} · ${esc(m.why || '')}${m.failedShare != null ? ` (${m.failedShare}% of ${m.generated} generated cards failed)` : ''} · ${modeTxt(m)} · ${m.n} usable plain-request cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}<br>${styleTxt(m)}`, m.upstream, extra);
+    `${esc(m.model)}${m.family ? ` (${esc(m.family)} family)` : ''} · ${esc(m.why || '')}${m.failedShare != null ? ` (${m.failedShare}% of ${m.generated} generated cards failed)` : ''} · ${modeTxt(m)} · ${m.n} usable plain-request cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}<br>${styleTxt(m)}`, m.upstream, extra, m.family || '');
   const funRow = x => x.kind === 'set' ? setRow('ref fun', x)
     : x.kind === 'failed' ? funModel('failed', x, `<span class="bl-sub"><span class="fail-chip">failed</span>${x.failedShare != null ? ` ${x.failedShare}% of its cards` : ''}</span>`)
     : funModel('fun', x, styleInline(x));
