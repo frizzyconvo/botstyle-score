@@ -334,10 +334,12 @@ function renderResult(r) {
     R += `<div class="sec"><h3>What scored</h3>${r.hits.phrases.length ? `<div class="dim small">Phrases</div>${chips(r.hits.phrases)}` : ''}${r.hits.words.length ? `<div class="dim small" style="margin-top:6px">Words</div>${chips(r.hits.words)}` : ''}`
       + (r.hits.structures.length ? `<div class="dim small" style="margin-top:6px">Sentence structures</div><ul>${r.hits.structures.slice(0, 12).map(x => `<li>${esc(x.label)}${x.count > 1 ? ' ×' + x.count : ''} <span class="faint">(${x.weight.toFixed(1)})</span>${x.examples && x.examples[0] ? `<span class="ex">“${esc(String(x.examples[0]).slice(0, 100))}”</span>` : ''}</li>`).join('')}</ul>` : '') + '</div>';
   }
-  // 0.9.x extra points: words and phrases mined from AI-written cards, bold labels
+  // 0.9.x extra points: words and phrases mined from AI-written cards, bold labels; 0.10.1: constructions
   const XP = r.extraPoints || {}, CL = r.cardListHits || [];
-  if (XP.cardLists > 0 || XP.boldLabels > 0) R += `<div class="sec"><h3>Card-style points</h3>${XP.cardLists > 0 ? `<div class="small">Words and phrases common in AI-written cards: <b>+${XP.cardLists.toFixed(1)}</b> points</div><div>${CL.slice(0, 16).map(x => `<span class="tag hot">${esc(x.item)}<span class="w">${x.weight.toFixed(1)}</span></span>`).join('')}</div>` : ''}`
-    + `${XP.boldLabels > 0 ? `<div class="small" style="margin-top:6px">Bold labels and headings: <b>+${XP.boldLabels.toFixed(1)}</b> points</div>` : ''}</div>`;
+  const CT = r.constructionTells || [], CT_LABEL = { not_x_not_y: 'He is not X. He is not Y.', its_not_x_its_y: "It's not X. It's Y.", not_x_just_y: 'not X, just Y', not_because: 'Not because X. Because Y.', no_more_no_less: 'No more. No less.', and_honestly: 'And honestly?', a_beat: 'A beat.', like_someone_who: 'like someone who', somehow_worse: 'somehow worse' };
+  if (XP.cardLists > 0 || XP.boldLabels > 0 || XP.construction > 0) R += `<div class="sec"><h3>Card-style points</h3>${XP.cardLists > 0 ? `<div class="small">Words and phrases common in AI-written cards: <b>+${XP.cardLists.toFixed(1)}</b> points</div><div>${CL.slice(0, 16).map(x => `<span class="tag hot">${esc(x.item)}<span class="w">${x.weight.toFixed(1)}</span></span>`).join('')}</div>` : ''}`
+    + `${XP.boldLabels > 0 ? `<div class="small" style="margin-top:6px">Bold labels and headings: <b>+${XP.boldLabels.toFixed(1)}</b> points</div>` : ''}`
+    + `${XP.construction > 0 ? `<div class="small" style="margin-top:6px">Constructions common in newer AI models: <b>+${XP.construction.toFixed(1)}</b> points</div><div>${CT.map(k => `<span class="tag hot">${esc(CT_LABEL[k] || k)}</span>`).join('')}</div>` : ''}</div>`;
   R += compareSection(r);
   const f = r.format.format, g = r.greeting;
   const gl = g ? (GREETING_FORMATS[g.rp] || [g.rp, '']) : null;

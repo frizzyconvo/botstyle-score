@@ -1,7 +1,7 @@
 // scorer-profile.js - Which BBBScorer version's rules are active.
 //
 // The page, the tools and every stored score use the default (0.9.1: card-mined lists, cut-offs by length, four bands).
-// BBBScorer 0.10.0 is prepared but not switched on: tools can opt in (score_all.mjs --scorer 0.10.0, dev experiments)
+// BBBScorer 0.10.1 is prepared but not switched on: tools can opt in (score_all.mjs --scorer 0.10.1, dev experiments)
 // to test it before the rescore.
 // 0.9.0 is kept only to describe its one full run (eval/old/scores/v0.9.0): 0.9.1 = 0.9.0 + the card-mined lists, which
 // were added after that run had started. Any change to a prepared profile that moves scores gets a new number.
@@ -25,10 +25,12 @@
 //   cardLists.file / lengthBands.file  which data file a version uses (default botstyle_card_lists.json /
 //                   botstyle_length_bands.json), so a re-mined list or new length bands get their own file
 //   bandScheme      'v10' for the 0.10.0 bands (Original / Fresh / Mixed / Common); default: the four bands up to 0.9.x
+//   constructionTells  points for rhetorical constructions newer chat models use on cards ("He is not X. He is not Y.",
+//                   "not X, just Y", "*A beat.*"; CONSTRUCTION_TELLS in js/score-card.js): per × distinct constructions, at most max
 //   patternsOff / patternsOn  sentence patterns switched off / on (ids from js/ai-structures.js), from rechecking every
 //                   pattern on character cards instead of the stories they were picked on
 export const DEFAULT_SCORER = '0.9.1';
-export const NEXT_SCORER = '0.10.0';
+export const NEXT_SCORER = '0.10.1';
 export const PROFILES = {
   '0.8.1': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },
   '0.8.2': { plistParens: false, maxRepeat: null, stripRpAsterisks: false, compactValues: null, texture: null, pulpWeight: 1, lengthBands: false, patternsOff: [], patternsOn: [], cardLists: null },   // same rules as 0.8.1; only the bands changed (four bands)
@@ -87,6 +89,17 @@ export const PROFILES = {
     patternsOff: ['found_herself', 'it_was_as_if', 'hung_heavy', 'felt_a_surge', 'unspoken', 'not_just_shes'], patternsOn: [],
     cardLists: { weight: 0.3 },
     boldLabels: { min: 2, base: 4, per: 1, max: 10 },
+  },
+  '0.10.1': {
+    // 0.10.0 + construction tells (RESCORE_IDEAS #51): +15 per distinct construction, at most 25. Same bands as 0.10.0:
+    // the constructions are on 0.13% of early-2023 human cards, so the human percentiles don't move.
+    plistParens: true, maxRepeat: 2.5, stripRpAsterisks: true, compactValues: null,
+    texture: { minParagraphs: 3, minWords: 150, pivot: 0.6, perUnit: 30, min: -12, max: 20 },
+    pulpWeight: 0.5, lengthBands: { file: 'botstyle_length_bands_0100.json' }, bandScheme: 'v10',
+    patternsOff: ['found_herself', 'it_was_as_if', 'hung_heavy', 'felt_a_surge', 'unspoken', 'not_just_shes'], patternsOn: [],
+    cardLists: { weight: 0.3 },
+    boldLabels: { min: 2, base: 4, per: 1, max: 10 },
+    constructionTells: { per: 15, max: 25 },
   },
 };
 let current = DEFAULT_SCORER, overrides = {};

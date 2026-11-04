@@ -6,6 +6,19 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.36.0] - 2026-11-04 · BBBScorer 0.9.1
+
+Live scores don't change (the page still scores with 0.9.1).
+
+### Added
+- Prepared scorer 0.10.1 (not live): 0.10.0 plus points for rhetorical constructions newer chat models use on cards
+  ("He is not X. He is not Y.", "It's not X. It's Y.", "not X, just Y", "Not because X. Because Y.", "No more. No
+  less.", "And honestly?", "*A beat.*", "like someone who", "somehow worse"): +15 for each distinct one, at most 25.
+  They appear on 0.13% of early-2023 human cards. Same bands as 0.10.0. `NEXT_SCORER` is 0.10.1.
+- `constructionTells` profile switch and `CONSTRUCTION_TELLS` / `constructionTells()` in `js/score-card.js`; results
+  list the constructions found, and the result page shows their points under *Card-style points*.
+- Tests for the constructions and 0.10.1.
+
 ## [0.35.0] - 2026-11-04 · BBBScorer 0.9.1
 
 **Scores and labels change:** the page now scores with BBBScorer 0.9.1 (it was 0.8.2). Cards saved under 0.8.2 keep

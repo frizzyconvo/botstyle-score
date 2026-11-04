@@ -139,6 +139,23 @@ const BOLD_LABEL = /^[ \t]*(?:[-*\u2022+]|\d+[.)])?[ \t]*(?:\*\*|__)[^*_\n]{1,40
 const BOLD_HEAD = /^[ \t]*(?:\*\*|__)[^*_\n]{1,40}(?:\*\*|__)[ \t]*$/gm;
 export function boldLabelCount(text) { const t = String(text || ''); return (t.match(BOLD_LABEL) || []).length + (t.match(BOLD_HEAD) || []).length; }
 function boldPoints(n) { const c = scorerProfile().boldLabels; return !c || n < c.min ? 0 : Math.min(c.max, c.base + c.per * (n - c.min)); }
+// 0.10.1 constructionTells: rhetorical constructions newer chat models put on cards (RESCORE_IDEAS #51), from a blind
+// read of missed AI cards. Any of them: 0.13% of early-2023 human cards, 7 of 47 provenance cards (all AI or hybrid),
+// 8% of missed hold-out AI cards. Points per distinct construction, capped.
+const SUBJ = "(?:He|She|They|It|I|You|This|That)", BE = "(?:'s|’s| is| are|'re|’re|'m|’m| am| was| were)";
+export const CONSTRUCTION_TELLS = {
+  not_x_not_y: new RegExp(SUBJ + BE + " not [^.!?\\n]{1,60}[.!?]\\s+" + SUBJ + BE + " not\\b"),           // "He is not cruel. He is not kind."
+  its_not_x_its_y: new RegExp("\\b(?:It|That|This)" + BE + " not [^.!?\\n]{1,60}[.!?]\\s+(?:It|That|This)" + BE + "\\b(?! not)"),   // "It's not fear. It's ..."
+  not_x_just_y: /\bnot\b[^.,;!?\n]{1,40}[,—–]\s*just\b/i,                                   // "not angry, just tired"
+  not_because: /\bNot because\b[^.!?\n]{1,80}[.!?]\s+(?:But )?[Bb]ecause\b/,                 // "Not because X. Because Y."
+  no_more_no_less: /\bno more[,.]\s*no less\b/i,
+  and_honestly: /\bhonestly\?/i,                                                          // "And honestly?"
+  a_beat: /(?:^|[*_\s(])A beat\./m,                                                        // "*A beat.*"
+  like_someone_who: /\blike (?:someone|somebody|a (?:man|woman|person|guy)) who\b/i,         // "smiles like someone who ..."
+  somehow_worse: /\bsomehow (?:worse|better|more|less)\b/i,                                // "and that's somehow worse"
+};
+export function constructionTells(text) { const t = String(text || ''); return Object.keys(CONSTRUCTION_TELLS).filter(k => CONSTRUCTION_TELLS[k].test(t)); }
+function constructionPoints(ids) { const c = scorerProfile().constructionTells; return !c || !ids.length ? 0 : Math.min(c.max, c.per * ids.length); }
 function texturePoints(pc, proseWords) {
   const c = scorerProfile().texture;
   if (!c || pc.cv === null || pc.paragraphs < c.minParagraphs || proseWords < c.minWords) return 0;
@@ -252,8 +269,9 @@ export function scoreCard(card, opts = {}) {
   const compact = compactValueStats(definition), pCv = paragraphCv(pre.prose);
   const cl = scorerProfile().cardLists ? cardListHits(pre.prose) : { rate: 0, hits: [] };
   const bold = boldLabelCount(text);
-  const extra = { compactValues: +compactPoints(compact).toFixed(2), texture: +texturePoints(pCv, pre.stats.proseWords).toFixed(2), cardLists: +cardListPoints(cl).toFixed(2), boldLabels: +boldPoints(bold).toFixed(2) };
-  const extraPts = extra.compactValues + extra.texture + extra.cardLists + extra.boldLabels;
+  const ctells = scorerProfile().constructionTells ? constructionTells(text) : [];
+  const extra = { compactValues: +compactPoints(compact).toFixed(2), texture: +texturePoints(pCv, pre.stats.proseWords).toFixed(2), cardLists: +cardListPoints(cl).toFixed(2), boldLabels: +boldPoints(bold).toFixed(2), construction: +constructionPoints(ctells).toFixed(2) };
+  const extraPts = extra.compactValues + extra.texture + extra.cardLists + extra.boldLabels + extra.construction;
   if (extraPts) for (const k of ['score', 'low', 'high']) score[k] = Math.max(0, Math.min(100, score[k] + extraPts));
   if (hybrid && (opts.hybridPolicy || opts.mixedPolicy) === 'higher') {
     const hi = parts[hybrid.higher];
@@ -278,7 +296,7 @@ export function scoreCard(card, opts = {}) {
     score: score.score, low: score.low, high: score.high, base: score.base, reliable: score.reliable, joint, parts, hybrid, mixed: hybrid, repetition,   // mixed: old name of hybrid
     components: score.components, emdashPoints: score.emdashPoints, artifactPoints: score.artifactPoints,
     band: writingStyleBand(score.score, score.reliable, format.format, pre.stats, score.artifactPoints > 0, bandCuts(pre.stats.proseWords)),
-    bandCuts: bandCuts(pre.stats.proseWords), extraPoints: extra, compactValues: compact, paragraphEvenness: pCv, cardListHits: cl.hits.slice(0, 20),
+    bandCuts: bandCuts(pre.stats.proseWords), extraPoints: extra, compactValues: compact, paragraphEvenness: pCv, cardListHits: cl.hits.slice(0, 20), constructionTells: ctells,
     rates, stats: pre.stats, format, greeting, type, peers,
     reference: referencePercentiles(score.score),
     genre, pulp, archetype: archetype({ format, greeting, genre, stats: pre.stats }),

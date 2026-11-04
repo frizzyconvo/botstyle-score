@@ -3,9 +3,18 @@
 Planned work and the status of scoring changes. The live scorer is **BBBScorer 0.9.1** (card-mined lists, cut-offs by
 length); the next version is prepared behind switches in `js/scorer-profile.js` and used only when a tool asks for it.
 
-## Next scorer version: 0.10.0 (prepared, not live)
+## Next scorer version: 0.10.1 (prepared, not live)
 
-0.10.0 scores cards like 0.9.3 and has new bands and length cut-offs.
+0.10.1 is 0.10.0 plus points for constructions newer chat models use on cards. 0.10.0 scores cards like 0.9.3 and has
+new bands and length cut-offs.
+
+- **Constructions (0.10.1):** +15 points for each distinct construction a card uses, at most 25: "He is not X. He is
+  not Y.", "It's not X. It's Y.", "not X, just Y", "Not because X. Because Y.", "No more. No less.", "And honestly?",
+  "*A beat.*", "like someone who", "somehow worse". They come from a blind read of AI-written cards the scorer missed.
+  Any of them appears on 0.13% of early-2023 human cards and on 7 of 47 cards of known provenance (all AI-written or
+  hybrid). With the 0.10.0 bands, the share in Common moves from 42.6% to 51.1% on the provenance cards, 43.9% to
+  45.9% on AI cards from unmined model families, 63.9% to 64.8% on a template creator's AI-written cards, and from
+  3.22% to 3.24% on early-2023 human cards. The bands are 0.10.0's.
 
 - **Bold labels and headings** (from 0.9.3): points for bold used as labels or headings (`**Appearance:**`,
   `- **Likes:** …`, a line that is only `**Backstory**`): from 2 such labels on, 4 points plus 1 for each one after, at
@@ -24,7 +33,7 @@ length); the next version is prepared behind switches in `js/scorer-profile.js` 
   rarely reach a cut-off set for all lengths; per-length cut-offs for long cards rose to about 72 and missed real
   AI-written cards, which are mostly long. (0.9.4 had these cut-offs with the four old bands.)
 
-Score with it: `node tools/score_all.mjs --scorer 0.10.0`.
+Score with it: `node tools/score_all.mjs --scorer 0.10.1` (or `--scorer 0.10.0` without the constructions).
 
 **Test results.** Human side: early-2023 card collections. AI side: cards from model families that were never used
 to build the lists. At the score that 2% of the human cards reach:

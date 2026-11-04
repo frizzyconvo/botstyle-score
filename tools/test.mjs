@@ -189,6 +189,19 @@ check('default fields: scenario not scored', scoreCard({ description: 'She bakes
   const ids10 = [c10.fresh - 1, c10.fresh + .1, c10.mixed + .1, c10.common + .1].map(v => wsb(v, true, 'free_prose', { proseWords: 600 }, false, c10).id).join();
   check('0.10.0: four bands original / fresh / mixed / common', ids10 === 'original,fresh,mixed,common' && bandScheme().labels.fresh === 'Fresh' && wsb(c10.common + 1, true, 'free_prose', { proseWords: 600 }, false, c10).tagline === 'Might just be slop', ids10);
   check('0.10.0: no Familiar band', !bandScheme().ids.includes('familiar') && bandIdFor(99, c10) === 'common');
+  check('0.10.0: no construction points', scoreCard({ description: 'He is not cruel. He is not kind. She smiles like someone who knows the answer.' }).extraPoints.construction === 0);
+  // 0.10.1: 0.10.0 + construction tells, +15 each, at most 25
+  const { constructionTells } = await import('../js/score-card.js');
+  check('construction tells found', ['He is not cruel. He is not kind.', "It's not fear. It's hunger.", 'not angry, just tired', 'Not because he cares. Because he must.', 'No more. No less.', 'And honestly? Fine.', '*A beat.*', 'grins like someone who knows', "that's somehow worse"].every(t => constructionTells(t).length === 1));
+  check('construction tells: ordinary text has none', constructionTells('She is not tall, but she is strong. He likes someone who listens. It is late. It was not raining.').length === 0, JSON.stringify(constructionTells('She is not tall, but she is strong. He likes someone who listens. It is late. It was not raining.')));
+  const ct1 = 'Mara runs the night shift at the diner on Fifth. She is not cruel. She is not kind. She refills coffee without asking and remembers every order. ' + longCard;
+  const ct2 = ct1 + ' She laughs like someone who has heard every excuse. *A beat.*';
+  const s100 = scoreCard({ description: ct2 }).score;
+  SP.setScorerProfile('0.10.1');
+  const r1 = scoreCard({ description: ct1 }), r2 = scoreCard({ description: ct2 });
+  check('0.10.1: +15 for one construction', r1.extraPoints.construction === 15 && r1.constructionTells.join() === 'not_x_not_y', JSON.stringify(r1.extraPoints));
+  check('0.10.1: three constructions capped at +25', r2.extraPoints.construction === 25 && Math.abs(r2.score - Math.min(100, s100 + 25)) < 0.01, `${r2.score} vs ${s100}`);
+  check('0.10.1: bands as 0.10.0', JSON.stringify(scoreCard({ description: longCard }).bandCuts) === JSON.stringify(c10));
   SP.setScorerProfile();
   check('profile back to 0.9.1', scoreCard('She bakes bread.').version === '0.9.1' && scoreCard({ description: wpp }).extraPoints.compactValues === 0 && !scoreCard({ description: bolded }).extraPoints.boldLabels);
 }

@@ -471,7 +471,9 @@ for rates yet; the set is growing.
 The rise after 2022 in both is about the size you'd expect as AI-assisted writing spreads; the scores don't say which
 pieces those are.
 
-**Next scorer version (0.10.0, prepared, not live)** adds a few points for bold labels and headings (0.9.3), new
+**Next scorer version (0.10.1, prepared, not live)** is 0.10.0 plus up to 25 points for rhetorical constructions newer
+chat models use on cards ("He is not X. He is not Y.", "not X, just Y", "*A beat.*"; on 0.13% of early-2023 human
+cards). 0.10.0 adds a few points for bold labels and headings (0.9.3), new
 length cut-offs and new bands: **Original**, **Fresh**, **Mixed** and **Common** (Familiar merges into Common). Its
 cut-offs come from the early-2023 collections with ChatGPT-era cards left out: Fresh from the 65th percentile of human
 cards of the same length (about 20 for cards with 350+ prose words), Mixed from the 94th, Common from the 98th, with
@@ -568,7 +570,7 @@ the pulp word-list builder and the phrase checker.
 | **App version** | The page and tools version (`package.json`). Moves for any change, including ones that don't touch scores. |
 | **Original slop score** | Sam Paech's slop-score formula, unchanged, on the same text. |
 | **Original-ish / Mixed / Familiar / Common** | The four bands (cut-offs by length; see [Bands](#bands)). Their fun taglines: meatbag adjacent, mixed signals, rings a bell, might just be slop. |
-| **Original / Fresh / Mixed / Common** | The bands of the prepared 0.10.0 (Familiar merges into Common). Taglines: meatbag adjacent, certified flesh?, big cyborg energy, might just be slop. |
+| **Original / Fresh / Mixed / Common** | The bands of the prepared 0.10.0 and 0.10.1 (Familiar merges into Common). Taglines: meatbag adjacent, certified flesh?, big cyborg energy, might just be slop. |
 | **Prose words** | Words left after lists, headers, W++/PList blocks and boilerplate are set aside. Only these are scored. |
 | **Boilerplate** | Instructions to the model, narrator rules, pasted jailbreaks. |
 | **W++ / PList / Ali:Chat** | Card-writing formats: W++ is `Trait("value" + "value")`; PList is `[Name's personality: a, b, c]`; Ali:Chat is example exchanges in the character's voice. |
