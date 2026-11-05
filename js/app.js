@@ -570,7 +570,7 @@ function renderBoard() {
   const funRow = x => x.kind === 'set' ? setRow('ref fun', x)
     : x.kind === 'failed' ? funModel('failed', x, `<span class="bl-sub"><span class="fail-chip">failed</span>${x.failedShare != null ? ` ${x.failedShare}% of its cards` : ''}</span>`)
     : funModel('fun', x, styleInline(x));
-  if (fun.length && !keyOnly) h += `<div class="group-label">Just for fun · not ranked</div>` + ['model', 'set', 'failed'].map(k => sorted(fun.filter(x => (x.kind || 'model') === k && (k === 'set' || big(x)))).map(funRow).join('')).join('');
+  if (fun.length) h += `<div class="group-label">Just for fun · not ranked</div>` + ['model', 'set', 'failed'].map(k => sorted(fun.filter(x => (x.kind || 'model') === k && (k === 'set' || big(x)))).map(funRow).join('')).join('');
   $('boardRows').innerHTML = h;
   const stale = B.version && !SAME_SCORES_AS.includes(B.version);
   $('boardNote').innerHTML = `${stale ? `<b>Built from the BBBScorer v${esc(B.version)} run</b>; this page scores with v${esc(SCORER_VERSION)}, so the leaderboard numbers will change once it's rebuilt from a v${esc(SCORER_VERSION)} run.` : `BBBScorer v${esc(SCORER_VERSION)}.`} Bars: middle half of each set's cards; line: median; n = cards in the set. <span class="star">*</span> fewer than 20 cards, so a rough guess. Click a row for details.`;

@@ -379,8 +379,8 @@ Models and card sets are ranked together in one list; each card set carries a **
 Two toggles shorten it:
 - **Key picks only** (on by default): the models most bot creators write or chat with (Claude, GPT, Gemini,
   DeepSeek, Kimi, GLM, Grok, MiniMax, Mistral Nemo and the common RP fine-tunes Magnum, Cydonia and Euryale) and two
-  human yardsticks (JanitorAI cards, Jul 2023–Feb 2024, and Chub cards, 2025). It also hides the "just for fun"
-  section. Untick it for every model and set.
+  human yardsticks (JanitorAI cards, Jul 2023–Feb 2024, and Chub cards, 2025). Untick it for every model and set.
+  The "just for fun" section below always shows.
 - **Card sets**: untick to show models only.
 
 **Hold-out models** are ranked with the rest and carry a **hold-out** tag: models from families the word lists were

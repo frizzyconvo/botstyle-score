@@ -6,11 +6,16 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.40.1] - 2026-11-05 · BBBScorer 0.9.1
+
+### Fixed
+- Leaderboard: the "just for fun" section shows again with Key picks on (0.40.0 hid it).
+
 ## [0.40.0] - 2026-11-05 · BBBScorer 0.9.1
 
 ### Added
 - Leaderboard: **Key picks only** toggle, on by default: the models most bot creators use and two human yardsticks
-  (JanitorAI 2023–24, Chub 2025). Untick it for every model and set, and the "just for fun" section.
+  (JanitorAI 2023–24, Chub 2025). Untick it for every model and set.
 - Leaderboard: **Card sets** toggle to show or hide the card sets; each set carries a human, mixed or AI tag.
 - Leaderboard heading shows the BBBScorer version it was built from.
 - Your cards and public list: each score's percentile among 2023 human cards and AI-written cards ("p96 human · p37
