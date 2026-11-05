@@ -6,6 +6,12 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.40.2] - 2026-11-05 · BBBScorer 0.9.1
+
+### Added
+- Leaderboard and How It Works: a note that model medians are a ranking under identical requests and run higher than
+  the same models' cards in the wild.
+
 ## [0.40.1] - 2026-11-05 · BBBScorer 0.9.1
 
 ### Fixed

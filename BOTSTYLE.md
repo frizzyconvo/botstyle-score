@@ -367,6 +367,11 @@ family, so l3.1-euryale-70b is tagged Llama, unslopnemo-12b and cydonia-24b-v4.1
 Only these plain requests are ranked. Each model's report (click a row) also shows cards written with
 "don't sound like AI" instructions and rewrites of human cards.
 
+**Read it as a ranking.** Every model wrote its cards from the same requests, and the scorer was tuned on cards like
+these, so model medians run higher than the same models' cards in the wild (often edited, and written from other
+prompts). The order is the useful part, not a forecast of what a real card will score. Scorer changes are judged on
+real-world card sets with known provenance, not on how far the leaderboard moves.
+
 On each row: the bar is the middle half of that set's cards, the line is the median, the big number is the
 BBBScorer median and "orig" the original slop-score median. Under each model: **styles** = the lowest to highest
 median across its request styles (lazy prompt aside), and **lazy** = its lazy-prompt median. Under each card set:
