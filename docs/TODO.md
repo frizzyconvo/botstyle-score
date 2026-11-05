@@ -104,6 +104,12 @@ cards (0.9.4), and the 0.10.0 bands.
 
 ## Planned
 
+### Test cards
+- [ ] Request prompts (`tools/generate_ai_cards.mjs` FORMATS): platform names appear in only one phrasing of some
+      formats (SillyTavern in one compact prompt, Chub in one formatted-prose prompt, JanitorAI in one free-prose
+      prompt; none in lists or in-voice), so platform wording is tied to format. Either name platforms evenly across
+      every format (rotating) or drop them, and keep the request text recorded per card so its effect can be checked.
+
 ### Scoring
 - [ ] Scale card-list points so a longer list doesn't lower everyone else's points.
 - [ ] Em dashes: start the points at 3 per 1,000 words instead of 6.
