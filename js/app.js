@@ -1,7 +1,7 @@
 // app.js - BB Botstyle Scorer page. Scores cards in the browser with js/score-card.js; nothing is
 // sent anywhere except card fetches (Chub/Botbooru) and, if switched on and chosen per card, the
 // public list (js/site-config.js PUBLIC_RUNS).
-import { scoreCard, loadAll, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, bandScheme, bandCuts, bandIdFor, SHORT_STAMP_WORDS } from './score-card.js';
+import { scoreCard, loadAll, referencePercentiles, SCORER_VERSION, SAME_SCORES_AS, WRITING_STYLE_BANDS as WB, bandScheme, bandCuts, bandIdFor, SHORT_STAMP_WORDS } from './score-card.js';
 // Band ids, names and taglines of the live scorer's scheme (four bands up to 0.9.x; Original / Fresh / Mixed / Common from 0.10.0).
 const BS = bandScheme(), BAND_LABELS = BS.labels, BAND_TAGLINES = BS.taglines, BAND_IDS = BS.ids;
 // The scorer version is part of the page title and the heading, so a tab, bookmark or screenshot says which scorer
@@ -85,6 +85,7 @@ async function init() {
     await initPosTagger().catch(() => {});
     await Promise.all([loadWordfreq(), loadSlopSets(), loadAll('./data/')]);
     state.ready = true; status('Ready. Paste a link, upload a card, or type text.');
+    renderMine();   // percentiles need the reference data loaded above
     // the fun vocabulary reads load after the rest and are simply left out if their data can't be fetched
     getJson('data/botstyle_card_words.json').then(d => { state.cardWords = d; if (state.result) renderResult(state.result); }).catch(() => {});
     getJson('data/botstyle_mood.json').then(d => { setMoodData(d); if (state.result) renderResult(state.result); }).catch(() => {});
@@ -494,6 +495,10 @@ function bindSaveBox() {
 
 // ---------------------------------------------------------------- your cards
 const median = a => { const s = [...a].sort((x, y) => x - y); return s.length ? (s.length % 2 ? s[s.length >> 1] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : null; };
+// Where a saved score sits among 2023 human cards and AI-written cards (the page's reference), as percentiles.
+const pctiles = score => { const r = referencePercentiles(score); return r && r.human_2023 && r.ai_cards ? { h: Math.round(r.human_2023.percentile), a: Math.round(r.ai_cards.percentile), hn: r.human_2023.n, an: r.ai_cards.n } : null; };
+const pctTag = (score, version) => { const p = pctiles(score); if (!p) return '';
+  return `<span class="pct" title="Higher than ${p.h}% of ${p.hn.toLocaleString()} human cards from 2023 and ${p.a}% of ${p.an.toLocaleString()} AI-written cards${version && !sameScorer(version, SCORER_VERSION) ? ` (approximate: scored with v${esc(version)})` : ''}">p${p.h} human · p${p.a} AI</span>`; };
 function renderMine() {
   const list = store.all();
   $('mine').hidden = !list.length; if (!list.length) return;
@@ -506,10 +511,11 @@ function renderMine() {
     + `<div class="stat"><b>${median(sc).toFixed(1)} <i>/</i> ${(sc.reduce((a, b) => a + b, 0) / sc.length).toFixed(1)}</b><span>median / average</span></div>`
     + `<div class="stat wide"><b>${BAND_IDS.map(bands).join(' · ')}${splitPop}</b><span>${BAND_IDS.map((b, i) => esc(i ? BAND_LABELS[b].toLowerCase() : BAND_LABELS[b])).join(' · ')}</span></div>`
     + (mineByCreator.length ? `<div class="stat"><b>${median(mineByCreator.map(x => x.score)).toFixed(1)}</b><span>median, made by you (${mineByCreator.length})</span></div>` : '')
-    + (ups.length ? `<div class="stat"><b>${median(ups).toFixed(1)}</b><span>original slop score, median${ups.length < list.length ? ` (${ups.length})` : ''}</span></div>` : '');
+    + (() => { const p = pctiles(median(sc)); return p ? `<div class="stat" title="The median card is higher than ${p.h}% of 2023 human cards and ${p.a}% of AI-written cards"><b>p${p.h} <i>/</i> p${p.a}</b><span>median card: human / AI percentile</span></div>` : ''; })()
+    + `<div class="stat"${ups.length < list.length ? ` title="Only recorded for cards saved since app 0.39.0 (${ups.length} of ${list.length}); score a card again to add it"` : ''}><b>${ups.length ? median(ups).toFixed(1) : '–'}</b><span>original slop score, median${ups.length && ups.length < list.length ? ` (${ups.length})` : ''}</span></div>`;
   const hist = x => (x.history || []).map(h => `v${esc(h.version)}: ${(+h.score).toFixed(1)}`).join(', ');
   $('mineList').innerHTML = [...list].reverse().map(x => `<div class="item"><span class="nm">${x.origin ? `<span class="src-tag">${esc(ORIGIN_LABEL[x.origin] || x.origin)}</span>` : ''}${oldVerTag(x.version)}${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}${x.upstream != null ? `<span class="orig" title="Original slop-score formula (Sam Paech) on the same text">orig ${x.upstream.toFixed(1)}</span>` : ''}</span><span class="meta"><span class="band ${bandOfScore(x.score, x.band, x.proseWords)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(x.score, x.band, x.proseWords)] || x.band)}</span> v${esc(x.version)}${hist(x) ? ` · was ${hist(x)}` : ''}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse).replace('about ', '')}` : ''}</span>
+    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}${x.upstream != null ? `<span class="orig" title="Original slop-score formula (Sam Paech) on the same text">orig ${x.upstream.toFixed(1)}</span>` : ''}</span><span class="meta"><span class="band ${bandOfScore(x.score, x.band, x.proseWords)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(x.score, x.band, x.proseWords)] || x.band)}</span> v${esc(x.version)}${pctTag(x.score, x.version) ? ' · ' + pctTag(x.score, x.version) : ''}${hist(x) ? ` · was ${hist(x)}` : ''}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse).replace('about ', '')}` : ''}</span>
     <button class="x" type="button" data-key="${esc(x.key)}" title="Remove">✕</button></div>`).join('');
   $('mineList').querySelectorAll('button.x').forEach(b => b.addEventListener('click', () => { store.remove(b.dataset.key); renderMine(); renderBoard(); }));
 }
@@ -518,6 +524,10 @@ function renderMine() {
 // Sort order for each leaderboard group: BBBScorer median (default), original slop score, or card count. (A lazy-prompt
 // sort was dropped: most models have only 1-2 lazy-prompt cards, so it ranked noise.)
 let hideSmall = false; try { hideSmall = localStorage.getItem('bb-board-hide-small') === '1'; } catch { /* ignore */ }
+// Key picks (on by default): only the models most bot creators use and the main human card sets. Card sets: show the
+// human / mixed / AI card sets in the ranking next to the models.
+let keyOnly = true, showSets = true;
+try { keyOnly = localStorage.getItem('bb-board-key') !== '0'; showSets = localStorage.getItem('bb-board-sets') !== '0'; } catch { /* ignore */ }
 const BOARD_SORTS = { median: ['BBBScorer', x => x.median], upstream: ['Original', x => x.upstream ?? -1], n: ['# cards', x => x.n] };
 function renderBoard() {
   const B = state.board; if (!B) return;
@@ -528,7 +538,7 @@ function renderBoard() {
   const row = (cls, label, n, p25, med, p75, val, detail, up = null, extra = '', fam = '', ho = false) => `<div class="brow ${cls}"><div class="bl" title="${esc(label)}${fam ? ` (${esc(fam)} family)` : ''}${ho ? ', hold-out model' : ''}"><span class="bl-name${fam ? ' has-fam' : ''}">${fam ? `<span class="bl-txt">${esc(label)}</span><span class="fam">${esc(fam)}</span>${ho ? '<span class="fam ho" title="Hold-out: a model family never used to build the word lists, so its numbers are a fair test">hold-out</span>' : ''}` : esc(label)}<span class="n${n && n < 20 ? ' low' : ''}"${n && n < 20 ? ' title="Fewer than 20 cards: treat as a rough guess"' : ''}>${n ? (n < 20 ? '<span class="star">*</span>' : '') + 'n=' + n.toLocaleString() : ''}</span></span>${extra}</div>
     <div class="track"><div class="iqr" style="left:${Math.min(100, p25)}%;width:${Math.max(1, Math.min(100, p75) - Math.min(100, p25))}%"></div><div class="med" style="left:${Math.min(100, med)}%"></div></div>
     <div class="bv">${val}${orig(up)}</div>${detail ? `<div class="bdetail" hidden>${detail}</div>` : ''}</div>`;
-  let h = `<div class="board-sort small faint">Sort by: ${Object.entries(BOARD_SORTS).map(([k, [l]]) => `<button type="button" class="ghost sort-btn${k === sortKey ? ' on' : ''}" data-sort="${k}">${l}</button>`).join(' ')} <label class="check hide-small"><input type="checkbox" id="hideSmallChk"${hideSmall ? ' checked' : ''}> Hide models with under 20 cards</label></div>`;
+  let h = `<div class="board-sort small faint">Sort by: ${Object.entries(BOARD_SORTS).map(([k, [l]]) => `<button type="button" class="ghost sort-btn${k === sortKey ? ' on' : ''}" data-sort="${k}">${l}</button>`).join(' ')} </div><div class="board-toggles small faint"><label class="check" title="Only the models most bot creators write or chat with, and the main human card sets"><input type="checkbox" id="keyChk"${keyOnly ? ' checked' : ''}> Key picks only</label> <label class="check" title="Human, mixed and AI-written card sets, ranked with the models"><input type="checkbox" id="setsChk"${showSets ? ' checked' : ''}> Card sets</label> <label class="check hide-small"><input type="checkbox" id="hideSmallChk"${hideSmall ? ' checked' : ''}> Hide models with under 20 cards</label></div>`;
   const mine = store.all();
   if (state.result && state.result.band.id !== 'na') { const r = state.result; h += `<div class="group-label">Yours</div>` + row('you', state.card.name || 'This card', 0, r.low, r.score, r.high, r.score.toFixed(1), ''); }
   if (mine.length >= 2) { const s = mine.map(x => x.score).sort((a, b) => a - b); const q = p => s[Math.min(s.length - 1, Math.floor(p * s.length))];
@@ -539,12 +549,19 @@ function renderBoard() {
   // Second line under the model name: range of request-style medians, and the lazy prompt's median.
   const styleInline = m => { const S = m.styles; if (!S || !(S.min && S.max) && !S.lazy) return '';
     return `<span class="bl-sub" title="Range: lowest to highest median across the request styles (lazy prompt aside). Lazy: the lazy-prompt median.">${S.min && S.max ? `<span class="nw">styles ${S.min.median.toFixed(0)}–${S.max.median.toFixed(0)}</span>` : ''}${S.min && S.max && S.lazy ? ' · ' : ''}${S.lazy ? `<span class="nw">lazy ${S.lazy.median.toFixed(0)}</span>` : ''}</span>`; };
-  h += `<div class="group-label">AI models · cards written for this test</div>` + sorted(B.models.filter(big)).map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)}${m.family ? ` (${esc(m.family)} family)` : ''}${m.holdout ? ' · hold-out model (family never used to build the lists)' : ''} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m), m.family || '', !!m.holdout)).join('');
+  const modelRow = m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
+    `${esc(m.model)}${m.family ? ` (${esc(m.family)} family)` : ''}${m.holdout ? ' · hold-out model (family never used to build the lists)' : ''} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m), m.family || '', !!m.holdout);
   // Card sets: dates (if any) go on a second line under the name.
   const setDetail = r => `${r.n.toLocaleString()} cards${r.sub ? ` · ${esc(r.sub)}` : ''} · ${r.original}% ${BAND_LABELS.original}, ${r.familiar ?? 0}% ${BAND_LABELS.familiar}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`;
-  const setRow = (cls, r) => row(cls, r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1), setDetail(r), r.upstream, r.sub ? `<span class="bl-sub">${esc(r.sub)}</span>` : '');
-  h += `<div class="group-label">Reference card sets</div>` + sorted(B.references).map(r => setRow('ref', r)).join('');
+  const SET_KIND = { human: ['human', 'Human-written card set (mostly; some AI-written cards slipped in)'], mixed: ['mixed', 'A mix of human and AI-assisted writing'], ai: ['AI', 'AI-written card set'] };
+  const setChip = r => { const k = SET_KIND[r.kind]; return k ? `<span class="set-chip k-${esc(r.kind)}" title="${esc(k[1])}">${esc(k[0])}</span>` : ''; };
+  const setRow = (cls, r) => row(cls, r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1), setDetail(r), r.upstream, `<span class="bl-sub">${setChip(r)}${r.sub ? esc(r.sub) : ''}</span>`);
+  // One ranking: models and (if ticked) card sets together; Key picks narrows both.
+  const pick = x => !keyOnly || x.key;
+  const items = [...B.models.filter(big).filter(pick).map(m => ({ t: 'model', x: m })), ...(showSets ? (B.references || []).filter(pick).map(r => ({ t: 'set', x: r })) : [])]
+    .sort((a, b) => sorter(b.x) - sorter(a.x));
+  const nAll = B.models.filter(big).length + (showSets ? (B.references || []).length : 0);
+  h += `<div class="group-label">AI models${showSets ? ' and card sets' : ''}${keyOnly ? ` · key picks (${items.length} of ${nAll})` : ''}</div>` + items.map(({ t, x }) => t === 'model' ? modelRow(x) : setRow('ref', x)).join('');
   // Just for fun, not ranked: models not made for writing cards, extra card sets of unknown origin, and failed models
   // (most of their cards failed the format checks, so what's left isn't a fair sample). Older data files call it "pending".
   const fun = B.fun || (B.pending || []).map(m => ({ kind: 'model', ...m }));
@@ -553,11 +570,14 @@ function renderBoard() {
   const funRow = x => x.kind === 'set' ? setRow('ref fun', x)
     : x.kind === 'failed' ? funModel('failed', x, `<span class="bl-sub"><span class="fail-chip">failed</span>${x.failedShare != null ? ` ${x.failedShare}% of its cards` : ''}</span>`)
     : funModel('fun', x, styleInline(x));
-  if (fun.length) h += `<div class="group-label">Just for fun · not ranked</div>` + ['model', 'set', 'failed'].map(k => sorted(fun.filter(x => (x.kind || 'model') === k && (k === 'set' || big(x)))).map(funRow).join('')).join('');
+  if (fun.length && !keyOnly) h += `<div class="group-label">Just for fun · not ranked</div>` + ['model', 'set', 'failed'].map(k => sorted(fun.filter(x => (x.kind || 'model') === k && (k === 'set' || big(x)))).map(funRow).join('')).join('');
   $('boardRows').innerHTML = h;
   const stale = B.version && !SAME_SCORES_AS.includes(B.version);
   $('boardNote').innerHTML = `${stale ? `<b>Built from the BBBScorer v${esc(B.version)} run</b>; this page scores with v${esc(SCORER_VERSION)}, so the leaderboard numbers will change once it's rebuilt from a v${esc(SCORER_VERSION)} run.` : `BBBScorer v${esc(SCORER_VERSION)}.`} Bars: middle half of each set's cards; line: median; n = cards in the set. <span class="star">*</span> fewer than 20 cards, so a rough guess. Click a row for details.`;
   $('boardRows').querySelectorAll('.brow').forEach(el => el.addEventListener('click', () => { const d = el.querySelector('.bdetail'); if (d) d.hidden = !d.hidden; }));
+  for (const [id, key, set] of [['keyChk', 'bb-board-key', v => { keyOnly = v; }], ['setsChk', 'bb-board-sets', v => { showSets = v; }]]) { const el = $(id); if (!el) continue;
+    el.addEventListener('click', ev => ev.stopPropagation()); el.addEventListener('change', () => { set(el.checked); try { localStorage.setItem(key, el.checked ? '1' : '0'); } catch { /* ignore */ } renderBoard(); }); }
+  if ($('boardVer')) $('boardVer').textContent = 'BBBScorer v' + (B.version || SCORER_VERSION);
   const hs = $('hideSmallChk'); if (hs) { hs.addEventListener('click', ev => ev.stopPropagation()); hs.addEventListener('change', () => { hideSmall = hs.checked; try { localStorage.setItem('bb-board-hide-small', hideSmall ? '1' : '0'); } catch { /* ignore */ } renderBoard(); }); }
   $('boardRows').querySelectorAll('.sort-btn').forEach(el => el.addEventListener('click', ev => { ev.stopPropagation(); state.boardSort = el.dataset.sort; try { localStorage.setItem('bb-board-sort', state.boardSort); } catch { /* ignore */ } renderBoard(); }));
 }
@@ -575,7 +595,7 @@ async function loadPublic() {
     // Other scorer versions' scores for the same link, newest first (one per version), shown on the top row.
     const otherVers = g => { const seen = new Set([g.top.version]); return g.older.filter(x => x.version && !seen.has(x.version) && seen.add(x.version)).map(x => `v${esc(x.version)}: ${(+x.score).toFixed(1)}`).join(', '); };
     const row = (x, sub = false, also = '') => `<div class="item${sub ? ' sub' : ''}"><span class="nm">${x.origin ? `<span class="src-tag">${esc(ORIGIN_LABEL[x.origin] || x.origin)}</span>` : ''}${oldVerTag(x.version)}${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-      <span class="sc">${(+x.score).toFixed(1)}</span><span class="meta"><span class="band ${esc(bandOfScore(+x.score, x.band))}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(+x.score, x.band)] || x.band)}</span> BBBScorer v${esc(x.version)}${also ? ` · also ${also}` : ''}${x.creator ? ` · by creator, AI ${aiLabel(x.aiUse)}` : ''}${sub && x.at ? ` · ${esc(String(x.at).slice(0, 10))}` : ''}</span><span></span></div>`;
+      <span class="sc">${(+x.score).toFixed(1)}${x.upstream != null ? `<span class="orig" title="Original slop-score formula (Sam Paech) on the same text">orig ${(+x.upstream).toFixed(1)}</span>` : ''}</span><span class="meta"><span class="band ${esc(bandOfScore(+x.score, x.band))}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(+x.score, x.band)] || x.band)}</span> BBBScorer v${esc(x.version)}${pctTag(+x.score, x.version) ? ' · ' + pctTag(+x.score, x.version) : ''}${also ? ` · also ${also}` : ''}${x.creator ? ` · by creator, AI ${aiLabel(x.aiUse)}` : ''}${sub && x.at ? ` · ${esc(String(x.at).slice(0, 10))}` : ''}</span><span></span></div>`;
     $('publicList').innerHTML = groups.slice(0, 300).map(g => row(g.top, false, otherVers(g)) + (g.older.length ? `<details class="older"><summary class="faint small">${g.older.length} earlier ${g.older.length > 1 ? 'entries' : 'entry'} for this link</summary>${g.older.map(x => row(x, true)).join('')}</details>` : '')).join('') || '<span class="faint small">Nothing shared yet.</span>';
   } catch { $('publicList').innerHTML = '<span class="faint small">The public list is unreachable right now.</span>'; }
 }
@@ -584,7 +604,7 @@ async function share(key, btn) {
   btn.disabled = true; btn.textContent = 'Sharing…';
   try {
     const r = await fetch(PUBLIC_RUNS.replace(/\/$/, '') + '/runs', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: e.name, link: e.link, origin: e.origin || 'text', score: e.score, band: e.band, version: e.version, fields: e.fields, creator: !!e.creator, aiUse: e.creator ? e.aiUse : null }) });
+      body: JSON.stringify({ name: e.name, link: e.link, origin: e.origin || 'text', score: e.score, upstream: e.upstream ?? null, band: e.band, version: e.version, fields: e.fields, creator: !!e.creator, aiUse: e.creator ? e.aiUse : null }) });
     if (!r.ok) throw new Error(await r.text());
     store.patch(key, { shared: true }); btn.textContent = 'Shared'; loadPublic();
   } catch (err) { btn.disabled = false; btn.textContent = 'Share to public list'; error('Could not share: ' + (err.message || err)); }

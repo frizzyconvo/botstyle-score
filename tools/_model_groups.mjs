@@ -13,6 +13,19 @@ export const JUST_FOR_FUN = {
   // (empty: phi-4 was here until app 0.39.0; it's ranked now, user's call)
 };
 
+// KEY_PICKS: the models an average bot creator is most likely to write or chat with (big hosted models people pick on
+// OpenRouter / chat sites, the usual RP fine-tunes), plus the main human card sets. The leaderboard shows only these
+// by default ("Key picks"); unticking shows everything.
+export const KEY_PICKS = new Set([
+  'anthropic/claude-sonnet-4.5', 'anthropic/claude-opus-5.5', 'anthropic/claude-fable-5.1',
+  'openai/gpt-6-luna', 'openai/gpt-6-astra', 'openai/gpt-5-mini', 'openai/gpt-4o-2024-11-20',
+  'google/gemini-3.8-flash', 'google/gemini-2.5-flash',
+  'deepseek/deepseek-v4.1-flash', 'deepseek/deepseek-chat-v3-0324', 'deepseek/deepseek-v3.2',
+  'moonshotai/kimi-k2-0905', 'z-ai/glm-5.3-flash', 'x-ai/grok-4.3', 'minimax/minimax-m3',
+  'mistralai/mistral-nemo', 'anthracite-org/magnum-v4-72b', 'thedrummer/cydonia-24b-v4.1', 'sao10k/l3.1-euryale-70b',
+]);
+export const KEY_SETS = new Set(['JanitorAI cards|Jul 2023–Feb 2024', 'Chub cards|2025']);
+
 // HOLDOUT: models whose cards are a test set only (eval/ai-cards/ai_cards_holdout.jsonl, dev\generate-cards-holdout.cmd).
 // Chosen from model families the card lists were never mined from. mine_card_lists.mjs never uses them, even if their
 // cards end up in another file. The note says how close each is to a mined family (fine-tune bases count).

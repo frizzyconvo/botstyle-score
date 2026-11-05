@@ -16,7 +16,7 @@ helpIfAsked(import.meta.url);
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { WRITING_STYLE_BANDS as WB, SCORER_VERSION } from '../js/score-card.js';
-import { FAILED, JUST_FOR_FUN, familyLabel } from './_model_groups.mjs';
+import { FAILED, JUST_FOR_FUN, familyLabel, KEY_PICKS, KEY_SETS } from './_model_groups.mjs';
 import { PATHS } from './_paths.mjs';
 import { pageRunDir } from './_paths.mjs';
 // default: the page's scorer version's run (not the newest folder: a prepared next version may be mid-run)
@@ -59,7 +59,7 @@ for (const [m, rows] of Object.entries(models)) {
   const styleMed = Object.entries(byStyle).map(([k, v]) => ({ style: k, n: v.length, median: q(v.map(x => x.score), .5) })).sort((a, b) => a.median - b.median);
   const lazy = byStyle.default ? { n: byStyle.default.length, median: q(byStyle.default.map(x => x.score), .5), upstream: q(byStyle.default.map(x => x.upstream).filter(x => x != null), .5) } : null;
   const styles = { lazy, min: styleMed.find(x => x.style !== 'default') || null, max: [...styleMed].reverse().find(x => x.style !== 'default') || null, all: styleMed };
-  const entry = { model: m, family: familyLabel(m), ...(rows.some(r => r.holdout) ? { holdout: true } : {}), ...stats(fresh), byMode, styles };
+  const entry = { model: m, family: familyLabel(m), ...(rows.some(r => r.holdout) ? { holdout: true } : {}), ...(KEY_PICKS.has(m) ? { key: true } : {}), ...stats(fresh), byMode, styles };
   if (FAILED[m]) { const a = attempts[m] || { all: 0, failed: 0 }; out.fun.push({ kind: 'failed', ...entry, why: FAILED[m], generated: a.all, failedShare: a.all ? +(100 * a.failed / a.all).toFixed(0) : null }); }
   else if (JUST_FOR_FUN[m]) out.fun.push({ kind: 'model', ...entry, why: JUST_FOR_FUN[m] });
   else out.models.push(entry);
@@ -80,14 +80,17 @@ const refs = [
   ["Roko's Basilisk Archive", 'Feb–Jul 2023', fresh('rokos_basilisk')],
   ['VenusAI Discord cards', '2023', fresh('venusai')],
   ['Chub archive (mega.nz)', 'to Jul 2023', fresh('chub_mega')],
+  // Perchance (both sets: converted, deduped, NSFW-tagged by tools/convert_cards.mjs) and later Chub: a mix of human and
+  // AI-assisted writing.
   ['Perchance cards (SFW)', '2024–25', load('perchance')],
-  ['SPB AI personas (Kimi, GLM)', '', load('spb_ai')],
-  ['Foreverse (anti-slop AI cards)', '', load('foreverse_ai')],
+  ['Perchance cards (NSFW)', '2024–25', load('perchance_aicc_nsfw')],
+  ['SPB AI personas (Kimi, GLM)', 'Feb 2026', load('spb_ai')],
+  ['Foreverse (anti-slop AI cards)', 'Jul 2026', load('foreverse_ai')],
 ];
-for (const [label, sub, rows] of refs) if (rows.length >= 5) out.references.push({ label, sub, kind: /\bAI\b/.test(label) ? 'ai' : 'human', ...stats(rows) });
+const kindOf = (label, sub) => /\bAI\b/.test(label) ? 'ai' : /^Perchance/.test(label) || (label === 'Chub cards' && sub === '2025') ? 'mixed' : 'human';
+for (const [label, sub, rows] of refs) if (rows.length >= 5) out.references.push({ label, sub, kind: kindOf(label, sub), ...(KEY_SETS.has(label + '|' + sub) ? { key: true } : {}), ...stats(rows) });
 // Extra card sets scored with score_all --add: origin unknown (human, AI or both), so just for fun.
 const extraSets = [
-  ['Perchance cards (NSFW)', '2024–25', 'perchance_aicc_nsfw'],
   ["Someone's SillyTavern Archive", 'undated', 'cardnsfwjammy'],
 ];
 for (const [label, sub, name] of extraSets) { const rows = load(name); if (rows.length >= 5) out.fun.push({ kind: 'set', label, sub, ...stats(rows) }); }

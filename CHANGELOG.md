@@ -6,6 +6,28 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.40.0] - 2026-11-05 · BBBScorer 0.9.1
+
+### Added
+- Leaderboard: **Key picks only** toggle, on by default: the models most bot creators use and two human yardsticks
+  (JanitorAI 2023–24, Chub 2025). Untick it for every model and set, and the "just for fun" section.
+- Leaderboard: **Card sets** toggle to show or hide the card sets; each set carries a human, mixed or AI tag.
+- Leaderboard heading shows the BBBScorer version it was built from.
+- Your cards and public list: each score's percentile among 2023 human cards and AI-written cards ("p96 human · p37
+  AI"); Your cards adds a box with the median card's percentiles.
+- Public list: the original slop score is shared and shown under the score (new entries; needs the updated worker).
+
+### Changed
+- Leaderboard: models and card sets are ranked in one list instead of two sections.
+- Perchance NSFW cards move from "just for fun" to the card sets (tagged mixed, next to the SFW set).
+- SPB and Foreverse card sets show their dates (Feb 2026, Jul 2026).
+- Your cards: the original slop score box always shows ("–" when no saved card has one yet).
+- Your cards and public list: details sit on a line under the name, so scores line up in one column at every width,
+  and percentiles show on phones too.
+
+### Fixed
+- Your cards and public list: hovering a row no longer adds a sideways scrollbar that made the list jump.
+
 ## [0.39.0] - 2026-11-05 · BBBScorer 0.9.1
 
 ### Added

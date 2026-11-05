@@ -385,3 +385,19 @@ details.cmp summary .cmp-vals { display: block; margin-top: 2px; }
   .mine-summary .stat { flex: 1 1 calc(50% - 8px); min-width: 0; }
   .mine-summary .stat.wide { flex-basis: 100%; }
 }
+
+/* 0.40: lists keep their columns lined up and no longer scroll sideways on hover; leaderboard toggles, set chips */
+.list { overflow-x: hidden; overflow-y: auto; }
+.item { grid-template-columns: minmax(0, 1fr) 4.6em 28px; row-gap: 3px; }
+.item > .nm { grid-column: 1; grid-row: 1; }
+.item > .sc { grid-column: 2; grid-row: 1 / span 2; text-align: right; align-self: center; }
+.item > .meta, #mineList .item > .meta { grid-column: 1; grid-row: 2; display: block; white-space: normal; max-width: none; line-height: 1.55; }
+.item > :last-child { grid-column: 3; grid-row: 1 / span 2; }
+.item:hover { transform: none; }
+.item .pct { white-space: nowrap; }
+.board-toggles { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 6px 0 4px; }
+.board-ver { font-size: .8em; font-weight: 700; color: var(--purple-light); white-space: nowrap; }
+.set-chip { display: inline-block; margin-right: 5px; padding: 0 5px; border-radius: 4px; font-size: 9.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; border: 1px solid currentColor; vertical-align: 1px; }
+.set-chip.k-human { color: var(--good); }
+.set-chip.k-mixed { color: var(--gold); }
+.set-chip.k-ai { color: var(--bad); }

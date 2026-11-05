@@ -418,6 +418,7 @@
   {
    "model": "deepseek/deepseek-v3.2",
    "family": "DeepSeek",
+   "key": true,
    "n": 22,
    "median": 80,
    "p25": 62.9,
@@ -720,6 +721,7 @@
   {
    "model": "google/gemini-2.5-flash",
    "family": "Gemini",
+   "key": true,
    "n": 77,
    "median": 75,
    "p25": 42.9,
@@ -1230,6 +1232,7 @@
   {
    "model": "google/gemini-3.8-flash",
    "family": "Gemini",
+   "key": true,
    "n": 54,
    "median": 69,
    "p25": 48.8,
@@ -1532,6 +1535,7 @@
   {
    "model": "openai/gpt-5-mini",
    "family": "GPT",
+   "key": true,
    "n": 141,
    "median": 65,
    "p25": 49.3,
@@ -1850,6 +1854,7 @@
   {
    "model": "deepseek/deepseek-chat-v3-0324",
    "family": "DeepSeek",
+   "key": true,
    "n": 53,
    "median": 64.3,
    "p25": 37.6,
@@ -2250,6 +2255,7 @@
   {
    "model": "thedrummer/cydonia-24b-v4.1",
    "family": "Mistral",
+   "key": true,
    "n": 63,
    "median": 61.3,
    "p25": 34.9,
@@ -2353,6 +2359,7 @@
    "model": "x-ai/grok-4.3",
    "family": "Grok",
    "holdout": true,
+   "key": true,
    "n": 29,
    "median": 60.6,
    "p25": 36.1,
@@ -2445,6 +2452,7 @@
   {
    "model": "moonshotai/kimi-k2-0905",
    "family": "Kimi",
+   "key": true,
    "n": 73,
    "median": 60.3,
    "p25": 40.2,
@@ -2943,6 +2951,7 @@
   {
    "model": "anthropic/claude-sonnet-4.5",
    "family": "Claude",
+   "key": true,
    "n": 145,
    "median": 57.2,
    "p25": 42.7,
@@ -4047,6 +4056,7 @@
   {
    "model": "z-ai/glm-5.3-flash",
    "family": "GLM",
+   "key": true,
    "n": 66,
    "median": 49.4,
    "p25": 35.7,
@@ -4149,6 +4159,7 @@
   {
    "model": "mistralai/mistral-nemo",
    "family": "Mistral",
+   "key": true,
    "n": 71,
    "median": 49.3,
    "p25": 30.8,
@@ -4544,6 +4555,7 @@
   {
    "model": "sao10k/l3.1-euryale-70b",
    "family": "Llama",
+   "key": true,
    "n": 67,
    "median": 46.2,
    "p25": 21.7,
@@ -4745,6 +4757,7 @@
    "model": "minimax/minimax-m3",
    "family": "MiniMax",
    "holdout": true,
+   "key": true,
    "n": 45,
    "median": 45.1,
    "p25": 33.5,
@@ -5246,6 +5259,7 @@
   {
    "model": "openai/gpt-4o-2024-11-20",
    "family": "GPT",
+   "key": true,
    "n": 41,
    "median": 43.9,
    "p25": 34.7,
@@ -5707,6 +5721,7 @@
   {
    "model": "openai/gpt-6-luna",
    "family": "GPT",
+   "key": true,
    "n": 55,
    "median": 41.9,
    "p25": 34.7,
@@ -5809,6 +5824,7 @@
   {
    "model": "deepseek/deepseek-v4.1-flash",
    "family": "DeepSeek",
+   "key": true,
    "n": 71,
    "median": 41.8,
    "p25": 27.9,
@@ -6209,6 +6225,7 @@
   {
    "model": "openai/gpt-6-astra",
    "family": "GPT",
+   "key": true,
    "n": 14,
    "median": 39.9,
    "p25": 35.5,
@@ -6409,6 +6426,7 @@
   {
    "model": "anthropic/claude-fable-5.1",
    "family": "Claude",
+   "key": true,
    "n": 14,
    "median": 37.4,
    "p25": 22.6,
@@ -6511,6 +6529,7 @@
   {
    "model": "anthropic/claude-opus-5.5",
    "family": "Claude",
+   "key": true,
    "n": 13,
    "median": 34.8,
    "p25": 22.1,
@@ -6613,6 +6632,7 @@
   {
    "model": "anthracite-org/magnum-v4-72b",
    "family": "Qwen",
+   "key": true,
    "n": 52,
    "median": 33.9,
    "p25": 19.7,
@@ -6766,20 +6786,6 @@
   }
  ],
  "fun": [
-  {
-   "kind": "set",
-   "label": "Perchance cards (NSFW)",
-   "sub": "2024–25",
-   "n": 253,
-   "median": 31.7,
-   "p25": 11.3,
-   "p75": 63.2,
-   "original": 59.7,
-   "familiar": 12.6,
-   "common": 6.7,
-   "pulp": 13,
-   "upstream": 9
-  },
   {
    "kind": "set",
    "label": "Someone's SillyTavern Archive",
@@ -7058,6 +7064,7 @@
    "label": "JanitorAI cards",
    "sub": "Jul 2023–Feb 2024",
    "kind": "human",
+   "key": true,
    "n": 97040,
    "median": 11.5,
    "p25": 4.6,
@@ -7085,7 +7092,8 @@
   {
    "label": "Chub cards",
    "sub": "2025",
-   "kind": "human",
+   "kind": "mixed",
+   "key": true,
    "n": 680,
    "median": 39.1,
    "p25": 21.4,
@@ -7155,7 +7163,7 @@
   {
    "label": "Perchance cards (SFW)",
    "sub": "2024–25",
-   "kind": "human",
+   "kind": "mixed",
    "n": 424,
    "median": 37.7,
    "p25": 22.3,
@@ -7167,8 +7175,22 @@
    "upstream": 11
   },
   {
+   "label": "Perchance cards (NSFW)",
+   "sub": "2024–25",
+   "kind": "mixed",
+   "n": 253,
+   "median": 31.7,
+   "p25": 11.3,
+   "p75": 63.2,
+   "original": 59.7,
+   "familiar": 12.6,
+   "common": 6.7,
+   "pulp": 13,
+   "upstream": 9
+  },
+  {
    "label": "SPB AI personas (Kimi, GLM)",
-   "sub": "",
+   "sub": "Feb 2026",
    "kind": "ai",
    "n": 593,
    "median": 70.8,
@@ -7182,7 +7204,7 @@
   },
   {
    "label": "Foreverse (anti-slop AI cards)",
-   "sub": "",
+   "sub": "Jul 2026",
    "kind": "ai",
    "n": 6,
    "median": 19.5,

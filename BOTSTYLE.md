@@ -372,20 +372,29 @@ BBBScorer median and "orig" the original slop-score median. Under each model: **
 median across its request styles (lazy prompt aside), and **lazy** = its lazy-prompt median. Under each card set:
 its dates. **n** = cards in the set; **\*** = fewer than 20 cards, so a rough guess (**Hide models with under 20
 cards** leaves those models out; card sets always show). Sort by BBBScorer median,
-original slop-score median, or number of cards (**# cards**).
+original slop-score median, or number of cards (**# cards**). The heading names the BBBScorer version the
+leaderboard was built from.
+
+Models and card sets are ranked together in one list; each card set carries a **human**, **mixed** or **AI** tag.
+Two toggles shorten it:
+- **Key picks only** (on by default): the models most bot creators write or chat with (Claude, GPT, Gemini,
+  DeepSeek, Kimi, GLM, Grok, MiniMax, Mistral Nemo and the common RP fine-tunes Magnum, Cydonia and Euryale) and two
+  human yardsticks (JanitorAI cards, Jul 2023–Feb 2024, and Chub cards, 2025). It also hides the "just for fun"
+  section. Untick it for every model and set.
+- **Card sets**: untick to show models only.
 
 **Hold-out models** are ranked with the rest and carry a **hold-out** tag: models from families the word lists were
 never built from (Qwen 3.x, MiniMax, Nemotron, MiMo, Grok and others), so their numbers aren't flattered by the lists.
 
 **Just for fun, not ranked:**
-- Extra card sets of unknown origin (human, AI or both): Perchance cards (NSFW) and Someone's SillyTavern Archive
-  (undated).
+- An extra card set of unknown origin (human, AI or both): Someone's SillyTavern Archive (undated).
 - **Failed** models, shown with a hatched red background: most of their cards failed the format checks, so the
   usable rest isn't a fair sample. MythoMax (ignores the output format), Hermes 3 70B (loops until cut off) and
   Aion RP (about 40% of its cards fail). The card generator skips them unless told otherwise.
 
-**Reference card sets:** real card sets scored with the same version. Cards found in an earlier set (same text, or
-nearly) are counted once.
+**Card sets:** real card sets scored with the same version. Cards found in an earlier set (same text, or
+nearly) are counted once. Perchance and 2025 Chub cards are a mix of human and AI-assisted writing (tagged
+**mixed**).
 
 | Set | Cards | Median | Original-ish | Familiar or Common |
 |---|---|---|---|---|
@@ -399,23 +408,28 @@ nearly) are counted once.
 | VenusAI Discord cards, 2023 | 1,452 | 15.4 | 91% | 2% |
 | Chub archive (mega.nz), to Jul 2023 | 3,071 | 16.2 | 92% | 2% |
 | Perchance cards (SFW), 2024–25 (human and AI-assisted) | 424 | 37.7 | 57% | 17% |
-| SPB-2602 AI personas (Kimi, GLM) | 593 | 70.8 | 7% | 46% |
-| Foreverse anti-slop AI cards | 6 | 19.5 | 100% | 0% |
+| Perchance cards (NSFW), 2024–25 (human and AI-assisted) | 253 | 31.7 | 60% | 19% |
+| SPB-2602 AI personas (Kimi, GLM), Feb 2026 | 593 | 70.8 | 7% | 46% |
+| Foreverse anti-slop AI cards, Jul 2026 | 6 | 19.5 | 100% | 0% |
 
 **Yours:** the card you just scored (gold), and your saved cards together.
 
 ## Public list
 
-Cards people chose to share. It keeps only the name, link, score, scorer version, which fields were scored, and the
+Cards people chose to share. It keeps only the name, link, score, original slop score, scorer version, which fields were scored, and the
 self-reported "I made this card" and AI-assisted-writing boxes (honor system). **It never receives or keeps card
 text.** The source tag shows where a card came from: Chub, Botbooru (BB), JSON, PNG or text. Earlier entries for
 the same link sit in a fold under the newest one; scores the same card got from other scorer versions are listed on
 the newest row ("also v0.8.2: 47.0"). A dashed version tag before the name marks a score from an older scorer, which
-isn't directly comparable with the current one.
+isn't directly comparable with the current one. Each row also gives the score's percentile among 2023 human cards
+and AI-written cards ("p96 human · p37 AI": higher than 96% of the human cards and 37% of the AI ones), and the
+original slop score under the score for entries shared from app 0.40.0 on.
 
 **Your cards** (this browser only) shows the same source tag, the old-version tag, the original slop score under each
-score, and earlier scores of a card rescored after an update ("was v0.8.2: 47.0"). The ⓘ on the band split gives each
-band's count and share.
+score, the same human / AI percentiles, and earlier scores of a card rescored after an update ("was v0.8.2: 47.0").
+The ⓘ on the band split gives each band's count and share; a summary box gives the median card's percentiles. The
+original slop score is only stored for cards saved since app 0.39.0 (card text is never kept, so older entries can't
+get it until the card is scored again).
 
 ## Known limits
 

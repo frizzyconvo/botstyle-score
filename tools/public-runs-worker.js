@@ -8,7 +8,7 @@
 // Workers & Pages -> Create -> Worker -> paste this file -> Settings -> Bindings -> add KV
 // namespace, variable name RUNS -> Deploy. Put the worker URL in js/site-config.js PUBLIC_RUNS.
 //
-// Stores only what the page sends: card name, link, origin tag, score, band, scorer version, scored fields,
+// Stores only what the page sends: card name, link, origin tag, score, original slop score, band, scorer version, scored fields,
 // and the self-reported creator / AI-use answers. Never card text. Each entry gets a short id so it can be
 // deleted with tools/public_list.mjs. Honor system: anyone can post;
 // there's a size cap, a per-IP limit and a list cap, nothing more.
@@ -38,7 +38,7 @@ export default {
       id: crypto.randomUUID().slice(0, 8),
       origin: ['chub', 'bb', 'json', 'png', 'text', 'link'].includes(d.origin) ? d.origin : 'text',
       name: str(d.name, 120) || 'Card', link: /^https:\/\/(?:www\.)?(?:chub\.ai|characterhub\.org|botbooru\.com)\//.test(link) ? link : null,
-      score: Math.max(0, Math.min(100, Number(d.score) || 0)), band: ['original', 'fresh', 'mixed', 'familiar', 'common'].includes(d.band) ? d.band : 'na',
+      score: Math.max(0, Math.min(100, Number(d.score) || 0)), upstream: d.upstream === null || d.upstream === undefined || !isFinite(Number(d.upstream)) ? null : +Math.max(0, Math.min(100, Number(d.upstream))).toFixed(1), band: ['original', 'fresh', 'mixed', 'familiar', 'common'].includes(d.band) ? d.band : 'na',
       version: str(d.version, 20), fields: Array.isArray(d.fields) ? d.fields.slice(0, 8).map(f => str(f, 40)) : [],
       creator: !!d.creator, aiUse: d.creator && d.aiUse !== null && d.aiUse !== undefined ? Math.max(0, Math.min(100, Math.round(Number(d.aiUse) / 10) * 10)) : null,
       at: new Date().toISOString(),
