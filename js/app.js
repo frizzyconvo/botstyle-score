@@ -218,10 +218,20 @@ function originOf(meta = {}) {
 const ORIGIN_LABEL = { chub: 'Chub', bb: 'Botbooru', json: 'JSON', png: 'PNG', text: 'text', link: 'link' };
 function entryFor(card, meta, r, fields, alts) {
   const prev = store.all().find(x => x.key === meta.key) || {};
+  const ns = nerdStats(r.text);
+  // Scores from other scorer versions are kept (newest first), so a card rescored after an update shows both.
+  const history = (prev.history || []).filter(h => h.version !== r.version);
+  if (prev.version && !sameScorer(prev.version, r.version) && prev.score != null) history.unshift({ version: prev.version, score: prev.score, at: prev.at || null });
   return { key: meta.key, name: card.name || meta.file || 'Card', link: meta.link || null, source: meta.source, origin: originOf(meta), score: +r.score.toFixed(1), band: r.band.id,
+    upstream: ns ? +ns.upstream.toFixed(1) : null,
     reliable: r.reliable, proseWords: r.stats.proseWords, totalWords: r.stats.totalWords, version: r.version, fields: fieldList(fields, alts), at: new Date().toISOString(),
-    creator: prev.creator || false, aiUse: prev.aiUse ?? null, shared: prev.shared || false };
+    creator: prev.creator || false, aiUse: prev.aiUse ?? null, shared: prev.shared || false, history: history.slice(0, 5) };
 }
+// Scores from two versions are comparable when they're the same version or the page declares them identical (SAME_SCORES_AS).
+const sameScorer = (a, b) => a === b || (SAME_SCORES_AS.includes(a) && SAME_SCORES_AS.includes(b)) || (a === SCORER_VERSION && SAME_SCORES_AS.includes(b)) || (b === SCORER_VERSION && SAME_SCORES_AS.includes(a));
+// Tag for a saved or shared score from an older scorer (shown before the name, so it stays visible on phones).
+const oldVerTag = v => v && !sameScorer(v, SCORER_VERSION)
+  ? `<span class="ver-old" title="Scored with BBBScorer v${esc(v)}; this page scores with v${esc(SCORER_VERSION)}. Scores from different versions aren't directly comparable.">v${esc(v)}</span>` : '';
 function scoreAndSave(card, meta, fields, alts) {
   const r = runScore(card, fields, alts);
   if (r.band.id !== 'na') store.upsert(entryFor(card, meta, r, fields, alts));
@@ -489,14 +499,17 @@ function renderMine() {
   $('mine').hidden = !list.length; if (!list.length) return;
   const sc = list.map(x => x.score), bands = b => list.filter(x => bandOfScore(x.score, x.band, x.proseWords) === b).length;
   const mineByCreator = list.filter(x => x.creator);
-  const vers = [...new Set(list.map(x => x.version))];
-  $('mineSummary').innerHTML = `<div class="stat"><b>${list.length}</b><span>cards</span></div><div class="stat"><b>${median(sc).toFixed(1)}</b><span>median score</span></div>`
-    + `<div class="stat"><b>${(sc.reduce((a, b) => a + b, 0) / sc.length).toFixed(1)}</b><span>average</span></div>`
-    + `<div class="stat"><b>${BAND_IDS.map(bands).join(' · ')}</b><span>${BAND_IDS.map((b, i) => esc(i ? BAND_LABELS[b].toLowerCase() : BAND_LABELS[b])).join(' · ')}</span></div>`
-    + (mineByCreator.length ? `<div class="stat"><b>${median(mineByCreator.map(x => x.score)).toFixed(1)}</b><span>median, cards you made (${mineByCreator.length})</span></div>` : '')
-    + (vers.length > 1 ? `<div class="stat"><b>${vers.length}</b><span>BBBScorer versions mixed</span></div>` : '');
-  $('mineList').innerHTML = [...list].reverse().map(x => `<div class="item"><span class="nm">${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}</span><span class="meta"><span class="band ${bandOfScore(x.score, x.band, x.proseWords)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(x.score, x.band, x.proseWords)] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse)}` : ''}</span>
+  const ups = list.map(x => x.upstream).filter(v => v != null);
+  const pct = n => Math.round(100 * n / list.length);
+  const splitPop = `<span class="pop" tabindex="0" aria-label="Band shares">i<span class="pop-body">${BAND_IDS.map(b => `${esc(BAND_LABELS[b])}: <b>${bands(b)}</b> (${pct(bands(b))}%)`).join('<br>')}</span></span>`;
+  $('mineSummary').innerHTML = `<div class="stat"><b>${list.length}</b><span>cards</span></div>`
+    + `<div class="stat"><b>${median(sc).toFixed(1)} <i>/</i> ${(sc.reduce((a, b) => a + b, 0) / sc.length).toFixed(1)}</b><span>median / average</span></div>`
+    + `<div class="stat wide"><b>${BAND_IDS.map(bands).join(' · ')}${splitPop}</b><span>${BAND_IDS.map((b, i) => esc(i ? BAND_LABELS[b].toLowerCase() : BAND_LABELS[b])).join(' · ')}</span></div>`
+    + (mineByCreator.length ? `<div class="stat"><b>${median(mineByCreator.map(x => x.score)).toFixed(1)}</b><span>median, made by you (${mineByCreator.length})</span></div>` : '')
+    + (ups.length ? `<div class="stat"><b>${median(ups).toFixed(1)}</b><span>original slop score, median${ups.length < list.length ? ` (${ups.length})` : ''}</span></div>` : '');
+  const hist = x => (x.history || []).map(h => `v${esc(h.version)}: ${(+h.score).toFixed(1)}`).join(', ');
+  $('mineList').innerHTML = [...list].reverse().map(x => `<div class="item"><span class="nm">${x.origin ? `<span class="src-tag">${esc(ORIGIN_LABEL[x.origin] || x.origin)}</span>` : ''}${oldVerTag(x.version)}${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
+    <span class="sc">${x.score.toFixed(1)}${x.totalWords && x.totalWords < 350 ? '<span class="star" title="Bite-sized card: rough score">*</span>' : ''}${x.upstream != null ? `<span class="orig" title="Original slop-score formula (Sam Paech) on the same text">orig ${x.upstream.toFixed(1)}</span>` : ''}</span><span class="meta"><span class="band ${bandOfScore(x.score, x.band, x.proseWords)}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(x.score, x.band, x.proseWords)] || x.band)}</span> v${esc(x.version)}${hist(x) ? ` · was ${hist(x)}` : ''}${x.creator ? ` · mine, AI ${aiLabel(x.aiUse).replace('about ', '')}` : ''}</span>
     <button class="x" type="button" data-key="${esc(x.key)}" title="Remove">✕</button></div>`).join('');
   $('mineList').querySelectorAll('button.x').forEach(b => b.addEventListener('click', () => { store.remove(b.dataset.key); renderMine(); renderBoard(); }));
 }
@@ -512,7 +525,7 @@ function renderBoard() {
   const sorted = list => [...(list || [])].sort((a, b) => sorter(b) - sorter(a));
   const big = m => !hideSmall || (m.n || 0) >= 20;   // "hide models with under 20 cards" (models only; card sets stay)
   const orig = v => v == null ? '' : `<span class="orig" title="Original slop-score (Sam Paech's formula) median">orig ${(+v).toFixed(1)}</span>`;
-  const row = (cls, label, n, p25, med, p75, val, detail, up = null, extra = '', fam = '') => `<div class="brow ${cls}"><div class="bl" title="${esc(label)}${fam ? ` (${esc(fam)} family)` : ''}"><span class="bl-name${fam ? ' has-fam' : ''}">${fam ? `<span class="bl-txt">${esc(label)}</span><span class="fam">${esc(fam)}</span>` : esc(label)}<span class="n${n && n < 20 ? ' low' : ''}"${n && n < 20 ? ' title="Fewer than 20 cards: treat as a rough guess"' : ''}>${n ? (n < 20 ? '<span class="star">*</span>' : '') + 'n=' + n.toLocaleString() : ''}</span></span>${extra}</div>
+  const row = (cls, label, n, p25, med, p75, val, detail, up = null, extra = '', fam = '', ho = false) => `<div class="brow ${cls}"><div class="bl" title="${esc(label)}${fam ? ` (${esc(fam)} family)` : ''}${ho ? ', hold-out model' : ''}"><span class="bl-name${fam ? ' has-fam' : ''}">${fam ? `<span class="bl-txt">${esc(label)}</span><span class="fam">${esc(fam)}</span>${ho ? '<span class="fam ho" title="Hold-out: a model family never used to build the word lists, so its numbers are a fair test">hold-out</span>' : ''}` : esc(label)}<span class="n${n && n < 20 ? ' low' : ''}"${n && n < 20 ? ' title="Fewer than 20 cards: treat as a rough guess"' : ''}>${n ? (n < 20 ? '<span class="star">*</span>' : '') + 'n=' + n.toLocaleString() : ''}</span></span>${extra}</div>
     <div class="track"><div class="iqr" style="left:${Math.min(100, p25)}%;width:${Math.max(1, Math.min(100, p75) - Math.min(100, p25))}%"></div><div class="med" style="left:${Math.min(100, med)}%"></div></div>
     <div class="bv">${val}${orig(up)}</div>${detail ? `<div class="bdetail" hidden>${detail}</div>` : ''}</div>`;
   let h = `<div class="board-sort small faint">Sort by: ${Object.entries(BOARD_SORTS).map(([k, [l]]) => `<button type="button" class="ghost sort-btn${k === sortKey ? ' on' : ''}" data-sort="${k}">${l}</button>`).join(' ')} <label class="check hide-small"><input type="checkbox" id="hideSmallChk"${hideSmall ? ' checked' : ''}> Hide models with under 20 cards</label></div>`;
@@ -527,7 +540,7 @@ function renderBoard() {
   const styleInline = m => { const S = m.styles; if (!S || !(S.min && S.max) && !S.lazy) return '';
     return `<span class="bl-sub" title="Range: lowest to highest median across the request styles (lazy prompt aside). Lazy: the lazy-prompt median.">${S.min && S.max ? `<span class="nw">styles ${S.min.median.toFixed(0)}–${S.max.median.toFixed(0)}</span>` : ''}${S.min && S.max && S.lazy ? ' · ' : ''}${S.lazy ? `<span class="nw">lazy ${S.lazy.median.toFixed(0)}</span>` : ''}</span>`; };
   h += `<div class="group-label">AI models · cards written for this test</div>` + sorted(B.models.filter(big)).map(m => row('', m.model.replace(/^[^/]+\//, ''), m.n, m.p25, m.median, m.p75, m.median.toFixed(1),
-    `${esc(m.model)}${m.family ? ` (${esc(m.family)} family)` : ''} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m), m.family || '')).join('');
+    `${esc(m.model)}${m.family ? ` (${esc(m.family)} family)` : ''}${m.holdout ? ' · hold-out model (family never used to build the lists)' : ''} · ${modeTxt(m)} · ${m.n} cards · ${m.original}% ${BAND_LABELS.original}, ${m.familiar ?? 0}% ${BAND_LABELS.familiar}, ${m.common}% ${BAND_LABELS.common}${m.pulp != null ? ` · pulp median ${m.pulp}%` : ''} · original slop-score median ${m.upstream ?? '–'}<br>${styleTxt(m)}`, m.upstream, styleInline(m), m.family || '', !!m.holdout)).join('');
   // Card sets: dates (if any) go on a second line under the name.
   const setDetail = r => `${r.n.toLocaleString()} cards${r.sub ? ` · ${esc(r.sub)}` : ''} · ${r.original}% ${BAND_LABELS.original}, ${r.familiar ?? 0}% ${BAND_LABELS.familiar}, ${r.common}% ${BAND_LABELS.common} · middle half ${r.p25}–${r.p75}${r.pulp != null ? ` · pulp median ${r.pulp}%` : ''} · original slop-score median ${r.upstream ?? '–'}`;
   const setRow = (cls, r) => row(cls, r.label, r.n, r.p25, r.median, r.p75, (+r.median).toFixed(1), setDetail(r), r.upstream, r.sub ? `<span class="bl-sub">${esc(r.sub)}</span>` : '');
@@ -559,9 +572,11 @@ async function loadPublic() {
     // Newest first; earlier entries for the same link sit in a fold under the newest one.
     const runs = (list.runs || []).slice(-500).reverse(), groups = [], byLink = new Map();
     for (const x of runs) { const k = x.link ? x.link.replace(/[?#].*$/, '').replace(/\/$/, '') : null; if (k && byLink.has(k)) byLink.get(k).older.push(x); else { const g = { top: x, older: [] }; groups.push(g); if (k) byLink.set(k, g); } }
-    const row = (x, sub = false) => `<div class="item${sub ? ' sub' : ''}"><span class="nm">${x.origin ? `<span class="src-tag">${esc(ORIGIN_LABEL[x.origin] || x.origin)}</span>` : ''}${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
-      <span class="sc">${(+x.score).toFixed(1)}</span><span class="meta"><span class="band ${esc(bandOfScore(+x.score, x.band))}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(+x.score, x.band)] || x.band)}</span> BBBScorer v${esc(x.version)}${x.creator ? ` · by creator, AI ${aiLabel(x.aiUse)}` : ''}${sub && x.at ? ` · ${esc(String(x.at).slice(0, 10))}` : ''}</span><span></span></div>`;
-    $('publicList').innerHTML = groups.slice(0, 300).map(g => row(g.top) + (g.older.length ? `<details class="older"><summary class="faint small">${g.older.length} earlier ${g.older.length > 1 ? 'entries' : 'entry'} for this link</summary>${g.older.map(x => row(x, true)).join('')}</details>` : '')).join('') || '<span class="faint small">Nothing shared yet.</span>';
+    // Other scorer versions' scores for the same link, newest first (one per version), shown on the top row.
+    const otherVers = g => { const seen = new Set([g.top.version]); return g.older.filter(x => x.version && !seen.has(x.version) && seen.add(x.version)).map(x => `v${esc(x.version)}: ${(+x.score).toFixed(1)}`).join(', '); };
+    const row = (x, sub = false, also = '') => `<div class="item${sub ? ' sub' : ''}"><span class="nm">${x.origin ? `<span class="src-tag">${esc(ORIGIN_LABEL[x.origin] || x.origin)}</span>` : ''}${oldVerTag(x.version)}${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</span>
+      <span class="sc">${(+x.score).toFixed(1)}</span><span class="meta"><span class="band ${esc(bandOfScore(+x.score, x.band))}" style="font-size:10px;padding:1px 6px">${esc(BAND_LABELS[bandOfScore(+x.score, x.band)] || x.band)}</span> BBBScorer v${esc(x.version)}${also ? ` · also ${also}` : ''}${x.creator ? ` · by creator, AI ${aiLabel(x.aiUse)}` : ''}${sub && x.at ? ` · ${esc(String(x.at).slice(0, 10))}` : ''}</span><span></span></div>`;
+    $('publicList').innerHTML = groups.slice(0, 300).map(g => row(g.top, false, otherVers(g)) + (g.older.length ? `<details class="older"><summary class="faint small">${g.older.length} earlier ${g.older.length > 1 ? 'entries' : 'entry'} for this link</summary>${g.older.map(x => row(x, true)).join('')}</details>` : '')).join('') || '<span class="faint small">Nothing shared yet.</span>';
   } catch { $('publicList').innerHTML = '<span class="faint small">The public list is unreachable right now.</span>'; }
 }
 async function share(key, btn) {

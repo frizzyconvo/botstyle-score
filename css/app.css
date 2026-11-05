@@ -288,8 +288,9 @@ html { scroll-behavior: smooth; }
   .axis-track .t100-long { display: none; }
   .bl-sub { white-space: normal; }
   .brow.ref .bl-name { white-space: normal; overflow-wrap: anywhere; } /* card-set names wrap so (SFW) / (NSFW) stay visible */
-  .brow .bl-name.has-fam { display: block; }
-  .brow .bl-name .fam { display: block; width: fit-content; margin: 2px 0 1px; } /* model family on its own line, so a long name's ellipsis can't hide it */
+  .brow .bl-name.has-fam { display: block; white-space: normal; }
+  .brow .bl-name.has-fam .bl-txt { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .brow .bl-name .fam { margin: 2px 4px 1px 0; } /* model family on its own line, so a long name's ellipsis can't hide it */
 }
 
 /* 0.12: band names with fun taglines */
@@ -360,3 +361,27 @@ details.cmp summary .cmp-vals { display: block; margin-top: 2px; }
   white-space: nowrap; opacity: .92; pointer-events: auto; cursor: help; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
 
 .report-row { margin-top: 6px; gap: 8px; flex-wrap: wrap; }
+
+/* 0.39: your cards (compact summary, two columns on wide screens, original score), older-scorer tags */
+.mine-summary { gap: 8px; }
+.mine-summary .stat { flex: 0 1 auto; min-width: 96px; padding: 6px 10px; }
+.mine-summary .stat b { font-size: 17px; display: flex; align-items: center; gap: 2px; }
+.mine-summary .stat b i { font-style: normal; font-weight: 400; color: var(--faint); margin: 0 3px; }
+.mine-summary .stat span { font-size: 10px; letter-spacing: .6px; }
+.mine-summary .stat .pop { margin-left: 4px; }
+.item .orig { display: block; font-size: 10.5px; font-weight: 500; color: var(--faint); text-align: right; }
+.item .ver-old { display: inline-block; margin-right: 6px; padding: 0 5px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .03em; color: var(--dim); border: 1px dashed currentColor; }
+@media (min-width: 900px) {
+  #mineList { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 6px 10px; }
+  #mineList .item .meta { white-space: normal; max-width: 15em; }
+}
+
+/* hold-out marker next to the family tag */
+.bl-name .fam.ho { color: var(--dim); border-style: dashed; background: none; }
+/* band-split pop-up inside a summary box: plain text, not the box's big-number style */
+.mine-summary .stat .pop-body { font-size: 12.5px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--dim); width: max-content; max-width: 260px; }
+.mine-summary .stat .pop-body b { display: inline; font-size: inherit; color: var(--red-light); }
+@media (max-width: 520px) {
+  .mine-summary .stat { flex: 1 1 calc(50% - 8px); min-width: 0; }
+  .mine-summary .stat.wide { flex-basis: 100%; }
+}

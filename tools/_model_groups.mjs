@@ -10,7 +10,7 @@ export const FAILED = {
   'aion-labs/aion-rp-llama-3.1-8b': 'about 40% of its cards fail the format checks (no headers or no greeting)',
 };
 export const JUST_FOR_FUN = {
-  'microsoft/phi-4': 'a small general model trained mostly on synthetic textbook-style data, not one people use for roleplay or card writing',
+  // (empty: phi-4 was here until app 0.39.0; it's ranked now, user's call)
 };
 
 // HOLDOUT: models whose cards are a test set only (eval/ai-cards/ai_cards_holdout.jsonl, dev\generate-cards-holdout.cmd).

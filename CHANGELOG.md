@@ -6,6 +6,22 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## [0.39.0] - 2026-11-05 · BBBScorer 0.9.1
+
+### Added
+- Leaderboard: the 30 hold-out models (families the word lists were never built from) are ranked with a **hold-out**
+  tag, 68 models in all.
+- Public list and Your cards: a dashed version tag before the name marks a score from an older scorer. The public list
+  shows other versions' scores for the same link on the newest row; Your cards keeps a card's earlier scores when it's
+  rescored after an update.
+- Your cards: source tag (Chub, Botbooru, JSON, PNG, text) and the original slop score under each score (cards scored
+  from now on), and a median original slop score box.
+
+### Changed
+- Leaderboard: Phi-4 is ranked instead of "just for fun".
+- Your cards: two columns on wide screens; smaller summary boxes, median and average in one box, an ⓘ with each band's
+  count and share. The "BBBScorer versions mixed" box is gone (the version tags replace it).
+
 ## [0.38.2] - 2026-11-04 · BBBScorer 0.9.1
 
 ### Changed

@@ -9,7 +9,7 @@
   "common": 80
  },
  "scorer": "0.9.1",
- "built": "2026-11-04",
+ "built": "2026-11-05",
  "models": [
   {
    "model": "google/gemma-3-4b-it",
@@ -108,6 +108,104 @@
      {
       "style": "free_prose",
       "n": 18,
+      "median": 100
+     }
+    ]
+   }
+  },
+  {
+   "model": "qwen/qwen3.7-flash",
+   "family": "Qwen",
+   "holdout": true,
+   "n": 48,
+   "median": 82.7,
+   "p25": 61.7,
+   "p75": 100,
+   "original": 16.7,
+   "familiar": 16.7,
+   "common": 50,
+   "pulp": 5,
+   "upstream": 26.2,
+   "byMode": {
+    "fresh": {
+     "n": 48,
+     "median": 82.7,
+     "p25": 61.7,
+     "p75": 100,
+     "original": 16.7,
+     "familiar": 16.7,
+     "common": 50,
+     "pulp": 5,
+     "upstream": 26.2
+    },
+    "antislop": {
+     "n": 71,
+     "median": 66.5,
+     "p25": 52,
+     "p75": 86.9,
+     "original": 7,
+     "familiar": 11.3,
+     "common": 31,
+     "pulp": 3,
+     "upstream": 13.2
+    },
+    "rewrite": {
+     "n": 24,
+     "median": 80.3,
+     "p25": 58.6,
+     "p75": 100,
+     "original": 12.5,
+     "familiar": 25,
+     "common": 45.8,
+     "pulp": 7,
+     "upstream": 34
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 96.8,
+     "upstream": 33.4
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 48.3
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 8,
+     "median": 100
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 48.3
+     },
+     {
+      "style": "lists",
+      "n": 8,
+      "median": 65.7
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 68.7
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 96.8
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 98.4
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
       "median": 100
      }
     ]
@@ -517,6 +615,104 @@
       "style": "free_prose",
       "n": 14,
       "median": 100
+     }
+    ]
+   }
+  },
+  {
+   "model": "nvidia/nemotron-3-ultra-550b-a55b",
+   "family": "Nemotron",
+   "holdout": true,
+   "n": 46,
+   "median": 77.5,
+   "p25": 65.5,
+   "p75": 89.1,
+   "original": 8.7,
+   "familiar": 30.4,
+   "common": 32.6,
+   "pulp": 4,
+   "upstream": 16.7,
+   "byMode": {
+    "fresh": {
+     "n": 46,
+     "median": 77.5,
+     "p25": 65.5,
+     "p75": 89.1,
+     "original": 8.7,
+     "familiar": 30.4,
+     "common": 32.6,
+     "pulp": 4,
+     "upstream": 16.7
+    },
+    "antislop": {
+     "n": 68,
+     "median": 58.5,
+     "p25": 47.7,
+     "p75": 68.7,
+     "original": 20.6,
+     "familiar": 13.2,
+     "common": 8.8,
+     "pulp": 2,
+     "upstream": 14
+    },
+    "rewrite": {
+     "n": 21,
+     "median": 69.7,
+     "p25": 58.1,
+     "p75": 91.7,
+     "original": 9.5,
+     "familiar": 14.3,
+     "common": 33.3,
+     "pulp": 3,
+     "upstream": 16.1
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 85.1,
+     "upstream": 16.6
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 69
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 89.1
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 69
+     },
+     {
+      "style": "lists",
+      "n": 6,
+      "median": 74.8
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 77.5
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 77.5
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 85.1
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 89.1
      }
     ]
    }
@@ -1134,6 +1330,206 @@
    }
   },
   {
+   "model": "microsoft/phi-4",
+   "family": "Phi",
+   "n": 40,
+   "median": 68.5,
+   "p25": 34.4,
+   "p75": 89.9,
+   "original": 32.5,
+   "familiar": 15,
+   "common": 37.5,
+   "pulp": 11,
+   "upstream": 31.1,
+   "byMode": {
+    "fresh": {
+     "n": 40,
+     "median": 68.5,
+     "p25": 34.4,
+     "p75": 89.9,
+     "original": 32.5,
+     "familiar": 15,
+     "common": 37.5,
+     "pulp": 11,
+     "upstream": 31.1
+    },
+    "antislop": {
+     "n": 33,
+     "median": 71.8,
+     "p25": 55.8,
+     "p75": 91.9,
+     "original": 6.1,
+     "familiar": 30.3,
+     "common": 33.3,
+     "pulp": 7,
+     "upstream": 32.7
+    },
+    "rewrite": {
+     "n": 12,
+     "median": 49.8,
+     "p25": 23.9,
+     "p75": 63.5,
+     "original": 41.7,
+     "familiar": 0,
+     "common": 16.7,
+     "pulp": 7,
+     "upstream": 15.3
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 7,
+     "median": 57.3,
+     "upstream": 31.1
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 28.7
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 7,
+     "median": 96.2
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 28.7
+     },
+     {
+      "style": "interview",
+      "n": 7,
+      "median": 51.4
+     },
+     {
+      "style": "default",
+      "n": 7,
+      "median": 57.3
+     },
+     {
+      "style": "compact",
+      "n": 3,
+      "median": 68.5
+     },
+     {
+      "style": "lists",
+      "n": 2,
+      "median": 77.2
+     },
+     {
+      "style": "formatted_prose",
+      "n": 7,
+      "median": 89.9
+     },
+     {
+      "style": "free_prose",
+      "n": 7,
+      "median": 96.2
+     }
+    ]
+   }
+  },
+  {
+   "model": "upstage/solar-pro4",
+   "family": "Solar",
+   "holdout": true,
+   "n": 43,
+   "median": 65.4,
+   "p25": 39.1,
+   "p75": 84,
+   "original": 25.6,
+   "familiar": 16.3,
+   "common": 30.2,
+   "pulp": 4,
+   "upstream": 19.3,
+   "byMode": {
+    "fresh": {
+     "n": 43,
+     "median": 65.4,
+     "p25": 39.1,
+     "p75": 84,
+     "original": 25.6,
+     "familiar": 16.3,
+     "common": 30.2,
+     "pulp": 4,
+     "upstream": 19.3
+    },
+    "antislop": {
+     "n": 70,
+     "median": 45.1,
+     "p25": 33.4,
+     "p75": 58,
+     "original": 34.3,
+     "familiar": 8.6,
+     "common": 10,
+     "pulp": 0,
+     "upstream": 7.5
+    },
+    "rewrite": {
+     "n": 22,
+     "median": 72.4,
+     "p25": 39.9,
+     "p75": 83.3,
+     "original": 27.3,
+     "familiar": 22.7,
+     "common": 27.3,
+     "pulp": 6,
+     "upstream": 24.5
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 86.6,
+     "upstream": 25.8
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 36.8
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 8,
+     "median": 93.9
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 36.8
+     },
+     {
+      "style": "lists",
+      "n": 5,
+      "median": 51.4
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 52.9
+     },
+     {
+      "style": "formatted_prose",
+      "n": 6,
+      "median": 81
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 86.6
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 93.9
+     }
+    ]
+   }
+  },
+  {
    "model": "openai/gpt-5-mini",
    "family": "GPT",
    "n": 141,
@@ -1251,6 +1647,202 @@
       "style": "free_prose",
       "n": 25,
       "median": 78.9
+     }
+    ]
+   }
+  },
+  {
+   "model": "thinkingmachines/inkling",
+   "family": "Inkling",
+   "holdout": true,
+   "n": 36,
+   "median": 65,
+   "p25": 40.8,
+   "p75": 88.2,
+   "original": 22.2,
+   "familiar": 13.9,
+   "common": 30.6,
+   "pulp": 5,
+   "upstream": 18.8,
+   "byMode": {
+    "fresh": {
+     "n": 36,
+     "median": 65,
+     "p25": 40.8,
+     "p75": 88.2,
+     "original": 22.2,
+     "familiar": 13.9,
+     "common": 30.6,
+     "pulp": 5,
+     "upstream": 18.8
+    },
+    "antislop": {
+     "n": 47,
+     "median": 36,
+     "p25": 24,
+     "p75": 48.9,
+     "original": 61.7,
+     "familiar": 4.3,
+     "common": 4.3,
+     "pulp": 0,
+     "upstream": 3.1
+    },
+    "rewrite": {
+     "n": 12,
+     "median": 92.2,
+     "p25": 76.4,
+     "p75": 100,
+     "original": 8.3,
+     "familiar": 16.7,
+     "common": 66.7,
+     "pulp": 3,
+     "upstream": 36.9
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 6,
+     "median": 88.2,
+     "upstream": 31.7
+    },
+    "min": {
+     "style": "interview",
+     "n": 5,
+     "median": 39.9
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 6,
+     "median": 84.3
+    },
+    "all": [
+     {
+      "style": "interview",
+      "n": 5,
+      "median": 39.9
+     },
+     {
+      "style": "lists",
+      "n": 5,
+      "median": 40.8
+     },
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 42.1
+     },
+     {
+      "style": "free_prose",
+      "n": 7,
+      "median": 79.1
+     },
+     {
+      "style": "formatted_prose",
+      "n": 6,
+      "median": 84.3
+     },
+     {
+      "style": "default",
+      "n": 6,
+      "median": 88.2
+     }
+    ]
+   }
+  },
+  {
+   "model": "ibm-granite/granite-4.2-8b",
+   "family": "Granite",
+   "holdout": true,
+   "n": 39,
+   "median": 64.9,
+   "p25": 40,
+   "p75": 78.3,
+   "original": 23.1,
+   "familiar": 17.9,
+   "common": 17.9,
+   "pulp": 3,
+   "upstream": 14.8,
+   "byMode": {
+    "fresh": {
+     "n": 39,
+     "median": 64.9,
+     "p25": 40,
+     "p75": 78.3,
+     "original": 23.1,
+     "familiar": 17.9,
+     "common": 17.9,
+     "pulp": 3,
+     "upstream": 14.8
+    },
+    "antislop": {
+     "n": 52,
+     "median": 43.3,
+     "p25": 31.1,
+     "p75": 59.9,
+     "original": 44.2,
+     "familiar": 19.2,
+     "common": 3.8,
+     "pulp": 3,
+     "upstream": 8.2
+    },
+    "rewrite": {
+     "n": 23,
+     "median": 69.8,
+     "p25": 52.7,
+     "p75": 100,
+     "original": 21.7,
+     "familiar": 13,
+     "common": 39.1,
+     "pulp": 3,
+     "upstream": 24.2
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 5,
+     "median": 56.7,
+     "upstream": 22.2
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 36.5
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 80.3
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 36.5
+     },
+     {
+      "style": "lists",
+      "n": 3,
+      "median": 48.6
+     },
+     {
+      "style": "default",
+      "n": 5,
+      "median": 56.7
+     },
+     {
+      "style": "interview",
+      "n": 7,
+      "median": 65.4
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 78.3
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 80.3
      }
     ]
    }
@@ -1460,6 +2052,202 @@
    }
   },
   {
+   "model": "nvidia/nemotron-3.5-lightning",
+   "family": "Nemotron",
+   "holdout": true,
+   "n": 48,
+   "median": 61.6,
+   "p25": 43,
+   "p75": 76.5,
+   "original": 20.8,
+   "familiar": 16.7,
+   "common": 20.8,
+   "pulp": 3,
+   "upstream": 19.2,
+   "byMode": {
+    "fresh": {
+     "n": 48,
+     "median": 61.6,
+     "p25": 43,
+     "p75": 76.5,
+     "original": 20.8,
+     "familiar": 16.7,
+     "common": 20.8,
+     "pulp": 3,
+     "upstream": 19.2
+    },
+    "antislop": {
+     "n": 59,
+     "median": 52.7,
+     "p25": 34.7,
+     "p75": 67,
+     "original": 30.5,
+     "familiar": 20.3,
+     "common": 8.5,
+     "pulp": 0,
+     "upstream": 18.4
+    },
+    "rewrite": {
+     "n": 23,
+     "median": 67.1,
+     "p25": 50.1,
+     "p75": 89.2,
+     "original": 21.7,
+     "familiar": 13,
+     "common": 34.8,
+     "pulp": 5,
+     "upstream": 31.2
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 58.9,
+     "upstream": 43.2
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 40.5
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 100
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 40.5
+     },
+     {
+      "style": "lists",
+      "n": 8,
+      "median": 53.5
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 58.9
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 59
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 79.4
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 100
+     }
+    ]
+   }
+  },
+  {
+   "model": "stepfun/step-3.5-flash",
+   "family": "Step",
+   "holdout": true,
+   "n": 43,
+   "median": 61.5,
+   "p25": 44.9,
+   "p75": 84,
+   "original": 20.9,
+   "familiar": 23.3,
+   "common": 30.2,
+   "pulp": 6,
+   "upstream": 23.7,
+   "byMode": {
+    "fresh": {
+     "n": 43,
+     "median": 61.5,
+     "p25": 44.9,
+     "p75": 84,
+     "original": 20.9,
+     "familiar": 23.3,
+     "common": 30.2,
+     "pulp": 6,
+     "upstream": 23.7
+    },
+    "antislop": {
+     "n": 64,
+     "median": 64.1,
+     "p25": 38.4,
+     "p75": 72.7,
+     "original": 26.6,
+     "familiar": 20.3,
+     "common": 15.6,
+     "pulp": 3,
+     "upstream": 21.4
+    },
+    "rewrite": {
+     "n": 24,
+     "median": 83.6,
+     "p25": 57.6,
+     "p75": 91.7,
+     "original": 12.5,
+     "familiar": 20.8,
+     "common": 50,
+     "pulp": 6,
+     "upstream": 37.4
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 71.3,
+     "upstream": 31.4
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 43
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 92.4
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 43
+     },
+     {
+      "style": "lists",
+      "n": 4,
+      "median": 49.5
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 55.8
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 71.3
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 84.1
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 92.4
+     }
+    ]
+   }
+  },
+  {
    "model": "thedrummer/cydonia-24b-v4.1",
    "family": "Mistral",
    "n": 63,
@@ -1557,6 +2345,99 @@
       "style": "formatted_prose",
       "n": 12,
       "median": 89.8
+     }
+    ]
+   }
+  },
+  {
+   "model": "x-ai/grok-4.3",
+   "family": "Grok",
+   "holdout": true,
+   "n": 29,
+   "median": 60.6,
+   "p25": 36.1,
+   "p75": 77.5,
+   "original": 24.1,
+   "familiar": 13.8,
+   "common": 20.7,
+   "pulp": 6,
+   "upstream": 18.1,
+   "byMode": {
+    "fresh": {
+     "n": 29,
+     "median": 60.6,
+     "p25": 36.1,
+     "p75": 77.5,
+     "original": 24.1,
+     "familiar": 13.8,
+     "common": 20.7,
+     "pulp": 6,
+     "upstream": 18.1
+    },
+    "antislop": {
+     "n": 59,
+     "median": 35.4,
+     "p25": 25.2,
+     "p75": 48,
+     "original": 57.6,
+     "familiar": 11.9,
+     "common": 0,
+     "pulp": 0,
+     "upstream": 10.6
+    },
+    "rewrite": {
+     "n": 22,
+     "median": 69.4,
+     "p25": 40.6,
+     "p75": 88.8,
+     "original": 27.3,
+     "familiar": 4.5,
+     "common": 40.9,
+     "pulp": 6,
+     "upstream": 26.4
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 2,
+     "median": 29.6,
+     "upstream": 43.9
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 20.8
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 77.5
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 20.8
+     },
+     {
+      "style": "default",
+      "n": 2,
+      "median": 29.6
+     },
+     {
+      "style": "interview",
+      "n": 4,
+      "median": 45
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 69.7
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 77.5
      }
     ]
    }
@@ -1664,6 +2545,104 @@
    }
   },
   {
+   "model": "cohere/command-a-plus",
+   "family": "Command",
+   "holdout": true,
+   "n": 31,
+   "median": 60.1,
+   "p25": 45.4,
+   "p75": 83.4,
+   "original": 9.7,
+   "familiar": 29,
+   "common": 29,
+   "pulp": 10,
+   "upstream": 21,
+   "byMode": {
+    "fresh": {
+     "n": 31,
+     "median": 60.1,
+     "p25": 45.4,
+     "p75": 83.4,
+     "original": 9.7,
+     "familiar": 29,
+     "common": 29,
+     "pulp": 10,
+     "upstream": 21
+    },
+    "antislop": {
+     "n": 46,
+     "median": 67.9,
+     "p25": 47.6,
+     "p75": 87.4,
+     "original": 21.7,
+     "familiar": 30.4,
+     "common": 34.8,
+     "pulp": 4,
+     "upstream": 12.2
+    },
+    "rewrite": {
+     "n": 23,
+     "median": 77.3,
+     "p25": 56.5,
+     "p75": 99.4,
+     "original": 17.4,
+     "familiar": 17.4,
+     "common": 47.8,
+     "pulp": 6,
+     "upstream": 30.4
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 5,
+     "median": 45.4,
+     "upstream": 34.7
+    },
+    "min": {
+     "style": "lists",
+     "n": 3,
+     "median": 31.3
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 7,
+     "median": 87
+    },
+    "all": [
+     {
+      "style": "lists",
+      "n": 3,
+      "median": 31.3
+     },
+     {
+      "style": "default",
+      "n": 5,
+      "median": 45.4
+     },
+     {
+      "style": "first_person",
+      "n": 4,
+      "median": 55.8
+     },
+     {
+      "style": "free_prose",
+      "n": 7,
+      "median": 59
+     },
+     {
+      "style": "interview",
+      "n": 5,
+      "median": 64
+     },
+     {
+      "style": "formatted_prose",
+      "n": 7,
+      "median": 87
+     }
+    ]
+   }
+  },
+  {
    "model": "deepseek/deepseek-v4-flash",
    "family": "DeepSeek",
    "n": 39,
@@ -1761,6 +2740,202 @@
       "style": "lists",
       "n": 6,
       "median": 91.1
+     }
+    ]
+   }
+  },
+  {
+   "model": "xiaomi/mimo-v2.6-pro",
+   "family": "MiMo",
+   "holdout": true,
+   "n": 48,
+   "median": 58.8,
+   "p25": 41.4,
+   "p75": 76.5,
+   "original": 33.3,
+   "familiar": 14.6,
+   "common": 18.8,
+   "pulp": 4,
+   "upstream": 12.7,
+   "byMode": {
+    "fresh": {
+     "n": 48,
+     "median": 58.8,
+     "p25": 41.4,
+     "p75": 76.5,
+     "original": 33.3,
+     "familiar": 14.6,
+     "common": 18.8,
+     "pulp": 4,
+     "upstream": 12.7
+    },
+    "antislop": {
+     "n": 70,
+     "median": 33.9,
+     "p25": 24.3,
+     "p75": 40.4,
+     "original": 82.9,
+     "familiar": 1.4,
+     "common": 0,
+     "pulp": 0,
+     "upstream": 5.3
+    },
+    "rewrite": {
+     "n": 21,
+     "median": 76,
+     "p25": 51.3,
+     "p75": 93.1,
+     "original": 19,
+     "familiar": 9.5,
+     "common": 42.9,
+     "pulp": 5,
+     "upstream": 20
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 67.7,
+     "upstream": 24.4
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 45.5
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 82.1
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 45.5
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 47.2
+     },
+     {
+      "style": "lists",
+      "n": 8,
+      "median": 57.8
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 63.1
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 67.7
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 82.1
+     }
+    ]
+   }
+  },
+  {
+   "model": "inception/mercury-3",
+   "family": "Mercury",
+   "holdout": true,
+   "n": 42,
+   "median": 58.1,
+   "p25": 35.2,
+   "p75": 78.8,
+   "original": 38.1,
+   "familiar": 21.4,
+   "common": 14.3,
+   "pulp": 5,
+   "upstream": 17.6,
+   "byMode": {
+    "fresh": {
+     "n": 42,
+     "median": 58.1,
+     "p25": 35.2,
+     "p75": 78.8,
+     "original": 38.1,
+     "familiar": 21.4,
+     "common": 14.3,
+     "pulp": 5,
+     "upstream": 17.6
+    },
+    "antislop": {
+     "n": 64,
+     "median": 49.6,
+     "p25": 36.3,
+     "p75": 65.1,
+     "original": 42.2,
+     "familiar": 4.7,
+     "common": 7.8,
+     "pulp": 2,
+     "upstream": 13
+    },
+    "rewrite": {
+     "n": 21,
+     "median": 74.8,
+     "p25": 61.3,
+     "p75": 99.9,
+     "original": 19,
+     "familiar": 19,
+     "common": 38.1,
+     "pulp": 5,
+     "upstream": 21.1
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 60.6,
+     "upstream": 17.6
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 35.2
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 7,
+     "median": 79.9
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 35.2
+     },
+     {
+      "style": "lists",
+      "n": 7,
+      "median": 37.5
+     },
+     {
+      "style": "interview",
+      "n": 6,
+      "median": 45.5
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 60.6
+     },
+     {
+      "style": "formatted_prose",
+      "n": 7,
+      "median": 79.4
+     },
+     {
+      "style": "free_prose",
+      "n": 7,
+      "median": 79.9
      }
     ]
    }
@@ -1888,6 +3063,104 @@
    }
   },
   {
+   "model": "writer/palmyra-x5",
+   "family": "Palmyra",
+   "holdout": true,
+   "n": 14,
+   "median": 57,
+   "p25": 38.5,
+   "p75": 64.6,
+   "original": 21.4,
+   "familiar": 21.4,
+   "common": 21.4,
+   "pulp": 4,
+   "upstream": 19.4,
+   "byMode": {
+    "fresh": {
+     "n": 14,
+     "median": 57,
+     "p25": 38.5,
+     "p75": 64.6,
+     "original": 21.4,
+     "familiar": 21.4,
+     "common": 21.4,
+     "pulp": 4,
+     "upstream": 19.4
+    },
+    "antislop": {
+     "n": 23,
+     "median": 53.1,
+     "p25": 38.7,
+     "p75": 65.6,
+     "original": 21.7,
+     "familiar": 26.1,
+     "common": 8.7,
+     "pulp": 0,
+     "upstream": 17
+    },
+    "rewrite": {
+     "n": 7,
+     "median": 83,
+     "p25": 57.5,
+     "p75": 100,
+     "original": 14.3,
+     "familiar": 14.3,
+     "common": 57.1,
+     "pulp": 5,
+     "upstream": 24.3
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 100,
+     "upstream": 30.2
+    },
+    "min": {
+     "style": "first_person",
+     "n": 3,
+     "median": 26.5
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 2,
+     "median": 100
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 3,
+      "median": 26.5
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 27.9
+     },
+     {
+      "style": "interview",
+      "n": 3,
+      "median": 56.5
+     },
+     {
+      "style": "free_prose",
+      "n": 4,
+      "median": 60.7
+     },
+     {
+      "style": "default",
+      "n": 1,
+      "median": 100
+     },
+     {
+      "style": "formatted_prose",
+      "n": 2,
+      "median": 100
+     }
+    ]
+   }
+  },
+  {
    "model": "meta-llama/Llama-3.2-3B-Instruct",
    "family": "Llama",
    "n": 31,
@@ -1990,6 +3263,202 @@
    }
   },
   {
+   "model": "xiaomi/mimo-v2.6-flash",
+   "family": "MiMo",
+   "holdout": true,
+   "n": 47,
+   "median": 54.5,
+   "p25": 34.4,
+   "p75": 72.9,
+   "original": 36.2,
+   "familiar": 12.8,
+   "common": 17,
+   "pulp": 6,
+   "upstream": 16.6,
+   "byMode": {
+    "fresh": {
+     "n": 47,
+     "median": 54.5,
+     "p25": 34.4,
+     "p75": 72.9,
+     "original": 36.2,
+     "familiar": 12.8,
+     "common": 17,
+     "pulp": 6,
+     "upstream": 16.6
+    },
+    "antislop": {
+     "n": 71,
+     "median": 37.6,
+     "p25": 27,
+     "p75": 54.9,
+     "original": 56.3,
+     "familiar": 2.8,
+     "common": 7,
+     "pulp": 4,
+     "upstream": 10.6
+    },
+    "rewrite": {
+     "n": 23,
+     "median": 55.3,
+     "p25": 40.8,
+     "p75": 90.6,
+     "original": 26.1,
+     "familiar": 4.3,
+     "common": 30.4,
+     "pulp": 5,
+     "upstream": 21
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 56.8,
+     "upstream": 34.6
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 33.7
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 81
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 33.7
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 44.2
+     },
+     {
+      "style": "lists",
+      "n": 7,
+      "median": 49.7
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 56.8
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 61.4
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 81
+     }
+    ]
+   }
+  },
+  {
+   "model": "thinkingmachines/inkling-small",
+   "family": "Inkling",
+   "holdout": true,
+   "n": 40,
+   "median": 53.8,
+   "p25": 30.2,
+   "p75": 79.4,
+   "original": 30,
+   "familiar": 20,
+   "common": 22.5,
+   "pulp": 4,
+   "upstream": 15.5,
+   "byMode": {
+    "fresh": {
+     "n": 40,
+     "median": 53.8,
+     "p25": 30.2,
+     "p75": 79.4,
+     "original": 30,
+     "familiar": 20,
+     "common": 22.5,
+     "pulp": 4,
+     "upstream": 15.5
+    },
+    "antislop": {
+     "n": 52,
+     "median": 33.5,
+     "p25": 25.4,
+     "p75": 41.7,
+     "original": 73.1,
+     "familiar": 5.8,
+     "common": 1.9,
+     "pulp": 0,
+     "upstream": 2.5
+    },
+    "rewrite": {
+     "n": 23,
+     "median": 75,
+     "p25": 44.3,
+     "p75": 89.8,
+     "original": 26.1,
+     "familiar": 26.1,
+     "common": 34.8,
+     "pulp": 5,
+     "upstream": 23.7
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 6,
+     "median": 42.6,
+     "upstream": 38.7
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 21
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 7,
+     "median": 93.1
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 21
+     },
+     {
+      "style": "default",
+      "n": 6,
+      "median": 42.6
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 44.4
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 78
+     },
+     {
+      "style": "lists",
+      "n": 4,
+      "median": 81.2
+     },
+     {
+      "style": "formatted_prose",
+      "n": 7,
+      "median": 93.1
+     }
+    ]
+   }
+  },
+  {
    "model": "meta-llama/Llama-3.2-1B-Instruct",
    "family": "Llama",
    "n": 13,
@@ -2077,6 +3546,202 @@
       "style": "interview",
       "n": 1,
       "median": 84.1
+     }
+    ]
+   }
+  },
+  {
+   "model": "liquid/lfm-2.5-24b-a2b",
+   "family": "LFM",
+   "holdout": true,
+   "n": 24,
+   "median": 51.6,
+   "p25": 44,
+   "p75": 70,
+   "original": 16.7,
+   "familiar": 25,
+   "common": 16.7,
+   "pulp": 8,
+   "upstream": 7.4,
+   "byMode": {
+    "fresh": {
+     "n": 24,
+     "median": 51.6,
+     "p25": 44,
+     "p75": 70,
+     "original": 16.7,
+     "familiar": 25,
+     "common": 16.7,
+     "pulp": 8,
+     "upstream": 7.4
+    },
+    "antislop": {
+     "n": 36,
+     "median": 59.5,
+     "p25": 43,
+     "p75": 76.9,
+     "original": 19.4,
+     "familiar": 27.8,
+     "common": 19.4,
+     "pulp": 3,
+     "upstream": 12.9
+    },
+    "rewrite": {
+     "n": 15,
+     "median": 67.5,
+     "p25": 51.7,
+     "p75": 78.5,
+     "original": 6.7,
+     "familiar": 33.3,
+     "common": 13.3,
+     "pulp": 7,
+     "upstream": 22.9
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 5,
+     "median": 44,
+     "upstream": 7.4
+    },
+    "min": {
+     "style": "first_person",
+     "n": 5,
+     "median": 38.1
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 4,
+     "median": 84.7
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 5,
+      "median": 38.1
+     },
+     {
+      "style": "default",
+      "n": 5,
+      "median": 44
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 47.7
+     },
+     {
+      "style": "interview",
+      "n": 4,
+      "median": 54.3
+     },
+     {
+      "style": "free_prose",
+      "n": 5,
+      "median": 70
+     },
+     {
+      "style": "formatted_prose",
+      "n": 4,
+      "median": 84.7
+     }
+    ]
+   }
+  },
+  {
+   "model": "cohere/command-r7b-12-2024",
+   "family": "Command",
+   "holdout": true,
+   "n": 27,
+   "median": 50.8,
+   "p25": 22,
+   "p75": 67.5,
+   "original": 40.7,
+   "familiar": 18.5,
+   "common": 14.8,
+   "pulp": 13,
+   "upstream": 18.6,
+   "byMode": {
+    "fresh": {
+     "n": 27,
+     "median": 50.8,
+     "p25": 22,
+     "p75": 67.5,
+     "original": 40.7,
+     "familiar": 18.5,
+     "common": 14.8,
+     "pulp": 13,
+     "upstream": 18.6
+    },
+    "antislop": {
+     "n": 51,
+     "median": 61.6,
+     "p25": 45.2,
+     "p75": 77.3,
+     "original": 13.7,
+     "familiar": 27.5,
+     "common": 21.6,
+     "pulp": 13,
+     "upstream": 20.4
+    },
+    "rewrite": {
+     "n": 21,
+     "median": 70,
+     "p25": 61.8,
+     "p75": 81.9,
+     "original": 14.3,
+     "familiar": 23.8,
+     "common": 28.6,
+     "pulp": 9,
+     "upstream": 24.8
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 4,
+     "median": 54.3,
+     "upstream": 49.6
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 29.2
+    },
+    "max": {
+     "style": "interview",
+     "n": 1,
+     "median": 72.7
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 29.2
+     },
+     {
+      "style": "lists",
+      "n": 3,
+      "median": 31.5
+     },
+     {
+      "style": "default",
+      "n": 4,
+      "median": 54.3
+     },
+     {
+      "style": "free_prose",
+      "n": 7,
+      "median": 54.7
+     },
+     {
+      "style": "formatted_prose",
+      "n": 5,
+      "median": 60.6
+     },
+     {
+      "style": "interview",
+      "n": 1,
+      "median": 72.7
      }
     ]
    }
@@ -2179,6 +3844,202 @@
       "style": "free_prose",
       "n": 6,
       "median": 100
+     }
+    ]
+   }
+  },
+  {
+   "model": "amazon/nova-lite-v1",
+   "family": "Nova",
+   "holdout": true,
+   "n": 37,
+   "median": 50.6,
+   "p25": 35.9,
+   "p75": 72.5,
+   "original": 24.3,
+   "familiar": 29.7,
+   "common": 13.5,
+   "pulp": 10,
+   "upstream": 28.4,
+   "byMode": {
+    "fresh": {
+     "n": 37,
+     "median": 50.6,
+     "p25": 35.9,
+     "p75": 72.5,
+     "original": 24.3,
+     "familiar": 29.7,
+     "common": 13.5,
+     "pulp": 10,
+     "upstream": 28.4
+    },
+    "antislop": {
+     "n": 60,
+     "median": 66.7,
+     "p25": 52,
+     "p75": 84.6,
+     "original": 6.7,
+     "familiar": 36.7,
+     "common": 30,
+     "pulp": 6,
+     "upstream": 31.6
+    },
+    "rewrite": {
+     "n": 24,
+     "median": 57.4,
+     "p25": 41.1,
+     "p75": 77.8,
+     "original": 33.3,
+     "familiar": 25,
+     "common": 16.7,
+     "pulp": 8,
+     "upstream": 17.9
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 6,
+     "median": 71.9,
+     "upstream": 40.8
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 42.3
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 7,
+     "median": 73.1
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 42.3
+     },
+     {
+      "style": "lists",
+      "n": 1,
+      "median": 42.5
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 45.1
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 56.8
+     },
+     {
+      "style": "default",
+      "n": 6,
+      "median": 71.9
+     },
+     {
+      "style": "formatted_prose",
+      "n": 7,
+      "median": 73.1
+     }
+    ]
+   }
+  },
+  {
+   "model": "stepfun/step-5-preview",
+   "family": "Step",
+   "holdout": true,
+   "n": 48,
+   "median": 49.7,
+   "p25": 40.7,
+   "p75": 72.4,
+   "original": 29.2,
+   "familiar": 8.3,
+   "common": 16.7,
+   "pulp": 7,
+   "upstream": 19.3,
+   "byMode": {
+    "fresh": {
+     "n": 48,
+     "median": 49.7,
+     "p25": 40.7,
+     "p75": 72.4,
+     "original": 29.2,
+     "familiar": 8.3,
+     "common": 16.7,
+     "pulp": 7,
+     "upstream": 19.3
+    },
+    "antislop": {
+     "n": 71,
+     "median": 37.4,
+     "p25": 25.4,
+     "p75": 46.3,
+     "original": 74.6,
+     "familiar": 1.4,
+     "common": 0,
+     "pulp": 0,
+     "upstream": 4.9
+    },
+    "rewrite": {
+     "n": 22,
+     "median": 73.9,
+     "p25": 39,
+     "p75": 88,
+     "original": 27.3,
+     "familiar": 13.6,
+     "common": 36.4,
+     "pulp": 4,
+     "upstream": 20.8
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 49.2,
+     "upstream": 34.8
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 38.9
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 8,
+     "median": 74.6
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 38.9
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 41.4
+     },
+     {
+      "style": "lists",
+      "n": 8,
+      "median": 49
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 49.2
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 67.3
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 74.6
      }
     ]
    }
@@ -2388,6 +4249,197 @@
    }
   },
   {
+   "model": "amazon/nova-pro-v1",
+   "family": "Nova",
+   "holdout": true,
+   "n": 33,
+   "median": 48.1,
+   "p25": 38.6,
+   "p75": 53.9,
+   "original": 21.2,
+   "familiar": 27.3,
+   "common": 6.1,
+   "pulp": 10,
+   "upstream": 23.5,
+   "byMode": {
+    "fresh": {
+     "n": 33,
+     "median": 48.1,
+     "p25": 38.6,
+     "p75": 53.9,
+     "original": 21.2,
+     "familiar": 27.3,
+     "common": 6.1,
+     "pulp": 10,
+     "upstream": 23.5
+    },
+    "antislop": {
+     "n": 51,
+     "median": 51.8,
+     "p25": 33.2,
+     "p75": 67.8,
+     "original": 29.4,
+     "familiar": 25.5,
+     "common": 9.8,
+     "pulp": 9,
+     "upstream": 27.6
+    },
+    "rewrite": {
+     "n": 23,
+     "median": 66,
+     "p25": 46.3,
+     "p75": 76.8,
+     "original": 26.1,
+     "familiar": 17.4,
+     "common": 17.4,
+     "pulp": 6,
+     "upstream": 23.6
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 5,
+     "median": 48.1,
+     "upstream": 38.9
+    },
+    "min": {
+     "style": "interview",
+     "n": 7,
+     "median": 42.9
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 7,
+     "median": 63.3
+    },
+    "all": [
+     {
+      "style": "interview",
+      "n": 7,
+      "median": 42.9
+     },
+     {
+      "style": "default",
+      "n": 5,
+      "median": 48.1
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 48.5
+     },
+     {
+      "style": "first_person",
+      "n": 6,
+      "median": 48.6
+     },
+     {
+      "style": "formatted_prose",
+      "n": 7,
+      "median": 63.3
+     }
+    ]
+   }
+  },
+  {
+   "model": "qwen/qwen3.8-flash",
+   "family": "Qwen",
+   "holdout": true,
+   "n": 41,
+   "median": 47.1,
+   "p25": 27.1,
+   "p75": 66,
+   "original": 43.9,
+   "familiar": 17.1,
+   "common": 4.9,
+   "pulp": 5,
+   "upstream": 14.6,
+   "byMode": {
+    "fresh": {
+     "n": 41,
+     "median": 47.1,
+     "p25": 27.1,
+     "p75": 66,
+     "original": 43.9,
+     "familiar": 17.1,
+     "common": 4.9,
+     "pulp": 5,
+     "upstream": 14.6
+    },
+    "antislop": {
+     "n": 63,
+     "median": 37,
+     "p25": 23.5,
+     "p75": 43.7,
+     "original": 73,
+     "familiar": 0,
+     "common": 0,
+     "pulp": 0,
+     "upstream": 4.8
+    },
+    "rewrite": {
+     "n": 24,
+     "median": 57.8,
+     "p25": 33.1,
+     "p75": 68.1,
+     "original": 33.3,
+     "familiar": 8.3,
+     "common": 8.3,
+     "pulp": 6,
+     "upstream": 17.8
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 6,
+     "median": 47.1,
+     "upstream": 27.7
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 17.3
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 74.1
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 17.3
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 38.1
+     },
+     {
+      "style": "lists",
+      "n": 4,
+      "median": 46.5
+     },
+     {
+      "style": "default",
+      "n": 6,
+      "median": 47.1
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 66
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 74.1
+     }
+    ]
+   }
+  },
+  {
    "model": "meta-llama/llama-4-maverick",
    "family": "Llama",
    "n": 40,
@@ -2592,6 +4644,202 @@
    }
   },
   {
+   "model": "inclusionai/ling-3.1-flash",
+   "family": "Ling",
+   "holdout": true,
+   "n": 46,
+   "median": 45.3,
+   "p25": 36.1,
+   "p75": 57.5,
+   "original": 45.7,
+   "familiar": 10.9,
+   "common": 6.5,
+   "pulp": 3,
+   "upstream": 11.3,
+   "byMode": {
+    "fresh": {
+     "n": 46,
+     "median": 45.3,
+     "p25": 36.1,
+     "p75": 57.5,
+     "original": 45.7,
+     "familiar": 10.9,
+     "common": 6.5,
+     "pulp": 3,
+     "upstream": 11.3
+    },
+    "antislop": {
+     "n": 68,
+     "median": 34.5,
+     "p25": 24.5,
+     "p75": 41.8,
+     "original": 82.4,
+     "familiar": 2.9,
+     "common": 0,
+     "pulp": 0,
+     "upstream": 3.7
+    },
+    "rewrite": {
+     "n": 22,
+     "median": 58.9,
+     "p25": 36.9,
+     "p75": 95.8,
+     "original": 36.4,
+     "familiar": 0,
+     "common": 40.9,
+     "pulp": 4,
+     "upstream": 15.8
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 43.9,
+     "upstream": 10.3
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 36.2
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 72.1
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 36.2
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 41.7
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 43.9
+     },
+     {
+      "style": "lists",
+      "n": 6,
+      "median": 48.9
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 69.9
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 72.1
+     }
+    ]
+   }
+  },
+  {
+   "model": "minimax/minimax-m3",
+   "family": "MiniMax",
+   "holdout": true,
+   "n": 45,
+   "median": 45.1,
+   "p25": 33.5,
+   "p75": 57,
+   "original": 40,
+   "familiar": 6.7,
+   "common": 4.4,
+   "pulp": 3,
+   "upstream": 11.9,
+   "byMode": {
+    "fresh": {
+     "n": 45,
+     "median": 45.1,
+     "p25": 33.5,
+     "p75": 57,
+     "original": 40,
+     "familiar": 6.7,
+     "common": 4.4,
+     "pulp": 3,
+     "upstream": 11.9
+    },
+    "antislop": {
+     "n": 66,
+     "median": 34.3,
+     "p25": 25,
+     "p75": 44.9,
+     "original": 77.3,
+     "familiar": 3,
+     "common": 0,
+     "pulp": 2,
+     "upstream": 4.1
+    },
+    "rewrite": {
+     "n": 22,
+     "median": 55.6,
+     "p25": 37.5,
+     "p75": 75.6,
+     "original": 40.9,
+     "familiar": 13.6,
+     "common": 13.6,
+     "pulp": 4,
+     "upstream": 19
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 36.3,
+     "upstream": 11.7
+    },
+    "min": {
+     "style": "lists",
+     "n": 6,
+     "median": 30.6
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 7,
+     "median": 61
+    },
+    "all": [
+     {
+      "style": "lists",
+      "n": 6,
+      "median": 30.6
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 36.3
+     },
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 45.1
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 48.3
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 52.9
+     },
+     {
+      "style": "formatted_prose",
+      "n": 7,
+      "median": 61
+     }
+    ]
+   }
+  },
+  {
    "model": "meta-llama/llama-3.1-8b-instruct",
    "family": "Llama",
    "n": 27,
@@ -2791,6 +5039,104 @@
       "style": "free_prose",
       "n": 13,
       "median": 74.2
+     }
+    ]
+   }
+  },
+  {
+   "model": "qwen/qwen3.8-27b",
+   "family": "Qwen",
+   "holdout": true,
+   "n": 47,
+   "median": 44.7,
+   "p25": 29.7,
+   "p75": 65.9,
+   "original": 57.4,
+   "familiar": 10.6,
+   "common": 4.3,
+   "pulp": 2,
+   "upstream": 12,
+   "byMode": {
+    "fresh": {
+     "n": 47,
+     "median": 44.7,
+     "p25": 29.7,
+     "p75": 65.9,
+     "original": 57.4,
+     "familiar": 10.6,
+     "common": 4.3,
+     "pulp": 2,
+     "upstream": 12
+    },
+    "antislop": {
+     "n": 72,
+     "median": 29.3,
+     "p25": 22.3,
+     "p75": 38.9,
+     "original": 81.9,
+     "familiar": 1.4,
+     "common": 0,
+     "pulp": 0,
+     "upstream": 3.4
+    },
+    "rewrite": {
+     "n": 22,
+     "median": 62.1,
+     "p25": 40.8,
+     "p75": 72.6,
+     "original": 22.7,
+     "familiar": 13.6,
+     "common": 13.6,
+     "pulp": 3,
+     "upstream": 14.3
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 53.7,
+     "upstream": 27
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 30.1
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 8,
+     "median": 67.3
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 30.1
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 38.5
+     },
+     {
+      "style": "lists",
+      "n": 8,
+      "median": 42.4
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 53.7
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 65.9
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 67.3
      }
     ]
    }
@@ -3102,6 +5448,263 @@
    }
   },
   {
+   "model": "bytedance-seed/seed-2.0-mini",
+   "family": "Seed",
+   "holdout": true,
+   "n": 45,
+   "median": 43.2,
+   "p25": 31.9,
+   "p75": 57.1,
+   "original": 44.4,
+   "familiar": 11.1,
+   "common": 8.9,
+   "pulp": 4,
+   "upstream": 13.7,
+   "byMode": {
+    "fresh": {
+     "n": 45,
+     "median": 43.2,
+     "p25": 31.9,
+     "p75": 57.1,
+     "original": 44.4,
+     "familiar": 11.1,
+     "common": 8.9,
+     "pulp": 4,
+     "upstream": 13.7
+    },
+    "antislop": {
+     "n": 64,
+     "median": 36.9,
+     "p25": 24.3,
+     "p75": 47.5,
+     "original": 65.6,
+     "familiar": 1.6,
+     "common": 3.1,
+     "pulp": 2,
+     "upstream": 12.9
+    },
+    "rewrite": {
+     "n": 24,
+     "median": 69.5,
+     "p25": 60.9,
+     "p75": 87.7,
+     "original": 12.5,
+     "familiar": 16.7,
+     "common": 29.2,
+     "pulp": 6,
+     "upstream": 27.1
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 47,
+     "upstream": 41.8
+    },
+    "min": {
+     "style": "first_person",
+     "n": 8,
+     "median": 32.2
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 5,
+     "median": 75.1
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 8,
+      "median": 32.2
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 40.9
+     },
+     {
+      "style": "lists",
+      "n": 8,
+      "median": 46.7
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 47
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 50
+     },
+     {
+      "style": "formatted_prose",
+      "n": 5,
+      "median": 75.1
+     }
+    ]
+   }
+  },
+  {
+   "model": "qwen/qwen3.8-max-0902",
+   "family": "Qwen",
+   "holdout": true,
+   "n": 3,
+   "median": 43,
+   "p25": 33.4,
+   "p75": 65.6,
+   "original": 0,
+   "familiar": 0,
+   "common": 0,
+   "pulp": 5,
+   "upstream": 7.5,
+   "byMode": {
+    "fresh": {
+     "n": 3,
+     "median": 43,
+     "p25": 33.4,
+     "p75": 65.6,
+     "original": 0,
+     "familiar": 0,
+     "common": 0,
+     "pulp": 5,
+     "upstream": 7.5
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 1,
+     "median": 43,
+     "upstream": 12.9
+    },
+    "min": {
+     "style": "interview",
+     "n": 1,
+     "median": 33.4
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 1,
+     "median": 65.6
+    },
+    "all": [
+     {
+      "style": "interview",
+      "n": 1,
+      "median": 33.4
+     },
+     {
+      "style": "default",
+      "n": 1,
+      "median": 43
+     },
+     {
+      "style": "formatted_prose",
+      "n": 1,
+      "median": 65.6
+     }
+    ]
+   }
+  },
+  {
+   "model": "meituan/longcat-2.0",
+   "family": "LongCat",
+   "holdout": true,
+   "n": 45,
+   "median": 42.9,
+   "p25": 27.8,
+   "p75": 52,
+   "original": 68.9,
+   "familiar": 2.2,
+   "common": 2.2,
+   "pulp": 2,
+   "upstream": 9.1,
+   "byMode": {
+    "fresh": {
+     "n": 45,
+     "median": 42.9,
+     "p25": 27.8,
+     "p75": 52,
+     "original": 68.9,
+     "familiar": 2.2,
+     "common": 2.2,
+     "pulp": 2,
+     "upstream": 9.1
+    },
+    "antislop": {
+     "n": 70,
+     "median": 33.8,
+     "p25": 22.2,
+     "p75": 41.7,
+     "original": 85.7,
+     "familiar": 0,
+     "common": 2.9,
+     "pulp": 2,
+     "upstream": 4.5
+    },
+    "rewrite": {
+     "n": 20,
+     "median": 58.1,
+     "p25": 48,
+     "p75": 73.8,
+     "original": 25,
+     "familiar": 20,
+     "common": 10,
+     "pulp": 4,
+     "upstream": 18.2
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 7,
+     "median": 43.1,
+     "upstream": 9.1
+    },
+    "min": {
+     "style": "lists",
+     "n": 7,
+     "median": 20.2
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 59.7
+    },
+    "all": [
+     {
+      "style": "lists",
+      "n": 7,
+      "median": 20.2
+     },
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 27.6
+     },
+     {
+      "style": "default",
+      "n": 7,
+      "median": 43.1
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 43.6
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 47.8
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 59.7
+     }
+    ]
+   }
+  },
+  {
    "model": "openai/gpt-6-luna",
    "family": "GPT",
    "n": 55,
@@ -3306,6 +5909,104 @@
    }
   },
   {
+   "model": "meta/muse-glimmer-30b",
+   "family": "Muse",
+   "holdout": true,
+   "n": 45,
+   "median": 41.6,
+   "p25": 31.1,
+   "p75": 53.1,
+   "original": 48.9,
+   "familiar": 13.3,
+   "common": 2.2,
+   "pulp": 2,
+   "upstream": 5.7,
+   "byMode": {
+    "fresh": {
+     "n": 45,
+     "median": 41.6,
+     "p25": 31.1,
+     "p75": 53.1,
+     "original": 48.9,
+     "familiar": 13.3,
+     "common": 2.2,
+     "pulp": 2,
+     "upstream": 5.7
+    },
+    "antislop": {
+     "n": 64,
+     "median": 31.1,
+     "p25": 18,
+     "p75": 40.9,
+     "original": 70.3,
+     "familiar": 3.1,
+     "common": 0,
+     "pulp": 0,
+     "upstream": 3.7
+    },
+    "rewrite": {
+     "n": 22,
+     "median": 50.2,
+     "p25": 38.4,
+     "p75": 73.2,
+     "original": 45.5,
+     "familiar": 22.7,
+     "common": 9.1,
+     "pulp": 5,
+     "upstream": 15.1
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 53.1,
+     "upstream": 24.4
+    },
+    "min": {
+     "style": "first_person",
+     "n": 7,
+     "median": 24.8
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 8,
+     "median": 50.5
+    },
+    "all": [
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 24.8
+     },
+     {
+      "style": "lists",
+      "n": 6,
+      "median": 41.2
+     },
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 41.6
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 49
+     },
+     {
+      "style": "formatted_prose",
+      "n": 8,
+      "median": 50.5
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 53.1
+     }
+    ]
+   }
+  },
+  {
    "model": "nousresearch/hermes-4-405b",
    "family": "Llama",
    "n": 54,
@@ -3408,6 +6109,104 @@
    }
   },
   {
+   "model": "minimax/minimax-m3.1-flash",
+   "family": "MiniMax",
+   "holdout": true,
+   "n": 46,
+   "median": 40.9,
+   "p25": 32.1,
+   "p75": 49.7,
+   "original": 69.6,
+   "familiar": 4.3,
+   "common": 0,
+   "pulp": 0,
+   "upstream": 8.1,
+   "byMode": {
+    "fresh": {
+     "n": 46,
+     "median": 40.9,
+     "p25": 32.1,
+     "p75": 49.7,
+     "original": 69.6,
+     "familiar": 4.3,
+     "common": 0,
+     "pulp": 0,
+     "upstream": 8.1
+    },
+    "antislop": {
+     "n": 71,
+     "median": 32.5,
+     "p25": 23,
+     "p75": 40.1,
+     "original": 84.5,
+     "familiar": 1.4,
+     "common": 0,
+     "pulp": 2,
+     "upstream": 4.6
+    },
+    "rewrite": {
+     "n": 23,
+     "median": 48,
+     "p25": 35.7,
+     "p75": 68.5,
+     "original": 56.5,
+     "familiar": 17.4,
+     "common": 0,
+     "pulp": 4,
+     "upstream": 12.8
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 8,
+     "median": 41.3,
+     "upstream": 12.7
+    },
+    "min": {
+     "style": "interview",
+     "n": 8,
+     "median": 31.4
+    },
+    "max": {
+     "style": "formatted_prose",
+     "n": 7,
+     "median": 49.2
+    },
+    "all": [
+     {
+      "style": "interview",
+      "n": 8,
+      "median": 31.4
+     },
+     {
+      "style": "first_person",
+      "n": 7,
+      "median": 37.8
+     },
+     {
+      "style": "lists",
+      "n": 8,
+      "median": 40.7
+     },
+     {
+      "style": "default",
+      "n": 8,
+      "median": 41.3
+     },
+     {
+      "style": "free_prose",
+      "n": 8,
+      "median": 44.8
+     },
+     {
+      "style": "formatted_prose",
+      "n": 7,
+      "median": 49.2
+     }
+    ]
+   }
+  },
+  {
    "model": "openai/gpt-6-astra",
    "family": "GPT",
    "n": 14,
@@ -3505,6 +6304,104 @@
       "style": "formatted_prose",
       "n": 2,
       "median": 66.5
+     }
+    ]
+   }
+  },
+  {
+   "model": "bytedance-seed/seed-2-1-turbo",
+   "family": "Seed",
+   "holdout": true,
+   "n": 23,
+   "median": 38.5,
+   "p25": 30.9,
+   "p75": 51.5,
+   "original": 69.6,
+   "familiar": 4.3,
+   "common": 8.7,
+   "pulp": 4,
+   "upstream": 7.7,
+   "byMode": {
+    "fresh": {
+     "n": 23,
+     "median": 38.5,
+     "p25": 30.9,
+     "p75": 51.5,
+     "original": 69.6,
+     "familiar": 4.3,
+     "common": 8.7,
+     "pulp": 4,
+     "upstream": 7.7
+    },
+    "antislop": {
+     "n": 35,
+     "median": 35,
+     "p25": 26.1,
+     "p75": 48.4,
+     "original": 82.9,
+     "familiar": 0,
+     "common": 0,
+     "pulp": 2,
+     "upstream": 10.4
+    },
+    "rewrite": {
+     "n": 9,
+     "median": 53,
+     "p25": 35.6,
+     "p75": 62,
+     "original": 33.3,
+     "familiar": 22.2,
+     "common": 11.1,
+     "pulp": 4,
+     "upstream": 16.3
+    }
+   },
+   "styles": {
+    "lazy": {
+     "n": 4,
+     "median": 79.2,
+     "upstream": 24.4
+    },
+    "min": {
+     "style": "lists",
+     "n": 3,
+     "median": 30.9
+    },
+    "max": {
+     "style": "free_prose",
+     "n": 4,
+     "median": 51.5
+    },
+    "all": [
+     {
+      "style": "lists",
+      "n": 3,
+      "median": 30.9
+     },
+     {
+      "style": "first_person",
+      "n": 4,
+      "median": 32.9
+     },
+     {
+      "style": "interview",
+      "n": 4,
+      "median": 33.2
+     },
+     {
+      "style": "formatted_prose",
+      "n": 4,
+      "median": 49.9
+     },
+     {
+      "style": "free_prose",
+      "n": 4,
+      "median": 51.5
+     },
+     {
+      "style": "default",
+      "n": 4,
+      "median": 79.2
      }
     ]
    }
@@ -3814,113 +6711,61 @@
      }
     ]
    }
-  }
- ],
- "fun": [
+  },
   {
-   "kind": "model",
-   "model": "microsoft/phi-4",
-   "family": "Phi",
-   "n": 40,
-   "median": 68.5,
-   "p25": 34.4,
-   "p75": 89.9,
-   "original": 32.5,
-   "familiar": 15,
-   "common": 37.5,
-   "pulp": 11,
-   "upstream": 31.1,
+   "model": "meta/muse-spark-1.3",
+   "family": "Muse",
+   "holdout": true,
+   "n": 2,
+   "median": 28.6,
+   "p25": 27.1,
+   "p75": 28.6,
+   "original": 100,
+   "familiar": 0,
+   "common": 0,
+   "pulp": 12,
+   "upstream": 6.9,
    "byMode": {
     "fresh": {
-     "n": 40,
-     "median": 68.5,
-     "p25": 34.4,
-     "p75": 89.9,
-     "original": 32.5,
-     "familiar": 15,
-     "common": 37.5,
-     "pulp": 11,
-     "upstream": 31.1
-    },
-    "antislop": {
-     "n": 33,
-     "median": 71.8,
-     "p25": 55.8,
-     "p75": 91.9,
-     "original": 6.1,
-     "familiar": 30.3,
-     "common": 33.3,
-     "pulp": 7,
-     "upstream": 32.7
-    },
-    "rewrite": {
-     "n": 12,
-     "median": 49.8,
-     "p25": 23.9,
-     "p75": 63.5,
-     "original": 41.7,
+     "n": 2,
+     "median": 28.6,
+     "p25": 27.1,
+     "p75": 28.6,
+     "original": 100,
      "familiar": 0,
-     "common": 16.7,
-     "pulp": 7,
-     "upstream": 15.3
+     "common": 0,
+     "pulp": 12,
+     "upstream": 6.9
     }
    },
    "styles": {
-    "lazy": {
-     "n": 7,
-     "median": 57.3,
-     "upstream": 31.1
-    },
+    "lazy": null,
     "min": {
-     "style": "first_person",
-     "n": 7,
-     "median": 28.7
+     "style": "formatted_prose",
+     "n": 1,
+     "median": 27.1
     },
     "max": {
-     "style": "free_prose",
-     "n": 7,
-     "median": 96.2
+     "style": "first_person",
+     "n": 1,
+     "median": 28.6
     },
     "all": [
      {
-      "style": "first_person",
-      "n": 7,
-      "median": 28.7
-     },
-     {
-      "style": "interview",
-      "n": 7,
-      "median": 51.4
-     },
-     {
-      "style": "default",
-      "n": 7,
-      "median": 57.3
-     },
-     {
-      "style": "compact",
-      "n": 3,
-      "median": 68.5
-     },
-     {
-      "style": "lists",
-      "n": 2,
-      "median": 77.2
-     },
-     {
       "style": "formatted_prose",
-      "n": 7,
-      "median": 89.9
+      "n": 1,
+      "median": 27.1
      },
      {
-      "style": "free_prose",
-      "n": 7,
-      "median": 96.2
+      "style": "first_person",
+      "n": 1,
+      "median": 28.6
      }
     ]
-   },
-   "why": "a small general model trained mostly on synthetic textbook-style data, not one people use for roleplay or card writing"
-  },
+   }
+  }
+ ],
+ "fun": [
   {
    "kind": "set",
    "label": "Perchance cards (NSFW)",

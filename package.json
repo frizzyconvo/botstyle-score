@@ -1,6 +1,6 @@
 {
   "name": "botstyle-score",
-  "version": "0.38.2",
+  "version": "0.39.0",
   "description": "BB Botstyle Scorer: a character-card scorer derived from slop-score that reads how much a card leans on stock AI phrasing",
   "keywords": [
     "character-cards",

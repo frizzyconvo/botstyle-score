@@ -8,6 +8,7 @@
 // ("fresh": run 1 + run 2 fresh mode), so models are compared on the same kind of request. The other
 // modes (anti-AI instructions, rewrites of human cards) are reported per model but not ranked.
 // References: human and mixed card sets scored with the same scorer version. Reliable English cards only.
+// Hold-out models (generated_holdout) are ranked too, marked `holdout`.
 // Just for fun (not ranked): models not made for writing cards, failed models (tools/_model_groups.mjs; their cards
 // mostly fail the format checks, so the rest isn't a fair sample) and extra card sets of unknown origin.
 import { helpIfAsked } from './_help.mjs';
@@ -32,7 +33,11 @@ const stats = rows => { const v = rows.map(r => r.score); return { n: v.length, 
   upstream: q(rows.map(r => r.upstream).filter(x => x !== null && x !== undefined), .5) }; };
 // Cards made at a non-default temperature / min_p (ids with |t… or |mp…) are sampler tests, not leaderboard cards.
 const defaultSampling = r => !/\|(?:t|mp)\d[\d.]*(?:\||$)/.test(String(r.id || ''));
-const gen = [...load('generated_v1').map(r => ({ ...r, mode: r.mode || 'fresh', run: 1 })), ...load('generated_v2').filter(defaultSampling).map(r => ({ ...r, run: 2 }))];
+// Hold-out models (tools/_model_groups.mjs HOLDOUT): cards from model families the lists were never mined from; ranked
+// with the rest and marked, so their numbers aren't flattered by in-sample lists.
+const modeOf = r => r.mode || String(r.id || '').split('|')[1] || 'fresh';
+const gen = [...load('generated_v1').map(r => ({ ...r, mode: r.mode || 'fresh', run: 1 })), ...load('generated_v2').filter(defaultSampling).map(r => ({ ...r, run: 2 })),
+  ...load('generated_holdout').filter(defaultSampling).map(r => ({ ...r, model: r.model || String(r.id).split('|')[0], mode: modeOf(r), run: 'holdout', holdout: true }))];
 const models = {};
 // Share of each model's generated cards that failed the format checks (valid and invalid records from the generator).
 const attempts = {};
@@ -54,7 +59,7 @@ for (const [m, rows] of Object.entries(models)) {
   const styleMed = Object.entries(byStyle).map(([k, v]) => ({ style: k, n: v.length, median: q(v.map(x => x.score), .5) })).sort((a, b) => a.median - b.median);
   const lazy = byStyle.default ? { n: byStyle.default.length, median: q(byStyle.default.map(x => x.score), .5), upstream: q(byStyle.default.map(x => x.upstream).filter(x => x != null), .5) } : null;
   const styles = { lazy, min: styleMed.find(x => x.style !== 'default') || null, max: [...styleMed].reverse().find(x => x.style !== 'default') || null, all: styleMed };
-  const entry = { model: m, family: familyLabel(m), ...stats(fresh), byMode, styles };
+  const entry = { model: m, family: familyLabel(m), ...(rows.some(r => r.holdout) ? { holdout: true } : {}), ...stats(fresh), byMode, styles };
   if (FAILED[m]) { const a = attempts[m] || { all: 0, failed: 0 }; out.fun.push({ kind: 'failed', ...entry, why: FAILED[m], generated: a.all, failedShare: a.all ? +(100 * a.failed / a.all).toFixed(0) : null }); }
   else if (JUST_FOR_FUN[m]) out.fun.push({ kind: 'model', ...entry, why: JUST_FOR_FUN[m] });
   else out.models.push(entry);

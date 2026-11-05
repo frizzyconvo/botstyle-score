@@ -374,8 +374,10 @@ its dates. **n** = cards in the set; **\*** = fewer than 20 cards, so a rough gu
 cards** leaves those models out; card sets always show). Sort by BBBScorer median,
 original slop-score median, or number of cards (**# cards**).
 
+**Hold-out models** are ranked with the rest and carry a **hold-out** tag: models from families the word lists were
+never built from (Qwen 3.x, MiniMax, Nemotron, MiMo, Grok and others), so their numbers aren't flattered by the lists.
+
 **Just for fun, not ranked:**
-- Phi-4: a small general model trained mostly on synthetic, textbook-style data; people don't write cards with it.
 - Extra card sets of unknown origin (human, AI or both): Perchance cards (NSFW) and Someone's SillyTavern Archive
   (undated).
 - **Failed** models, shown with a hatched red background: most of their cards failed the format checks, so the
@@ -407,7 +409,13 @@ nearly) are counted once.
 Cards people chose to share. It keeps only the name, link, score, scorer version, which fields were scored, and the
 self-reported "I made this card" and AI-assisted-writing boxes (honor system). **It never receives or keeps card
 text.** The source tag shows where a card came from: Chub, Botbooru (BB), JSON, PNG or text. Earlier entries for
-the same link sit in a fold under the newest one.
+the same link sit in a fold under the newest one; scores the same card got from other scorer versions are listed on
+the newest row ("also v0.8.2: 47.0"). A dashed version tag before the name marks a score from an older scorer, which
+isn't directly comparable with the current one.
+
+**Your cards** (this browser only) shows the same source tag, the old-version tag, the original slop score under each
+score, and earlier scores of a card rescored after an update ("was v0.8.2: 47.0"). The ⓘ on the band split gives each
+band's count and share.
 
 ## Known limits
 
