@@ -13,6 +13,9 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
   part reader that yields each card's description and greeting with source, creator, date, era and provenance. Chub
   mega placeholder stubs are skipped. Tests in `tests/v1/`, run by `npm test`.
 
+### Fixed
+- Part reader: provenance-set card files with no `provenance.csv` row are skipped instead of read as unlabeled.
+
 ## [0.40.3] - 2026-11-05 · BBBScorer 0.9.1
 
 ### Changed

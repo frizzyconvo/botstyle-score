@@ -116,7 +116,8 @@ export const READERS = {
   creator_statements: function* (p) { for (const d of readdirSync(p).sort()) for (const c of labeledFolder(join(p, d), '', { creator: d })) yield { ...c, id: `${d}/${c.id}` }; },
   provenance: function* (p) {
     const labelOf = new Map(readManifest(p).map(r => [r.file.replace(/\\/g, '/'), r.label_source || null]));
-    for (const c of provenanceCards(p)) yield { ...c, provenance: c.prov.provenance, labelSource: labelOf.get(c.id.replace(/^prov\//, '')) || null };
+    // card files without a provenance.csv row are unlabeled leftovers (e.g. copies moved to another set): skipped
+    for (const c of provenanceCards(p)) { const file = c.id.replace(/^prov\//, ''); if (labelOf.has(file)) yield { ...c, provenance: c.prov.provenance, labelSource: labelOf.get(file) }; }
   },
   generated_v1: generated(() => { try { return new Set(JSON.parse(readFileSync(abs('eval/ai-cards/ai_cards_invalid_ids.json'), 'utf-8'))); } catch { return new Set(); } }),
   generated_v2: generated(), generated_holdout: generated(),

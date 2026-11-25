@@ -64,7 +64,8 @@ test('provenance parts take labels from provenance.csv', async () => {
   const parts = await collect('provenance');
   assert.ok(parts.length >= 100);
   assert.ok(parts.some(p => p.provenance === 'mixed') && parts.some(p => p.provenance === 'ai'));
-  assert.ok(parts.every(p => ['human', 'ai', 'mixed', 'unknown'].includes(p.provenance)));
+  assert.ok(parts.every(p => ['human', 'ai', 'mixed'].includes(p.provenance)), 'card files with no provenance.csv row are skipped');
+  assert.ok(parts.every(p => ['creator', 'peer', 'user', 'platform_tag', 'inferred'].includes(p.labelSource)));
 });
 
 test('real-world AI sets are labeled ai, with a creator and a date', async t => {
