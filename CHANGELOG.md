@@ -14,6 +14,8 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
   mega placeholder stubs are skipped. Tests in `tests/v1/`, run by `npm test`.
 - `tools/v1/dedupe.mjs`: cross-set dedupe of card parts (exact text, or simhash within 3 bits on parts of 60+
   words), keeping the copy from the most trusted source; resumable, writes part ids only.
+- `tools/v1/sample_reads.mjs`: a locked, stratified test set of real-world parts and seeded, source-free read-round
+  packets (`--plan` prints the strata without writing).
 
 ### Fixed
 - Part reader: provenance-set card files with no `provenance.csv` row are skipped instead of read as unlabeled.
