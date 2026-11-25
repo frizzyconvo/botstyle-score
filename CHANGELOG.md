@@ -6,6 +6,13 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - **BBBScorer** (`SCORER_VERSION` in `js/score-card.js`, stored with every score): moves only when scores or labels
   can change. Scores from different scorer versions shouldn't be compared directly.
 
+## Unreleased (dev-blue)
+
+### Added
+- `tools/v1/datasets.mjs`: registry of the card sources BBBScorer 1.0 reads (kind, allowed parts, exclusions) and a
+  part reader that yields each card's description and greeting with source, creator, date, era and provenance. Chub
+  mega placeholder stubs are skipped. Tests in `tests/v1/`, run by `npm test`.
+
 ## [0.40.3] - 2026-11-05 · BBBScorer 0.9.1
 
 ### Changed
