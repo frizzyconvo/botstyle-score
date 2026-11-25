@@ -12,6 +12,8 @@ All notable changes to BB Botstyle Scorer. Two version numbers:
 - `tools/v1/datasets.mjs`: registry of the card sources BBBScorer 1.0 reads (kind, allowed parts, exclusions) and a
   part reader that yields each card's description and greeting with source, creator, date, era and provenance. Chub
   mega placeholder stubs are skipped. Tests in `tests/v1/`, run by `npm test`.
+- `tools/v1/dedupe.mjs`: cross-set dedupe of card parts (exact text, or simhash within 3 bits on parts of 60+
+  words), keeping the copy from the most trusted source; resumable, writes part ids only.
 
 ### Fixed
 - Part reader: provenance-set card files with no `provenance.csv` row are skipped instead of read as unlabeled.
